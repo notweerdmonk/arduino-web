@@ -1,0 +1,50 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# --- Monorepo build artifacts ---
+dist-standalone/
+dist-standalone/*.tar.gz
+dist-standalone/*.zip
+*.whl
+*.tar.gz
+
+# --- PyOxidizer build outputs ---
+scripts/pyoxidizer/*/build/
+**/*.pyoxidizer/
+
+# --- Virtual environments ---
+dist-test-install/.venv/
+.venv/
+
+# --- Environment files ---
+.env
+
+# --- Nox ---
+.nox/
+
+# --- opencode agent ---
+.opencode/
+
+# --- Playwright MCP ---
+.playwright-mcp/
+
+# --- SASS ---
+.sass-cache/
+
+# --- Pytest ---
+.pytest_cache/
+
+# --- Jekyll ---
+_site/
+
+# --- Runtime data files ---
+config/board_sketches.json
+**/data/board_meta.json
+
+# --- Generated sketch uploads (track dirs only) ---
+**/uploads/*
+!**/uploads/.gitkeep

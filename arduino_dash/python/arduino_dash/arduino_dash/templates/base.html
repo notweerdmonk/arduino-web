@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Arduino Dash{% endblock %}</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
+    <script src="https://unpkg.com/hyperscript.org@0.9.13"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <h1>Arduino Dash</h1>
+        <a href="/">Dashboard</a>
+        <a href="/admin">Admin</a>
+        <span id="daemon-badge" hx-get="/daemon/status" hx-trigger="every 10s, load" hx-target="this" hx-swap="outerHTML"></span>
+    </nav>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    <div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
+    <script>
+        document.addEventListener('dragover', function(e) { e.preventDefault(); });
+        document.addEventListener('drop', function(e) { e.preventDefault(); });
+    </script>
+    <script>
+        htmx.on("htmx:wsBeforeMessage", function(evt) {
+            if (evt.target.id !== "event-feed") return;
+            if (evt.detail.message.includes("board-event")) {
+                htmx.trigger('body', 'board-changed');
+            }
+        });
+    </script>
+</body>
+</html>

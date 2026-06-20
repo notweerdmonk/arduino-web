@@ -1,0 +1,160 @@
+"""Flask application factory and top-level route wiring."""
+
+import logging
+import os
+import sys
+import uuid
+
+logger = logging.getLogger(__name__)
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    jsonify,
+    make_response,
+)
+
+from arduino_sketch_tools import ArduinoSketchTools
+
+from medminder_dash import state
+from medminder_dash.medicines_state import Medicine, MedicineStore
+from medminder_dash.utils import validate_medicine_data, day_name, time_display
+from medminder_dash.sketch_gen import generate_alarm_hpp, parse_alarm_hpp
+from medminder_dash.pubsub_infra import (
+    broadcast_ws,
+    add_ws_client,
+    remove_ws_client,
+    is_connected,
+    is_daemon_ready,
+    ensure_sketch_dir,
+    _get_alarm_hpp_path,
+)
+from medminder_dash.utils import (
+    get_known_ports,
+    get_port_info,
+    get_first_board,
+    find_board_info_by_fqbn,
+)
+from medminder_dash.settings import _DEFAULT_SKETCH_DIR, load_sketch_dir
+from medminder_dash.sketch_registry import get_assignment as get_board_sketch_assignment
+from medminder_dash.sketch_management import _save_registry, _update_meta_hw_ids
+
+
+SKETCH_DIR = load_sketch_dir()
+ALARM_HPP_PATH = _get_alarm_hpp_path()
+
+
+def _get_board_info(port):
+    """Return board info dict for a port, or empty dict.
+
+    Args:
+        port: Board port string.
+
+    Returns:
+        Board info dict or empty dict.
+    """
+    info = get_port_info(port)
+    return info or {}
+
+
+def _record_deploy(port: str, sketch_path: str) -> None:
+    """Record a deploy event in the upload registry.
+
+    Args:
+        port: Board port that was deployed to.
+        sketch_path: Path to the deployed sketch.
+    """
+    import datetime
+    with state._known_ports_lock:
+        board_info = state._known_ports.get(port, {})
+    hardware_id = board_info.get("hardware_id", "")
+    if not hardware_id:
+        return
+    deploy_ts = datetime.datetime.utcnow().isoformat()
+    with state._upload_registry_lock:
+        for user_sketches in state._upload_registry.values():
+            for versions in user_sketches.values():
+                for v in versions:
+                    if v["path"] == sketch_path:
+                        if hardware_id not in v["hardware_ids"]:
+                            v["hardware_ids"].append(hardware_id)
+                        v["board_timestamps"][hardware_id] = deploy_ts
+                        _update_meta_hw_ids(sketch_path, v["hardware_ids"], v["board_timestamps"])
+                        _save_registry()
+                        broadcast_ws('<div class="sketch-event">Deploy recorded <!-- board-event --></div>')
+                        return
+
+
+def _migrate_default_board(store, session):
+    """Migrate medicines from 'default' board to the current board port.
+
+    Args:
+        store: MedicineStore instance.
+        session: Flask session object.
+    """
+    default_meds = store._board_meta.get("default", {}).get("medicines", [])
+    if not default_meds:
+        return
+    if store.all():
+        return
+    logger.info(
+        "Migrating %d medicine(s) from 'default' to board %s",
+        len(default_meds),
+        session.get("board_port"),
+    )
+    for med in default_meds:
+        store.add(med)
+    del store._board_meta["default"]
+    store._save()
+
+
+def create_app() -> Flask:
+    """Create and configure the Flask application.
+
+    Returns:
+        Configured Flask application instance.
+    """
+    app = Flask(__name__)
+    app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")
+    global store
+    store = MedicineStore()
+
+    arduino_tools = ArduinoSketchTools(
+        broadcast_ws=broadcast_ws,
+        get_board_info=_get_board_info,
+        record_deploy=_record_deploy,
+    )
+    arduino_tools.init_app(app)
+
+    @app.before_request
+    def _sync_store_board():
+        """Load the board's medicines into the store before each request."""
+        port = session.get("board_port")
+        if port:
+            store.load_board(port)
+
+    try:
+        from flask_sock import Sock
+
+        sock = Sock(app)
+    except ImportError:
+        sock = None
+
+    from medminder_dash.html_routes import init_html_routes
+    from medminder_dash.api_routes import init_api_routes
+
+    init_html_routes(
+        app,
+        sock,
+        store_param=store,
+        migrate_default_board=lambda: _migrate_default_board(store, session),
+        load_sketch_dir_param=load_sketch_dir,
+        get_alarm_hpp_path_param=lambda: _get_alarm_hpp_path(),
+    )
+    init_api_routes(app, store_param=store)
+
+    return app

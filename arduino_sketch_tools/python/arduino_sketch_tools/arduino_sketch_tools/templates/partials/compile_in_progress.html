@@ -1,0 +1,18 @@
+<div id="compile-output-area">
+    <div class="card">
+        <h3 class="card-section-title">Compile Output</h3>
+        {% if meta and meta.get("port") %}
+        <div class="output-meta">
+            Port: {{ meta.port }}{% if meta.get("board") %} · {{ meta.board }}{% endif %}{% if meta.get("fqbn") %} · {{ meta.fqbn }}{% endif %}{% if meta.get("sketch") %} · Sketch: {{ meta.sketch_name }}{% endif %}
+        </div>
+        {% endif %}
+        <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">
+            <span class="spinner-label"><span class="spinner"></span>Compiling...</span>
+        </div>
+    </div>
+    <div hx-get="/board/{{ port }}/compile/poll"
+         hx-trigger="every 2s"
+         hx-target="#compile-output-area"
+         hx-swap="outerHTML">
+    </div>
+</div>

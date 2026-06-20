@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/grpc_client/python/arduino_grpc/dist"
+verify_ssl = false
+name = "arduino-grpc-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/board_manager/python/board_manager/dist"
+verify_ssl = false
+name = "board-manager-local"
+
+[packages]
+arduino-grpc = {version = "*", index = "arduino-grpc-local"}
+board-manager = {version = "*", index = "board-manager-local"}
+
+[dev-packages]
+pytest = "*"
+
+[requires]
+python_version = "3.10"

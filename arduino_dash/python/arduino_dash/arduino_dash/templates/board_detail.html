@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Arduino Dash - {{ port }}{% endblock %}
+{% block extra_head %}
+<link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+<link rel="manifest" href="/static/favicon/site.webmanifest" />
+{% endblock %}
+{% block content %}
+<h2 class="detail-heading">Board: {{ board_name }}</h2>
+<p class="hint hint-mb">Port: {{ port }}</p>
+
+<div class="card">
+    <div class="section-header">
+        <h3>Controls</h3>
+        <span id="board-status-badge"
+              hx-get="/board/{{ port_path }}/connection-status"
+              hx-trigger="every 10s, load"
+              hx-target="this"
+              hx-swap="outerHTML"></span>
+    </div>
+
+    <form id="compile-form" _="on submit halt" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="active-board-hardware-id" name="hardware_id" value="{{ board_info.get('hardware_id', '') }}">
+        <div class="form-group">
+            <label for="sketch_path">Sketch</label>
+            <div class="flex-row">
+                <div id="sketch-path-container" class="container-grow"
+                    hx-get="/last-upload"
+                    hx-trigger="load"
+                    hx-target="this"
+                    hx-swap="innerHTML"
+                    hx-include="#active-board-hardware-id">
+                </div>
+                <button class="btn btn-danger btn-fixed-size nowrap" type="button"
+                        id="delete-sketch-btn"
+                        _="on click
+                             if #sketch_path exists
+                               set #delete-confirm-modal.__deletePath to #sketch_path.value
+                               trigger showDeleteConfirm on #delete-confirm-modal
+                             end
+                           end">Delete</button>
+                <label for="folder-input" class="btn btn-secondary btn-fixed-size"
+                       class="btn-label">Browse...</label>
+            </div>
+            {% include "partials/dnd_overlay.html" %}
+            <input type="file" id="folder-input" webkitdirectory name="files[]"
+                   class="sr-only"
+                   _="on change
+                          if #folder-input.files.length > 0
+                            set files to #folder-input.files
+                            put files[0].name into #modal-folder-name's innerText
+                            put files.length into #modal-file-count's innerText
+                            set #sketch-upload-modal.__dndFiles to null
+                            trigger showModal on #sketch-upload-modal
+                          end
+                        end">
+            <button id="modal-reset-input"
+                    class="sr-only"
+                    _="on click set #folder-input.value to '' end">
+            </button>
+            <span class="hint">Select an Arduino sketch folder (.ino file) or drag & drop here</span>
+        </div>
+        <div class="flex-row-wide mb-075">
+            <div class="form-group flex-1 mb-0">
+                <label>FQBN</label>
+                <span id="fqbn-display" class="value">{{ board_info.get('fqbn', 'arduino:avr:uno') or 'arduino:avr:uno' }}</span>
+                <input type="hidden" id="fqbn" name="fqbn" value="{{ board_info.get('fqbn', 'arduino:avr:uno') or 'arduino:avr:uno' }}">
+            </div>
+            <div class="form-group flex-1 mb-0">
+                <label>Device Port</label>
+                <span id="port-display" class="value">{{ port }}</span>
+            </div>
+        </div>
+        <div class="flex-row">
+            <button type="button" class="btn btn-primary"
+                hx-post="/board/{{ port_path }}/compile"
+                hx-trigger="click"
+                hx-target="#compile-section"
+                hx-swap="outerHTML"
+                hx-include="#compile-form">
+                Compile
+            </button>
+            <button type="button" class="btn btn-success"
+                hx-post="/board/{{ port_path }}/upload"
+                hx-trigger="click"
+                hx-target="#upload-section"
+                hx-swap="outerHTML"
+                hx-include="#compile-form">
+                Upload
+            </button>
+
+        </div>
+    </form>
+</div>
+
+<div id="compile-section">
+    <div class="card">
+        <h3 class="card-section-title">Compile Output</h3>
+        <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">Ready</div>
+    </div>
+</div>
+
+<div id="upload-section">
+    <div class="card">
+        <h3 class="card-section-title">Upload Output</h3>
+        <div class="log-viewer" id="upload-output-{{ port | replace('/', '_') }}">Ready</div>
+    </div>
+</div>
+
+{% include "partials/sketch_upload_modal.html" %}
+{% include "partials/delete_confirm_modal.html" %}
+{% endblock %}

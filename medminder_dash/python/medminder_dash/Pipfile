@@ -1,0 +1,39 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/grpc_client/python/arduino_grpc/dist"
+verify_ssl = false
+name = "arduino-grpc-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/board_manager/python/board_manager/dist"
+verify_ssl = false
+name = "board-manager-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/board_manager_client/python/board_manager_client/dist"
+verify_ssl = false
+name = "board-manager-client-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/arduino_sketch_tools/python/arduino_sketch_tools/dist"
+verify_ssl = false
+name = "arduino-sketch-tools-local"
+
+[packages]
+arduino-grpc = {version = "*", index = "arduino-grpc-local"}
+board-manager = {version = "*", index = "board-manager-local"}
+board-manager-client = {version = "*", index = "board-manager-client-local"}
+flask = "*"
+flask-sock = "*"
+arduino-sketch-tools = {version = "*", index = "arduino-sketch-tools-local"}
+
+[dev-packages]
+tomli = "*"
+pytest = "*"
+
+[requires]
+python_version = "3.10"

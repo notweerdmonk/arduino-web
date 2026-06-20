@@ -1,0 +1,13 @@
+{% if events %}
+{% for evt in events %}
+<div class="board-event">
+    <span class="badge badge-ok">{{ evt.get("event", "unknown") }}</span>
+    <span>{{ evt.get("port", "") }}</span>
+    <span class="hint">{{ evt.get("board", "") }}</span>
+</div>
+{% endfor %}
+{% else %}
+<div class="card empty-state-card">
+    <p>No board events yet.</p>
+</div>
+{% endif %}

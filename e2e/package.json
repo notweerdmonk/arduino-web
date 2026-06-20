@@ -1,0 +1,14 @@
+{
+  "name": "medminder-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright E2E tests for MedMinder web apps",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}

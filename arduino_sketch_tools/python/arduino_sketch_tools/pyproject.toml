@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arduino-sketch-tools"
+version = "0.1.0"
+description = "Flask Extension for Arduino sketch compile/upload"
+requires-python = ">=3.10"
+dynamic = ["readme", "authors", "keywords"]
+dependencies = [
+    "flask>=3.0.0",
+    "arduino-grpc>=0.1.0",
+    "board-manager>=0.1.0",
+    "board-manager-client>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["arduino_sketch_tools*"]
+
+[tool.setuptools.package-data]
+arduino_sketch_tools = [
+    "templates/**/*",
+    "static/**/*",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]

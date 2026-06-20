@@ -1,0 +1,6 @@
+<select name="sketch_path" id="sketch_path">
+    <option value="" disabled{% if not selected %} selected{% endif %}>Select a sketch...</option>
+    {% for sketch in sketches %}
+    <option value="{{ sketch.path }}"{% if sketch.path == selected %} selected{% endif %}>{{ sketch.name }}</option>
+    {% endfor %}
+</select>

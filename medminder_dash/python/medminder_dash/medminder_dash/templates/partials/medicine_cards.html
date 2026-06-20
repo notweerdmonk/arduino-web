@@ -1,0 +1,10 @@
+<div id="medicine-cards-container" data-differ="{{ 'true' if diff.differ else 'false' }}">
+    {% if diff.differ %}
+        {% include "partials/medicine_metadata_card.html" with context %}
+        {% set show_two_cards = True %}
+        {% include "partials/medicine_alarm_hpp_card.html" with context %}
+    {% else %}
+        {% set show_two_cards = False %}
+        {% include "partials/medicine_metadata_card.html" with context %}
+    {% endif %}
+</div>

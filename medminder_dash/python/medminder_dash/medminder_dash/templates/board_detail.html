@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}MedMinder — {{ port }}{% endblock %}
+{% block extra_head %}
+<link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+<link rel="manifest" href="/static/favicon/site.webmanifest" />
+{% endblock %}
+{% block content %}
+<h2 class="detail-heading">Board: {{ board_name }}</h2>
+<p class="hint hint-mb">Port: {{ port }}</p>
+
+<div class="card">
+    <div class="section-header">
+        <h3>Controls</h3>
+        <span id="board-status-badge"
+              hx-get="/board/{{ port_path }}/connection-status"
+              hx-trigger="load, every 10s"
+              hx-target="this"
+              hx-swap="outerHTML"></span>
+    </div>
+
+    <div class="flex-row-wide mb-075">
+        <div class="form-group flex-1 mb-0">
+            <label>FQBN</label>
+            <span id="fqbn-display" class="value">{{ (board_info or {}).get('fqbn', 'arduino:avr:uno') or 'arduino:avr:uno' }}</span>
+            <input type="hidden" id="fqbn" name="fqbn" value="{{ (board_info or {}).get('fqbn', 'arduino:avr:uno') or 'arduino:avr:uno' }}">
+        </div>
+        <div class="form-group flex-1 mb-0">
+            <label>Device Port</label>
+            <span id="port-display" class="value">{{ port }}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <input type="hidden" id="sketch_path" name="sketch_path" value="{{ sketch_path }}">
+    </div>
+    <div class="flex-row">
+        <button class="btn btn-primary"
+                hx-post="/board/{{ port_path }}/compile"
+                hx-trigger="click"
+                hx-target="#compile-section"
+                hx-swap="outerHTML"
+                hx-include="#fqbn, #sketch_path">
+            Compile
+        </button>
+        <button class="btn btn-success"
+                hx-post="/board/{{ port_path }}/upload"
+                hx-trigger="click"
+                hx-target="#upload-section"
+                hx-swap="outerHTML"
+                hx-include="#fqbn, #sketch_path">
+            Upload
+        </button>
+        <a href="/admin" class="btn btn-secondary btn-link">Admin Page</a>
+    </div>
+</div>
+
+<div id="compile-section">
+    <div class="card">
+        <h3 class="card-section-title">Compile Output</h3>
+        <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">Ready</div>
+    </div>
+</div>
+
+<div id="upload-section">
+    <div class="card">
+        <h3 class="card-section-title">Upload Output</h3>
+        <div class="log-viewer" id="upload-output-{{ port | replace('/', '_') }}">Ready</div>
+    </div>
+</div>
+
+<div class="card mt-1">
+    <div class="section-header">
+        <h3>Medicines</h3>
+        <button class="btn btn-primary"
+                hx-get="/medicine/new"
+                hx-target="#medicine-form-container"
+                hx-swap="outerHTML">Add Medicine</button>
+    </div>
+    <div id="medicine-form-container"></div>
+    <div id="medicine-list"
+         hx-get="/medicines"
+         hx-trigger="load"
+         hx-target="this"
+         hx-swap="innerHTML">
+        <div class="card empty-state-card">
+            <p>Loading...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

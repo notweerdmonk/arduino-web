@@ -1,0 +1,7 @@
+<span class="badge {{ 'badge-ok' if connected else 'badge-err' }}"
+      hx-get="/board/{{ port_path }}/connection-status"
+      hx-trigger="every 10s"
+      hx-target="this"
+      hx-swap="outerHTML">
+    {{ '● Connected' if connected else '○ Disconnected' }}
+</span>

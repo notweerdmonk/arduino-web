@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medminder-dash"
+version = "0.1.0"
+description = "Medicine reminder web app for Arduino MedMinderV2"
+requires-python = ">=3.10"
+dynamic = ["readme", "authors", "keywords"]
+dependencies = [
+    "flask>=3.0",
+    "gunicorn>=20.0",
+]
+
+[project.scripts]
+medminder-dash = "medminder_dash.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["medminder_dash*"]
+
+[tool.setuptools.package-data]
+medminder_dash = [
+    "templates/**/*",
+    "static/**/*",
+    "sketches/MedMinderV2/**/*",
+]

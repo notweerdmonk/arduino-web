@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "board-manager"
+version = "0.1.0"
+description = "Board Manager Service for Arduino gRPC"
+requires-python = ">=3.10"
+dynamic = ["readme", "authors", "keywords"]
+dependencies = [
+    "arduino-grpc>=0.1.0",
+    "grpcio>=1.80.0",
+    "protobuf>=6.33.6",
+    "tomli>=1.1.0",
+]
+
+[project.scripts]
+board-manager = "board_manager.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["board_manager*"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+udev = ["pyudev>=0.24"]

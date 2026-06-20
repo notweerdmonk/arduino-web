@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "board-manager-client"
+version = "0.1.0"
+description = "PubSub client for BoardManagerService"
+requires-python = ">=3.10"
+dynamic = ["readme", "authors", "keywords"]
+dependencies = [
+    "arduino-grpc>=0.1.0",
+    "board-manager>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["board_manager_client*"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]

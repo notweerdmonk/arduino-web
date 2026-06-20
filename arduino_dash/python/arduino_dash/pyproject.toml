@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "arduino-dash"
+version = "0.1.0"
+description = "Web GUI for Arduino gRPC Board Manager"
+requires-python = ">=3.10"
+dynamic = ["readme", "authors", "keywords"]
+dependencies = [
+    "flask>=3.0.0",
+    "flask-sock>=0.7.0",
+    "arduino-grpc>=0.1.0",
+    "board-manager>=0.1.0",
+    "board-manager-client>=0.1.0",
+    "arduino-sketch-tools>=0.1.0",
+    "gunicorn>=20.0",
+]
+
+[project.scripts]
+arduino-dash = "arduino_dash.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["arduino_dash*"]
+
+[tool.setuptools.package-data]
+arduino_dash = [
+    "templates/**/*",
+    "static/**/*",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]

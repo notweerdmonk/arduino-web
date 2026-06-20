@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+board-manager = {path = "../board_manager/python/board_manager/dist/board-manager/board_manager-0.1.0-py3-none-any.whl"}
+board-manager-client = {path = "../board_manager_client/python/board_manager_client/dist/board-manager-client/board_manager_client-0.1.0-py3-none-any.whl"}
+arduino-sketch-tools = {path = "../arduino_sketch_tools/python/arduino_sketch_tools/dist/arduino-sketch-tools/arduino_sketch_tools-0.1.0-py3-none-any.whl"}
+arduino-grpc = {path = "../grpc_client/python/arduino_grpc/dist/arduino-grpc/arduino_grpc-0.1.0-py3-none-any.whl"}
+arduino-dash = {path = "../arduino_dash/python/arduino_dash/dist/arduino-dash/arduino_dash-0.1.0-py3-none-any.whl"}
+medminder-dash = {path = "../medminder_dash/python/medminder_dash/dist/medminder-dash/medminder_dash-0.1.0-py3-none-any.whl"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

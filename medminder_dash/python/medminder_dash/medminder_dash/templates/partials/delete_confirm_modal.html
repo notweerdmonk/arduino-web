@@ -1,0 +1,32 @@
+<div id="delete-confirm-modal" class="modal-backdrop" style="display:none;"
+     _="
+         on showDeleteConfirm
+           set my.style.display to 'flex'
+         end
+         on hideDeleteConfirm
+           set my.style.display to 'none'
+           set my.__deletePath to null
+         end
+         on htmx:afterOnLoad from #delete-confirm-btn
+           trigger hideDeleteConfirm on me
+         end
+        ">
+    <div class="modal-content">
+        <h3 class="modal-title">Delete Sketch</h3>
+        <p>Are you sure you want to delete this sketch version?</p>
+        <p class="text-danger-strong">This action cannot be undone.</p>
+        <div class="flex-row">
+            <button type="button" class="btn btn-danger" id="delete-confirm-btn"
+                    hx-delete="/sketch"
+                    hx-vals='js:{path: document.getElementById("delete-confirm-modal").__deletePath}'
+                    hx-target="#sketch-path-container"
+                    hx-swap="outerHTML">
+                Delete
+            </button>
+            <button type="button" class="btn btn-secondary"
+                    _="on click trigger hideDeleteConfirm on #delete-confirm-modal end">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>

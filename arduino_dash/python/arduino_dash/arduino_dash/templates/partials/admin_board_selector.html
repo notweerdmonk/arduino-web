@@ -1,0 +1,28 @@
+<div class="card" id="admin-board-selector-card">
+  <div class="form-group mb-0">
+    <label for="admin-active-board">Active Board (for compile and upload)</label>
+    <div class="flex-row">
+      <select id="admin-active-board"
+              name="port"
+              hx-post="/admin/active-board"
+              hx-trigger="change"
+              hx-target="#compile-upload-card"
+              hx-swap="innerHTML"
+              hx-include="this"
+              hx-on::after-request="htmx.trigger('body', 'board-changed')"
+              class="flex-1">
+        {% for port in ports %}
+          {% set port_value = port.port if port is mapping else port %}
+          <option value="{{ port_value }}" {{ "selected" if active_board == port_value else "" }}>
+            {{ port_value }}
+          </option>
+        {% endfor %}
+      </select>
+
+    </div>
+    <span class="hint hint-block">
+      FQBN: <code id="global-fqbn-display">{{ active_board_fqbn or 'arduino:avr:uno' }}</code>
+    </span>
+    <input type="hidden" id="global-fqbn" value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
+  </div>
+</div>

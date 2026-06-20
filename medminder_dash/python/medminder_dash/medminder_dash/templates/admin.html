@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}MedMinder — Admin{% endblock %}
+{% block extra_head %}
+<link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+<link rel="manifest" href="/static/favicon/site.webmanifest" />
+{% endblock %}
+{% block content %}
+<h2 class="admin-heading">Admin</h2>
+
+<div class="admin-content">
+
+    <details class="card live-events-card" id="live-events-card">
+        <summary>Live Events</summary>
+        <div id="live-events">
+            <p class="hint live-events-empty live-events-empty-center">Waiting for board events...</p>
+        </div>
+    </details>
+
+    <div id="admin-board-selector-container"
+         hx-get="/medicines/board-selector"
+          hx-trigger="load, board-changed from:body"
+         hx-target="this"
+         hx-swap="innerHTML">
+    </div>
+
+    <div class="card">
+        <h3 class="card-section-title">Sketch Path</h3>
+        <p class="hint hint-mb">
+            Drag a sketch folder anywhere on the page to upload, or browse to select one.
+        </p>
+        <div class="flex-row mb-075">
+            <div id="sketch-path-container" class="container-grow"
+                 hx-get="/last-upload"
+                 hx-trigger="load, board-changed from:body"
+                 hx-target="this"
+                 hx-swap="innerHTML"
+                 hx-include="#active-board-hardware-id">
+            </div>
+            <input type="hidden" id="active-board-hardware-id" name="hardware_id" value="{{ active_board_hardware_id }}">
+            <input type="hidden" id="fqbn" name="fqbn" value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
+            <button class="btn btn-danger btn-fixed-size nowrap" type="button"
+                    id="delete-sketch-btn"
+                    _="on click
+                         if #sketch_path exists
+                           set #delete-confirm-modal.__deletePath to #sketch_path.value
+                           trigger showDeleteConfirm on #delete-confirm-modal
+                         end
+                       end">Delete</button>
+            <label for="folder-input" class="btn btn-secondary btn-fixed-size btn-label">Browse...</label>
+        </div>
+        
+        <input type="file" id="folder-input" webkitdirectory name="files[]"
+               class="sr-only"
+               _="on change
+                      if #folder-input.files.length > 0
+                        set files to #folder-input.files
+                        put files[0].name into #modal-folder-name's innerText
+                        put files.length into #modal-file-count's innerText
+                        set #sketch-upload-modal.__dndFiles to null
+                        trigger showModal on #sketch-upload-modal
+                      end
+                    end">
+        <button id="modal-reset-input"
+                class="sr-only"
+                _="on click set #folder-input.value to '' end">
+        </button>
+        <span class="hint hint-block">Select an Arduino sketch folder (.ino file) or drag & drop anywhere on the page</span>
+        {% if active_board_hardware_id and active_board_sketch %}
+        <div class="assigned-sketch-info">
+            &#9889; Assigned to selected board: <code>{{ active_board_sketch }}</code>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3 class="card-section-title">Step 1: Set Medicines</h3>
+        <p class="hint hint-mb">
+            Manage the medicine schedule. The metadata card is editable; the <code>alarm.hpp</code> card shows the on-device file (read-only).
+            Edit metadata to auto-sync <code>alarm.hpp</code>, or use the sync buttons below when the two diverge.
+        </p>
+        <div id="medicine-cards-container"
+              hx-get="/medicines/active-board-card"
+             hx-trigger="load"
+             hx-target="this"
+         hx-swap="innerHTML">
+            {% with diff = initial_diff %}{% include "partials/medicine_cards.html" %}{% endwith %}
+        </div>
+        <div class="flex-row mt-075">
+            <button class="btn btn-primary"
+                    id="generate-hpp-btn"
+                    hx-get="/medicines/confirm-modal?action=generate"
+                    hx-target="#confirm-modal-container"
+                    hx-swap="innerHTML"
+                    {% if not initial_diff.differ %}disabled{% endif %}>
+                Generate alarm.hpp FROM metadata
+            </button>
+            <button class="btn btn-secondary"
+                    id="sync-hpp-btn"
+                    hx-get="/medicines/confirm-modal?action=sync"
+                    hx-target="#confirm-modal-container"
+                    hx-swap="innerHTML"
+                    {% if not initial_diff.differ %}disabled{% endif %}>
+                Sync FROM alarm.hpp → metadata
+            </button>
+            {% if not initial_diff.differ %}
+                <span class="hint ml-05" id="sync-buttons-help">
+                    ✓ metadata and alarm.hpp are in sync
+                </span>
+            {% endif %}
+        </div>
+        <div id="confirm-modal-container"></div>
+        <div id="medicine-result" class="mt-05"></div>
+    </div>
+
+    <div id="compile-upload-card"
+         hx-get="/board/compile-upload-card"
+         hx-trigger="load, board-changed from:body"
+         hx-target="this"
+         hx-swap="innerHTML">
+    </div>
+
+</div>
+
+{% include "partials/sketch_upload_modal.html" %}
+{% include "partials/delete_confirm_modal.html" %}
+{% include "partials/dnd_overlay.html" %}
+{% endblock %}

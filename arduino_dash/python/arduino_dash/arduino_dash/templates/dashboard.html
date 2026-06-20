@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Arduino Dash - Dashboard{% endblock %}
+{% block extra_head %}
+<link rel="icon" type="image/png" href="/static/favicon/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+<link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png" />
+<link rel="manifest" href="/static/favicon/site.webmanifest" />
+{% endblock %}
+{% block content %}
+<h2 class="page-heading">Board Dashboard</h2>
+
+    <div class="grid" id="board-grid"
+         hx-get="/boards/grid"
+         hx-trigger="load, board-changed from:body"
+         hx-swap="innerHTML">
+        <div class="card empty-state-card">
+            <p>Scanning for boards...</p>
+        </div>
+    </div>
+
+<div class="card mt-1" id="live-events">
+    <h3 class="card-section-title">Live Events</h3>
+    <div id="event-list">
+        <p class="hint">Waiting for board events...</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+title: MedMinder
+description: >-
+  Arduino board monitoring and management via gRPC — pub/sub BoardManagerService
+  with Flask+HTMX+WebSocket web dashboards.
+
+theme: jekyll-theme-cayman
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Exclude build artifacts and tooling from the generated site
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - .venv/
+  - Pipfile
+  - Pipfile.lock
+  - "*.whl"
+  - "*.egg-info/"
+  - .gitignore
+  - noxfile.py
+  - pyproject.toml
+  - setup.py

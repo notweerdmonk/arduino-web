@@ -1,0 +1,22 @@
+{% if boards %}
+    {% for b in boards %}
+    <div class="card board-card" data-port="{{ b.get('port', '') }}">
+        <div class="board-card-header">
+            <div>
+                <h3 class="board-card-title">{{ b.get('board', 'Unknown') or 'Unknown' }}</h3>
+                <p class="hint hint-025">{{ b.get('port', '') }}</p>
+                <p class="hint">{{ b.get('fqbn', '') }}</p>
+            </div>
+            <span class="badge badge-ok">Connected</span>
+        </div>
+        <div class="board-card-actions">
+            <a href="/board/{{ b.get('port', '').lstrip('/') }}" class="btn btn-primary btn-sm">Manage</a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card empty-state-card">
+        <p>No boards detected.</p>
+        <p class="hint">Connect a board via USB and the BoardManagerService will auto-detect it.</p>
+    </div>
+{% endif %}

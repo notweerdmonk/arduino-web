@@ -53,13 +53,14 @@ PACKAGES = [
 @nox.parametrize("name,pip_name,src,outdir", PACKAGES, ids=[p[0] for p in PACKAGES])
 def tests(session, name, pip_name, src, outdir):
     """Run the per-package pytest suite (Phase 56 Q17)."""
+    env = {"PROJECT_ROOT": str(ROOT)}
     with session.chdir(src):
-        session.run("pipenv", "lock", "--dev", external=True)
-        session.run("pipenv", "sync", "--dev", external=True)
+        session.run("pipenv", "lock", "--dev", external=True, env=env)
+        session.run("pipenv", "sync", "--dev", external=True, env=env)
         pytest_args = ["tests/"]
         if name == "board_manager":
             pytest_args.append("--integration")
-        session.run("pipenv", "run", "pytest", *pytest_args, external=True)
+        session.run("pipenv", "run", "pytest", *pytest_args, external=True, env=env)
 
 
 @nox.session

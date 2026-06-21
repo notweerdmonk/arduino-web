@@ -1,0 +1,13 @@
+<div class="card board-card" data-port="{{ b.get('port', '') }}">
+    <div class="board-card-header">
+        <div>
+            <h3 class="board-card-title">{{ b.get('board', 'Unknown') }}</h3>
+            <p class="hint hint-025">{{ b.get('port', '') }}</p>
+            <p class="hint">{{ b.get('fqbn', '') }}</p>
+        </div>
+        <span class="badge badge-ok">Connected</span>
+    </div>
+    <div class="board-card-actions">
+        <a href="/board/{{ b.get('port', '').lstrip('/') }}" class="btn btn-primary btn-sm">Manage</a>
+    </div>
+</div>

@@ -4,6 +4,7 @@ description: >-
   with Flask+HTMX+WebSocket web dashboards.
 
 theme: jekyll-theme-cayman
+url: ""
 
 plugins:
   - jekyll-relative-links

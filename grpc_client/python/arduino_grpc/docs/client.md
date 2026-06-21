@@ -161,9 +161,10 @@ for board in client.watch_boards(timeout=10):
 
 ## Compilation
 
-### `compile_stream(sketch_path, fqbn, verbose=False, quiet=False) -> Iterator[tuple[str, str, bool]]`
+### `compile_stream(sketch_path, fqbn, verbose=False, quiet=False) -> Iterator[tuple[str, str, bool, float]]`
 
-Streams compiler output as it arrives from the gRPC stream — useful for progress bars or live logs.
+Streams compiler output as it arrives from the gRPC stream — yields progress
+percentage from `TaskProgress` messages for progress bar display.
 
 | Param | Default | Description |
 |-------|---------|-------------|
@@ -172,29 +173,32 @@ Streams compiler output as it arrives from the gRPC stream — useful for progre
 | `verbose` | `False` | Enable verbose compiler output |
 | `quiet` | `False` | Suppress non-error output |
 
-**Yields:** `(out: str, err: str, done: bool)` tuples.
+**Yields:** `(out: str, err: str, done: bool, percent: float)` 4-tuples.
 
 | Field | Description |
 |-------|-------------|
 | `out` | Decoded stdout text chunk (may be empty) |
 | `err` | Decoded stderr text chunk (may be empty) |
 | `done` | `True` on the *last* response that carries the compile result |
+| `percent` | Compilation progress percentage (0.0–100.0) from `resp.progress.percent` in gRPC `TaskProgress`. Reset to 0.0 before the first response and set to 100.0 on the final result |
+
+```python
+for out, err, done, percent in client.compile_stream("sketches/blinky", "arduino:avr:uno", verbose=True):
+    if out:
+        sys.stdout.write(out)
+    if percent > 0:
+        print(f"\rProgress: {percent:.0f}%", end="", flush=True)
+    if done:
+        print("\nCompilation finished")
+```
 
 **Raises:**
 - `InvalidFqbnError` — FQBN is empty
 - `CompileError` — RPC failure
 
-```python
-for out, err, done in client.compile_stream("sketches/blinky", "arduino:avr:uno", verbose=True):
-    if out:
-        sys.stdout.write(out)
-    if done:
-        print("\nCompilation finished")
-```
-
 ### `compile(sketch_path, fqbn, verbose=False, quiet=False) -> CompileResult`
 
-Convenience wrapper over `compile_stream()` that collects all output and returns a `CompileResult`.
+Convenience wrapper over `compile_stream()` that collects all output and returns a `CompileResult`. Iterates the 4-tuple stream internally, discarding the `percent` field.
 
 | Param | Default | Description |
 |-------|---------|-------------|
@@ -301,7 +305,23 @@ if cr.success:
 
 ## Progress Streaming Pattern
 
-Both `compile_stream()` and `upload_stream()` use the same streaming protocol:
+`compile_stream()` and `upload_stream()` use a similar streaming protocol, with
+the key difference that `compile_stream()` returns a **4-tuple** (includes
+`percent`) and `upload_stream()` returns a **3-tuple** (no percent —
+`UploadResponse` has no `TaskProgress`):
+
+### `compile_stream()` — 4-tuple with percent
+
+```
+Iterator[tuple[str, str, bool, float]]
+              │     │    │      │
+              │     │    │      └── progress percentage (0.0–100.0)
+              │     │    └───────── done flag (True on the final response)
+              │     └────────────── stderr text chunk
+              └──────────────────── stdout text chunk
+```
+
+### `upload_stream()` — 3-tuple (no percent)
 
 ```
 Iterator[tuple[str, str, bool]]
@@ -318,10 +338,11 @@ with ArduinoGrpcClient() as client:
     client.init()
 
     last_out = ""
-    for out, err, done in client.compile_stream("sketch", "arduino:avr:uno"):
+    last_pct = 0.0
+    for out, err, done, percent in client.compile_stream("sketch", "arduino:avr:uno"):
         if out:
             last_out = out.rstrip()
-            print(f"\r{last_out}", end="", flush=True)
+            print(f"\r[{percent:.0f}%] {last_out}", end="", flush=True)
         if err:
             print(f"\n[stderr] {err.rstrip()}")
         if done:

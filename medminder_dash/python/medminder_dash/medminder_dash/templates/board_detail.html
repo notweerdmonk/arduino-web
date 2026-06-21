@@ -14,11 +14,11 @@
 <div class="card">
     <div class="section-header">
         <h3>Controls</h3>
-        <span id="board-status-badge"
+        <span id="board-status-badge--{{ port | replace('/', '_') }}"
               hx-get="/board/{{ port_path }}/connection-status"
-              hx-trigger="load, every 10s"
+              hx-trigger="load"
               hx-target="this"
-              hx-swap="outerHTML"></span>
+              hx-swap="morph"></span>
     </div>
 
     <div class="flex-row-wide mb-075">
@@ -59,6 +59,7 @@
 <div id="compile-section">
     <div class="card">
         <h3 class="card-section-title">Compile Output</h3>
+        <progress id="compile-progress-{{ port | replace('/', '_') }}" value="0" max="100"></progress>
         <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">Ready</div>
     </div>
 </div>

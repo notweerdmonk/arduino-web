@@ -3,6 +3,35 @@
 {% raw %}
 # MedMinder Project Journal
 
+## 2026-06-21 11:55 — Phase 98: WS Push Migration (Q1-Q5) ✅ COMPLETED
+
+**Goal**: Migrate all PubSub-driven frontend updates from HTMX polling to WS push across three tiers.
+
+**Design** (see PLAN.md for full details):
+1. **Tier 1 — Badge OOB**: Both daemon badge and board status badge now use OOB HTML over WS instead of HTMX polling. `base.html` badges keep `hx-trigger="load"` for initial render only. WS broadcasts push badge HTML on state change.
+2. **Tier 2 — Compile/upload OOB**: ArduinoSketchTools wraps each compile/upload output line in `<span hx-swap-oob="beforeend:#...-output-{port_safe}">` so WS-delivered progress lines appear in the correct output container.
+3. **Tier 3 — Compile progress bar**: `compile_stream()` yields 4-tuple `(out, err, done, percent)`. Board worker sends progress-only messages on percent change. Extension tracks `_compile_last_pct` per port, broadcasts `<progress id="compile-progress-{port_safe}">` OOB, and prepends `[N%]` to output lines.
+
+**Key findings**:
+- `compile_stream()` 4-tuple is a clean break — all callers in `compile()`, `board_worker`, and tests needed updating
+- `UploadResponse` has no `TaskProgress` — upload remains 3-tuple
+- arduino-cli builder sends ~25+ `TaskProgress` gRPC messages per compile with real percent values
+- Port transform: `/dev/ttyACM0` → `.replace("/", "_")` → `_dev_ttyACM0` matches Jinja `{{ port | replace('/', '_') }}`
+- Noxfile needed `env={"PROJECT_ROOT": str(ROOT)}` fix for `file://${PROJECT_ROOT}` expansion in Pipfile
+
+**Verification**: All 8 nox sessions pass (3m total).
+
+**Files changed** (10 source + 4 template):
+- `arduino_dash/pubsub.py` — `_broadcast_daemon_badge()`, board badge OOB in `_on_board_event()`
+- `medminder_dash/pubsub_infra.py` — same
+- `arduino_grpc/client.py` — `compile_stream()` yields 4-tuple
+- `board_manager/board_worker.py` — `_make_progress()` with percent, compile progress-only messages
+- `arduino_sketch_tools/extension.py` — OOB targeting, percent tracking, progress bar broadcast, `[N%]` prefix
+- Both `base.html` — `hx-trigger="every 10s, load"` → `"load"`
+- Both `board_detail.html` — unique badge IDs, progress bar `<progress>` element
+- Both `daemon_badge.html`, `board_status_badge.html` — stripped `hx-*` attributes
+- `noxfile.py` — `env={"PROJECT_ROOT": str(ROOT)}` fix
+
 ## 2026-06-20 14:24 — Phase 93: GitHub Pages Jekyll Documentation Site ✅ COMPLETED
 
 **Goal**: Set up the project documentation as a GitHub Pages site using Jekyll (Minima theme), fix all config/build issues, fix broken relative links for nested-subpackage docs, eliminate Liquid warnings, and add missing per-package README links.
@@ -3506,4 +3535,114 @@ and nox-not-found guard using a fake nox shim.
 
 **Files changed**: `noxfile.py` (+1 line)
 
+## 2026-06-20 22:17 — Phase 97: Frontend Stack Optimization (Research Complete)
+
+**Status**: 🔬 Research complete, awaiting implementation prompt.
+
+**Key findings**:
+
+1. **Hyperscript audit**: ~120 lines across 10 template files for 5 event patterns (modal show/hide, delete path, file input, DnD overlay, cancel button). All replaceable with ~30 lines vanilla JS via `data-*` attributes + event delegation.
+
+2. **Payload savings**: Dropping Hyperscript saves 43KB (72% of 60KB JS payload). Adding Idiomorph adds 1KB. Net: 60KB→19KB (−68%).
+
+3. **WS→SSE evaluation**: SSE would add native reconnection and remove flask-sock dep, but same payload size (triggers are tiny). Deferred per user instruction — 3-5h effort not justified as a payload optimization.
+
+4. **Swap target audit**: Board grid (1-5KB) is the largest fragment. Granularization would reduce per-swap payload but is marginal for 1-3 board setups.
+
+5. **Daemon status WS push**: User will handle separately — not part of Phase 97.
+
+**Design decisions**:
+- Drop Hyperscript first (Q1), add Idiomorph (Q2), restructure targets (Q3)
+- WS→SSE deferred; daemon status WS push handled by user
+- No implementation until user prompt
+
+**Documents created/updated**:
+- `RESEARCH_PLAN.md` — research approach and findings
+- `RESEARCH_TASK.md` — task breakdown
+- `RESEARCH_PROGRESS.md` — progress tracking
+- `RESEARCH_JOURNAL.md` — full research findings and audit details
+- `PLAN.md` — Phase 97 added
+- `IMPLEMENTATION_PLAN.md` — quantized implementation plan
+- `IMPLEMENTATION_TASK.md` — task breakdown list
+- `IMPLEMENTATION_PROGRESS.md` — milestone tracking
+- `IMPLEMENTATION_JOURNAL.md` — implementation journal entries
+- `CODEBASE_REFERENCE.md` — frontend stack details
+
+## 2026-06-20 23:00 — Phase 97: Frontend Stack Optimization (Implementation Complete)
+
+**Status**: ✅ Fully implemented. All 3 quantums complete.
+
+**Q1 — Drop Hyperscript**:
+- Removed hyperscript.org@0.9.13 CDN (43KB) from both base.html
+- Created centralized JS block (~30 lines): showModal(), hideModal(), handleFolderInput(), uploadSketch() + event delegation
+- Updated 10 template files across both dashboards, removed all 22 `_=` hyperscript attributes
+- Patterns replaced: modal show/hide (4 files), delete path + trigger (3 files), file input + modal (3 files), cancel buttons (2 files), form submit halt (1 file)
+- Upload js() block converted to standalone uploadSketch() function
+
+**Q2 — Add Idiomorph**:
+- Added htmx.org/dist/ext/idiomorph.js (~1KB)
+- hx-ext="morph" on both base.html body tags
+- hx-swap="morph" on daemon badge and board status badge polling elements
+
+**Q3 — Restructure Swap Targets**:
+- Created board_card.html partial in both dashboards
+- Added /boards/grid/card/<port> endpoints in both html_routes.py
+- Added data-event-port to WS broadcast HTML in pubsub.py and pubsub_infra.py
+- WS handler now does targeted per-card htmx.ajax refresh alongside full board-changed
+
+**User cosmetic changes (incorporated)**:
+- style.css: .badge-container, .badge-circle, font-weight on .daemon-badge
+- base.html styling refinements (brand link, badge-container class)
+- daemon_badge.html: \<span class="badge-circle"\>⬤\</span\> for both states
+- board_status_badge.html: text-only (bullets removed)
+
+**Test results**:
+- all_tests: ✅
+- scripts_tests: ✅ (170 tests)
+- arduino_grpc: ✅ (33 pass, 2 skipped)
+- Pre-existing pipenv lock failures (board_manager, board_manager_client, arduino_sketch_tools, arduino_dash, medminder_dash) — unrelated to Phase 97
+
+**Files changed (45 files total, 989 insertions, 719 deletions)**:
+[List notable files: base.html (both), admin.html (both), board_detail.html (arduino), all modal partials, dnd_overlay.html (both), medicine_form.html, html_routes.py (both), pubsub.py, pubsub_infra.py, style.css (both), daemon_badge.html (both), board_status_badge.html (both), board_card.html (both, new), all 20 project/workflow docs]
+
+## 2026-06-21 09:36 — Phase 97 Audit Fixes (Post-Implementation Docs Sync) ✅ COMPLETED
+
+**Goal**: Fix 8 issues found during post-Phase-97 codebase audit.
+
+**Fixes applied**:
+1. **CODEBASE_REFERENCE.md** — heading "Research Complete, Not Implemented" → "Complete"
+2. **IMPLEMENTATION_JOURNAL.md** — 4 inaccuracies: `base.html`→`admin.html` for hx-on after-request; board_status_badge swap claim corrected (kept outerHTML, not morph); WS handler target/swap corrected (#board-card-<port>/morph → [data-port="..."]/outerHTML); medminder daemon badge corrected (inline, not partial include)
+3. **IMPLEMENTATION_PLAN.md** — board_status_badge swap claim & medminder daemon badge claim corrected
+4. **TESTING_JOURNAL.md** — fixed stale template paths, CDN URL, route param type (<int:port>→<path:port>), route file name (boards_routes.py→html_routes.py)
+5. **TESTING_PLAN.md, TESTING_PROGRESS.md, REVIEW_PLAN.md** — corrected morph claims to clarify board_status_badge partial kept outerHTML; fixed grep paths
+6. **REVIEW_PROGRESS.md, REVIEW_JOURNAL.md** — removed non-existent failure refs (test_websocket_connection.rb, generator-auth-ok/fail); replaced "wired in hyperscript" → "event delegation"; updated review findings to reflect vanilla JS (not hyperscript)
+7. **arduino_dash/setup.py** — removed stale `"config/**/*"` from package_data (no config/ dir exists)
+
+**Verification**: Jekyll rebuilt (0 errors, 0 warnings, 15s). No stale refs detected cross-document.
+
+
+## 2026-06-21 09:48 — Phase 97 Audit Fixes (Second Pass)
+
+Completed secondary audit pass fixing 2 additional inaccuracies found during final verification:
+
+- **IMPLEMENTATION_JOURNAL.md:209** — Q2 file count corrected from "4 files (both base.html + board_status_badge.html)" to "2 files (both base.html)" — board_status_badge.html partial was kept at `hx-swap="outerHTML"`
+- **IMPLEMENTATION_TASK.md:42** — Checkbox marked as `[x]` for board_status_badge.html morph change — corrected to note the change was attempted but reverted
+
+Also updated CODEBASE_REFERENCE.md previously stale Phase 97 sections (Before/After table, Key Files table, Design Decisions, Implementation Details) to accurately reflect current state.
+
+**Jekyll rebuild**: 0 errors, 0 warnings (16s). **All docs clean**: no stale morph claims, no stale `config/**/*`, no stale failure refs.
+
+---
+
+## 2026-06-21 — Phase 98 Q6: Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector
+
+**Goal**: Cosmetic rename of a stale test class name. The `TestAdminBoardSelectorPolling` name referred to `hx-trigger="load, every 5s"` polling behavior from Phase 62.2 — but Phase 71 had already switched the trigger to `board-changed from:body` (WS push). The tests were always correct; only the name was misleading.
+
+**Changes** (2 files):
+- `medminder_dash/tests/test_admin.py:811` — `class TestAdminBoardSelectorPolling` → `class TestAdminBoardSelector`; docstring updated to reference Phase 71 WS push
+- `medminder_dash/README.md:205` — `TestAdminBoardSelectorPolling` → `TestAdminBoardSelector`
+
+**Verification**: 186 medminder_dash tests pass, 1 skip (same as before — 0 regression). No stale `TestAdminBoardSelectorPolling` in source code.
+
+**Rationale for Phase 98 attachment**: Q6 is appended to Phase 98 (WS Push Migration) rather than creating a standalone phase, since Phase 98 is the phase that eliminated the polling behavior that the "Polling" suffix referred to.
 {% endraw %}

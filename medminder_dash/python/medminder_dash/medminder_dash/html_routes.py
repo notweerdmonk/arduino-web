@@ -750,6 +750,18 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         boards = get_known_ports()
         return render_template("partials/board_grid.html", boards=boards)
 
+    @app.route("/boards/grid/card/<path:port>")
+    def html_boards_grid_card(port: str):
+        """Render a single board card partial."""
+        norm_port = normalize_port(port)
+        if norm_port is None:
+            return "", 400
+        boards = get_known_ports()
+        for b in boards:
+            if b.get("port") == norm_port:
+                return render_template("partials/board_card.html", b=b)
+        return "", 404
+
     # ------------------------------------------------------------------ #
     #  WebSocket — stays with HTML routes                                 #
     # ------------------------------------------------------------------ #

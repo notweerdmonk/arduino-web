@@ -50,7 +50,6 @@ setup(
         "arduino_dash": [
             "templates/**/*",
             "static/**/*",
-            "config/**/*",
         ],
     },
     include_package_data=True,

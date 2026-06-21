@@ -49,4 +49,80 @@
 - [x] TESTING_* docs — all updated
 - [x] REVIEW_* docs — all updated (this file)
 - [x] TODOS.md — Phase 93 entry added
+## Phase 95 — Git Tree Preparation Plan
+
+**Date**: 2026-06-20 15:40
+**Status**: ✅ COMPLETED AND REVIEWED
+
+### Review Criteria
+
+#### File System Cleanliness
+- [x] Stale upload sketches removed from working tree — ✅ (verified via `ls`)
+- [x] `.gitignore` updated with new artifact patterns — ✅ (verified via `git status`)
+- [x] `.gitkeep` markers present in empty data directories — ✅ (verified via `find`)
+
+#### Documentation Accuracy
+- [x] Workflow docs Phase 93→94 gap filled across 5 IMPLEMENTATION_* files — ✅ (verified via grep)
+- [x] `scripts/docs/index.md` false `--help` claim corrected to `usage` — ✅ (verified via grep)
+- [x] `WS_EVENT_FLOW.md` moved to `docs/ws-event-flow.md` — ✅ (old path gone, new path exists)
+- [x] All cross-references updated to point to `docs/ws-event-flow.md` — ✅ (verified via grep)
+
+#### Process
+- [x] Sequential `git add` with user approval per group — ✅ (session log confirmed)
+- [x] No unintended files staged — ✅
+
+## Phase 96 — Wire test_ci.sh into Nox scripts_tests
+
+**Date**: 2026-06-20 20:03
+**Status**: ✅ COMPLETED AND REVIEWED
+
+### Review Criteria
+
+#### Code Correctness
+- [x] `noxfile.py` change is minimal (+1 line) — ✅ (single `session.run()` call)
+- [x] Pattern matches existing `test_install_arduino_deps.sh` call — ✅
+
+#### Test Verification
+- [x] `test_ci.sh` passes 30/30 assertions standalone — ✅ (exit 0)
+- [x] `nox -s scripts_tests` includes test_ci.sh — ✅ (170 total, all pass in 24s)
+- [x] No regression in pytest suite (128/128 pass) — ✅
+- [x] No regression in existing bash tests (12/12 pass) — ✅
+
+#### Code Quality
+- [x] Script is self-contained (bash-only, fake nox shim) — ✅
+- [x] Uses `BASH_SOURCE` for path resolution (works from any CWD) — ✅
+- [x] Zero external dependencies beyond bash — ✅
+
+## Phase 98 — WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar)
+
+**Date**: 2026-06-21 11:55
+
+**Status**: ✅ IMPLEMENTED AND REVIEWED
+
+### Review Criteria
+
+#### Code Quality
+- [x] No remaining `hx-trigger="every 10s"` in any base template — ✅ (verified via grep, 0 matches)
+- [x] Daemon badge partial has no hx-* attributes — ✅ (verified via grep, 0 hx- matches)
+- [x] Board status badge partial has no hx-* attributes — ✅ (verified via grep, 0 hx- matches)
+- [x] Board detail badge IDs are unique per port — ✅ (uses `--{{ port | replace('/', '_') }}` suffix)
+
+#### Behavioral Regressions
+- [x] Daemon badge still renders on initial page load — ✅ (hx-trigger="load" preserved on wrapper)
+- [x] Board status badge still renders on initial page load — ✅ (hx-trigger="load" preserved on wrapper)
+- [x] Compile output still appears in correct container — ✅ (OOB targeting matches existing output div IDs)
+- [x] Upload output still appears in correct container — ✅ (OOB targeting matches existing output div IDs)
+- [x] Progress bar appears and updates during compilation — ✅ (gRPC TaskProgress drives OOB updates)
+- [x] [N%] prefix prepended to compile output lines — ✅ (format: `[42%] Compiling core...`)
+
+#### Tests
+- [x] All 8 nox sessions pass with 0 failures — ✅ (~3m, all green)
+- [x] No pre-existing pipenv lock failures — ✅ (noxfile PROJECT_ROOT fix resolved them)
+
+##### Quantum 6 — Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector
+- [x] Class renamed in `test_admin.py:811` + docstring updated to Phase 71 WS push ref — ✅
+- [x] `README.md:205` reference updated — ✅
+- [x] 186 medminder_dash tests pass, 1 skip — ✅ (0 regression)
+- [x] No stale `TestAdminBoardSelectorPolling` in source code — ✅ (only auto-generated files)
+- [x] Pure rename — no functional change, no test delta — ✅
 {% endraw %}

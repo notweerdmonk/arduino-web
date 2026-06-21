@@ -36,12 +36,12 @@ def _make_result(msg: dict, status: str, data: Any = None) -> dict:
     }
 
 
-def _make_progress(msg: dict, out: str, err: str) -> dict:
+def _make_progress(msg: dict, out: str, err: str, percent: float = 0.0) -> dict:
     """Build a progress event dict for compile/upload streaming output."""
     return {
         "type": "event",
         "topic": msg.get("reply_to", "") + "::progress",
-        "data": {"output": out, "error": err},
+        "data": {"output": out, "error": err, "percent": percent},
     }
 
 
@@ -151,20 +151,26 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
             out_lines: list[str] = []
             err_lines: list[str] = []
             success = False
-            for out, err, done in client.compile_stream(
+            last_pct = -1.0
+            for out, err, done, percent in client.compile_stream(
                 sketch_path=sketch_path,
                 fqbn=fqbn,
                 verbose=verbose,
             ):
                 if out:
                     out_lines.append(out)
-                    sock.sendall(encode_and_frame(_make_progress(msg, out, "")))
-                    logger.debug("compile: received %d output bytes", len(out))
+                    sock.sendall(encode_and_frame(_make_progress(msg, out, "", percent)))
+                    last_pct = percent
+                    logger.debug("compile: received %d output bytes (%.0f%%)", len(out), percent)
                 if err:
                     err_lines.append(err)
-                    sock.sendall(encode_and_frame(_make_progress(msg, "", err)))
+                    sock.sendall(encode_and_frame(_make_progress(msg, "", err, percent)))
+                    last_pct = percent
                 if done:
                     success = True
+                elif percent != last_pct:
+                    sock.sendall(encode_and_frame(_make_progress(msg, "", "", percent)))
+                    last_pct = percent
             logger.info("compile: done success=%s output_len=%d", success, sum(len(l) for l in out_lines))
             sock.sendall(
                 encode_and_frame(

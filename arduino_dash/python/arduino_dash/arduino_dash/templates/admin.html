@@ -43,28 +43,15 @@
             <input type="hidden" id="fqbn" name="fqbn" value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
             <button class="btn btn-danger btn-fixed-size nowrap" type="button"
                     id="delete-sketch-btn"
-                    _="on click
-                         if #sketch_path exists
-                           set #delete-confirm-modal.__deletePath to #sketch_path.value
-                           trigger showDeleteConfirm on #delete-confirm-modal
-                         end
-                       end">Delete</button>
+                    data-action="delete-sketch">Delete</button>
             <label for="folder-input" class="btn btn-secondary btn-fixed-size btn-label">Browse...</label>
         </div>
         <input type="file" id="folder-input" webkitdirectory name="files[]"
                class="sr-only"
-               _="on change
-                      if #folder-input.files.length > 0
-                        set files to #folder-input.files
-                        put files[0].name into #modal-folder-name's innerText
-                        put files.length into #modal-file-count's innerText
-                        set #sketch-upload-modal.__dndFiles to null
-                        trigger showModal on #sketch-upload-modal
-                      end
-                    end">
+               onchange="handleFolderInput(this)">
         <button id="modal-reset-input"
                 class="sr-only"
-                _="on click set #folder-input.value to '' end">
+                onclick="document.getElementById('folder-input').value=''">
         </button>
         <span class="hint hint-block">
             Select an Arduino sketch folder (.ino file) or drag & drop anywhere on the page

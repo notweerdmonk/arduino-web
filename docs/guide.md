@@ -76,12 +76,15 @@ pipenv run python -m medminder_dash --port 8081
 
 Open [http://localhost:8081](http://localhost:8081)
 
-### 5. Install all Arduino dependencies for CI
+### 5. Run the full test suite
 
 ```bash
-pipenv install
-cd scripts && pipenv install --dev
+nox -s all_tests          # 8 sessions: all 6 packages + scripts
+./scripts/ci.sh           # full CI pipeline (tests + builds)
 ```
+
+The nox sessions auto-regenerate Pipfile.lock on each run (Phase 94), so there is
+no manual lock management needed after wheel rebuilds or Pipfile changes.
 
 ## Board Selection (medminder-dash)
 
@@ -91,7 +94,7 @@ The medminder-dash app is board-centric — most operations are scoped to a spec
 
 1. Open the app — the landing page shows a board selector dropdown (auto-populated from BoardManagerService).
 2. Select a board — the app stores it in the session and redirects to the board detail view (`/board`).
-3. The navbar shows a status badge polling every 5 seconds.
+3. The navbar shows a daemon status badge updated in real time via WebSocket push (no polling).
 
 ### Board detail view
 
@@ -160,8 +163,25 @@ Minutes are restricted to 0, 10, 20, 30, 40, 50 (6-minute resolution for the TM1
 
 1. Select a board.
 2. Click "Compile & Upload" on the board detail page.
-3. The compile card shows progress in real time via WebSocket.
-4. On success, the sketch is uploaded to the board.
+3. The compile card shows progress in real time via WebSocket push (no polling):
+   - **Progress bar**: A `<progress>` element fills from 0% to 100% as the
+     Arduino CLI daemon emits `TaskProgress` gRPC messages (~25+ updates per
+     typical compile). The bar updates only on percentage change (redundant
+     updates are suppressed).
+   - **Output lines**: Each compile output line arrives via OOB HTML swap,
+     prefixed with `[N%]` progress percentage (e.g., `[42%] Compiling core...`).
+     Lines are appended to the compile output container in real time.
+   - **How it works**: The gRPC `compile_stream()` yields 4-tuples of
+     `(out, err, done, percent)`. The board worker sends progress-only messages
+     when only the percentage changes. The ArduinoSketchTools extension wraps
+     each line in `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`
+     and broadcasts over the WS connection.
+4. On success, the sketch is uploaded to the board:
+   - Upload output is also streamed in real time via the same OOB pattern,
+     but without a progress bar — the gRPC `UploadResponse` has no
+     `TaskProgress` field, so upload remains a 3-tuple `(out, err, done)`.
+   - After a successful upload, the deploy timestamp is recorded to the
+     sketch registry.
 
 ### Via the API
 

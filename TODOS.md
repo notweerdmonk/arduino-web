@@ -54,6 +54,21 @@
 | 80 | Hardware-ID Fallback Chain + Modal Fixes | ✅ DONE | 8/8 nox |
 | 81 | Cleanup: Debug Logs + outerHTML + Docs Sync | ✅ DONE | 8/8 nox |
 | 82 | Sorted Upload Registry via bisect.insort | ✅ DONE | 8/8 nox |
+| 83 | WebSocket Reconnect + Daemon Badge OOB | ✅ DONE | 8/8 nox |
+| 84 | Pyodide/arm64 macOS Binary Builds | ✅ DONE | 8/8 nox |
+| 85 | MCP E2E Server Binding + BMS Daemon Support | ✅ DONE | varied |
+| 86 | Fix HTMX Extension Mismatch Warning | ✅ DONE | 8/8 nox |
+| 87 | Linux arm64 Binary Builds / Release | ✅ DONE | 8/8 nox |
+| 88 | Stale BMS Port Cleanup in boot.py | ✅ DONE | 8/8 nox |
+| 90 | Fix Double BoardDetector Stop Log | ✅ DONE | 8/8 nox |
+| 91 | Align Live Events Card Style with arduino_dash | ✅ DONE | 8/8 nox |
+| 92 | Sketch Dir Resolution + Upload Bugfix | ✅ DONE | 8/8 nox |
+| 93 | GitHub Pages Jekyll Documentation Site | ✅ DONE | 8/8 nox |
+| 94 | Fix Test NoX Session Post-Jekyll | ✅ DONE | 8/8 nox |
+| 95 | Git Tree Preparation Plan | ✅ DONE | 8/8 nox |
+| 96 | Wire test_ci.sh into Nox scripts_tests | ✅ DONE | 8/8 nox |
+| 97 | Docs Sync: Phase 94-96 Imports + Warnings | ✅ DONE | 8/8 nox |
+| 98 | WS Push Migration (Badge/Compile/Upload OOB) | ✅ DONE | 8/8 nox |
 
 ## Phase 60 — COMPLETED ✅
 

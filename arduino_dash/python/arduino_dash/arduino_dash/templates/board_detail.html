@@ -14,14 +14,14 @@
 <div class="card">
     <div class="section-header">
         <h3>Controls</h3>
-        <span id="board-status-badge"
+        <span id="board-status-badge--{{ port | replace('/', '_') }}"
               hx-get="/board/{{ port_path }}/connection-status"
-              hx-trigger="every 10s, load"
+              hx-trigger="load"
               hx-target="this"
-              hx-swap="outerHTML"></span>
+              hx-swap="morph"></span>
     </div>
 
-    <form id="compile-form" _="on submit halt" method="post" enctype="multipart/form-data">
+    <form id="compile-form" onsubmit="return false" method="post" enctype="multipart/form-data">
         <input type="hidden" id="active-board-hardware-id" name="hardware_id" value="{{ board_info.get('hardware_id', '') }}">
         <div class="form-group">
             <label for="sketch_path">Sketch</label>
@@ -35,30 +35,17 @@
                 </div>
                 <button class="btn btn-danger btn-fixed-size nowrap" type="button"
                         id="delete-sketch-btn"
-                        _="on click
-                             if #sketch_path exists
-                               set #delete-confirm-modal.__deletePath to #sketch_path.value
-                               trigger showDeleteConfirm on #delete-confirm-modal
-                             end
-                           end">Delete</button>
+                        data-action="delete-sketch">Delete</button>
                 <label for="folder-input" class="btn btn-secondary btn-fixed-size"
                        class="btn-label">Browse...</label>
             </div>
             {% include "partials/dnd_overlay.html" %}
             <input type="file" id="folder-input" webkitdirectory name="files[]"
                    class="sr-only"
-                   _="on change
-                          if #folder-input.files.length > 0
-                            set files to #folder-input.files
-                            put files[0].name into #modal-folder-name's innerText
-                            put files.length into #modal-file-count's innerText
-                            set #sketch-upload-modal.__dndFiles to null
-                            trigger showModal on #sketch-upload-modal
-                          end
-                        end">
+                   onchange="handleFolderInput(this)">
             <button id="modal-reset-input"
                     class="sr-only"
-                    _="on click set #folder-input.value to '' end">
+                    onclick="document.getElementById('folder-input').value=''">
             </button>
             <span class="hint">Select an Arduino sketch folder (.ino file) or drag & drop here</span>
         </div>
@@ -98,6 +85,7 @@
 <div id="compile-section">
     <div class="card">
         <h3 class="card-section-title">Compile Output</h3>
+        <progress id="compile-progress-{{ port | replace('/', '_') }}" value="0" max="100"></progress>
         <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">Ready</div>
     </div>
 </div>

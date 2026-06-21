@@ -83,6 +83,8 @@ client.disconnect()
 | `watch_boards()` | `callback`, `timeout` | `Iterator[Board]` | Stream board connect/disconnect events |
 | `compile()` | `sketch_path`, `fqbn`, `verbose` | `CompileResult` | Compile a sketch |
 | `upload()` | `sketch_path`, `fqbn`, `port`, `verbose`, `verify` | `UploadResult` | Upload a compiled sketch |
+| `compile_stream()` | `sketch_path`, `fqbn`, `verbose`, `quiet` | `Iterator[tuple[str,str,bool,float]]` | Streaming compile with 4-tuple `(out, err, done, percent)` progress — drives real-time `<progress>` bar in the UI |
+| `upload_stream()` | `sketch_path`, `fqbn`, `port`, `verbose`, `verify` | `Iterator[tuple[str,str,bool]]` | Streaming upload with 3-tuple `(out, err, done)` — no percent because `UploadResponse` lacks `TaskProgress` |
 | `compile_and_upload()` | `sketch_path`, `fqbn`, `port`, `verbose`, `verify` | `tuple[CompileResult, UploadResult]` | Compile then upload |
 
 ### Data Models

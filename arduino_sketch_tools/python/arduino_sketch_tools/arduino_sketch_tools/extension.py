@@ -39,6 +39,8 @@ class ArduinoSketchTools:
 
         self._compile_results: dict[str, dict | None] = {}
         self._compile_results_lock = threading.Lock()
+        self._compile_last_pct: dict[str, float] = {}
+        self._compile_last_pct_lock = threading.Lock()
         self._upload_results: dict[str, dict | None] = {}
         self._upload_results_lock = threading.Lock()
         self._compile_start: dict[str, float] = {}
@@ -177,9 +179,19 @@ class ArduinoSketchTools:
             data = msg.get("data", {})
             out = data.get("output", "")
             err = data.get("error", "")
+            percent = data.get("percent", 0.0)
+            port_safe = port.replace("/", "_")
+            with self._compile_last_pct_lock:
+                last = self._compile_last_pct.get(port_safe, -1.0)
+                if percent != last:
+                    pct_int = int(round(percent))
+                    self._compile_last_pct[port_safe] = percent
+                    bar = f'<progress id="compile-progress-{port_safe}" value="{pct_int}" max="100" hx-swap-oob="true"></progress>'
+                    self._broadcast_ws(bar)
             if out or err:
                 text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                html = f'<div class="compile-line" data-port="{port}">{text}</div>'
+                pct_prefix = f"[{pct_int}%] " if percent >= 0 else ""
+                html = f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}"><div class="compile-line" data-port="{port}">{pct_prefix}{text}</div></span>'
                 self._broadcast_ws(html)
         else:
             port = rest
@@ -211,7 +223,8 @@ class ArduinoSketchTools:
             err = data.get("error", "")
             if out or err:
                 text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                html = f'<div class="upload-line" data-port="{port}">{text}</div>'
+                port_safe = port.replace("/", "_")
+                html = f'<span hx-swap-oob="beforeend:#upload-output-{port_safe}"><div class="upload-line" data-port="{port}">{text}</div></span>'
                 self._broadcast_ws(html)
         else:
             port = rest

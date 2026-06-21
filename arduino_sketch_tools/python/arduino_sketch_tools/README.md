@@ -12,9 +12,10 @@ compile dashboard) and `medminder-dash` (medicine reminder dashboard).
 `app.ext` pattern) that encapsulates all arduino-cli interaction:
 
 - **Compile** — POST a sketch path + FQBN, stream compile progress
-  back to the front-end via htmx polling, detect result success/failure.
+  back to the front-end via WebSocket push (Phase 98) with real-time `<progress>` bar updates
+  and per-output-line `[N%]` prefix, detect result success/failure.
 - **Upload** — POST a sketch path + FQBN + port, upload the compiled
-  binary, stream progress, detect result.
+  binary, stream progress (no progress bar — gRPC `UploadResponse` has no `TaskProgress`), detect result.
 - **Board list** — list all connected boards with port and FQBN.
 - **Port list** — list all available serial ports.
 - **Sketch metadata** — checksum computation, modification time
@@ -84,7 +85,11 @@ sketch_tools = ArduinoSketchTools(app)
 The extension auto-registers all routes on `init_app`. It expects a
 `pubsub` attribute on the Flask app (the `board-manager-client`
 PubSubClient instance) — if found, it subscribes to compile/upload
-response topics automatically.
+response topics automatically. Compile progress messages trigger OOB
+(Out-of-Band) HTML swaps over WebSocket: output lines are wrapped in
+`<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`, progress
+percentage drives a `<progress>` OOB element broadcast only on change,
+and upload output uses `<span hx-swap-oob="beforeend:#upload-output-{port_safe}">`.
 
 ### Exposed Routes
 
@@ -167,7 +172,7 @@ arduino_sketch_tools/python/arduino_sketch_tools/
 | `TestMakeMeta` | Metadata JSON generation |
 | `TestNormPort` | Port normalization |
 
-**Total**: 47 tests across 1 file.
+**Total**: 51 tests across 1 file.
 
 ## Dependencies
 

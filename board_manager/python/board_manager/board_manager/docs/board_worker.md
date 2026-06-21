@@ -73,6 +73,10 @@ Compiles a sketch via `client.compile_stream()` (streaming output).
 | `verbose` | `bool` | `False` | Enable verbose output |
 
 **Streaming output:** Sends `::progress` events for each chunk of stdout/stderr.
+Each progress event includes a `percent` field (0.0–100.0) from the gRPC
+`TaskProgress` message. When only the percentage advances (no output text),
+a progress-only message is sent to update the progress bar without adding a
+blank output line.
 
 **Final response:** `ok` or `error` result with `{success, output, error, sketch_path}`.
 
@@ -148,18 +152,29 @@ Builds a success response dict.
 }
 ```
 
-#### `_make_progress(msg: dict, out: str, err: str) -> dict`
+#### `_make_progress(msg: dict, out: str, err: str, percent: float = 0.0) -> dict`
 
 Builds a progress event dict for streaming compile/upload output.
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `percent` | `0.0` | Compilation progress percentage (0.0–100.0). Only used for compile — upload always passes `0.0` (no `TaskProgress` in upload gRPC responses) |
 
 **Return format:**
 ```python
 {
     "type": "event",
     "topic": msg["reply_to"] + "::progress",
-    "data": {"output": out, "error": err},
+    "data": {"output": out, "error": err, "percent": percent},
 }
 ```
+
+The `percent` field is consumed by `arduino_sketch_tools` to broadcast a
+`<progress>` OOB element over WebSocket. The board worker sends
+progress-only messages (empty `out`/`err`, only `percent` changed) to update
+the progress bar when no output text is available. This prevents redundant
+empty output lines in the compile log while keeping the progress bar
+up-to-date.
 
 #### `_make_event(topic: str, data: Any) -> dict`
 

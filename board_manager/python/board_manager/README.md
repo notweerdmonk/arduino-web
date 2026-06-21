@@ -20,7 +20,9 @@ coordinates all interaction with it:
   notifications to all subscribed clients.
 - **Command routing** — accept compile, upload, board-list, and
   port-list requests from clients over a local TCP or UDS pubsub
-  channel, forward to the daemon, and stream responses back.
+  channel, forward to the daemon, and stream responses back. Per-board
+  workers send progress events with percent (0.0–100.0) from gRPC
+  `TaskProgress` for real-time progress bar updates in the UI.
 - **Port management** — detect and kill stale processes holding the
   daemon's port, validate port availability before spawning.
 - **In-process embedding** — the `BoardManagerService` class can be
@@ -181,7 +183,7 @@ board_manager/python/board_manager/
 
 ## Test Suite
 
-The test suite covers (194 tests across 10 files):
+The test suite covers (212 tests, including integration tests, across 10 files):
 
 **board_detector**: BoardDetector polling, connect/disconnect events,
 no-change detection, run loop, restart daemon.

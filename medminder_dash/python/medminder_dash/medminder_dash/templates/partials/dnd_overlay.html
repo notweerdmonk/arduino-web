@@ -93,11 +93,10 @@
                 setTimeout(waitForFiles, 50);
                 return;
             }
-            var modal = document.getElementById('sketch-upload-modal');
             document.getElementById('modal-folder-name').textContent = rootDirName || 'folder';
             document.getElementById('modal-file-count').textContent = String(collected.length);
-            modal.__dndFiles = collected;
-            htmx.trigger(modal, 'showModal');
+            document.getElementById('sketch-upload-modal').__dndFiles = collected;
+            showModal('sketch-upload-modal');
         })();
     });
 

@@ -1,5 +1,6 @@
 ---
 ---
+{% raw %}
 # ArduinoSketchTools Extension
 
 **Source:** `arduino_sketch_tools/extension.py`
@@ -12,7 +13,9 @@ class ArduinoSketchTools(pubsub=None, broadcast_ws=None, get_board_info=None, re
 
 Flask Extension managing Arduino sketch compile/upload state. Encapsulates all
 compile/upload results, metadata, and pub/sub response handling. Registers a
-Blueprint with compile/upload routes via `init_app()`.
+Blueprint with compile/upload routes via `init_app()`. As of Phase 98, all
+compile output is streamed over WebSocket OOB pushes with real-time `<progress>`
+bar updates and per-line `[N%]` progress prefixes.
 
 ### Constructor Parameters
 
@@ -105,6 +108,7 @@ Each dict is protected by its own `threading.Lock`.
 | `_compile_start` | `str` (port) | `float` | `time.time()` when the compile was initiated |
 | `_compile_meta` | `str` (port) | `dict` | Metadata dict for in-progress compile (see `_make_meta`) |
 | `_upload_meta` | `str` (port) | `dict` | Metadata dict for in-progress upload |
+| `_compile_last_pct` | `str` (port_safe) | `float` | Last broadcast progress percentage — used to suppress duplicate progress bar OOB updates |
 | `_last_compiled_sketch` | `str` (port) | `str` | Sketch path of the most recent successful compile |
 | `_last_compile_mtime` | `str` (port) | `float \| None` | Latest source-file mtime after the last successful compile |
 | `_last_compile_checksum` | `str` (port) | `str` | SHA-256 hex digest of source files after the last successful compile |
@@ -152,12 +156,42 @@ inspected:
 
 - **Progress messages** — topics ending with `::progress` (format
   `resp::compile::{port}::progress`). The `output` and `error` fields from
-  the message data are HTML-escaped, wrapped in a
-  `<div class="compile-line">` element, and sent to `_broadcast_ws`.
+  the message data are processed as follows:
+
+  1. **Progress bar OOB** — If the message contains a `percent` field, a
+     `<progress id="compile-progress-{port_safe}" value="{percent}" max="100">`
+     element is wrapped in an `<span hx-swap-oob="true">` and broadcast via
+     WebSocket. The broadcast is suppressed if the percentage hasn't changed
+     since the last message (tracked by `_compile_last_pct`).
+  2. **`[N%]` prefix** — If the output text is non-empty, a `[33%]` prefix
+     is prepended to display the current progress alongside the text.
+  3. **Output wrapping** — The text (with optional `[N%]` prefix) is
+     HTML-escaped, wrapped in a
+     `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`
+     containing a `<div class="compile-line">` element, and sent to
+     `_broadcast_ws`.
+
 - **Final messages** — topic `resp::compile::{port}`. The message dict is
   stored in `_compile_results[port]`. If `status == "ok"`, the sketch path
   from the response data is recorded in `_last_compiled_sketch` and the
   latest source-file mtime is stored in `_last_compile_mtime`.
+
+  Output is wrapped in an `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`
+  element so WS-delivered lines appear in the correct output container on the
+  board detail page. The `port_safe` value is derived from the port path by
+  replacing `/` with `_` (e.g., `/dev/ttyACM0` → `_dev_ttyACM0`), matching
+  the Jinja2 `{{ port | replace('/', '_') }}` template filter.
+
+The `_compile_last_pct` dictionary tracks the last broadcast progress
+percentage per `port_safe`. This prevents redundant `<progress>` OOB HTML
+from being sent to the browser when the percentage hasn't changed between
+messages.
+
+**Pure progress-only messages:** When the board worker sends a message with
+output text AND the progress has advanced, the text is broadcast with the
+`[N%]` prefix AND a separate `<progress>` OOB is sent. When the board worker
+sends a progress-only message (no output text, only percent changed), only
+the `<progress>` OOB is sent — no output line is broadcast.
 
 ### `_on_upload_resp()`
 
@@ -170,7 +204,12 @@ inspected:
 
 - **Progress messages** — topics ending with `::progress` (format
   `resp::upload::{port}::progress`). HTML-escaped output is wrapped in
-  `<div class="upload-line">` and sent to `_broadcast_ws`.
+  `<div class="upload-line">` and sent to `_broadcast_ws`. The output is
+  wrapped in an `<span hx-swap-oob="beforeend:#upload-output-{port_safe}">`
+  element so WS-delivered lines appear in the correct upload output container
+  on the board detail page. Unlike compile messages, upload outputs have no
+  `[N%]` prefix or progress bar — `UploadResponse` has no `TaskProgress`
+  field.
 - **Final messages** — topic `resp::upload::{port}`. Stored in
   `_upload_results[port]`. If `status == "ok"`, the `record_deploy` callback
   is invoked with the port and sketch path.
@@ -188,10 +227,22 @@ tools = ArduinoSketchTools(
 )
 ```
 
-The HTML strings are:
+The HTML strings are sent as **OOB (Out-of-Band)** swaps so they target the
+correct output container on the page without requiring the HTMX WS extension
+to parse routing instructions:
 
-- Compile progress: `<div class="compile-line" data-port="{port}">escaped text</div>`
-- Upload progress: `<div class="upload-line" data-port="{port}">escaped text</div>`
+- **Compile output:** `<span hx-swap-oob="beforeend:#compile-output-{port_safe}"><div class="compile-line" data-port="{port}">{pct_prefix}escaped text</div></span>`
+- **Compile progress bar:** `<span hx-swap-oob="true"><progress id="compile-progress-{port_safe}" value="{percent}" max="100"></progress></span>`
+- **Upload output:** `<span hx-swap-oob="beforeend:#upload-output-{port_safe}"><div class="upload-line" data-port="{port}">escaped text</div></span>`
+
+Where `port_safe` is the port path with `/` replaced by `_` (e.g.,
+`/dev/ttyACM0` → `_dev_ttyACM0`), matching the Jinja2 template filter
+`{{ port | replace('/', '_') }}`.
+
+The compile progress bar OOB is only broadcast when the percentage actually
+changes (tracked by `_compile_last_pct` per `port_safe`). Pure progress-only
+messages (no output text, only percent change) send only the progress bar OOB
+without any output line.
 
 ---
 
@@ -256,3 +307,4 @@ Every read or write to these dicts is performed inside a `with
 self._<name>_lock` block. The compile and upload response handlers run on
 pub/sub subscriber threads and must be safe for concurrent access with Flask
 request threads.
+{% endraw %}

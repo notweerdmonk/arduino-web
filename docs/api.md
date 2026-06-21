@@ -194,11 +194,11 @@ Compile a sketch directory.
 #### `upload(sketch_path, port, fqbn="arduino:avr:uno", profile=False)` → `UploadResult`
 Upload a compiled sketch to a board.
 
-#### `compile_stream(...)` → `Generator[Progress, None, CompileResult]`
-Streaming compile that yields progress messages and returns the final `CompileResult`.
+#### `compile_stream(...)` → `Generator[tuple[str,str,bool,float], None, CompileResult]`
+Streaming compile that yields `(out, err, done, percent)` 4-tuples (percent is 0.0–100.0 from `TaskProgress`) and returns the final `CompileResult`. The 4-tuple was introduced in Phase 98 — before that it was a 3-tuple without percent.
 
-#### `upload_stream(...)` → `Generator[Progress, None, UploadResult]`
-Streaming upload that yields progress messages and returns the final `UploadResult`.
+#### `upload_stream(...)` → `Generator[tuple[str,str,bool], None, UploadResult]`
+Streaming upload that yields `(out, err, done)` 3-tuples (no percent — `UploadResponse` has no `TaskProgress`) and returns the final `UploadResult`. Upload remains a 3-tuple because the gRPC `UploadResponse` message has no `TaskProgress` field. 
 
 #### `compile_and_upload(sketch_path, port, fqbn, profile=False, source_overrides=None)` → `tuple[CompileResult, UploadResult]`
 Compile then upload in sequence.
@@ -371,6 +371,70 @@ client.on_reconnect = lambda: print("reconnected")
 | `/api/board/hardware-ids` | GET | List hardware IDs for assignment |
 | `/api/board/assign` | POST | Assign sketch to board by hardware ID |
 | `/api/sketch/path` | GET | Current sketch path for active board |
+
+---
+
+## Board Worker Progress Protocol
+
+**Package:** `board_manager`  
+**Module:** `board_manager.board_worker`
+
+The `_make_progress()` helper constructs progress event dicts for compile/upload streaming output:
+
+```python
+def _make_progress(msg: dict, out: str, err: str, percent: float = 0.0) -> dict
+```
+
+Returns a dict with `topic` set to `resp::compile::<port>::progress` (or `resp::upload::<port>::progress`) and `data` containing `output`, `error`, and `percent` fields. The board worker's compile loop iterates the 4-tuple from `compile_stream()`, sending each `(out, err, done, percent)` as a progress event via the socketpair IPC. When only the percentage changes (no output), a progress-only event is sent to drive the progress bar without duplicating output lines.
+
+---
+
+## WebSocket OOB Broadcast Pattern
+
+All frontend updates use a single persistent WebSocket connection established by HTMX's `ws.js` extension:
+
+```html
+<div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
+```
+
+The server sends raw HTML with `hx-swap-oob` attributes; HTMX swaps the content into the DOM. Three tiers of OOB broadcasts exist (all introduced in Phase 98):
+
+### Tier 1 — Badge OOB
+
+Daemon status badge broadcasts on daemon state change from `_broadcast_daemon_badge()`:
+
+```python
+oob = '<span id="daemon-badge" hx-swap-oob="true">Connected</span>'
+broadcast_ws(oob)
+```
+
+Board status badge uses per-port unique IDs (`board-status-badge--{port_safe}`) to target individual board detail pages:
+
+```python
+port_safe = port.replace("/", "_")
+oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
+```
+
+### Tier 2 — Compile/Upload OOB
+
+Output lines from `_on_compile_resp()` / `_on_upload_resp()` in the ArduinoSketchTools extension are wrapped in targeted OOB spans:
+
+```python
+html = f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}">'
+html += f'<div class="compile-line">{pct_prefix}{text}</div></span>'
+broadcast_ws(html)
+```
+
+### Tier 3 — Compile Progress Bar OOB
+
+Progress percentage drives a `<progress>` element broadcast only on change (suppressed via `_compile_last_pct` tracking per port):
+
+```python
+bar = f'<progress id="compile-progress-{port_safe}" value="{pct_int}" max="100" hx-swap-oob="true"></progress>'
+broadcast_ws(bar)
+```
+
+All three tiers share the same `broadcast_ws(html)` function that iterates connected WS clients and sends each one the raw HTML string.
 
 ---
 

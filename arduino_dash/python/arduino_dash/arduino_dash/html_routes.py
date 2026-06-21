@@ -117,6 +117,18 @@ def init_html_routes(app: Flask, sock):
             boards = list(state._board_list.values())
         return render_template("partials/board_grid.html", boards=boards)
 
+    @app.route("/boards/grid/card/<path:port>")
+    def html_boards_grid_card(port: str):
+        """Render a single board card partial."""
+        norm_port = normalize_port(port)
+        if norm_port is None:
+            return "", 400
+        with state._board_list_lock:
+            b = state._board_list.get(norm_port)
+        if b is None:
+            return "", 404
+        return render_template("partials/board_card.html", b=b)
+
     @app.route("/board/<path:port>/connection-status")
     def html_board_connection_status(port: str):
         """Render the connection status badge for a board."""

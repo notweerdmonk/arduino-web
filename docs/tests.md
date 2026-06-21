@@ -71,8 +71,8 @@ cd grpc_client/python/arduino_grpc              && pipenv run pytest tests/    #
 ### All packages (nox)
 
 ```bash
-nox -s all_tests          # all 6 packages + scripts
-nox -s scripts_tests      # scripts/tests only
+nox -s all_tests          # all 6 packages + scripts (8 sessions)
+nox -s scripts_tests      # scripts/tests only (pytest + bash)
 nox -s 'tests(board_manager)'  # single package
 ```
 
@@ -82,11 +82,13 @@ nox -s 'tests(board_manager)'  # single package
 ./scripts/ci.sh           # full pipeline (tests + builds)
 ```
 
+The CI pipeline supports `--skip-tests` and `--skip-builds` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96).
+
 ### Expected Results
 
 | Session | Tests | Notes |
 |---------|-------|-------|
-| `scripts_tests` | 128 passed | pytest + bash |
+| `scripts_tests` | **170 passed** (128 pytest + 12 bash + **30 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
 | `tests(board_manager)` | 212 passed | includes integration tests |
 | `tests(board_manager_client)` | 24 passed | |
 | `tests(arduino_sketch_tools)` | 51 passed | |

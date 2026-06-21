@@ -808,10 +808,9 @@ class TestMedMinderV2DefaultSketch:
         assert _DEFAULT_SKETCH_DIR.encode() in last_upload.data
 
 
-class TestAdminBoardSelectorPolling:
-    """Phase 62.2: /admin board selector polls every 5s (matches main dashboard)
-    so that newly-connected boards appear in the selector without a manual
-    page reload.
+class TestAdminBoardSelector:
+    """Phase 62.2 → 71: /admin board selector refreshes via WS push
+    on board-changed events (board-changed from:body trigger).
     """
 
     def test_admin_html_board_selector_uses_board_changed_event(self, app, client):

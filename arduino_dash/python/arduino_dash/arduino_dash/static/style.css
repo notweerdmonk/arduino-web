@@ -139,7 +139,9 @@ nav h1, nav .brand { color: var(--brand); font-size: 1.25rem; font-weight: bold;
 .btn-secondary:hover { background: var(--btn-secondary-hover); }
 .btn-fixed-size { flex: initial; }
 
+.badge-container { margin-left: auto; }
 .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+.badge-circle { display: inline-block; vertical-align: 0.05em; }
 .badge-ok { background: var(--badge-ok-bg); color: var(--badge-ok-text); }
 .badge-err { background: var(--badge-err-bg); color: var(--badge-err-text); }
 
@@ -195,6 +197,7 @@ label { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; color: var(
 
 .daemon-badge {
   font-size: 0.75rem;
+  font-weight: bold;
   margin-left: auto;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;

@@ -43,7 +43,7 @@ class FakeClient:
         if self.compile_result:
             out = self.compile_result.output or ""
             err = self.compile_result.error or ""
-            yield out, err, True
+            yield out, err, True, 100.0
 
     def upload(self, sketch_path="", fqbn="", port="", verbose=False):
         return self.upload_result

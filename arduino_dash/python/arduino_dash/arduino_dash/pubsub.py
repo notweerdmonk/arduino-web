@@ -134,12 +134,14 @@ def _on_daemon_ready(msg: dict) -> None:
             return
         state._daemon_ready = True
     state.logger.info("Daemon ready event received")
+    _broadcast_daemon_badge()
 
 
 def _on_pubsub_reconnect() -> None:
     """Re-register all PubSub subscriptions after a reconnection."""
     with state._daemon_ready_lock:
         state._daemon_ready = False
+    _broadcast_daemon_badge()
     ps = state.pubsub
     if not ps:
         return
@@ -191,8 +193,13 @@ def _on_board_event(msg: dict) -> None:
     try:
         from flask import render_template
         with state._app.app_context():
-            event_html = '<div hx-swap-oob="afterbegin:#live-events-card">' + render_template("partials/board_event.html", events=[data]) + '</div>'
+            event_html = '<div hx-swap-oob="afterbegin:#live-events-card" data-event-port="' + port + '">' + render_template("partials/board_event.html", events=[data]) + '</div>'
         _broadcast_ws(event_html)
+        port_safe = port.replace("/", "_")
+        connected = (event == "connected")
+        badge = render_template("partials/board_status_badge.html", port=port, port_path=port.lstrip("/"), connected=connected)
+        oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
+        _broadcast_ws(oob)
     except Exception:
         state.logger.exception("Failed to broadcast board event")
 
@@ -294,6 +301,20 @@ def _make_meta(port: str, sketch_path: str) -> dict:
         "sketch": sketch_path,
         "sketch_name": utils_dir,
     }
+
+
+def _broadcast_daemon_badge() -> None:
+    """Broadcast daemon badge OOB update via WebSocket."""
+    try:
+        from flask import render_template
+        with state._daemon_ready_lock:
+            ready = state._daemon_ready
+        with state._app.app_context():
+            badge = render_template("partials/daemon_badge.html", ready=ready)
+        oob = f'<span id="daemon-badge" hx-swap-oob="true">{badge}</span>'
+        _broadcast_ws(oob)
+    except Exception:
+        state.logger.exception("Failed to broadcast daemon badge")
 
 
 def _broadcast_ws(html: str) -> None:

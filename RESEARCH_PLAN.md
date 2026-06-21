@@ -1,26 +1,29 @@
 ---
 ---
 {% raw %}
-# Research Plan — Phase 77: Template Port Path Cleanup
+# Research Plan — Phase 97: Frontend Stack Optimization
 
-**Date**: 2026-06-17 17:03
+**Date**: 2026-06-20 22:17
 
 ## Objective
 
-Remove the scattered `{{ port.lstrip('/') }}` pattern from 9 HTML template locations by computing a `port_path` (URL-safe, no leading `/`) once in Python route context and passing it to templates. This is the natural follow-on to Phase 76's `normalize_port()` integration.
+Reduce JS payload, simplify the frontend stack, and optimize HTMX swap targets to minimize bytes over the wire. Evaluate Idiomorph, dropping Hyperscript, and restructure DOM swap targets.
 
 ## Research Questions
 
-1. **Where does `port.lstrip('/')` appear in templates?** — Identify all 9 locations across 6 template files.
-2. **Which route handlers pass `port` to these templates?** — Trace each template's render context.
-3. **What is the data flow?** — Route receives bare port → `normalize_port()` adds `/` → template strips `/` for URLs. Can we break this inversion?
-4. **What is the minimal change?** — Compute `port_path = port.lstrip('/')` in Python, pass as context variable.
-5. **Risk assessment** — Would any route break if `port` changes format?
+1. **Current JS payload breakdown** — What does each dependency cost?
+2. **Hyperscript usage audit** — Where is it used, what does it do, can it be replaced with vanilla JS?
+3. **Idiomorph compatibility** — Can we add `hx-swap="morph"` without breaking existing behavior?
+4. **Swap target audit** — Which partials can be made more granular to reduce payload?
+5. **WebSocket vs SSE evaluation** — What would SSE change for our real-time board events?
+6. **WS → WS+HTMX polling conversion** — daemon status already uses polling via `hx-trigger="every 10s"`; can we make it respond to WS push instead?
 
 ## Approach
 
-1. Search templates for `port.lstrip` patterns
-2. Search route handlers for `render_template` calls with `port` in context
-3. Propose minimal changes
-4. Validate with existing test suite
+1. Read HOTWIRE_FEASIBILITY_RESEARCH.md for existing analysis
+2. Audit all partial templates and hx-target combos
+3. Audit all Hyperscript usages across 10 template files
+4. Research Idiomorph API and compatibility
+5. Reasearch HTMX SSE extension
+6. Document findings and propose phased implementation
 {% endraw %}

@@ -269,10 +269,29 @@ def _on_board_event(msg: dict) -> None:
             from flask import render_template
 
             with state._app.app_context():
-                event_html = '<div hx-swap-oob="afterbegin:#live-events-card">' + render_template("partials/board_event.html", events=[data]) + '</div>'
+                event_html = '<div hx-swap-oob="afterbegin:#live-events-card" data-event-port="' + port + '">' + render_template("partials/board_event.html", events=[data]) + '</div>'
             broadcast_ws(event_html)
+            port_safe = port.replace("/", "_")
+            connected = (event == "connected")
+            badge = render_template("partials/board_status_badge.html", port=port, port_path=port.lstrip("/"), connected=connected)
+            oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
+            broadcast_ws(oob)
         except Exception:
             _logger.debug("Failed to broadcast board event via WS", exc_info=True)
+
+
+def _broadcast_daemon_badge() -> None:
+    """Broadcast daemon badge OOB update via WebSocket."""
+    try:
+        from flask import render_template
+        with state._daemon_ready_lock:
+            ready = state._daemon_ready
+        with state._app.app_context():
+            badge = render_template("partials/daemon_badge.html", ready=ready)
+        oob = f'<span id="daemon-badge" hx-swap-oob="true">{badge}</span>'
+        broadcast_ws(oob)
+    except Exception:
+        _logger.exception("Failed to broadcast daemon badge")
 
 
 def _on_daemon_ready(msg: dict) -> None:
@@ -288,6 +307,7 @@ def _on_daemon_ready(msg: dict) -> None:
             return
         state._daemon_ready = True
     _logger.info("Daemon ready event received")
+    _broadcast_daemon_badge()
 
 
 def _on_resp(msg: dict) -> None:
@@ -336,6 +356,7 @@ def _on_pubsub_reconnect() -> None:
     """Re-register all PubSub handlers after a reconnection."""
     with state._daemon_ready_lock:
         state._daemon_ready = False
+    _broadcast_daemon_badge()
     ps = get_pubsub()
     if not ps:
         _logger.info("PubSub reconnected — no pubsub instance yet")

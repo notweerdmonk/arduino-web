@@ -267,12 +267,13 @@ class ArduinoGrpcClient:
         fqbn: str,
         verbose: bool = False,
         quiet: bool = False,
-    ) -> Iterator[tuple[str, str, bool]]:
+    ) -> Iterator[tuple[str, str, bool, float]]:
         """Stream compile output as it arrives from the gRPC stream.
 
-        Yields ``(out, err, done)`` tuples for each response from the Compile
-        RPC.  *out* and *err* are decoded text chunks (may be empty).  *done*
-        is True on the final response that contains the result.
+        Yields ``(out, err, done, percent)`` tuples for each response from the
+        Compile RPC.  *out* and *err* are decoded text chunks (may be empty).
+        *done* is True on the final response that contains the result.
+        *percent* is a 0.0–100.0 progress percentage from TaskProgress.
 
         Args:
             sketch_path: Path to the sketch directory containing the .ino file.
@@ -281,7 +282,7 @@ class ArduinoGrpcClient:
             quiet: Suppress non-error output.
 
         Yields:
-            ``(out: str, err: str, done: bool)`` tuples.
+            ``(out: str, err: str, done: bool, percent: float)`` tuples.
 
         Raises:
             InvalidFqbnError: If fqbn is empty.
@@ -302,11 +303,16 @@ class ArduinoGrpcClient:
                 quiet=quiet,
             )
 
+            percent = 0.0
             for resp in self.stub.Compile(request, timeout=120):
                 out = resp.out_stream.decode() if resp.HasField("out_stream") else ""
                 err = resp.err_stream.decode() if resp.HasField("err_stream") else ""
                 done = resp.HasField("result") and resp.result
-                yield out, err, done
+                if resp.HasField("progress"):
+                    percent = resp.progress.percent
+                if done:
+                    percent = 100.0
+                yield out, err, done, percent
 
         except grpc.RpcError as e:
             raise exceptions.CompileError(f"Compile RPC failed: {e.details()}")
@@ -339,7 +345,7 @@ class ArduinoGrpcClient:
         err_lines = []
         success = False
 
-        for out, err, done in self.compile_stream(sketch_path, fqbn, verbose, quiet):
+        for out, err, done, percent in self.compile_stream(sketch_path, fqbn, verbose, quiet):
             if out:
                 out_lines.append(out)
             if err:

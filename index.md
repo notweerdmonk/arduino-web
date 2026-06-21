@@ -4,6 +4,8 @@
 
 Welcome to the MedMinder documentation. This index maps all documentation resources across the monorepo.
 
+> **Last updated**: 2026-06-21 — Phases 94-98 complete. See [PLAN.md](PLAN.md) for full phase history.
+
 ---
 
 ## Quick Links

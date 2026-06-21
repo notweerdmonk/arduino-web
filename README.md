@@ -2,7 +2,22 @@
 ---
 # MedMinder
 
-Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerService and a Flask+HTMX+WebSocket web dashboard.
+Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerService and a Flask+HTMX+WebSocket web dashboard. All frontend updates use WebSocket push (no periodic HTMX polling). The frontend stack uses vanilla JS event delegation (no Hyperscript) with Idiomorph for scroll-preserving morphing swaps.
+
+## Recent Enhancements (Phases 94-98)
+
+| Area | Change | Phase |
+|------|--------|-------|
+| **Build** | Noxfile self-healing: auto-regenerates `Pipfile.lock` on each run | 94 |
+| **CI** | `test_ci.sh` (30 bash assertions) wired into nox `scripts_tests` | 96 |
+| **Frontend** | Hyperscript (43KB) → centralized JS event delegation; Idiomorph morphing for scroll-preserving swaps | 97 |
+| **Frontend** | Card-level WS swap targeting (`data-event-port`) — per-event payload from 1-5KB → ~200-500B | 97 |
+| **Frontend** | All badge updates (daemon, board status) use OOB HTML over WS — no more polling | 98 |
+| **Frontend** | Compile/upload output OOB targeting — lines appear in correct per-port container | 98 |
+| **Frontend** | Compile progress bar with `<progress>` element + `[N%]` prefix per output line | 98 |
+| **gRPC** | `compile_stream()` yields 4-tuple `(out, err, done, percent)` for progress tracking | 98 |
+| **Docs** | Full Jekyll documentation site (254 pages, 0 errors); `WS_EVENT_FLOW.md` relocated to `docs/` | 93, 95 |
+| **Tests** | `TestAdminBoardSelectorPolling` renamed to `TestAdminBoardSelector` (stale name after WS push migration) | 98(Q6) |
 
 ## Architecture
 
@@ -66,22 +81,21 @@ pipenv run python -m medminder_dash --port 8081
 ## Running tests
 
 ```bash
-cd board_manager/python/board_manager && pipenv run python -m pytest tests/ -v
-cd arduino_dash/python/arduino_dash && pipenv run python -m pytest tests/ -v
-cd medminder_dash/python/medminder_dash && pipenv run python -m pytest tests/ -v
-cd arduino_sketch_tools/python/arduino_sketch_tools && pipenv run python -m pytest tests/ -v
-cd board_manager_client/python/board_manager_client && pipenv run python -m pytest tests/ -v
-cd grpc_client/python/arduino_grpc && pipenv run python -m pytest tests/ -v
+# All 8 test sessions via nox (6 package suites + scripts pytest + scripts bash)
+nox -s all_tests
+
+# Single package
+nox -s 'tests(medminder_dash)'
+
+# Full CI pipeline
+./scripts/ci.sh
+./scripts/ci.sh --skip-builds    # tests only
+./scripts/ci.sh --skip-tests     # builds only
 ```
 
-Or build all wheels and run every test in one go:
+**Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 187, arduino_grpc 35, scripts 170.
 
-```bash
-nox            # builds 6 wheels into their respective dist/ dirs
-for p in grpc_client arduino_sketch_tools board_manager_client board_manager arduino_dash medminder_dash; do
-    (cd "$p/python/$p" && pipenv run python -m pytest tests/ -q)
-done
-```
+**Note:** Nox sessions auto-regenerate `Pipfile.lock` (Phase 94) — no manual lock management after wheel rebuilds.
 
 ## Editable dev mode
 
@@ -99,7 +113,7 @@ The `medminder_dash` Flask app provides a board‑centric UI for managing medici
 
 1. Open the app → the landing page shows a board selector dropdown (auto‑populated via `/api/board_list`).
 2. Select a board → the app stores it in the session and redirects to the board detail view (`/board`).
-3. The navbar shows a status badge (polls `/api/board_status` every 5s).
+3. The navbar shows a daemon status badge updated in real time via WebSocket push (no polling).
 4. Medicine CRUD operations are scoped to the selected board.
 
 ### Running with Gunicorn
@@ -151,7 +165,7 @@ Full documentation: [`scripts/docs/index.md`](scripts/docs/index.md)
 pipenv run python scripts/gen_grpc_bindings.py  # Regenerate gRPC stubs
 ```
 
-136-test suite at `scripts/tests/`: `nox -s scripts_tests`
+170-test suite at `scripts/tests/` (128 pytest + 12 bash + 30 bash `test_ci.sh`): `nox -s scripts_tests`
 
 ## Documentation Structure
 

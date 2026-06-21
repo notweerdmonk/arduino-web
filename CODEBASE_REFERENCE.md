@@ -3,7 +3,7 @@
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-06-20 (Phase 94 — Noxfile Self-Healing Test Sessions)
+**Last updated**: 2026-06-21 (Phase 98 — WS Push Migration)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -37,7 +37,7 @@ medminder/
 │       │   └── templates/     # Jinja2 templates
 │       ├── tests/
 │       └── pyproject.toml
-├── arduino_grpc/               # gRPC stubs for arduino-cli
+├── grpc_client/               # gRPC stubs for arduino-cli
 │   └── python/arduino_grpc/
 │       ├── arduino_grpc/      # Wrapper module
 │       ├── cc/                # Generated pb2/pb2_grpc stubs
@@ -109,8 +109,8 @@ medminder/
 | `arduino_sketch_tools` | 51 | `arduino_sketch_tools/python/` |
 | `arduino_dash` | 119 | `arduino_dash/python/` |
 | `medminder_dash` | 186 + 1 skip | `medminder_dash/python/` |
-| `scripts/` | 128 + 12 bash | `scripts/tests/` |
-| **Grand total** | **~1197 + 9 skip** | |
+| `scripts/` | 170 (128 pytest + 42 bash) | `scripts/tests/` |
+| **Grand total** | **~789 + 9 skip** | |
 
 ### gRPC API
 
@@ -344,6 +344,77 @@ All 9 README refs in `index.md` resolve to `.html` (processed pages):
   `/medminder_dash/.../README.html`, `/scripts/README.html`
 
 ---
+
+### Phase 98 — WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar) ✅ COMPLETED
+
+**Date**: 2026-06-21 11:55
+
+**Type**: Frontend/Infrastructure
+
+**Goal**: Migrate all PubSub-driven frontend updates from HTMX polling to WS push across three tiers.
+
+**Tier 1 — Daemon Badge OOB**:
+- Both `base.html`: `hx-trigger="every 10s, load"` → `"load"` (one-shot initial fill)
+- Both `daemon_badge.html`: stripped `hx-get`, `hx-trigger`, `hx-target`, `hx-swap`
+- `arduino_dash/pubsub.py`: `_broadcast_daemon_badge()` added, called from `_on_daemon_ready()` and `_on_pubsub_reconnect()`
+- `medminder_dash/pubsub_infra.py`: same changes
+
+**Tier 1 — Board Status Badge OOB**:
+- Both `board_status_badge.html`: stripped all `hx-*` attributes
+- Both `board_detail.html`: `id="board-status-badge"` → `id="board-status-badge--{{ port | replace('/', '_') }}"`
+- Both pubsub `_on_board_event()`: added badge OOB WS broadcast
+
+**Tier 2 — Compile/Upload OOB Targeting**:
+- `extension.py:182` compile line: wrapped in `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`
+- `extension.py:214` upload line: wrapped in `<span hx-swap-oob="beforeend:#upload-output-{port_safe}">`
+
+**Tier 3 — Compile Progress Percentage**:
+- `client.py:compile_stream()`: yields 4-tuple `(out, err, done, percent)` with `percent` from `resp.progress.percent`
+- `board_worker.py:_make_progress()`: accepts `percent`, sends progress-only messages on change
+- `extension.py:_on_compile_resp()`: tracks `_compile_last_pct` per port_safe; broadcasts `<progress>` OOB; prepends `[N%]` prefix
+- Both `board_detail.html`: added `<progress id="compile-progress-{port_safe}">` element
+
+**Noxfile fix**: Added `env={"PROJECT_ROOT": str(ROOT)}` to pipenv calls (resolves `file://${PROJECT_ROOT}` expansion failure)
+
+**Key decisions**:
+- OOB HTML over WS for badge updates (proven pattern from existing board event pushes)
+- Per-port unique board badge IDs to avoid wrong-port updates on board_detail pages
+- Strip `hx-*` from partials entirely; keep `hx-trigger="load"` on wrapper spans for initial AJAX fill
+- Clean break for `compile_stream()` 4-tuple: update all callers including `compile()`, `board_worker`, tests
+- Upload remains 3-tuple (`UploadResponse` has no `TaskProgress`)
+- Only broadcast progress bar OOB when percent changes (track `_compile_last_pct` per port_safe)
+
+**Test Impact**: All 8 nox sessions pass (~3m). No pre-existing failures remain.
+
+**Quantum 6 — Rename**: `TestAdminBoardSelectorPolling` → `TestAdminBoardSelector` in `test_admin.py:811` and `README.md:205`. See [Phase 98 Q6 section](#phase-98-q6--rename-testadminboardselectorpolling--testadminboardselector-2026-06-21) below.
+
+**Files by bucket** (full paths shortened for readability):
+
+| Bucket | File(s) | Change |
+|--------|---------|--------|
+| **A — Core** | `arduino_dash/.../pubsub.py`, `medminder_dash/.../pubsub_infra.py` | `_broadcast_daemon_badge()`, board badge OOB |
+| **A — Core** | `arduino_sketch_tools/.../extension.py` | `_compile_last_pct`, `<progress>` OOB, `[N%]`, per-port OOB targeting |
+| **A — Core** | `board_manager/.../board_worker.py` | `_make_progress()` with percent, progress-only messages |
+| **A — Core** | `grpc_client/.../client.py` | `compile_stream()` 4-tuple `(out,err,done,percent)` |
+| **B — Templates** | Both `base.html` | Polling→`"load"`, portMatch JS handler |
+| **B — Templates** | Both `board_detail.html` | `<progress>` bar, per-port badge IDs |
+| **B — Templates** | Both `partials/daemon_badge.html` | Stripped `hx-*` attributes |
+| **B — Templates** | Both `partials/board_status_badge.html` | Stripped `hx-*` attributes |
+| **B — Templates** | Both `partials/board_grid.html`, `admin.html` | Per-port badge IDs, WS compile-card integration |
+| **B — Templates** | Both `static/style.css` | Progress bar styling |
+| **C — Routes** | Both `html_routes.py` | `/daemon/status` route for initial badge load |
+| **D — Tests** | `arduino_sketch_tools test_extension.py` | Compile progress OOB/`[25%]`/`<progress>` tests |
+| **D — Tests** | `board_manager test_board_worker.py` | `_make_progress()` 4-tuple mock update |
+| **D — Tests** | `grpc_client test_client.py` | 4-tuple `percent` assertions |
+| **E — Docs** | `docs/ws-event-flow.md`, `docs/architecture.md`, `docs/api.md`, `docs/guide.md`, root `README.md` | WS push migration docs (tiers, signatures, architecture) |
+| **E — Docs** | `arduino_sketch_tools docs/{extension,routes}.md`, `README.md` | OOB targeting, WS push notes |
+| **E — Docs** | `arduino_dash docs/pubsub.md`, `medminder_dash docs/pubsub_infra.md` | Badge OOB docs |
+| **E — Docs** | `board_manager docs/board_worker.md`, `grpc_client docs/client.md` | `_make_progress()` percent, `compile_stream()` 4-tuple |
+| **F — Stale refs** | `CODEBASE_REFERENCE.md`, `TODOS.md`, `PLAN.md`, `_config.yml` | Stale line-refs fixed, Phase 98 in completed table, `url: ""` |
+| **G — Jekyll wrap** | `TESTING_PLAN.md`, `TESTING_TASK.md` | Added `{% raw %}...{% endraw %}` wrapping |
+| **H — Workflow** | `IMPLEMENTATION_*.md` (4), `JOURNAL.md`, `RESEARCH_*.md` (4), `REVIEW_*.md` (4), `TESTING_*.md` (2) | All workflow context docs updated |
+| **I — Other** | `noxfile.py` | `env={"PROJECT_ROOT": str(ROOT)}` for pipenv |
+| **J — Q6 Rename** | `medminder_dash tests/test_admin.py:811`, `README.md:205` | `TestAdminBoardSelectorPolling` → `TestAdminBoardSelector` |
 
 ### Phase 90 — Fix Double BoardDetector Stop Log ✅ COMPLETED
 
@@ -3081,6 +3152,18 @@ defaults:
 
 **Non-fatal warnings**: `{{ port.lstrip('/') }}` in `RESEARCH_JOURNAL.md` and `RESEARCH_PLAN.md` — Jinja2 filter syntax in code examples. Cosmetic only.
 
+### Phase 95 — Git Tree Preparation Plan
+
+**Scope**: Pre-commit housekeeping — stale artifact cleanup, `.gitignore` updates, workflow doc gap-fill, doc correction, file relocation.
+
+**Key files affected**:
+| File | Change |
+|------|--------|
+| `.gitignore` | Added patterns for generated artifacts and upload sketches |
+| `scripts/docs/index.md` | Corrected false `--help` claim → `usage` |
+| `WS_EVENT_FLOW.md` | Moved to `docs/ws-event-flow.md` |
+| 5 IMPLEMENTATION_* files | Phase 93→94 gap filled |
+
 ### nox `scripts_tests` session (Phase 96)
 
 Runs 3 suites in order:
@@ -3090,5 +3173,142 @@ Runs 3 suites in order:
 
 Total: 170 tests.
 
-**Last updated**: 2026-06-20 20:03 (Phase 96)
+**Last updated**: 2026-06-21 09:36 (Phase 97 audit fixes)
+
+---
+
+## Phase 97 — Frontend Stack Optimization (Complete)
+
+### Before/After JS Payload
+
+| Metric | Before Phase 97 | After Phase 97 |
+|--------|----------------|----------------|
+| HTMX 2.0.4 | 16KB | 16KB |
+| HTMX WS extension | 1KB | 1KB |
+| Hyperscript 0.9.13 | 43KB | — |
+| Idiomorph | — | 1KB |
+| Vanilla JS inline | — | ~1KB |
+| **Total** | **~60KB** | **~19KB (−68%)** |
+
+### Hyperscript Usage Audit
+
+~120 lines across 10 template files, 5 patterns:
+
+| Pattern | Files | Hyperscript | Vanilla Replacement |
+|---------|-------|-------------|---------------------|
+| Modal show/hide | `confirm_modal.html`, `delete_confirm_modal.html`, `sketch_upload_modal.html` | `_="on click trigger showModal on #id"` / `_="on click trigger closeModal on #id"` | `data-action="modal:show"` / `data-action="modal:hide"` with `data-target` |
+| Delete path + confirm | `admin.html` (both), `board_detail.html` | `_="on click set ... then trigger showModal..."` | `data-action="delete:set-path"` with `data-path` |
+| File input + upload | `admin.html` (both), `board_detail.html` (both) | `_="on change ... then trigger upload"` | `onchange` attribute or `change` event listener |
+| DnD overlay | `dnd_overlay.html` (both) | Mostly JS already | Verify no hyperscript residue |
+| Cancel button | `medicine_form.html` | `_="on click trigger closeModal"` | `data-action="modal:hide"` |
+
+### WS/SSE Evaluation
+
+| Aspect | WebSocket (current) | SSE |
+|--------|-------------------|-----|
+| Direction | Bidirectional | Unidirectional (server→client) |
+| Reconnection | Manual (broken) | Native browser auto-reconnect |
+| Server library | flask-sock | Any WSGI server |
+| Client library | HTMX WS extension | HTMX SSE extension or native EventSource |
+| Payload | Tiny HTML snippets (triggers) | Same |
+| Effort to migrate | — | 3-5h |
+
+**Decision**: Defer WS→SSE migration. Not a payload optimization. Current WS ext is 1KB. Reconnection fix alone doesn't justify 3-5h of work. Move to SSE only when flask-sock causes issues.
+
+### Swap Target Audit
+
+| Fragment | Size | Notes |
+|----------|------|-------|
+| `/boards/grid` | 1-5KB | Largest fragment — contains 1-N board cards |
+| `/daemon/status` | ~200B | Polling every 10s |
+| `/board/<port>/connection-status` | ~150B | Per-board connection badge |
+| `/board/<port>/compile-status` | ~200B | Per-board compile/upload status |
+| `/board/<port>/upload-status` | ~200B | Per-board upload status |
+| `/sketch/<id>` | ~200B | Sketch detail |
+| `/files/dashboard` | ~1-3KB | File type counts |
+| `/files/<type>` | ~1-10KB | File list by type |
+
+**Implementation (Phase 97 Q3)**: Created per-card endpoints `/boards/grid/card/<path:port>` in both dashboards. WS broadcasts include `data-event-port` attribute for targeted per-card refresh via `htmx.ajax()`. New `board_card.html` partial extracted from `board_grid.html`.
+**Research note**: Swap target granularization was initially deferred during research as marginal gain, but was implemented as Q3 after Hyperscript removal.
+
+### Key Files
+
+| File | Dashboard | Role |
+|------|-----------|------|
+| `templates/base.html` | Both | Loads all CDN scripts; defines `#event-feed` div and `board-changed` listener |
+| `templates/base.html` | Both | Main template: CDN scripts (HTMX, WS ext, Idiomorph), inline `<script>` block with showModal/hideModal/handleFolderInput/uploadSketch + event delegation; inline daemon badge with `hx-swap="morph"`; WS message handler with targeted card refresh |
+| `templates/partials/daemon_badge.html` | Both | Renders daemon status text + colored circle; `hx-swap="morph"` applied on the parent in base.html (inline), not on this partial directly |
+| `templates/partials/board_card.html` | Both | Per-board card partial extracted from board_grid.html for targeted swap (Phase 97 Q3) |
+| `templates/partials/board_grid.html` | Both | Board grid container using `{% include "partials/board_card.html" %}` for each board |
+| `templates/partials/confirm_modal.html` | medminder | Modal show/hide via vanilla JS showModal/hideModal + hx-on::after-request |
+| `templates/partials/delete_confirm_modal.html` | Both | Modal show/hide via data-action delegation + hx-on::after-request auto-close |
+| `templates/partials/sketch_upload_modal.html` | Both | File upload via uploadSketch() + modal show/hide via data-action delegation |
+| `templates/partials/dnd_overlay.html` | Both | Drag-and-drop overlay; calls showModal() on file drop |
+| `templates/admin.html` | Both | Delete path + file input handlers via data-action + onchange |
+| `templates/board_detail.html` | arduino_dash | Halt button + file input + inline board status badge with `hx-swap="morph"` |
+| `templates/medicine_form.html` | medminder | Cancel button via onclick |
+| `medminder_dash/.../pubsub_infra.py` | medminder | `broadcast_ws(html)` — WS broadcast function |
+
+### Phase 97 Design Decisions
+
+1. **Drop Hyperscript first**: 43KB saved, ~120 lines replaced with ~30 lines vanilla JS, lowest risk.
+2. **Add Idiomorph**: +1KB, preserves scroll/focus on polling swaps.
+3. **Restructure swap targets**: Implemented as Q3 — per-card endpoints + targeted WS refresh. Initially deferred in research but proven feasible after Hyperscript removal.
+4. **WS→SSE migration**: Deferred per user instruction. Not a payload optimization.
+5. **Daemon status WS push**: User handles separately — not in Phase 97.
+
+### Verification
+
+| Test | Method |
+|------|--------|
+| No hyperscript parse errors | Browser console |
+| Upload DnD + Browse | Manual in browser |
+| Delete confirm modal | Manual in browser |
+| Morphing on daemon badge | Manual in browser (verify scroll preserved) |
+| JS console clean | Browser console |
+| All existing tests | `nox -s all_tests` |
+### Phase 97 Implementation Details
+
+1. **Current JS Payload**: ~19KB (HTMX 16KB + WS ext 1KB + Idiomorph 1KB + inline ~1KB). Was 60KB.
+2. **Vanilla JS Functions** (defined in both base.html):
+   - `showModal(id)` — show modal by ID
+   - `hideModal(id)` — hide modal by ID, clear __deletePath and __dndFiles
+   - `handleFolderInput(input)` — file input handler, populates modal and shows it
+   - `uploadSketch()` — standalone upload function (was js() block)
+   - Event delegation: click handler for `[data-action]` (modal:hide, delete-sketch)
+3. **Idiomorph Integration**: CDN loaded after HTMX, `hx-ext="morph"` on body, `hx-swap="morph"` on polling elements (daemon badge inline in base.html, board_detail.html status span). Note: board_status_badge.html partial kept `hx-swap="outerHTML"`.
+4. **Swap Target Granularization**:
+   - `board_card.html` partial (both dashboards)
+   - `/boards/grid/card/<port>` endpoint (both dashboards)
+   - `data-event-port` attribute in WS broadcast (pubsub.py, pubsub_infra.py)
+   - WS handler parses port and does targeted card refresh via `htmx.ajax()`
+5. **CSS Additions**:
+   - `.badge-container { margin-left: auto; }`
+   - `.badge-circle { display: inline-block; vertical-align: 0.05em; }`
+   - `.daemon-badge { font-weight: bold; }`
+6. **Daemon/Status Badges**: Use `<span class="badge-circle">⬤</span>` for visual indicator, CSS handles color (green/red). Board status badges are text-only.
+
+### Phase 97 Audit Fixes (2026-06-21 09:36)
+
+Post-implementation audit found 8 inaccuracies across project/workflow docs and setup.py:
+
+| # | Area | Fix |
+|---|------|-----|
+| 1 | CODEBASE_REFERENCE.md heading | "Research Complete, Not Implemented" → "Complete" |
+| 2 | IMPLEMENTATION_JOURNAL.md | 4 inaccuracies (base.html→admin.html, morph claim, WS handler snippet, daemon badge pattern) |
+| 3 | IMPLEMENTATION_PLAN.md | 2 inaccuracies (morph claim, daemon badge pattern) |
+| 4 | TESTING_JOURNAL.md | Wrong template paths, CDN URL, route param type, route file name |
+| 5 | TESTING_PLAN.md / PROGRESS.md / REVIEW_PLAN.md | Morph claims clarified (board_status_badge kept outerHTML), grep paths fixed |
+| 6 | REVIEW_PROGRESS.md / JOURNAL.md | Non-existent failure refs removed, "hyperscript" → "event delegation" |
+| 7 | arduino_dash/setup.py | Stale `"config/**/*"` removed from package_data |
+| 8 | Jekyll site | Rebuilt with doc fixes (0 errors, 0 warnings, 15s) |
+
+### Phase 98 Q6 — Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector (2026-06-21)
+
+Cosmetic rename — no functional change. The "Polling" suffix was stale after Phase 71's WS push migration.
+
+| Item | Before | After |
+|------|--------|-------|
+| `medminder_dash/tests/test_admin.py:811` | `class TestAdminBoardSelectorPolling` | `class TestAdminBoardSelector` |
+| `medminder_dash/README.md:205` | `TestAdminBoardSelectorPolling` | `TestAdminBoardSelector` |
 {% endraw %}

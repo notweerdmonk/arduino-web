@@ -1,16 +1,4 @@
-<div id="sketch-upload-modal" class="modal-backdrop" style="display:none;"
-     _="
-         on showModal
-           remove @disabled from #modal-upload-btn
-           remove @disabled from #modal-cancel-btn
-           put 'Upload to Server' into #modal-upload-btn's innerText
-           set my.style.display to 'flex'
-         end
-        on hideModal
-          set my.style.display to 'none'
-        set my.__dndFiles to null
-        end
-     ">
+<div id="sketch-upload-modal" class="modal-backdrop" style="display:none;">
     <div class="modal-content">
         <h3 class="modal-title">Upload Sketch to Server</h3>
         <div class="modal-details">
@@ -22,45 +10,11 @@
         </div>
         <div class="flex-row">
             <button type="button" class="btn btn-primary" id="modal-upload-btn"
-                    _="on click
-                             add @disabled to me
-                             add @disabled to #modal-cancel-btn
-                             put 'Uploading...' into my innerText
-                             js()
-                               var modal = document.getElementById('sketch-upload-modal');
-                               var btn = document.getElementById('modal-upload-btn');
-                               var dndFiles = modal.__dndFiles;
-                               var sourceFiles = dndFiles || document.getElementById('folder-input').files;
-                               modal.__dndFiles = null;
-
-                              var fd = new FormData();
-
-                                for (var i = 0; i < sourceFiles.length; i++) {
-                                  var file = sourceFiles[i];
-                                  var relPath = file.__relativePath || file.webkitRelativePath || file.name;
-                                  fd.append('files[]', file, relPath);
-                                }
-
-                                 var hwInput = document.getElementById('active-board-hardware-id');
-                                 var hwParam = hwInput && hwInput.value ? '?hardware_id=' + encodeURIComponent(hwInput.value) : '';
-                                 fetch('/sketch/upload' + hwParam, { method: 'POST', body: fd })
-                                  .then(function(r) { return r.text(); })
-                                  .then(function(data) {
-                                    htmx.ajax('GET', '/last-upload' + hwParam, {target: '#sketch-path-container', swap: 'innerHTML'}).catch(function(){});
-                                    htmx.trigger(modal, 'hideModal');
-                                    document.getElementById('modal-reset-input').click();
-                                  })
-                                  .catch(function(e) {
-                                    btn.removeAttribute('disabled');
-                                   document.getElementById('modal-cancel-btn').removeAttribute('disabled');
-                                   btn.innerText = 'Upload Failed';
-                                   setTimeout(function() { btn.innerText = 'Upload to Server'; }, 2000);
-                                 });
-                             end">
+                    onclick="uploadSketch()">
                 Upload to Server
             </button>
             <button type="button" class="btn btn-secondary" id="modal-cancel-btn"
-                    _="on click trigger hideModal on #sketch-upload-modal end">
+                    data-action="modal:hide" data-target="sketch-upload-modal">
                 Cancel
             </button>
         </div>

@@ -12,12 +12,14 @@ channel driven by the BoardManagerService.
 interface for:
 
 - **Board monitoring** — real-time list of connected boards with port,
-  FQBN, and connection status, updated via WebSocket events from the
-  BoardManagerService.
+  FQBN, and connection status, updated via WebSocket push (no polling).
+  Daemon status badge and board status badges also use WS push.
 - **Compile sketches** — select a sketch directory and compile against
-  any detected board's FQBN, with live progress streamed to the UI.
+  any detected board's FQBN, with live progress streamed to the UI via
+  WS push. Shows a real-time `<progress>` bar and `[N%]` prefix on output lines.
 - **Upload firmware** — upload compiled binaries to a selected board
-  via its serial port.
+  via its serial port with line-by-line streaming (no progress bar —
+  gRPC `UploadResponse` has no `TaskProgress`).
 - **Sketch management** — drag-and-drop upload of new sketches, file
   browser for the sketch directory, version history, and checksum-based
   deduplication.
@@ -174,7 +176,7 @@ The test suite covers:
 | `TestPostWorkerInit` | Gunicorn `post_worker_init` hook |
 | `TestOnExit` | Gunicorn `on_exit` hook |
 
-**Total**: 96 tests across 2 files.
+**Total**: 119 tests across 2 files.
 
 ## Dependencies
 

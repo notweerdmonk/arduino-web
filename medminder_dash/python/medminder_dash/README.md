@@ -21,9 +21,12 @@ for sketch compilation and firmware upload.
 - **Alarm schedule generation** — generate `alarm.hpp` from the
   medicine database and sync it to the MedMinderV2 Arduino sketch.
 - **Board monitoring** — live board connect/disconnect events via
-  WebSocket, powered by the BoardManagerService.
+  WebSocket push, powered by the BoardManagerService. Daemon status badge
+  and board status badges also use WS push (no periodic HTMX polling).
 - **Sketch compile/upload** — compile the MedMinderV2 sketch and upload
-  to a connected board, with live progress streaming.
+  to a connected board, with live progress streaming via WS push. Compile
+  output shows a real-time `<progress>` bar and per-line `[N%]` prefix.
+  Upload output streams line-by-line (no progress bar — gRPC `UploadResponse` has no `TaskProgress`).
 - **Sketch management** — upload new sketches via drag-and-drop or file
   browser, per-board sketch assignment via USB hardware_id, version
   history.
@@ -195,14 +198,14 @@ medminder_dash/python/medminder_dash/
 
 ## Test Suite
 
-medminder-dash has the largest test suite in the monorepo (152 tests):
+medminder-dash has the largest test suite in the monorepo (187 tests, +1 skipped):
 
 **test_admin.py** (14 test classes):
 `TestSketchUpload`, `TestConfirmModal`, `TestSetMedicinesSync`,
 `TestSetMedicinesGenerate`, `TestAdminPage`, `TestMedicinesDiff`,
 `TestActiveBoard`, `TestMedicineCardsRender`, `TestSyncButtonsState`,
 `TestAdminFrontendStructure`, `TestMedMinderV2DefaultSketch`,
-`TestAdminBoardSelectorPolling`, `TestAdminHtmxNativeCompileUpload`,
+`TestAdminBoardSelector`, `TestAdminHtmxNativeCompileUpload`,
 `TestGlobalBoardSelectorForCompileUpload`, `TestPhase62Q4AdminSketchAssignment`,
 `TestPhase62Q5AdminActiveSketch`
 
@@ -226,7 +229,7 @@ Deploy-only endpoints, board list.
 **test_bootstrap.py**, **test_pubsub.py**, **test_board_isolation.py**,
 **test_e2e_sketch.py**: Integration and edge-case coverage.
 
-**Total**: 152 tests across 10 files.
+**Total**: 187 tests + 1 skipped across 10 files.
 
 ## Dependencies
 

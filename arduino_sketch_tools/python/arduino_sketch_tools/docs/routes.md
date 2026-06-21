@@ -74,8 +74,9 @@ pub/sub. Returns an in-progress partial template immediately.
 
 **View function:** `api_compile_poll(port: str)`
 
-Poll compile status and return the appropriate partial template. Intended to
-be called via HTMX polling (e.g. `hx-trigger="every 2s"`).
+Poll compile status and return the appropriate partial template. Used for
+checking the final compile result (success/failure). Output streaming is
+handled separately via WebSocket OOB push (Phase 98, see `extension.md`).
 
 **Flow:**
 
@@ -167,8 +168,9 @@ Proceed directly to upload:
 
 **View function:** `api_upload_poll(port: str)`
 
-Poll upload status and return the appropriate partial template. Intended to be
-called via HTMX polling.
+Poll upload status and return the appropriate partial template. Used for
+checking the final upload result (success/failure). Output streaming is
+handled separately via WebSocket OOB push (Phase 98, see `extension.md`).
 
 **Flow:**
 

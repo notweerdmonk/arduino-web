@@ -34,6 +34,8 @@ def _clear_caches(tools):
         tools._last_compile_checksum.clear()
     with tools._last_uploaded_sketch_lock:
         tools._last_uploaded_sketch.clear()
+    with tools._compile_last_pct_lock:
+        tools._compile_last_pct.clear()
     yield
 
 
@@ -86,27 +88,33 @@ class TestOnCompileResp:
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "Compiling foo.c...\n"}})
-        assert len(ws_html) == 1
-        assert "compile-line" in ws_html[0]
-        assert "foo.c" in ws_html[0]
-        assert "/dev/ttyACM0" in ws_html[0]
+        tools._on_compile_resp({"topic": topic, "data": {"output": "Compiling foo.c...\n", "percent": 25.0}})
+        assert len(ws_html) == 2
+        assert "compile-progress" in ws_html[0]
+        assert "value=\"25\"" in ws_html[0]
+        assert "compile-line" in ws_html[1]
+        assert "foo.c" in ws_html[1]
+        assert "[25%]" in ws_html[1]
+        assert "/dev/ttyACM0" in ws_html[1]
 
-    def test_progress_no_output_does_not_broadcast(self, tools):
+    def test_progress_no_output_broadcasts_progress_bar(self, tools):
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "", "error": ""}})
-        assert len(ws_html) == 0
+        tools._on_compile_resp({"topic": topic, "data": {"output": "", "error": "", "percent": 50.0}})
+        assert len(ws_html) == 1
+        assert "compile-progress" in ws_html[0]
 
     def test_progress_escapes_html(self, tools):
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "<script>alert('xss')</script>"}})
-        assert len(ws_html) == 1
-        assert "&lt;script&gt;" in ws_html[0]
-        assert "<script>" not in ws_html[0]
+        tools._on_compile_resp({"topic": topic, "data": {"output": "<script>alert('xss')</script>", "percent": 0.0}})
+        assert len(ws_html) == 2
+        assert "compile-progress" in ws_html[0]
+        assert "compile-line" in ws_html[1]
+        assert "&lt;script&gt;" in ws_html[1]
+        assert "<script>" not in ws_html[1]
 
     def test_ok_stores_last_compiled_state(self, tools, tmp_path):
         sketch_dir = tmp_path / "sketch"

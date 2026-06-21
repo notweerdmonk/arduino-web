@@ -1,16 +1,4 @@
-<div id="delete-confirm-modal" class="modal-backdrop" style="display:none;"
-     _="
-         on showDeleteConfirm
-           set my.style.display to 'flex'
-         end
-         on hideDeleteConfirm
-           set my.style.display to 'none'
-           set my.__deletePath to null
-         end
-         on htmx:afterOnLoad from #delete-confirm-btn
-           trigger hideDeleteConfirm on me
-         end
-      ">
+<div id="delete-confirm-modal" class="modal-backdrop" style="display:none;">
     <div class="modal-content">
         <h3 class="modal-title">Delete Sketch</h3>
         <p>Are you sure you want to delete this sketch version?</p>
@@ -20,11 +8,12 @@
                     hx-delete="/sketch"
                     hx-vals='js:{path: document.getElementById("delete-confirm-modal").__deletePath, hardware_id: (document.getElementById("active-board-hardware-id")?.value || "")}'
                     hx-target="#sketch-path-container"
-                    hx-swap="outerHTML">
+                    hx-swap="outerHTML"
+                    hx-on::after-request="hideModal('delete-confirm-modal')">
                 Delete
             </button>
             <button type="button" class="btn btn-secondary"
-                    _="on click trigger hideDeleteConfirm on #delete-confirm-modal end">
+                    data-action="modal:hide" data-target="delete-confirm-modal">
                 Cancel
             </button>
         </div>

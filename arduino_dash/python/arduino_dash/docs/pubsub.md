@@ -135,6 +135,29 @@ Signal the fallback scanner thread to stop.
 
 Poll for boards via glob patterns and emit connect/disconnect events. Runs every `state._fallback_scan_interval` (default 5.0s) seconds. Skips scanning if `state._daemon_ready` is `True` (daemon mode preferred). On finding new ports or missing ports, calls `_on_board_event` with synthetic events.
 
+### `_broadcast_daemon_badge() -> None`
+
+Broadcast the daemon status badge HTML over WebSocket as an OOB swap. Fetches
+the badge from `/daemon/status` via background HTTP GET, wraps it in
+`<span id="daemon-badge" hx-swap-oob="true">...</span>`, and sends to all WS
+clients. Called from:
+- `_on_daemon_ready()` — on daemon ready/reconnect
+- `_on_pubsub_reconnect()` — on PubSub reconnection
+
+### Board Badge OOB (in `_on_board_event`)
+
+When a board event is processed, the handler also broadcasts the board status
+badge as an OOB swap. The badge targets a per-port ID
+(`board-status-badge--{port_safe}`, where `port_safe` is the port path with
+`/` replaced by `_`) so each board detail page receives only its own badge
+update.
+
+```python
+badge = render_template("partials/board_status_badge.html", port=port, connected=connected)
+oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
+_broadcast_ws(oob)
+```
+
 ### `_resolve_board_info(port: str) -> dict`
 
 Resolve board metadata (name, fqbn, hardware_id) via the gRPC client. Creates an `ArduinoGrpcClient`, connects, calls `list_boards()`, and matches by port address. Used by the fallback scanner.

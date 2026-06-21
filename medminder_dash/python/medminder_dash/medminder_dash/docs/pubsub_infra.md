@@ -177,6 +177,28 @@ scan against `state._known_ports` and synthesizes connect/disconnect events.
 Resolve board name, FQBN, and hardware ID for a port via `ArduinoGrpcClient`.
 Returns dict with keys `board`, `fqbn`, `hardware_id`.
 
+### `_broadcast_daemon_badge() -> None`
+
+Broadcast the daemon status badge HTML over WebSocket as an OOB swap. Fetches
+the badge via a background HTTP GET to `/daemon/status`, wraps it in
+`<span id="daemon-badge" hx-swap-oob="true">...</span>`, and sends to all WS
+clients. Called from `_on_daemon_ready()` and `_on_pubsub_reconnect()`.
+
+### Board Badge OOB (in `_on_board_event`)
+
+Along with the board event card, `_on_board_event()` also broadcasts the board
+status badge as an OOB swap targeting a per-port ID:
+
+```python
+badge = render_template("partials/board_status_badge.html", port=port, connected=connected)
+oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
+broadcast_ws(oob)
+```
+
+The per-port ID (`board-status-badge--{port_safe}`) ensures each board detail
+page receives only its own badge update, even when multiple boards are
+displayed.
+
 ## Module-Level Globals
 
 | Variable | Description |

@@ -117,6 +117,29 @@ All inter-process communication uses a custom JSON-line pub/sub protocol over Un
 3. **MQTT-style wildcards** — `+` matches one level, `*` matches remaining levels.
 4. **Re-emission on subscribe** — When a client subscribes, the server re-emits current board state and daemon state, ensuring the client never sees an empty board list.
 
+### WebSocket Push Architecture
+
+All frontend updates use WS push with OOB (Out-of-Band) HTML swaps, eliminating
+periodic HTMX polling:
+
+- **Badge OOB**: `_broadcast_daemon_badge()` pushes daemon status badge HTML
+  wrapped in `<span hx-swap-oob="true">` over WS on daemon state change.
+  Board status badges use per-port IDs (`board-status-badge--{port_safe}`) to
+  target individual board detail pages.
+- **Compile/Upload OOB**: ArduinoSketchTools wraps output lines in
+  `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">` so WS-delivered
+  progress lines appear in the correct output container.
+- **Progress bar OOB**: A `<progress id="compile-progress-{port_safe}">` element
+  is broadcast via OOB on every compile percent change. Redundant updates
+  (same percentage) are suppressed client-side.
+- **Board event card OOB**: Board connect/disconnect events render a
+  `board_event.html` partial and broadcast via
+  `<div hx-swap-oob="afterbegin:#live-events-card">`.
+
+The WS connection is established by `<div id="event-feed" hx-ext="ws"
+ws-connect="/ws/board-events">` in both `base.html` templates. The element
+itself is hidden — its sole purpose is enabling the HTMX WS extension.
+
 ## Board Detection
 
 Two modes controlled by `BOARD_MGR_DETECTION_MODE`:
@@ -159,11 +182,35 @@ BoardManager routes to BoardPool → Board Worker socketpair
        ▼
 Worker sends gRPC compile_stream() to arduino-cli daemon
        │
-       ├── Progress events → socketpair → topic router → WebSocket
+       ├── Progress events → socketpair → topic router
+       │       │
+       │       ├── Badge OOB: pubsub broadcasts daemon badge HTML
+       │       │   and board status badge HTML via WS (no polling)
+       │       │
+       │       ├── Compile output OOB: extension wraps each line in
+       │       │   <span hx-swap-oob="beforeend:#compile-output-{port_safe}">
+       │       │   and broadcasts via WS; [N%] prefix prepended to output;
+       │       │   <progress> bar OOB broadcast on percent change
+       │       │
+       │       └── Upload output OOB: same pattern as compile,
+       │           but without progress bar (no TaskProgress in upload)
        │
        ▼
 CompileResult → socketpair → topic router → Web UI
 ```
+
+### WS Push Timeline
+
+Prior to Phase 98, the daemon badge and board status badge used HTMX polling
+(`hx-trigger="every 10s"`). Now all three tiers of frontend updates use
+WebSocket push:
+
+| Tier | What | Before | After |
+|------|------|--------|-------|
+| 1 | Daemon badge | HTMX `every 10s, load` | OOB HTML over WS on state change |
+| 1 | Board status badge | HTMX `every 10s` per port | OOB HTML over WS on board event |
+| 2 | Compile/upload output | WS with generic HTML | OOB targeting (`beforeend:#...-output-{port_safe}`) |
+| 3 | Compile progress | No progress bar | `<progress>` OOB + `[N%]` prefix per line |
 
 ## Medicine Data Model (medminder-dash)
 
@@ -227,6 +274,48 @@ Each web app maintains an upload registry that maps sketches to hardware IDs:
 - **Session state** — Board selection, active board stored in Flask session
 - **Medicine data** — Per-board JSON file, loaded on startup, persisted on every mutation
 
+## Frontend Architecture
+
+### Real-Time UI via WebSocket (Phase 98)
+
+All frontend updates use a single persistent WebSocket connection (`/ws/board-events`) established by HTMX's `ws.js` extension. The server pushes raw HTML with `hx-swap-oob` attributes that HTMX auto-swaps into the DOM. Four tiers of OOB broadcasts exist:
+
+| Tier | Category | Mechanism | Source Code |
+|------|----------|-----------|-------------|
+| 0 | Board connect/disconnect events | OOB `<div hx-swap-oob="afterbegin:#live-events-card">` | `html_routes.py` WS handler |
+| 1 | Daemon + board status badges | OOB `<span hx-swap-oob="true">` on daemon/board state change | `pubsub.py` / `pubsub_infra.py` |
+| 2 | Compile/upload output | OOB `<span hx-swap-oob="beforeend:#...-output-{port_safe}">` | `extension.py` |
+| 3 | Compile progress bar | OOB `<progress hx-swap-oob="true">` on percent change | `extension.py` |
+
+Initial page loads use `hx-trigger="load"` with Idiomorph morphing (Phase 97) to preserve scroll position and focus. After that, all updates happen via WS push — no periodic HTMX polling remains.
+
+**Key implementation details:**
+- Board status badges use per-port IDs (`board-status-badge--{port_safe}` where `port_safe = port.replace("/", "_")`)
+- Progress bar updates are broadcast only when percent changes (tracked via `_compile_last_pct` dict per port)
+- Upload output streams without a progress bar (gRPC `UploadResponse` has no `TaskProgress` field)
+- Output lines are prefixed with `[N%]` percentage indicator in the compile response handler
+
+### Frontend Optimization (Phase 97 — Hyperscript → Idiomorph)
+
+Prior to Phase 97, interactive UI behaviors used **Hyperscript** (`_=""` attributes) with a 43KB CDN dependency. Phase 97 replaced it:
+
+| Change | Before | After | Benefit |
+|--------|--------|-------|---------|
+| Interactivity | Hyperscript `_=""` attributes | Centralized JS event delegation in `base.html` | -68% JS payload (60KB → 19KB) |
+| DOM morphing | HTMX default swap (scroll reset) | Idiomorph CDN (+1KB) | Preserves scroll/focus on polling elements |
+| Badge rendering | Bullet characters in partials | CSS `.badge-circle` + `font-weight: bold` | Consistent rendering, no HTML entities |
+| Card refresh | Page-level swap on WS event | `data-event-port` targeted card partials | Per-event payload reduced from 1-5KB to ~200-500B |
+
+**Idiomorph** is loaded from CDN and set as the swap strategy for daemon badge and board status elements:
+
+```html
+<script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"></script>
+<body hx-ext="morph">
+    <span hx-get="/daemon/status" hx-trigger="load" hx-target="this" hx-swap="morph">
+```
+
+**Event delegation** replaced all `_=""` hyperscript attributes with a single `DOMContentLoaded` listener in `base.html` that handles modal toggles, dropdowns, and button state using `data-*` attributes and CSS class toggling.
+
 ## Technology Stack
 
 | Component | Technology |
@@ -234,12 +323,14 @@ Each web app maintains an upload registry that maps sketches to hardware IDs:
 | gRPC client | `grpcio`, `protobuf` |
 | Core service | Python 3.10 `select()`, `socket`, `subprocess` |
 | Web framework | Flask |
-| Real-time UI | HTMX + flask-sock WebSocket |
+| Real-time UI | HTMX + flask-sock WebSocket + Idiomorph |
 | Templates | Jinja2 |
+| Interactivity | Vanilla JS event delegation (Phase 97 replaced Hyperscript) |
 | WSGI server | Gunicorn |
 | Board detection | pyudev (optional) |
 | Build | setuptools, nox |
-| Testing | pytest, unittest.mock |
+| CI pipeline | `scripts/ci.sh` — `nox -s all_tests all_builds` |
+| Testing | pytest, unittest.mock, bash (scripts/tests) |
 | Standalone binary | PyOxidizer |
 | Arduino libs | RTClib, TM1637TinyDisplay |
 

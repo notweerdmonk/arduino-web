@@ -6,29 +6,97 @@
     <title>{% block title %}MedMinder{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
-    <script src="https://unpkg.com/hyperscript.org@0.9.13"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body hx-ext="morph">
     <nav>
         <a href="/" class="brand">MedMinder</a>
         <a href="/admin">Admin</a>
-        <span hx-get="/daemon/status"
-              hx-trigger="load, every 10s"
-              hx-target="this"
-              hx-swap="outerHTML">
-            <span class="daemon-badge daemon-off">○ Daemon Disconnected</span>
-        </span>
+        <span id="daemon-badge" class="badge-container" hx-get="/daemon/status" hx-trigger="load" hx-target="this" hx-swap="morph"></span>
     </nav>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
     <div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
     <script>
+        function showModal(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        }
+        function hideModal(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'none';
+                if (el.__deletePath !== undefined) el.__deletePath = null;
+                if (el.__dndFiles !== undefined) el.__dndFiles = null;
+            }
+        }
+        function handleFolderInput(input) {
+            if (input.files.length > 0) {
+                document.getElementById('modal-folder-name').textContent = input.files[0].name;
+                document.getElementById('modal-file-count').textContent = String(input.files.length);
+                var modal = document.getElementById('sketch-upload-modal');
+                modal.__dndFiles = null;
+                showModal('sketch-upload-modal');
+            }
+        }
+        function uploadSketch() {
+            var modal = document.getElementById('sketch-upload-modal');
+            var btn = document.getElementById('modal-upload-btn');
+            var cancelBtn = document.getElementById('modal-cancel-btn');
+            var dndFiles = modal.__dndFiles;
+            var sourceFiles = dndFiles || document.getElementById('folder-input').files;
+            modal.__dndFiles = null;
+            btn.disabled = true;
+            cancelBtn.disabled = true;
+            btn.textContent = 'Uploading...';
+            var fd = new FormData();
+            for (var i = 0; i < sourceFiles.length; i++) {
+                var file = sourceFiles[i];
+                fd.append('files[]', file, file.__relativePath || file.webkitRelativePath || file.name);
+            }
+            var hwInput = document.getElementById('active-board-hardware-id');
+            var hwParam = hwInput && hwInput.value ? '?hardware_id=' + encodeURIComponent(hwInput.value) : '';
+            fetch('/sketch/upload' + hwParam, { method: 'POST', body: fd })
+                .then(function(r) { return r.text(); })
+                .then(function() {
+                    htmx.ajax('GET', '/last-upload' + hwParam, {target: '#sketch-path-container', swap: 'innerHTML'}).catch(function(){});
+                    hideModal('sketch-upload-modal');
+                    document.getElementById('modal-reset-input').click();
+                })
+                .catch(function() {
+                    btn.disabled = false;
+                    cancelBtn.disabled = false;
+                    btn.textContent = 'Upload Failed';
+                    setTimeout(function() { btn.textContent = 'Upload to Server'; }, 2000);
+                });
+        }
+        document.addEventListener('click', function(e) {
+            var target = e.target.closest('[data-action]');
+            if (!target) return;
+            var action = target.getAttribute('data-action');
+            if (action === 'modal:hide') {
+                hideModal(target.getAttribute('data-target'));
+            } else if (action === 'delete-sketch') {
+                var pathInput = document.getElementById('sketch_path');
+                if (pathInput) {
+                    document.getElementById('delete-confirm-modal').__deletePath = pathInput.value;
+                    showModal('delete-confirm-modal');
+                }
+            }
+        });
         htmx.on("htmx:wsBeforeMessage", function(evt) {
             if (evt.target.id !== "event-feed") return;
-            if (evt.detail.message.includes("board-event")) {
+            var msg = evt.detail.message;
+            var portMatch = msg.match(/data-event-port="([^"]+)"/);
+            if (portMatch) {
+                var port = portMatch[1];
+                var encoded = encodeURIComponent(port);
+                htmx.ajax('GET', '/boards/grid/card/' + encoded, {target: '[data-port="' + port + '"]', swap: 'outerHTML'});
+                htmx.trigger('body', 'board-changed');
+            } else if (msg.includes("board-event")) {
                 htmx.trigger('body', 'board-changed');
             }
         });

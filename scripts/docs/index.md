@@ -14,7 +14,7 @@ Utility scripts for building, testing, and deploying the MedMinder monorepo. Loc
 | [`install_arduino_deps.sh`](install-arduino-deps.md) | Install Arduino libraries for MedMinder sketches |
 | [`gen_grpc_bindings.py`](gen-grpc-bindings.md) | Regenerate Python gRPC stubs from proto files |
 | [`check_venv.bash`](check-venv.md) | Recursively verify pipenv venvs in the project tree |
-| [Tests](tests.md) | Scripts test suite (136 tests) |
+| [Tests](tests.md) | Scripts test suite (170 tests) |
 
 Most scripts support `--help` for detailed usage.
 

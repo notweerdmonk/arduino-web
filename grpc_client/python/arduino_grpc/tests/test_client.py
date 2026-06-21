@@ -263,10 +263,11 @@ class TestArduinoGrpcClientCompile(unittest.TestCase):
     @patch.object(ArduinoGrpcClient, "_ensure_connected")
     def test_compile_stream_yields_chunks(self, mock_ensure_connected):
         chunk1 = MagicMock()
-        chunk1.HasField = lambda f: f in ("out_stream",)
+        chunk1.HasField = lambda f: f in ("out_stream", "progress")
         chunk1.out_stream = b"Compiling foo.c...\n"
         chunk1.err_stream = b""
         chunk1.result = None
+        chunk1.progress.percent = 25.0
 
         chunk2 = MagicMock()
         chunk2.HasField = lambda f: f in ("out_stream", "result")
@@ -281,8 +282,10 @@ class TestArduinoGrpcClientCompile(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0][0], "Compiling foo.c...\n")
         self.assertFalse(results[0][2])
+        self.assertAlmostEqual(results[0][3], 25.0)
         self.assertEqual(results[1][0], "Done.\n")
         self.assertTrue(results[1][2])
+        self.assertAlmostEqual(results[1][3], 100.0)
 
     @patch.object(ArduinoGrpcClient, "_ensure_connected")
     def test_compile_stream_missing_fqbn(self, mock_ensure_connected):

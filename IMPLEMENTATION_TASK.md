@@ -1,65 +1,47 @@
 ---
 ---
 {% raw %}
-# Implementation Task — Phase 98: WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar)
+# Implementation Task — Phase 100: Server Script Process Lifecycle (Disown & Cleanup)
 
-**Date**: 2026-06-21 11:55 | **Completed**: 2026-06-21 11:55 (Q1-Q5); Q6 added 2026-06-21
+**Date**: 2026-06-22 16:14
 
-## Current Task
+## Task Breakdown
 
-Phase 98: Q1-Q5 complete. Q6 (rename) complete.
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1a | arduino_dash — `_daemonize(logfile)`, `--logfile`, `--pidfile`, `--stop`, `--force` | ✅ | |
+| Q1b | arduino_dash — setsid + redirect in daemonize() | ✅ | |
+| Q1c | arduino_dash — stale pidfile + ProcessLookupError handling | ✅ | |
+| Q2 | medminder_dash — same changes + fix `--stop` ordering | ✅ | |
+| Q3a | Test: arduino_dash survival | ✅ | HTTP 200 |
+| Q3b | Test: `--stop` cleanup | ✅ | |
+| Q3c | Test: `--logfile` capture | ✅ | 571 bytes |
+| Q3d | Test: medminder_dash | ✅ | survival, log, --stop |
+| D1 | Update CODEBASE_REFERENCE.md | ✅ | Add Phase 100 section |
+| D2 | Update JOURNAL.md | ✅ | Brief entry |
+| D3 | Update IMPLEMENTATION_JOURNAL.md | ✅ | Detailed entry |
+| D4 | Update TESTING docs | ✅ | Results in TESTING_JOURNAL.md + PROGRESS.md |
 
-### Task Breakdown
+## Detailed Tasks
 
-| # | Task | Status |
-|---|------|--------|
-| 1 | Tier 1 — Daemon badge OOB | ✅ Done |
-| 2 | Tier 1 — Board status badge OOB | ✅ Done |
-| 3 | Tier 2 — Compile/upload OOB targeting | ✅ Done |
-| 4 | Tier 3 — Compile progress percentage | ✅ Done |
-| 5 | Noxfile PROJECT_ROOT fix | ✅ Done |
-| 6 | Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector | ✅ Done |
+### Q1 — arduino_dash_server.py
 
-### Detailed Tasks
+- [ ] Remove `_daemonize()` function (fork-based, superseded by setpgid + redirect)
+- [ ] Add `_redirect_io(logfile)` function — closes stdin, dup2 stdout/stderr
+- [ ] Add `--logfile` CLI argument
+- [ ] Replace `_daemonize()` call with: `os.setpgid(0, 0)` (try/except) + `signal.signal()` + `_redirect_io()`
+- [ ] Verify `--stop` runs before setpgid/redirect (already correct)
 
-#### Q1 — Daemon Badge OOB
+### Q2 — medminder_dash_server.py
 
-- [x] Both `base.html`: `hx-trigger="every 10s, load"` → `"load"` (one-shot initial fill)
-- [x] Both `daemon_badge.html`: strip `hx-get`, `hx-trigger`, `hx-target`, `hx-swap` (plain HTML fragment)
-- [x] `arduino_dash/pubsub.py`: add `_broadcast_daemon_badge()` method, call from `_on_daemon_ready()` and `_on_pubsub_reconnect()`
-- [x] `medminder_dash/pubsub_infra.py`: same changes
+- [ ] Same changes as Q1
+- [ ] Fix ordering: `--stop` check should come before setpgid (currently reversed)
 
-#### Q2 — Board Status Badge OOB
+### Q3 — Integration Tests
 
-- [x] Both `board_status_badge.html`: strip all `hx-*` attributes
-- [x] Both `board_detail.html`: `id="board-status-badge"` → `id="board-status-badge--{{ port | replace('/', '_') }}"`
-- [x] Both `board_detail.html`: `hx-trigger="every 10s, load"` → `"load"`
-- [x] `arduino_dash/pubsub.py` `_on_board_event()`: add badge OOB WS broadcast after event-feed broadcast
-- [x] `medminder_dash/pubsub_infra.py` `_on_board_event()`: same addition
-
-#### Q3 — Compile/Upload OOB Targeting
-
-- [x] `extension.py:182` compile line: wrap in `<span hx-swap-oob="beforeend:#compile-output-{port_safe}">`
-- [x] `extension.py:214` upload line: wrap in `<span hx-swap-oob="beforeend:#upload-output-{port_safe}">`
-
-#### Q4 — Compile Progress Percentage
-
-- [x] `client.py:compile_stream()`: yield 4-tuple `(out, err, done, percent)`, track last `percent` from `resp.progress.percent`, set 100.0 on done
-- [x] `board_worker.py:_make_progress()`: accept `percent: float = 0.0`, include `"percent"` in data dict; compile handler unpacks 4-tuple, sends progress-only messages on percent change
-- [x] `extension.py:_on_compile_resp()`: read `percent` from data; track `_compile_last_pct` per port_safe; broadcast `<progress id="compile-progress-{port_safe}">` OOB on change; prepend `[N%]` prefix to output text
-- [x] Both `board_detail.html`: add `<progress id="compile-progress-{port_safe}" value="0" max="100">` before compile output div
-- [x] Update all callers of 3-tuple `compile_stream()` to handle 4-tuple
-
-#### Q5 — Noxfile PROJECT_ROOT Fix
-
-- [x] `noxfile.py`: add `env={"PROJECT_ROOT": str(ROOT)}` to all pipenv calls in `tests()` session
-- [x] Verify `scripts_tests` unaffected
-
-#### Q6 — Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector
-
-- [x] `test_admin.py:811`: `class TestAdminBoardSelectorPolling` → `class TestAdminBoardSelector`
-- [x] Update class docstring: remove "polls every 5s" language, replace with "refreshes via WS push on board-changed events"
-- [x] `README.md:205`: `TestAdminBoardSelectorPolling` → `TestAdminBoardSelector`
-- [x] Run `nox -s 'tests(medminder_dash)' -- -k 'TestAdminBoardSelector' -v` — 3 tests collected and pass
-- [x] Verify no stale `TestAdminBoardSelectorPolling` references in code (grep)
+- [ ] Kill any leftover servers
+- [ ] Start arduino_dash with `python3 script.py --mock --production`, verify HTTP 200 in next invocation
+- [ ] Test `--logfile` capture
+- [ ] Test `--stop` cleanup
+- [ ] Repeat for medminder_dash on port 8766
 {% endraw %}

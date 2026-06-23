@@ -870,8 +870,93 @@ to hyperscript `fetch` + `FormData`, supporting both `__dndFiles` (DnD) and
 
 ---
 
-## Status: Phase 98 complete (WS Push Migration — Badge OOB, Compile/Upload OOB, Compile Progress Bar). All 8 nox sessions pass.
+### Phase 99 — HTML Template Homogenisation Across Both Dashboards ✅ COMPLETED
 
-**Last Updated**: 2026-06-21 12:00
+**Date**: 2026-06-22 12:43
+**Status**: ✅ Completed
+
+**Goal**: Make all 14 shared templates structurally identical, extracting medicine-specific sections into separate partials and using template variables for route-path divergence.
+
+**Design** (see IMPLEMENTATION_PLAN.md for full details):
+1. **Q1 — board_detail.html**: Both apps converge on flat `<div>` + htmx `/last-upload` pattern. arduino_dash: remove `<form>` wrapper, move FQBN/Port above sketch, use `hx-include="#sketch_path, #fqbn"`, add Admin Page link. medminder_dash: switch hidden `#sketch_path` input → htmx `/last-upload` container, add hardware-id hidden input, guard DnD/browse/delete/modals behind `{% if show_sketch_tools %}`. Extract Medicines section (lines 74-92) to `partials/medicine_management.html`, guarded by `{% if show_medicines_section %}`
+2. **Q2 — admin.html**: Add assigned-sketch-info div to arduino_dash. Extract medicine management section (lines 65-105) to `partials/admin_medicine_section.html`. Both apps pass admin_board_selector attributes as Python route kwargs.
+3. **Q3 — admin_board_selector.html**: Extract route-dependent attributes (`hx-post`, `hx-target`, `hx-swap`, label) to template variables passed as render_template kwargs.
+4. **Q4 — compile_upload_card.html**: Add `Step 2:`/`Step 3:` to arduino_dash; converge description to generic text; converge `&#8230;` entity
+5. **T1-T3 — Trivial diffs**: dnd_overlay.html trailing newline, board_card.html defensive `or 'Unknown'`, delete_confirm_modal.html `hardware_id` in `hx-vals`
+6. **Q6 — base.html**: Add `dragover`/`drop` `preventDefault` listeners to medminder_dash
+
+**Post-plan addition**: Extracted `SketchRegistry` class to `arduino_sketch_tools` as a shared module. Both per-app `sketch_registry.py` files became thin wrappers. This was needed for the `assigned-sketch-info` feature in arduino_dash.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | board_detail.html | Flat div + htmx /last-upload; sketch tools guard; medicines partial extract | ✅ |
+| Q2 | admin.html | Route vars, medicine section extract, assigned-sketch div | ✅ |
+| Q3 | admin_board_selector.html | Template vars for `hx-post`, `hx-target`, `hx-swap`, label | ✅ |
+| Q4 | compile_upload_card.html | Step numbering, generic description, `&#8230;` entity | ✅ |
+| T1 | dnd_overlay.html | Trailing newline | ✅ |
+| T2 | board_card.html | `or 'Unknown'` | ✅ |
+| T3 | delete_confirm_modal.html | `hardware_id` in `hx-vals` | ✅ |
+| Q6 | base.html DnD listeners | `preventDefault` for medminder_dash | ✅ |
+| SR | SketchRegistry extract | Shared class in arduino_sketch_tools | ✅ |
+
+**Test results**: 119 arduino_dash ✓, 186 medminder_dash ✓
+
+**Files changed**: ~15 templates across both dashboards + 5 Python route files + 2 new partials + 1 new shared module.
+
+---
+
+### Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) ✅ COMPLETED
+
+**Date**: 2026-06-22 16:14
+**Status**: ✅ Completed
+
+**Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags for proper lifecycle management.
+
+**Root cause**: When the bash tool's shell command exits, it sends SIGHUP to the entire process group. `disown` does not protect against process-group-level signals (only removes from bash job table). The server was killed between bash invocations.
+
+**Revised approach (Option 3)** — replaces earlier fork-based `_daemonize()`:
+
+```
+Before (broken):                          After (works):
+                                            1. os.setpgid(0,0) → new PGID
+┌─ bash tool ────────┐                    ┌─ bash tool ────────┐
+│  python3 script.py │                    │  python3 script.py │
+│  ┌─ server ───────┐│                    │  os.setpgid(0,0)  │
+│  │ app.run()──────││── tool waits──▶    │  _redirect_io()   │
+│  └────────────────┘│                    │  ⟐ pipe closes ⟐  │
+└────────────────────┘                    │  tool returns!     │
+    ↑ dies on exit                        └────────────────────┘
+                                             2. Flask continues
+                                                in own PGID,
+                                                logs→file|/dev/null
+```
+
+**Components**:
+- `os.setpgid(0, 0)` — new process group, immune to parent shell's group SIGHUP
+- `signal.signal(signal.SIGHUP, signal.SIG_IGN)` — belt-and-suspenders
+- `_redirect_io(logfile)` — dup2 stdout/stderr to file or `/dev/null`, closing the tool's pipe
+- `--logfile PATH` — optional, collects Flask logs (default: `/dev/null`)
+- `--pidfile PATH` — default `/tmp/<script>.pid`
+- `--stop` — reads pidfile, `os.kill(pid, SIGTERM)` → 5s poll → SIGKILL fallback
+- `--force` — with `--stop`, sends SIGKILL immediately
+
+**Files**: `e2e/servers/arduino_dash_server.py`, `e2e/servers/medminder_dash_server.py`
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | arduino_dash server | `_daemonize(logfile)`, `--pidfile`, `--stop`, `--force`, `--logfile` | ✅ |
+| Q2 | medminder_dash server | Same changes | ✅ |
+| Q3 | Integration test | Start, survive bash exit, `--stop` cleanup, log capture | ✅ |
+
+**Evolution** (traceability):
+1. **Initial plan**: `os.setpgid(0, 0)` + `disown` workaround — rejected because user wants no shell hacks
+2. **Iteration 2**: Fork-based `_daemonize()` — rejected because fork child inherits stdout/stderr, tool blocks until timeout
+3. **Final (Option 3)**: `os.setpgid(0, 0)` + `_redirect_io()` — no fork, pipe closes immediately, tool returns, logs captured
+
+---
+
+## Phase 100 complete (Server Disown & Cleanup).
+
+**Last Updated**: 2026-06-23 06:00
 
 {% endraw %}

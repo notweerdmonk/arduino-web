@@ -31,10 +31,12 @@
 | 62.1-62.4 | /admin Page Fixes (3 User-Reported Issues) | ✅ DONE | 132+ |
 | 62.5 | Per-Board Sketch Assignment + Wheel-Packaged Default | ✅ COMPLETE | 152+ |
 | 62.6 | Post-Launch Bugfixes | ✅ COMPLETE | 152+ |
+| 63 | setup.py Arguments + setup.cfg + Detailed READMEs | ✅ DONE | 548 per-pkg |
 | 64 | Drag-and-Drop Overlay (Rounds 1-7) | ✅ DONE | 152+ |
 | 65 | Fix Admin Board Selector Polling | ✅ DONE | 152+ |
 | 66 | Refresh Button for Board Selector | ✅ DONE | 152+ |
 | 67 | HTMX Spinner for Refresh Button | ✅ DONE | 152+ |
+| 68 | Instant Board Selector Refresh + XDG Path Fixes | ✅ DONE | 151+1 |
 | 69 | XDG Source-Relative Paths (arduino_dash) | ✅ DONE | varied |
 | 70 | BoardListWatch gRPC Streaming | ✅ DONE | 1079+10 |
 | 71 | Eliminate HTMX Polling via WS | ✅ DONE | varied |
@@ -54,21 +56,24 @@
 | 80 | Hardware-ID Fallback Chain + Modal Fixes | ✅ DONE | 8/8 nox |
 | 81 | Cleanup: Debug Logs + outerHTML + Docs Sync | ✅ DONE | 8/8 nox |
 | 82 | Sorted Upload Registry via bisect.insort | ✅ DONE | 8/8 nox |
-| 83 | WebSocket Reconnect + Daemon Badge OOB | ✅ DONE | 8/8 nox |
-| 84 | Pyodide/arm64 macOS Binary Builds | ✅ DONE | 8/8 nox |
+| 83 | Unified Sketch Registry (hardware_id + sketch_registry.json) | ✅ DONE | 8/8 nox |
+| 84 | Playwright E2E Testing Infrastructure | ✅ DONE | varied |
 | 85 | MCP E2E Server Binding + BMS Daemon Support | ✅ DONE | varied |
-| 86 | Fix HTMX Extension Mismatch Warning | ✅ DONE | 8/8 nox |
-| 87 | Linux arm64 Binary Builds / Release | ✅ DONE | 8/8 nox |
+| 86 | Favicon Links for medminder_dash | ✅ DONE | 8/8 nox |
+| 87 | Favicon Links for arduino_dash | ✅ DONE | 8/8 nox |
 | 88 | Stale BMS Port Cleanup in boot.py | ✅ DONE | 8/8 nox |
+| 89 | Fix Daemon Badge "Disconnected" State | ✅ DONE | 8/8 nox |
 | 90 | Fix Double BoardDetector Stop Log | ✅ DONE | 8/8 nox |
 | 91 | Align Live Events Card Style with arduino_dash | ✅ DONE | 8/8 nox |
-| 92 | Sketch Dir Resolution + Upload Bugfix | ✅ DONE | 8/8 nox |
+| 92 | Constants Refactor (Enum/IntEnum/StrEnum) | ✅ DONE | 8/8 nox |
 | 93 | GitHub Pages Jekyll Documentation Site | ✅ DONE | 8/8 nox |
 | 94 | Fix Test NoX Session Post-Jekyll | ✅ DONE | 8/8 nox |
 | 95 | Git Tree Preparation Plan | ✅ DONE | 8/8 nox |
 | 96 | Wire test_ci.sh into Nox scripts_tests | ✅ DONE | 8/8 nox |
-| 97 | Docs Sync: Phase 94-96 Imports + Warnings | ✅ DONE | 8/8 nox |
+| 97 | Frontend Stack Optimization (Hyperscript→JS, Idiomorph) | ✅ DONE | 8/8 nox |
 | 98 | WS Push Migration (Badge/Compile/Upload OOB) | ✅ DONE | 8/8 nox |
+| 99 | HTML Template Homogenisation Across Both Dashboards | ✅ DONE | 119 + 186 pass |
+| 100 | Server Script Process Lifecycle (Disown & Cleanup) | ✅ DONE | 8/8 nox |
 
 ## Phase 60 — COMPLETED ✅
 

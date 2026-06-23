@@ -258,6 +258,23 @@ Each web app maintains an upload registry that maps sketches to hardware IDs:
 - **Sketch assignment** — A persistent mapping of hardware_id → sketch path, enabling board-scoped sketch selection.
 - **persistence** — `sketch_registry.json` is serialized to disk and warmed up on startup.
 
+### Shared `SketchRegistry` Class (Phase 99)
+
+The sketch-to-hardware-ID lookup logic was extracted to a shared `SketchRegistry` class in
+`arduino_sketch_tools/sketch_registry.py` to eliminate duplication between `arduino_dash` and
+`medminder_dash`. Each app still owns its own `_upload_registry` dict and lock; the shared class
+operates on them via constructor injection:
+
+```python
+from arduino_sketch_tools import SketchRegistry
+
+_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)
+```
+
+Per-app `sketch_registry.py` modules now re-export bound methods from a module-level instance of
+`SketchRegistry`, so existing importers (`get_assignment`, `set_assignment`, etc.) require no
+changes.
+
 ## State Management
 
 ### BoardManager

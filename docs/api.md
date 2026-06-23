@@ -441,6 +441,9 @@ All three tiers share the same `broadcast_ws(html)` function that iterates conne
 ## ArduinoSketchTools Flask Extension
 
 **Package:** `arduino_sketch_tools`  
+
+### `ArduinoSketchTools` (extension.py)
+
 **Module:** `arduino_sketch_tools.extension`
 
 ```python
@@ -451,6 +454,18 @@ tools.init_app(app)
 ```
 
 Registers a Flask blueprint with compile/upload routes and subscribes to `resp::compile::*` and `resp::upload::*` pub/sub topics. Progress messages are broadcast via WebSocket.
+
+### `SketchRegistry` (sketch_registry.py)
+
+**Module:** `arduino_sketch_tools.sketch_registry`
+
+```python
+from arduino_sketch_tools import SketchRegistry
+
+_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)
+```
+
+Thread-safe registry mapping `hardware_id → sketch_path`. Extracted to the shared package in Phase 99; per-app `sketch_registry.py` modules re-export bound methods from a module-level instance. API: `get_assignment()`, `set_assignment()`, `clear_assignment()`, `get_all_assignments()`. See [`arduino_sketch_tools/docs/sketch_registry.md`](../arduino_sketch_tools/python/arduino_sketch_tools/docs/sketch_registry.md) for full reference.
 
 ---
 

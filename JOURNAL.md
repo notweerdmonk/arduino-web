@@ -3645,4 +3645,84 @@ Also updated CODEBASE_REFERENCE.md previously stale Phase 97 sections (Before/Af
 **Verification**: 186 medminder_dash tests pass, 1 skip (same as before — 0 regression). No stale `TestAdminBoardSelectorPolling` in source code.
 
 **Rationale for Phase 98 attachment**: Q6 is appended to Phase 98 (WS Push Migration) rather than creating a standalone phase, since Phase 98 is the phase that eliminated the polling behavior that the "Polling" suffix referred to.
+
+---
+
+## 2026-06-22 12:43 — Phase 99: HTML Template Homogenisation ✅ COMPLETED
+
+**Goal**: Make all 14 shared templates between arduino_dash and medminder_dash structurally identical, extracting medicine-specific sections into separate partials and using template variables for route-path divergence.
+
+**Quantums**:
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | board_detail.html | arduino_dash: removed `<form>` wrapper, moved FQBN/Port above sketch, hx-include→sketch_path+fqbn, Admin page btn. medminder_dash: htmx `/last-upload` replaces hidden input, `show_sketch_tools` guard, medicines extracted to partial | ✅ |
+| Q2 | admin.html | arduino_dash: added `assigned-sketch-info` div. medminder_dash: extracted medicine section to `admin_medicine_section.html` partial | ✅ |
+| Q3 | admin_board_selector.html | Route attrs (hx-post, hx-target, hx-swap, label) passed as Python render_template kwargs | ✅ |
+| Q4 | compile_upload_card.html | Step numbering converged, description made generic, `&#8230;` entity converged | ✅ |
+| T1-T3 | 3 partials | trailing newline, or 'Unknown', hardware_id in hx-vals | ✅ |
+| Q6 | base.html DnD listeners | `preventDefault` added to medminder_dash | ✅ |
+
+**Post-plan addition**: Extracted `SketchRegistry` class to `arduino_sketch_tools` as shared module. Both per-app `sketch_registry.py` files became thin wrappers. This was needed to enable `assigned-sketch-info` in arduino_dash without code duplication or cross-package import.
+
+**Key gotchas**:
+1. **htmx-loaded partials don't inherit `{% set %}` vars** from parent templates — the admin_board_selector attributes had to be passed as Python `render_template` kwargs rather than Jinja2 `{% set %}` in admin.html
+2. **SketchRegistry dependencies**: The per-app `sketch_registry.py` files depend on `state._upload_registry` and `state._upload_registry_lock` from each app's state module. Making them shareable required a class-based approach where each app passes its own registry/lock at init time
+3. **Wheel rebuild required**: Adding `sketch_registry.py` to `arduino_sketch_tools` required rebuilding the wheel and updating both dependent Pipfile.locks via `PROJECT_ROOT= pipenv lock`
+
+**Verification**:
+| Command | Result |
+|---------|--------|
+| `nox -s 'tests(arduino_dash)'` | 119 pass ✅ |
+| `nox -s 'tests(medminder_dash)'` | 186 pass, 1 skip ✅ |
+
+**Test fix**: 3 `TestBoardDetailFqbn` tests in `medminder_dash/tests/test_routes.py` updated to assert htmx `/last-upload` container attributes instead of static sketch_path values.
+
+**Files changed**: ~15 templates + 5 Python files + 2 new partials + 1 new shared module + 2 Pipfile.locks.
+## 2026-06-22 16:14 — Phase 100: Server Script Process Lifecycle ✅ COMPLETED
+
+**Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's exit without shell hacks (`&`, `disown`, `timeout=3000`). Add `--pidfile`, `--stop`, `--force`, `--logfile` flags.
+
+**Design evolution** (detailed in IMPLEMENTATION_JOURNAL.md):
+1. `os.setpgid(0, 0)` + `disown` — rejected (user wants no shell hacks)
+2. `os.setpgid(0, 0)` + `_redirect_io()` — fails because setpgid changes PGID but not SESSION; tool kills by session
+3. **Final**: `os.fork()` + `os.setsid()` + `_redirect_io(logfile)` — parent exits → tool returns; child in new session, immune; stdout/stderr → logfile
+
+**Key gotchas**:
+1. Session vs Process Group — `os.setpgid()` only changes PGID; SIGHUP from tool targets the whole session. Only `os.setsid()` (requiring fork) creates a new session
+2. Stale pidfile — a failed second instance could delete the first instance's pidfile. Fixed: `_remove_pidfile()` checks PID matches before unlink
+3. Stale PID in `--stop` — old pidfile with dead PID. Fixed: `ProcessLookupError` → clean up pidfile and exit(0)
+
+**Verification**:
+| Test | arduino_dash | medminder_dash |
+|------|-------------|----------------|
+| Start, survive, serve HTTP 200 | ✅ | ✅ |
+| `--logfile` captures output | ✅ (571 bytes) | ✅ (649 bytes) |
+| `--stop` clean shutdown | ✅ | ✅ |
+| Stale pidfile cleanup | ✅ | ✅ |
+| No `&`, `disown`, `timeout` tricks | ✅ | ✅ |
+
+**Files changed**: `e2e/servers/arduino_dash_server.py` (272 lines, +130 net), `e2e/servers/medminder_dash_server.py` (303 lines, +131 net)
+
+**Method**: `arduino_dash` on port 8765, `medminder_dash` on port 8766, Playwright MCP browser navigate + snapshot.
+
+**Server lifecycle gotcha (detailed in TESTING_JOURNAL.md)**: Flask processes killed between bash invocations because the tool sends SIGHUP to the entire child process group on shell exit. `disown` does not protect against process-group-level signals. Workaround: `python3 ... &>/dev/null & disown` with `timeout=3000` — the foreground exits quickly (<100ms), so SIGHUP never propagates to the server.
+
+**All 6 scenarios passed**:
+
+| Recipe | App | Page | Status |
+|--------|-----|------|--------|
+| 2 | arduino_dash | Board Grid | ✅ Board cards, Connected badges, Manage links |
+| 3 | arduino_dash | Admin | ✅ All sections, step numbering, board selector |
+| 6 | arduino_dash | Board Detail | ✅ Controls, compile/upload, Admin link |
+| 7 | medminder_dash | Home | ✅ Board Dashboard + Medicine Overview |
+| 8 | medminder_dash | Board Detail + API | ✅ Medicines list; API returns 3 medicines |
+| 9 | medminder_dash | Admin | ✅ Medicines CRUD, alarm.hpp, sync, compile/upload |
+
+## 2026-06-23 — Phase 100 Doc Sync: Disown, Script Architecture, Cleanup
+
+GUIDE files updated with 3 new sections documenting server script lifecycle:
+- **Disown** — explains why `&>/dev/null & disown` was fragile and how `_daemonize()` (fork + setsid + redirect) replaces it
+- **Script Architecture** — lifecycle helpers table, CLI flags, main() execution order
+- **Cleanup** (expanded) — stale pidfiles, SIGKILL fallback, orphaned BMS cleanup
 {% endraw %}

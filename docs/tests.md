@@ -64,7 +64,7 @@ cd board_manager/python/board_manager          && pipenv run pytest tests/    # 
 cd board_manager_client/python/board_manager_client && pipenv run pytest tests/  # 24 tests
 cd arduino_sketch_tools/python/arduino_sketch_tools && pipenv run pytest tests/  # 51 tests
 cd arduino_dash/python/arduino_dash             && pipenv run pytest tests/    # 119 tests
-cd medminder_dash/python/medminder_dash         && pipenv run pytest tests/    # 187 tests
+cd medminder_dash/python/medminder_dash         && pipenv run pytest tests/    # 186 passed, 1 skipped
 cd grpc_client/python/arduino_grpc              && pipenv run pytest tests/    # 35 tests
 ```
 

@@ -1,135 +1,62 @@
 ---
 ---
 {% raw %}
-# Testing Plan — Phase 93: GitHub Pages Jekyll Documentation Site
+# Testing Plan — Phase 99: HTML Template Homogenisation
 
-**Date**: 2026-06-20
+**Date**: 2026-06-22 12:43
 
-## Scope
-
-Static analysis and build verification for Jekyll documentation site. No Python code changes — only config files, markdown content, and static file metadata (front matter).
+**Status**: ✅ COMPLETED
 
 ## Test Strategy
 
-| Quantum | What to Test | Method | Pass Criteria |
-|---------|-------------|--------|---------------|
-| Q1-Q2 | Config fixes | `bundle exec jekyll build` | Exit 0, no "Liquid syntax error" |
-| Q3-Q4 | Front matter + raw/endraw | `bundle exec jekyll build` | Exit 0, no syntax errors |
-| Q5 | Broken links | `grep` href targets in `_site/` | All hrefs point to existing `.html` files |
-| Q6 | Final build | `bundle exec jekyll build` | Exit 0, 0 errors, 0 warnings |
-| Q7 | Liquid warnings | `bundle exec jekyll build 2>&1 | grep -i warning` | 0 warnings |
-| Q8 | README files | `grep` href targets in `_site/index.html` | All README hrefs resolve to `.html` |
-| Q9 | index.md README links | `grep -oP 'href="[^"]*README[^"]*"' _site/index.html` | 9+ README hrefs present |
-| Q10 | Final build + page count | `find _site -name "*.html" | wc -l` | 254 HTML pages |
+Template-only changes require verification that:
+1. No template syntax errors (Jinja2 rendering)
+2. No broken HTMX attribute references (IDs, endpoints)
+3. No regression in existing test assertions
 
-## Verification Steps
+Since all changes are in Jinja2 templates, the primary test strategy is running the existing test suites — they exercise the templates via Flask's `render_template` and `client.get()`.
 
-1. `bundle exec jekyll build` — exit 0, no errors, no warnings
-2. `grep` spot-check all new href targets in `_site/index.html`
-3. Verify README links resolve to `.html` (not `.md`)
-4. Count total HTML pages (expect 254)
-5. Verify nested subpackage doc directories exist in `_site/`
+## Test Scenarios by Quantum
 
-## Key Files to Verify
+| Q | Files Changed | Test Command | What It Covers |
+|---|-------------|-------------|----------------|
+| Q1a | arduino_dash board_detail.html | `nox -s 'tests(arduino_dash)'` | Template renders, HTMX attrs correct, buttons have correct hx-include |
+| Q1b | medminder_dash board_detail.html | `nox -s 'tests(medminder_dash)'` | Template renders, htmx /last-upload loads, modals not shown when guarded |
+| Q1c | medicine_management.html new | `nox -s 'tests(medminder_dash)'` | Partial renders in board_detail context |
+| Q1d | html_routes.py (both) | Both test suites | Route context includes new variables |
+| Q2a | arduino_dash admin.html | `nox -s 'tests(arduino_dash)'` | Admin page renders, assigned-sketch-info conditional |
+| Q2b | medminder_dash admin.html | `nox -s 'tests(medminder_dash)'` | Admin page renders, medicine section works via partial |
+| Q3a | Both admin_board_selector.html | Both test suites | Template vars resolve, HTMX attrs correct |
+| Q4a+b | Both compile_upload_card.html | Both test suites | Step numbers visible, description correct |
+| T1+T2+T3 | 3 partials | Both test suites | No rendering errors, hx-vals correct |
+| Q6 | medminder_dash base.html | `nox -s 'tests(medminder_dash)'` | No JS syntax errors in base template |
 
-| File in _site | Expected | Verification |
-|---------------|----------|--------------|
-| `_site/index.html` | Documentation hub with README links | `grep` href README |
-| `_site/board_manager/python/board_manager/board_manager/docs/` | 11 doc pages | `ls` directory |
-| `_site/medminder_dash/python/medminder_dash/medminder_dash/docs/` | 15 doc pages | `ls` directory |
-| `_site/README.html` | Processed README | File exists |
-| All README `.html` files | Processed pages at expected paths | `find _site -name "README.html"` |
+## Regression Risk
 
----
+Low — all changes are structural template edits. No Python logic, no new routes, no CSS changes. Existing tests verify template rendering through route responses.
+## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup)
 
-## Phase 95 — Git Tree Preparation Plan
+**Date**: 2026-06-22 16:14
 
-**Date**: 2026-06-20 15:40
-**Status**: ✅ COMPLETED — Git tree cleaned and staged.
+**Status**: ✅ COMPLETED
 
-### Test Strategy
+## Test Strategy
 
-No code changes — only file staging, `.gitignore` updates, doc fixes, and file moves. Verification is manual inspection and build smoke tests.
+Server lifecycle changes require verification that:
+1. Process survives bash tool exit (no `&`, `disown`, `timeout` hacks)
+2. `--stop` flag kills the server cleanly
+3. `--logfile` flag captures stdout/stderr
+4. Stale pidfile is cleaned up (dead PID)
 
-| Q | What to Test | Method | Pass Criteria | Status |
-|---|-------------|--------|---------------|--------|
-| 1 | Stale upload sketches removed | `ls _uploads/ 2>/dev/null` | No stale files | ✅ |
-| 1 | .gitignore patterns correct | `git status --short` | No dirty generated-artifact entries | ✅ |
-| 1 | .gitkeep markers present | `find */python/*/data -name '.gitkeep'` | All empty dirs have markers | ✅ |
-| 2 | Workflow docs gap filled | `grep 'Phase 93\|Phase 94' IMPLEMENTATION_*.md` | Both phases referenced in sequence | ✅ |
-| 3 | docs/index.md --help claim fixed | `grep -c 'usage' scripts/docs/index.md` | At least 1 usage reference present | ✅ |
-| 4 | Sequential git add approved | Manual session log | User approved each group | ✅ |
-| 5 | WS_EVENT_FLOW.md relocated | `test -f docs/ws-event-flow.md && test ! -f WS_EVENT_FLOW.md` | New path exists, old path gone | ✅ |
-| 5 | All cross-refs updated | `grep -rn 'WS_EVENT_FLOW' * --include='*.md'` | All refs point to `docs/ws-event-flow.md` | ✅ |
+## Test Scenarios
 
----
-
-## Phase 96 — Wire test_ci.sh into Nox scripts_tests
-
-**Date**: 2026-06-20 20:03
-**Status**: ✅ COMPLETED — test_ci.sh wired and verified.
-
-### Test Strategy
-
-| # | What to Test | Method | Pass Criteria | Status |
-|---|-------------|--------|---------------|--------|
-| 1 | Standalone test_ci.sh | `bash scripts/tests/test_ci.sh` | Exit 0, 30/30 pass | ✅ |
-| 2 | pytest suite in scripts_tests | `nox -s scripts_tests` | 128 pytest pass | ✅ |
-| 3 | test_install_arduino_deps.sh in scripts_tests | `nox -s scripts_tests` | 12 bash pass | ✅ |
-| 4 | test_ci.sh in scripts_tests | `nox -s scripts_tests` | 30 bash pass | ✅ |
-| 5 | scripts_tests total | `nox -s scripts_tests` | All 170 pass in 24s | ✅ |
-
----
-
-## Phase 98 — WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar)
-
-**Date**: 2026-06-21 11:55
-
-**Status**: IMPLEMENTED — All tests executed.
-
-## Scope
-
-Migrate PubSub-driven frontend updates from HTMX polling to WS push across 3 tiers: daemon badge OOB, board status badge OOB, compile/upload OOB targeting, and compile progress percentage.
-
-## Test Strategy — Actual Results
-
-| Q | What to Test | Method | Pass Criteria | Result |
-|---|-------------|--------|---------------|--------|
-| 1 | Daemon badge — base.html hx-trigger updated | grep on base templates | `hx-trigger="every 10s, load"` not present | ✅ Changed to `"load"` |
-| 1 | Daemon badge — partial stripped of hx-* | grep on daemon_badge.html | No `hx-get`, `hx-trigger`, `hx-target`, `hx-swap` | ✅ Stripped |
-| 1 | Daemon badge — pubsub _broadcast_daemon_badge() | grep on pubsub modules | Method exists | ✅ Both dashboards |
-| 2 | Board badge — partial stripped of hx-* | grep on board_status_badge.html | No hx-* attributes | ✅ Stripped |
-| 2 | Board badge — unique per-port IDs | grep on board_detail.html | IDs contain `{{ port \| replace('/', '_') }}` | ✅ Present |
-| 2 | Board badge — pubsub OOB broadcast | grep on pubsub modules | Badge OOB in `_on_board_event()` | ✅ Both dashboards |
-| 3 | Compile/upload OOB targeting | grep on extension.py | `hx-swap-oob="beforeend:#...-output-{port_safe}"` | ✅ Present |
-| 4 | compile_stream() 4-tuple | grep on client.py | Yields `(out, err, done, percent)` | ✅ Updated |
-| 4 | Progress bar element in templates | grep on board_detail.html | `<progress id="compile-progress-"` | ✅ Present |
-| 4 | _compile_last_pct tracking | grep on extension.py | Dict for per-port percent tracking | ✅ Present |
-| 5 | Noxfile env fix | grep on noxfile.py | `env={"PROJECT_ROOT": str(ROOT)}` | ✅ Added |
-| 6 | Rename TestAdminBoardSelectorPolling → TestAdminBoardSelector | `grep` on test_admin.py + README.md | Class renamed, docstring updated, README ref updated | ✅ Done |
-| 6 | No stale references in code | `grep -rn 'TestAdminBoardSelectorPolling' medminder_dash/ --exclude-dir=.egg-info --exclude-dir=.pytest_cache` | 0 matches in source | ✅ Done |
-| All | All nox sessions pass | `nox -s all_tests` | All 8 sessions pass | ✅ All pass |
-
-## Automated Test Sessions
-
-| Session | Command | Result | Details |
-|---------|---------|--------|---------|
-| Core pytest | `nox -s all_tests` | ✅ PASS | All 8 sessions pass |
-| Arduino gRPC | `nox -s arduino_grpc` | ✅ PASS | Passed |
-| Board manager | `nox -s board_manager` | ✅ PASS | Passed |
-| Board manager client | `nox -s board_manager_client` | ✅ PASS | Passed |
-| Arduino sketch tools | `nox -s arduino_sketch_tools` | ✅ PASS | Passed |
-| Arduino dash | `nox -s arduino_dash` | ✅ PASS | Passed |
-| Medminder dash | `nox -s medminder_dash` | ✅ PASS | Passed |
-| Scripts tests | `nox -s scripts_tests` | ✅ PASS | Passed |
-
-## Manual Verification Steps (performed, cannot run in automated CI)
-
-1. `grep -rn 'every 10s' */templates/base.html` → 0 matches → periodic polling removed
-2. `grep -rn 'hx-get' */templates/partials/daemon_badge.html` → 0 matches → partial stripped
-3. `grep -rn 'hx-get' */templates/partials/board_status_badge.html` → 0 matches → partial stripped
-4. `grep -rn 'hx-swap-oob="beforeend:#compile-output-' */extension.py` → matches → OOB targeting present
-5. `grep -rn 'hx-swap-oob="beforeend:#upload-output-' */extension.py` → matches → OOB targeting present
-6. `grep -rn 'compile-progress-' */board_detail.html` → matches → progress bar element present
+| # | Scenario | Script | Verification |
+|---|----------|--------|-------------|
+| 1 | Start & survive | arduino_dash | `curl http://localhost:8765` returns 200 after bash exit |
+| 2 | --stop | arduino_dash | `python3 arduino_dash_server.py --stop` prints "Stopped PID X" |
+| 3 | --logfile | arduino_dash | Logfile has >0 bytes of output |
+| 4 | Start & survive | medminder_dash | `curl http://localhost:8766` returns 200 after bash exit |
+| 5 | --stop | medminder_dash | `python3 medminder_dash_server.py --stop` prints "Stopped PID X" |
+| 6 | --logfile | medminder_dash | Logfile has >0 bytes of output |
+| 7 | Stale pidfile | both | Dead PID in pidfile → cleaned up |
 {% endraw %}
-7. `grep -rn 'percent' */client.py` → matches → 4-tuple with percent

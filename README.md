@@ -4,7 +4,7 @@
 
 Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerService and a Flask+HTMX+WebSocket web dashboard. All frontend updates use WebSocket push (no periodic HTMX polling). The frontend stack uses vanilla JS event delegation (no Hyperscript) with Idiomorph for scroll-preserving morphing swaps.
 
-## Recent Enhancements (Phases 94-98)
+## Recent Enhancements (Phases 94-100)
 
 | Area | Change | Phase |
 |------|--------|-------|
@@ -18,6 +18,10 @@ Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerSer
 | **gRPC** | `compile_stream()` yields 4-tuple `(out, err, done, percent)` for progress tracking | 98 |
 | **Docs** | Full Jekyll documentation site (254 pages, 0 errors); `WS_EVENT_FLOW.md` relocated to `docs/` | 93, 95 |
 | **Tests** | `TestAdminBoardSelectorPolling` renamed to `TestAdminBoardSelector` (stale name after WS push migration) | 98(Q6) |
+| **Templates** | All shared templates homogenised across arduino_dash + medminder_dash (14+ structurally identical) | 99 |
+| **Templates** | Medicine management extracted to reusable partials (`medicine_management.html`, `admin_medicine_section.html`) | 99 |
+| **Refactor** | `SketchRegistry` extracted to shared `arduino_sketch_tools/sketch_registry.py` — per-app modules become 10-line wrappers | 99 |
+| **E2E Servers** | Server process lifecycle: `os.fork()` + `os.setsid()` daemonization; `--pidfile`, `--stop`, `--force`, `--logfile` flags; no shell hacks (`&`, `disown`, `&>/dev/null`) needed | 100 |
 
 ## Architecture
 
@@ -93,7 +97,7 @@ nox -s 'tests(medminder_dash)'
 ./scripts/ci.sh --skip-tests     # builds only
 ```
 
-**Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 187, arduino_grpc 35, scripts 170.
+**Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 186 (+1 skip), arduino_grpc 33 (+2 skip), scripts 170.
 
 **Note:** Nox sessions auto-regenerate `Pipfile.lock` (Phase 94) — no manual lock management after wheel rebuilds.
 
@@ -227,10 +231,11 @@ medminder/
 │       └── pubsub_client.md
 │
 ├── arduino_sketch_tools/python/arduino_sketch_tools/
-│   └── docs/                                # Per-package docs (2 modules)
+│   └── docs/                                # Per-package docs (3 modules)
 │       ├── index.md
 │       ├── extension.md
-│       └── routes.md
+│       ├── routes.md
+│       └── sketch_registry.md
 │
 ├── grpc_client/python/arduino_grpc/
 │   └── docs/                                # Per-package docs (3 modules)

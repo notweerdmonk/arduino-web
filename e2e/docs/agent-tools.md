@@ -11,7 +11,7 @@ opencode skill/agent/command definitions for Playwright MCP E2E testing.
 | `e2e/agent_tools/SKILL.md` | Generic MCP testing skill (project-agnostic) |
 | `e2e/agent_tools/AGENT.md` | Sub-agent definition for `@playwright-mcp-testing` |
 | `e2e/agent_tools/COMMAND.md` | Command definition for `/playwright-mcp-testing` |
-| `e2e/agent_tools/GUIDE.md` | Full 419-line project-specific testing guide |
+| `e2e/agent_tools/GUIDE.md` | Full 529-line project-specific testing guide |
 
 ## Installed Locations
 

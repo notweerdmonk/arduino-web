@@ -4,7 +4,7 @@
 
 Welcome to the MedMinder documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-06-21 — Phases 94-98 complete. See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-06-23 — Phases 94-100 complete (Phase 100: server process lifecycle — daemonize, `--pidfile`, `--stop`, `--force`). See [PLAN.md](PLAN.md) for full phase history.
 
 ---
 
@@ -77,6 +77,7 @@ Base: `arduino_sketch_tools/python/arduino_sketch_tools/`
 | [docs/index.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/index.md) | Package overview, Flask extension pattern |
 | [docs/extension.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/extension.md) | `ArduinoSketchTools` — `init_app`, blueprint registration, state management |
 | [docs/routes.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/routes.md) | Compile/upload Flask routes, request/response formats |
+| [docs/sketch_registry.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/sketch_registry.md) | `SketchRegistry` — hardware ID → sketch assignment, thread safety |
 
 ### `arduino-dash` — Board + compile web dashboard
 

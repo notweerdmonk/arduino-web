@@ -315,4 +315,219 @@ Phase 98 successfully migrated all PubSub-driven frontend updates from HTMX poll
 
 **Gotchas**: `.egg-info/PKG-INFO` and `.pytest_cache/` contain stale references — these are auto-generated and rebuild on next install/test run.
 ---
+
+## Phase 99 — HTML Template Homogenisation Across Both Dashboards
+
+**Date**: 2026-06-22 12:43
+**Status**: ✅ Complete
+
+**Goal**: Make all 14 shared templates structurally identical, extracting medicine-specific sections into separate partials and using template variables for route-path divergence.
+
+### Q1 — board_detail.html homogenisation
+
+**Changes made:**
+
+**arduino_dash `board_detail.html`:**
+1. Removed `<form id="compile-form">` wrapper (was `onsubmit="return false" method="post" enctype="multipart/form-data"`)
+2. Moved FQBN/Port `.flex-row-wide` block above the sketch selector section
+3. Changed compile/upload buttons `hx-include="#compile-form"` → `hx-include="#sketch_path, #fqbn"`
+4. Added `href="/admin"` Admin Page button in the flex-row action bar
+5. Changed `board_info.get('hardware_id', '')` → `(board_info or {}).get('hardware_id', '')` (defensive)
+6. Changed `board_info.get('fqbn', ...)` → `(board_info or {}).get('fqbn', ...)` (defensive)
+7. Added `show_sketch_tools` and `show_medicines_section` guards
+
+**medminder_dash `board_detail.html`:**
+1. Replaced hidden `<input id="sketch_path" value="{{ sketch_path }}">` with htmx `/last-upload` container:
+   ```html
+   <div id="sketch-path-container" class="container-grow"
+       hx-get="/last-upload"
+       hx-trigger="load"
+       hx-target="this"
+       hx-swap="innerHTML"
+       hx-include="#active-board-hardware-id">
+   </div>
+   ```
+2. Added `#active-board-hardware-id` hidden input
+3. Guarded DnD overlay, Browse button, Delete button, and both modals (sketch_upload_modal, delete_confirm_modal) behind `{% if show_sketch_tools %}`
+4. Added `{% if show_medicines_section %}` guard around `{% include "partials/medicine_management.html" %}`
+5. FQBN changed to defensive `(board_info or {}).get('fqbn', ...)`
+
+**New file created:** `medminder_dash/.../templates/partials/medicine_management.html`
+- Contains the Medicines card (Add Medicine button, medicine-form-container, medicine-list with hx-get="/medicines")
+- Included from board_detail.html behind `{% if show_medicines_section %}` guard
+
+**Route context changes:**
+- `arduino_dash/html_routes.py:109` — `board_detail()` now passes `show_sketch_tools=True, show_medicines_section=False`
+- `medminder_dash/html_routes.py:712` — `board_detail()` now passes `show_sketch_tools=False, show_medicines_section=True`
+
+### Q2 — admin.html homogenisation
+
+**arduino_dash changes:**
+- Added `active_board_sketch = ""` variable in `admin()` route
+- Added `get_assignment()` lookup: `if active_board_hardware_id: active_board_sketch = get_assignment(...) or ""`
+- Passed `active_board_sketch` in `render_template` context
+- Added `assigned-sketch-info` div:
+  ```html
+  {% if active_board_hardware_id and active_board_sketch %}
+  <div class="assigned-sketch-info">
+      &#9889; Assigned to selected board: <code>{{ active_board_sketch }}</code>
+  </div>
+  {% endif %}
+  ```
+
+**medminder_dash changes:**
+- Extracted medicine management "Step 1: Set Medicines" card (admin.html lines 65-105) to new partial `partials/admin_medicine_section.html`
+- Replaced extracted block with `{% include "partials/admin_medicine_section.html" %}`
+
+### Q3 — admin_board_selector.html homogenisation
+
+Both partials now identical. Route-dependent attributes passed as template variables from Python route handlers:
+
+| Variable | arduino_dash | medminder_dash |
+|----------|-------------|----------------|
+| `board_selector_label` | `"Active Board (for compile and upload)"` | `"Active Board (for medicine management, compile, and upload)"` |
+| `board_selector_hx_post` | `"/admin/active-board"` | `"/medicines/active-board"` |
+| `board_selector_hx_target` | `"#compile-upload-card"` | `"#medicine-cards-container"` |
+| `board_selector_hx_swap` | `"innerHTML"` | `"outerHTML"` |
+
+Route handler changes:
+- `arduino_dash html_admin_board_selector()` (html_routes.py:209): passes 4 board_selector variables
+- `medminder_dash html_medicines_board_selector()` (html_routes.py:496): passes 4 board_selector variables
+
+### Q4 — compile_upload_card.html homogenisation
+
+Both files now identical:
+- arduino_dash: added `Step 2:` / `Step 3:` prefixes to card section titles
+- medminder_dash: changed "Compile the MedMinderV2 sketch..." → "Compile the selected sketch..."
+- medminder_dash: changed Unicode `…` → HTML entity `&#8230;`
+
+### T1-T3 — Trivial diff fixes
+
+| # | File | Fix |
+|---|------|-----|
+| T1 | `medminder_dash/.../partials/dnd_overlay.html` | Added trailing `\n` after `</script>` (was 0 trailing newlines, now 1 — matches arduino_dash) |
+| T2 | `arduino_dash/.../partials/board_card.html:4` | `b.get('board', 'Unknown')` → `b.get('board', 'Unknown') or 'Unknown'` |
+| T3 | `medminder_dash/.../partials/delete_confirm_modal.html:9` | Added `hardware_id: ...` to `hx-vals` |
+
+### Q6 — base.html DnD listeners
+
+Added to medminder_dash `base.html` (before existing click listener):
+```js
+document.addEventListener('dragover', function(e) { e.preventDefault(); });
+document.addEventListener('drop', function(e) { e.preventDefault(); });
+```
+Matches arduino_dash `base.html:76-77`.
+
+### Shared SketchRegistry Extraction (post-plan addition)
+
+**Motivation**: Enabling the `assigned-sketch-info` block in arduino_dash required `get_board_sketch_assignment()`, which was previously only available in medminder_dash. Rather than duplicating code or creating a cross-package import, the shared logic was extracted to `arduino_sketch_tools`.
+
+**New file:** `arduino_sketch_tools/python/arduino_sketch_tools/arduino_sketch_tools/sketch_registry.py`
+- `SketchRegistry` class accepts `registry: dict` and `lock: threading.Lock` at init
+- Methods: `get_assignment()`, `set_assignment()`, `clear_assignment()`, `get_all_assignments()`, `reset_for_tests()`
+- Thread-safe: uses instance-level `_op_lock` then acquires the registry `_lock`
+- Logic identical to the original per-app modules (same triple-nested loop over upload_registry structure)
+
+**Updated:** `arduino_sketch_tools/__init__.py` — exports `SketchRegistry`
+
+**Updated per-app wrappers:**
+- `arduino_dash/.../sketch_registry.py` (73→10 lines): creates `SketchRegistry(state._upload_registry, state._upload_registry_lock)` and re-exports bound methods
+- `medminder_dash/.../sketch_registry.py` (93→10 lines): same pattern
+
+**Build:** `arduino_sketch_tools` wheel rebuilt via `nox -s 'build(arduino_sketch_tools)'`; both Pipfile.locks updated via `PROJECT_ROOT=... pipenv lock`
+
+### Deviations from Plan
+
+1. **Q2/Q3 implementation route**: Original plan specified `{% set %}` template variables in `admin.html` for board_selector attributes. Implemented as Python `render_template` kwargs from route handlers instead. This keeps the template simpler and avoids the `{% set %}` scope issue (variables set in the parent template don't propagate to htmx-loaded partials).
+
+2. **Shared SketchRegistry**: Not in the original plan. Added when Q2a required `active_board_sketch` in arduino_dash and neither code duplication nor cross-package import was acceptable.
+
+### Verification
+
+| Command | Result |
+|---------|--------|
+| `nox -s 'tests(arduino_dash)'` | 119 passed, 0 failed |
+
+---
+
+## Entry 2 — Phase 100: Server Script Process Lifecycle (Disown & Cleanup)
+
+**Date**: 2026-06-22 16:14
+**Status**: ✅ Complete
+
+### Goal
+
+Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags.
+
+### Problem
+
+The bash tool tracks processes by session. When a shell command times out or exits, the tool sends SIGHUP to all processes in the session. The previous workaround (`&>/dev/null & disown` with `timeout=3000`) relied on a race condition.
+
+### Architecture Evolution
+
+Three iterations before arriving at the final design:
+
+| Iteration | Approach | Problem |
+|-----------|----------|---------|
+| 1 | `os.setpgid(0, 0)` + `disown` | User wants no shell hacks |
+| 2 | `os.setpgid(0, 0)` + `_redirect_io()` — no fork | `setpgid` changes PGID but not session; tool still tracks and kills via session |
+| 3 (final) | `os.fork()` + `os.setsid()` + `_redirect_io()` | **Works** — parent exits → tool returns; child in new session, immune; stdout/stderr redirected to logfile |
+
+### Final Architecture
+
+```
+bash tool (session leader)
+  │ SIGHUP on exit (to session's PGID)
+  └── bash (shell session)
+        └── python3 (our script)
+              ├── fork
+              ├── parent: os._exit(0) ──▶ bash exits ──▶ tool returns
+              └── child: os.setsid() ──▶ new session, immune to SIGHUP
+                    ├── _redirect_io(logfile) ──▶ stdout/stderr → file
+                    ├── Flask runs
+                    └── logs captured in --logfile
+```
+
+Key insight: `os.setpgid(0, 0)` changes process GROUP but not SESSION. The tool tracks processes by SESSION. When the session leader (bash) dies, the kernel sends SIGHUP to ALL processes in that session, regardless of process group. Only `os.setsid()` (which requires a fork) creates a new session.
+
+### Changes per file
+
+**Both `arduino_dash_server.py` and `medminder_dash_server.py`**:
+
+| Component | Change |
+|-----------|--------|
+| Imports | Added `import signal`, `import time` |
+| `_get_default_pidfile()` | New — derives path from script name |
+| `_write_pidfile()` | New — writes PID to file |
+| `_remove_pidfile()` | New — safe removal (checks PID matches) |
+| `_stop_server()` | New — SIGTERM → 5s poll → SIGKILL; handles stale PID |
+| `_daemonize(logfile)` | New — fork + setsid + redirect |
+| `--pidfile` arg | New — custom PID path |
+| `--stop` arg | New — shutdown via pidfile |
+| `--force` arg | New — immediate SIGKILL |
+| `--logfile` arg | New — Flask log capture |
+| `main()` order | --stop before daemonize |
+| Docstring | Updated with new usage examples |
+
+### Stale PID handling
+
+A second server instance that fails to start (e.g., port in use) could delete the first instance's pidfile in its `finally` block. Fixed: `_remove_pidfile()` verifies the pidfile still contains OUR PID before deleting.
+
+Similarly, `--stop` handles stale PIDs gracefully: if `os.kill()` raises `ProcessLookupError`, it cleans up the pidfile and exits with status 0.
+
+### Verification
+
+| Test | Commands | Result |
+|------|----------|--------|
+| arduino_dash survival | `python3 script.py --mock --production` then `curl` | ✅ HTTP 200 |
+| arduino_dash log | `--logfile /tmp/x.log` | ✅ 571 bytes captured |
+| arduino_dash --stop | `python3 script.py --stop` | ✅ "Stopped PID X" |
+| medminder_dash survival | Same pattern | ✅ HTTP 200 |
+| medminder_dash log | `--logfile /tmp/x.log` | ✅ 649 bytes captured |
+| medminder_dash --stop | `python3 script.py --stop` | ✅ "Stopped PID X" |
+| Stale PID handling | `--stop` on non-existent PID | ✅ Cleaned up pidfile |
+| No shell hacks | No `&`, `disown`, `&>/dev/null`, or timeout tricks | ✅ |
+| `nox -s 'tests(medminder_dash)'` | 186 passed, 1 skipped |
+
+---
 {% endraw %}

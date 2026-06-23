@@ -34,7 +34,7 @@ e2e/
 │   ├── SKILL.md              # MCP testing skill (project-agnostic)
 │   ├── AGENT.md              # Sub-agent for @playwright-mcp-testing
 │   ├── COMMAND.md            # Command definition
-│   └── GUIDE.md              # Project-specific testing guide (419 lines)
+│   └── GUIDE.md              # Project-specific testing guide (529 lines)
 ├── servers/
 │   ├── arduino_dash_server.py    # Mock arduino-dash server
 │   └── medminder_dash_server.py  # Mock medminder-dash server
@@ -64,4 +64,4 @@ Installed copies of agent_tools live in `.opencode/skills/playwright-mcp-testing
 ## Related
 
 - [docs/tests.md (top-level)](../../docs/tests.md) — overall testing methodology
-- [agent_tools/GUIDE.md](../agent_tools/GUIDE.md) — full MCP testing guide (419 lines)
+- [agent_tools/GUIDE.md](../agent_tools/GUIDE.md) — full MCP testing guide (529 lines)

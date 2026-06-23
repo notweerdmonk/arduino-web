@@ -204,4 +204,71 @@ The noxfile `PROJECT_ROOT` fix (Q5) resolved the root cause. All 8 sessions now 
 ### Verdict
 
 ✅ **Phase 98 is approved and complete.** All 12 review criteria have been verified. The phase eliminates the last two periodic HTMX polls, makes WS-delivered compile/upload content visible, adds real-time compile progress percentage, and resolves all pre-existing pipenv lock failures. No behavioral regressions introduced.
+
+---
+
+## Phase 99 — HTML Template Homogenisation Across Both Dashboards
+
+**Date**: 2026-06-22 12:43
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Review Summary
+
+Phase 99 completed the HTML template homogenisation work. All 14+ shared templates across arduino_dash and medminder_dash are now structurally identical. Eight quantums (Q1-Q6 + T1-T3 + SR) were implemented and tested.
+
+### Key Review Findings
+
+1. **Template convergence successful**: All templates structurally identical except unavoidable branding text (`Arduino Dash` vs `MedMinder`) and route paths (`/admin/` vs `/medicines/`). Route divergence handled via Python `render_template` kwargs.
+
+2. **SketchRegistry extraction**: An unplanned but necessary addition. The original per-app `sketch_registry.py` files were identical except for the `from X import state` line. Extracting the shared logic to `arduino_sketch_tools.SketchRegistry` eliminated this duplication. Both per-app modules became 10-line wrappers.
+
+3. **Test fix required**: 3 `TestBoardDetailFqbn` tests needed updating because `board_detail.html` switched from static `<input id="sketch_path">` to dynamic htmx `/last-upload`. The old tests asserted the sketch path was in the initial HTML; new tests assert the htmx container is present.
+
+4. **Deviation from plan**: The admin_board_selector template variables were specified as `{% set %}` in `admin.html` but implemented as Python `render_template` kwargs instead. Reason: htmx-loaded partials don't inherit `{% set %}` variables from the parent template.
+
+### Verification
+
+| Suite | Result |
+|-------|--------|
+| `nox -s 'tests(arduino_dash)'` | 119 pass ✅ |
+| `nox -s 'tests(medminder_dash)'` | 186 pass, 1 skip ✅ |
+
+### Verdict
+
+✅ **Phase 99 is approved and complete.** All 14+ shared templates are now structurally identical. The SketchRegistry has been extracted to a shared module. No regressions. 305 total passing tests.
+
+---
+
+## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup)
+
+**Date**: 2026-06-22 16:14
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Review Summary
+
+Phase 100 implemented a proper daemonize pattern for E2E test servers, replacing the fragile `&>/dev/null & disown` workaround with `os.fork()` + `os.setsid()` + `_redirect_io()`. Both `arduino_dash_server.py` and `medminder_dash_server.py` now survive bash tool exit without any shell hacks.
+
+### Key Review Findings
+
+1. **Design evolution**: Three approaches were tried. `os.setpgid(0,0)` failed because it changes PGID but not session; the tool kills by session. `os.setpgid` + `disown` was rejected (user wants no shell hacks). The final `os.fork()` + `os.setsid()` approach creates a new session, making the process immune to tool-level SIGHUP.
+
+2. **Stale pidfile protection**: The `_remove_pidfile()` function checks that the PID in the file matches the current process before unlinking. This prevents a failed second instance from deleting the first instance's pidfile.
+
+3. **ProcessLookupError handling**: When `--stop` encounters a pidfile with a dead PID, the error is caught, the pidfile is cleaned up, and the script exits cleanly.
+
+### Verification
+
+| Test | arduino_dash | medminder_dash |
+|------|-------------|----------------|
+| Start, survive, serve HTTP 200 | ✅ | ✅ |
+| `--logfile` captures output | ✅ (571 bytes) | ✅ (649 bytes) |
+| `--stop` clean shutdown | ✅ | ✅ |
+| Stale pidfile cleanup | ✅ | ✅ |
+| No shell hacks | ✅ | ✅ |
+
+### Verdict
+
+✅ **Phase 100 is approved and complete.** Both server scripts now implement proper daemonization with fork + setsid + redirect. All 6 lifecycle scenarios (survival, --stop, --logfile, stale pidfile) pass for both apps. Zero shell hacks required.
 {% endraw %}

@@ -3,7 +3,7 @@
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-06-21 (Phase 98 — WS Push Migration)
+**Last updated**: 2026-06-22 (Phase 100 — Server Process Lifecycle)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -411,7 +411,7 @@ All 9 README refs in `index.md` resolve to `.html` (processed pages):
 | **E — Docs** | `arduino_dash docs/pubsub.md`, `medminder_dash docs/pubsub_infra.md` | Badge OOB docs |
 | **E — Docs** | `board_manager docs/board_worker.md`, `grpc_client docs/client.md` | `_make_progress()` percent, `compile_stream()` 4-tuple |
 | **F — Stale refs** | `CODEBASE_REFERENCE.md`, `TODOS.md`, `PLAN.md`, `_config.yml` | Stale line-refs fixed, Phase 98 in completed table, `url: ""` |
-| **G — Jekyll wrap** | `TESTING_PLAN.md`, `TESTING_TASK.md` | Added `{% raw %}...{% endraw %}` wrapping |
+| **G — Jekyll wrap** | `TESTING_PLAN.md`, `TESTING_TASK.md` | Added raw/endraw wrapping for Jinja2 |
 | **H — Workflow** | `IMPLEMENTATION_*.md` (4), `JOURNAL.md`, `RESEARCH_*.md` (4), `REVIEW_*.md` (4), `TESTING_*.md` (2) | All workflow context docs updated |
 | **I — Other** | `noxfile.py` | `env={"PROJECT_ROOT": str(ROOT)}` for pipenv |
 | **J — Q6 Rename** | `medminder_dash tests/test_admin.py:811`, `README.md:205` | `TestAdminBoardSelectorPolling` → `TestAdminBoardSelector` |
@@ -3311,4 +3311,185 @@ Cosmetic rename — no functional change. The "Polling" suffix was stale after P
 |------|--------|-------|
 | `medminder_dash/tests/test_admin.py:811` | `class TestAdminBoardSelectorPolling` | `class TestAdminBoardSelector` |
 | `medminder_dash/README.md:205` | `TestAdminBoardSelectorPolling` | `TestAdminBoardSelector` |
-{% endraw %}
+
+## Phase 99 — HTML Template Homogenisation Across Both Dashboards (2026-06-22)
+
+**Goal**: Make all 14 shared templates structurally identical. Extract medicine-specific sections to partials. Use template variables for route-path divergence.
+
+### SketchRegistry — Shared Class in arduino_sketch_tools
+
+**File:** `arduino_sketch_tools/python/arduino_sketch_tools/arduino_sketch_tools/sketch_registry.py` (lines 1–77)
+
+New thread-safe registry class, extracted from duplicated per-app modules:
+
+```python
+class SketchRegistry:
+    def __init__(self, registry: dict, lock: threading.Lock) -> None:
+        self._registry = registry
+        self._lock = lock
+        self._op_lock = threading.Lock()
+
+    def get_assignment(self, hardware_id: str) -> Optional[str]:
+    def set_assignment(self, hardware_id: str, sketch_dir: str) -> None:
+    def clear_assignment(self, hardware_id: str) -> None:
+    def get_all_assignments(self) -> dict[str, str]:
+    def reset_for_tests(self) -> None:
+```
+
+Double-lock pattern: `_op_lock` (per-operation) → `_lock` (shared registry lock from caller). Iterates `self._registry` for matching `hardware_ids` list entries.
+
+**File:** `arduino_sketch_tools/python/arduino_sketch_tools/arduino_sketch_tools/__init__.py` (line 5)
+- Exports `SketchRegistry` alongside `ArduinoSketchTools`
+
+### Per-App Wrappers (both become 10-line thin wrappers)
+
+| App | File | Key Line |
+|-----|------|----------|
+| arduino_dash | `arduino_dash/.../sketch_registry.py:1-12` | `_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)` |
+| medminder_dash | `medminder_dash/.../sketch_registry.py:1-12` | `_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)` |
+
+Both re-export bound methods at module level: `get_assignment`, `set_assignment`, `clear_assignment`, `get_all_assignments`, `reset_for_tests`.
+
+### Route Context Changes
+
+**arduino_dash `html_routes.py`:**
+
+| Route | Line | Change |
+|-------|------|--------|
+| `board_detail()` | 109 | Added `show_sketch_tools=True, show_medicines_section=False` |
+| `admin()` | 199 | Added `active_board_sketch = get_assignment(...)` lookup + context var |
+| `html_admin_board_selector()` | 221 | Passes `board_selector_label`, `board_selector_hx_post`, `board_selector_hx_target`, `board_selector_hx_swap` |
+
+**medminder_dash `html_routes.py`:**
+
+| Route | Line | Change |
+|-------|------|--------|
+| `board_detail()` | 712 | Added `show_sketch_tools=False, show_medicines_section=True` |
+| `admin()` | 483 | Already had `active_board_sketch` (no change needed) |
+| `html_medicines_board_selector()` | 512 | Passes `board_selector_label`, `board_selector_hx_post`, `board_selector_hx_target`, `board_selector_hx_swap` |
+
+### Template Variable Values for admin_board_selector
+
+| Variable | arduino_dash html_admin_board_selector | medminder_dash html_medicines_board_selector |
+|----------|----------------------------------------|---------------------------------------------|
+| `board_selector_label` | `"Active Board (for compile and upload)"` | `"Active Board (for medicine management, compile, and upload)"` |
+| `board_selector_hx_post` | `"/admin/active-board"` | `"/medicines/active-board"` |
+| `board_selector_hx_target` | `"#compile-upload-card"` | `"#medicine-cards-container"` |
+| `board_selector_hx_swap` | `"innerHTML"` | `"outerHTML"` |
+
+### New Partial Templates
+
+| Partial | App | Purpose |
+|---------|-----|---------|
+| `partials/medicine_management.html` | medminder_dash | Medicines card with Add Medicine button + list (included by board_detail.html when `show_medicines_section=True`) |
+| `partials/admin_medicine_section.html` | medminder_dash | Step 1: Set Medicines card with generate/sync buttons (included by admin.html) |
+
+### Converged Template Structure (both apps now identical)
+
+**board_detail.html** key patterns:
+```
+{% if show_sketch_tools %}DnD overlay, Browse btn, Delete btn, modals{% endif %}
+{% if show_medicines_section %}{% include "partials/medicine_management.html" %}{% endif %}
+Sketch selector: <div hx-get="/last-upload" hx-include="#active-board-hardware-id">
+```
+
+**admin.html** key patterns:
+```
+arduino:  board-selector(/admin) + Sketch Path (+ assigned-sketch-info) + compile-upload + modals
+medminder: board-selector(/medicines) + Sketch Path (+ assigned-sketch-info) + admin_medicine_section + compile-upload + modals
+```
+
+**admin_board_selector.html**: Identical template using `{{ board_selector_label }}`, `{{ board_selector_hx_post }}`, etc.
+
+**compile_upload_card.html**: Identical template with `Step 2:`, `Step 3:`, generic description, `&#8230;`.
+
+### Test Changes (3 tests updated)
+
+**File:** `medminder_dash/tests/test_routes.py` — `class TestBoardDetailFqbn`
+
+| Test | Line | What Changed |
+|------|------|-------------|
+| `test_sketch_path_uses_per_board_assignment` | 283 | Assert htmx `/last-upload` container + hw_id value (was: assert sketch path in HTML) |
+| `test_sketch_path_falls_back_to_default` | 305 | Assert htmx container attributes (was: assert default path in HTML) |
+| `test_sketch_path_uses_default_for_no_hardware_id` | 325 | Assert empty hw_id + htmx container (was: assert default path in HTML) |
+
+### Verification
+
+| Suite | Result |
+|-------|--------|
+| `nox -s 'tests(arduino_dash)'` | 119 pass |
+| `nox -s 'tests(medminder_dash)'` | 186 pass, 1 skip |
+
+---
+
+## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) (2026-06-22)
+
+**Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags.
+
+### Key Architecture
+
+```
+_daemonize(logfile):
+  1. os.fork() → parent os._exit(0) → tool sees command done → returns
+  2. Child: os.setsid()     ← new session, immune to parent SIGHUP
+  3. Child: _redirect_io()  ← dup2 stdout/stderr → logfile, no SIGPIPE
+  4. Child: Flask runs      ← forever, logs captured
+```
+
+### Lifecycle Helpers (both server scripts)
+
+| Function | Purpose |
+|----------|---------|
+| `_get_default_pidfile()` | Returns `/tmp/<script_stem>.pid` |
+| `_write_pidfile(path)` | Writes `os.getpid()` to file |
+| `_remove_pidfile(path)` | Removes pidfile only if it still contains OUR PID (avoids stealing another instance's pidfile) |
+| `_stop_server(pidfile, force)` | Reads pidfile, `os.kill(pid, SIGTERM)`, polls 5s, escalates to SIGKILL. Handles `ProcessLookupError` for stale PIDs |
+| `_daemonize(logfile)` | Fork + setsid + signal ignore + stdout/stderr redirect |
+
+### CLI Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--pidfile PATH` | `/tmp/<script>.pid` | PID file path |
+| `--stop` | — | Stop server via pidfile (SIGTERM → 5s poll → SIGKILL) |
+| `--force` | — | With `--stop`: SIGKILL immediately |
+| `--logfile PATH` | /dev/null | Flask log capture |
+
+### Session vs Process Group (critical distinction)
+
+| Mechanism | Scope | Effect |
+|-----------|-------|--------|
+| `os.setpgid(0, 0)` | Process GROUP | ✗ Does NOT protect from tool's session-wide SIGHUP |
+| `os.setsid()` (after fork) | Session | ✓ Creates new session, immune from parent session's SIGHUP |
+
+The bash tool tracks processes by **session ID**. When the shell (session leader) dies, the kernel broadcasts SIGHUP to ALL processes in that session, regardless of process group. Only `os.setsid()` (which requires a fork because the calling process must not be a group leader) creates a new session.
+
+### File References
+
+| File | Lines | Component |
+|------|-------|-----------|
+| `e2e/servers/arduino_dash_server.py` | 81-109 | `_daemonize()` |
+| `e2e/servers/arduino_dash_server.py` | 24-78 | `_get_default_pidfile`, `_write_pidfile`, `_remove_pidfile`, `_stop_server` |
+| `e2e/servers/arduino_dash_server.py` | 208-237 | `main()` — args, --stop check, daemonize call |
+| `e2e/servers/medminder_dash_server.py` | 83-111 | `_daemonize()` (identical) |
+| `e2e/servers/medminder_dash_server.py` | 26-80 | Lifecycle helpers (identical) |
+| `e2e/servers/medminder_dash_server.py` | 237-266 | `main()` — args, --stop check, daemonize call |
+
+### Usage (no shell hacks required)
+
+```bash
+# Start:
+python3 e2e/servers/arduino_dash_server.py --mock --production
+
+# Start with logs:
+python3 e2e/servers/arduino_dash_server.py --mock --production --logfile /tmp/arduino.log
+
+# Stop:
+python3 e2e/servers/arduino_dash_server.py --stop
+
+# Force stop:
+python3 e2e/servers/arduino_dash_server.py --stop --force
+
+# Custom pidfile:
+python3 e2e/servers/arduino_dash_server.py --pidfile /tmp/my.pid --stop
+```{% endraw %}

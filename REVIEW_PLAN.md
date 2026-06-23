@@ -125,4 +125,67 @@
 - [x] 186 medminder_dash tests pass, 1 skip — ✅ (0 regression)
 - [x] No stale `TestAdminBoardSelectorPolling` in source code — ✅ (only auto-generated files)
 - [x] Pure rename — no functional change, no test delta — ✅
+
+## Phase 99 — HTML Template Homogenisation Across Both Dashboards
+
+**Date**: 2026-06-22 12:43
+
+**Status**: ✅ IMPLEMENTED AND REVIEWED
+
+### Review Criteria
+
+#### Template Correctness
+- [x] arduino_dash board_detail.html — no `<form>` wrapper, flat `<div>` + htmx `/last-upload` — ✅
+- [x] medminder_dash board_detail.html — htmx `/last-upload` replaces hidden input, `show_sketch_tools` guard — ✅
+- [x] Both admin.html — assigned-sketch-info (arduino) and medicine partial (medminder) — ✅
+- [x] Both admin_board_selector.html — template vars for route attrs — ✅
+- [x] Both compile_upload_card.html — step nums, generic desc, entity converged — ✅
+
+#### Partial Alignment (14 shared templates now identical)
+- [x] dnd_overlay.html — trailing newline matches — ✅
+- [x] board_card.html — `or 'Unknown'` guard — ✅
+- [x] delete_confirm_modal.html — `hardware_id` in hx-vals — ✅
+- [x] base.html — DnD listeners match — ✅
+
+#### Route Context
+- [x] `show_sketch_tools` / `show_medicines_section` set correctly in both apps — ✅
+- [x] `active_board_sketch` resolved from shared SketchRegistry in arduino_dash admin — ✅
+- [x] admin_board_selector template vars passed as Python kwargs — ✅
+
+#### Shared Module
+- [x] `SketchRegistry` class in `arduino_sketch_tools` — exports `get_assignment`, `set_assignment`, `clear_assignment`, `get_all_assignments` — ✅
+- [x] Both per-app `sketch_registry.py` are thin wrappers — ✅
+- [x] Wheel rebuilt, Pipfile.locks updated — ✅
+
+#### Tests
+- [x] `nox -s 'tests(arduino_dash)'` — 119 passed — ✅
+- [x] `nox -s 'tests(medminder_dash)'` — 186 passed, 1 skipped — ✅
+- [x] 3 TestBoardDetailFqbn tests updated for htmx /last-upload pattern — ✅
+
+## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup)
+
+**Date**: 2026-06-22 16:14
+
+**Status**: ✅ IMPLEMENTED AND REVIEWED
+
+### Review Criteria
+
+#### Code Correctness
+- [x] `os.fork()` + `os.setsid()` creates new session immune to SIGHUP — ✅
+- [x] `_redirect_io(logfile)` closes stdin, dup2 stdout/stderr to logfile — ✅
+- [x] `--stop` reads pidfile, sends SIGTERM, waits for exit — ✅
+- [x] `--force` sends SIGKILL if SIGTERM doesn't work — ✅
+- [x] Stale pidfile detection (ProcessLookupError → clean up) — ✅
+- [x] Stale PID check (`_remove_pidfile` verifies PID matches) — ✅
+
+#### Behavioral Correctness
+- [x] Process survives bash tool exit without `&`, `disown`, `timeout` — ✅
+- [x] `--logfile` captures stdout/stderr — ✅ (571 / 649 bytes)
+- [x] `--stop` performs clean shutdown — ✅
+- [x] Second instance warns about existing PID — ✅
+
+#### Tests
+- [x] All 6 server lifecycle scenarios pass (both apps) — ✅
+- [x] No regression in dashboard tests — ✅ (119 + 186 pass)
+- [x] No shell hacks used — ✅
 {% endraw %}

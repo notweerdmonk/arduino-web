@@ -294,7 +294,10 @@ class TestBoardDetailFqbn:
                        return_value=per_board_path):
                 resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
-            assert per_board_path.encode() in resp.data
+            assert b'id="sketch-path-container"' in resp.data
+            assert b'hx-get="/last-upload"' in resp.data
+            assert b'hx-include="#active-board-hardware-id"' in resp.data
+            assert b'USB VID:PID=2341:0043 SER=12345' in resp.data
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
@@ -312,8 +315,9 @@ class TestBoardDetailFqbn:
                        return_value=None):
                 resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
-            from medminder_dash.settings import _DEFAULT_SKETCH_DIR
-            assert _DEFAULT_SKETCH_DIR.encode() in resp.data
+            assert b'id="sketch-path-container"' in resp.data
+            assert b'hx-get="/last-upload"' in resp.data
+            assert b'hx-include="#active-board-hardware-id"' in resp.data
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
@@ -329,8 +333,10 @@ class TestBoardDetailFqbn:
         try:
             resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
-            from medminder_dash.settings import _DEFAULT_SKETCH_DIR
-            assert _DEFAULT_SKETCH_DIR.encode() in resp.data
+            assert b'id="sketch-path-container"' in resp.data
+            assert b'hx-get="/last-upload"' in resp.data
+            assert b'hx-include="#active-board-hardware-id"' in resp.data
+            assert b'id="active-board-hardware-id" value=""' in resp.data
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)

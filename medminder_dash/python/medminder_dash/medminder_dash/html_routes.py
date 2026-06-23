@@ -514,6 +514,10 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
             ports=ports,
             active_board=active_board_port,
             active_board_fqbn=active_board_fqbn,
+            board_selector_label="Active Board (for medicine management, compile, and upload)",
+            board_selector_hx_post="/medicines/active-board",
+            board_selector_hx_target="#medicine-cards-container",
+            board_selector_hx_swap="outerHTML",
         )
 
     @app.route("/board/compile-upload-card")
@@ -717,6 +721,8 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
             board_info=board_info,
             sketch_path=sketch_path,
             hardware_id=hardware_id,
+            show_sketch_tools=False,
+            show_medicines_section=True,
         )
 
     @app.route("/board/<path:port>/connection-status")

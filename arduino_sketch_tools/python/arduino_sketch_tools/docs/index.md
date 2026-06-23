@@ -55,9 +55,10 @@ registered on the app.
 
 ```
 arduino_sketch_tools/
-  __init__.py        # Public API: exports ArduinoSketchTools
+  __init__.py        # Public API: exports ArduinoSketchTools, SketchRegistry
   extension.py       # ArduinoSketchTools class, state management, checksums
   routes.py          # Flask blueprint with compile/upload routes
+  sketch_registry.py # SketchRegistry class — per-board sketch assignment lookup
   templates/
     partials/        # 10 HTMX partial templates for progress/result rendering
 ```
@@ -65,7 +66,8 @@ arduino_sketch_tools/
 ## Import
 
 ```python
-from arduino_sketch_tools import ArduinoSketchTools
+from arduino_sketch_tools import ArduinoSketchTools, SketchRegistry
 ```
 
-The only public name is `ArduinoSketchTools`.
+- `ArduinoSketchTools` — Flask extension for compile/upload routes, WS broadcast, state management
+- `SketchRegistry` — Thread-safe registry mapping hardware IDs to assigned sketch paths, operating on a shared upload registry dict

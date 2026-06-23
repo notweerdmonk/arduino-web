@@ -56,6 +56,11 @@
         <span class="hint hint-block">
             Select an Arduino sketch folder (.ino file) or drag & drop anywhere on the page
         </span>
+        {% if active_board_hardware_id and active_board_sketch %}
+        <div class="assigned-sketch-info">
+            &#9889; Assigned to selected board: <code>{{ active_board_sketch }}</code>
+        </div>
+        {% endif %}
     </div>
 
     <div id="compile-upload-card"

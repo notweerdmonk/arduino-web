@@ -7,10 +7,31 @@
 Per-board sketch assignment registry keyed by hardware ID. Backed by
 `state._upload_registry` in-memory dict.
 
-All functions are thread-safe (protected by `_lock` and
-`state._upload_registry_lock`).
+## Shared `SketchRegistry` Class (Phase 99)
 
-## Functions
+This module is now a thin **10-line wrapper** around the shared `SketchRegistry` class in
+`arduino_sketch_tools/sketch_registry.py`. The module-level functions (`get_assignment`,
+`set_assignment`, etc.) are bound methods of a module-level `SketchRegistry` instance:
+
+```python
+from arduino_sketch_tools import SketchRegistry
+from medminder_dash import state
+
+_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)
+
+get_assignment = _registry.get_assignment
+set_assignment = _registry.set_assignment
+clear_assignment = _registry.clear_assignment
+get_all_assignments = _registry.get_all_assignments
+reset_for_tests = _registry.reset_for_tests
+```
+
+Existing importers (`from medminder_dash.sketch_registry import get_assignment`) require **no changes**.
+
+## Functions (re-exported from `SketchRegistry`)
+
+All functions are thread-safe (protected by `_op_lock` and
+`state._upload_registry_lock`).
 
 ### `get_assignment(hardware_id: str) -> Optional[str]`
 
@@ -69,3 +90,9 @@ assignments = get_all_assignments()
 ### `reset_for_tests() -> None`
 
 Reset internal state for testing. Currently a no-op.
+
+## Thread Safety
+
+Two levels of locking within the `SketchRegistry` class:
+1. **`_op_lock`** (instance-level) — serializes registry operations
+2. **`state._upload_registry_lock`** (caller-provided) — protects the shared `_upload_registry` dict

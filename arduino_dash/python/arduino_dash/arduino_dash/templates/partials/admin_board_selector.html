@@ -1,13 +1,13 @@
 <div class="card" id="admin-board-selector-card">
   <div class="form-group mb-0">
-    <label for="admin-active-board">Active Board (for compile and upload)</label>
+    <label for="admin-active-board">{{ board_selector_label }}</label>
     <div class="flex-row">
       <select id="admin-active-board"
               name="port"
-              hx-post="/admin/active-board"
+              hx-post="{{ board_selector_hx_post }}"
               hx-trigger="change"
-              hx-target="#compile-upload-card"
-              hx-swap="innerHTML"
+              hx-target="{{ board_selector_hx_target }}"
+              hx-swap="{{ board_selector_hx_swap }}"
               hx-include="this"
               hx-on::after-request="htmx.trigger('body', 'board-changed')"
               class="flex-1">

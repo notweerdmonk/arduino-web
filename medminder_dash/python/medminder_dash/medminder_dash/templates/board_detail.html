@@ -32,16 +32,44 @@
             <span id="port-display" class="value">{{ port }}</span>
         </div>
     </div>
+
     <div class="form-group">
-        <input type="hidden" id="sketch_path" name="sketch_path" value="{{ sketch_path }}">
+        <input type="hidden" id="active-board-hardware-id" value="{{ (board_info or {}).get('hardware_id', '') }}">
+        <div class="flex-row">
+            <div id="sketch-path-container" class="container-grow"
+                hx-get="/last-upload"
+                hx-trigger="load"
+                hx-target="this"
+                hx-swap="innerHTML"
+                hx-include="#active-board-hardware-id">
+            </div>
+            {% if show_sketch_tools %}
+            <button class="btn btn-danger btn-fixed-size nowrap" type="button"
+                    id="delete-sketch-btn"
+                    data-action="delete-sketch">Delete</button>
+            <label for="folder-input" class="btn btn-secondary btn-fixed-size">Browse...</label>
+            {% endif %}
+        </div>
+        {% if show_sketch_tools %}
+        {% include "partials/dnd_overlay.html" %}
+        <input type="file" id="folder-input" webkitdirectory name="files[]"
+               class="sr-only"
+               onchange="handleFolderInput(this)">
+        <button id="modal-reset-input"
+                class="sr-only"
+                onclick="document.getElementById('folder-input').value=''">
+        </button>
+        <span class="hint">Select an Arduino sketch folder (.ino file) or drag & drop here</span>
+        {% endif %}
     </div>
+
     <div class="flex-row">
         <button class="btn btn-primary"
                 hx-post="/board/{{ port_path }}/compile"
                 hx-trigger="click"
                 hx-target="#compile-section"
                 hx-swap="outerHTML"
-                hx-include="#fqbn, #sketch_path">
+                hx-include="#sketch_path, #fqbn">
             Compile
         </button>
         <button class="btn btn-success"
@@ -49,7 +77,7 @@
                 hx-trigger="click"
                 hx-target="#upload-section"
                 hx-swap="outerHTML"
-                hx-include="#fqbn, #sketch_path">
+                hx-include="#sketch_path, #fqbn">
             Upload
         </button>
         <a href="/admin" class="btn btn-secondary btn-link">Admin Page</a>
@@ -71,23 +99,12 @@
     </div>
 </div>
 
-<div class="card mt-1">
-    <div class="section-header">
-        <h3>Medicines</h3>
-        <button class="btn btn-primary"
-                hx-get="/medicine/new"
-                hx-target="#medicine-form-container"
-                hx-swap="outerHTML">Add Medicine</button>
-    </div>
-    <div id="medicine-form-container"></div>
-    <div id="medicine-list"
-         hx-get="/medicines"
-         hx-trigger="load"
-         hx-target="this"
-         hx-swap="innerHTML">
-        <div class="card empty-state-card">
-            <p>Loading...</p>
-        </div>
-    </div>
-</div>
+{% if show_sketch_tools %}
+{% include "partials/sketch_upload_modal.html" %}
+{% include "partials/delete_confirm_modal.html" %}
+{% endif %}
+
+{% if show_medicines_section %}
+{% include "partials/medicine_management.html" %}
+{% endif %}
 {% endblock %}

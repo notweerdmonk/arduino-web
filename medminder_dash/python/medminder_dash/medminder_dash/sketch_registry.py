@@ -1,93 +1,12 @@
-"""Per-board sketch assignment registry keyed by hardware_id.
-Backed by _upload_registry in-memory dict.
-"""
+"""Per-board sketch assignment registry — delegates to arduino_sketch_tools."""
 
-import os
-import threading
-from typing import Optional
-
+from arduino_sketch_tools.sketch_registry import SketchRegistry
 from medminder_dash import state
 
-_lock = threading.Lock()
+_registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)
 
-
-def get_assignment(hardware_id: str) -> Optional[str]:
-    """Return the sketch path assigned to a hardware ID, or None.
-
-    Args:
-        hardware_id: Board hardware ID.
-
-    Returns:
-        Sketch directory path or None.
-    """
-    if not hardware_id:
-        return None
-    with _lock:
-        with state._upload_registry_lock:
-            for entry in state._upload_registry.values():
-                for versions in entry.values():
-                    for v in versions:
-                        if hardware_id in v.get("hardware_ids", []) and os.path.isdir(v["path"]):
-                            return v["path"]
-    return None
-
-
-def set_assignment(hardware_id: str, sketch_dir: str) -> None:
-    """Assign a sketch path to a hardware ID.
-
-    Args:
-        hardware_id: Board hardware ID.
-        sketch_dir: Sketch directory path to assign.
-    """
-    if not hardware_id:
-        return
-    with _lock:
-        with state._upload_registry_lock:
-            for entry in state._upload_registry.values():
-                for versions in entry.values():
-                    for v in versions:
-                        if v["path"] == sketch_dir:
-                            if hardware_id not in v.get("hardware_ids", []):
-                                v.setdefault("hardware_ids", []).append(hardware_id)
-                            return
-
-
-def clear_assignment(hardware_id: str) -> None:
-    """Remove the sketch assignment for a hardware ID.
-
-    Args:
-        hardware_id: Board hardware ID.
-    """
-    if not hardware_id:
-        return
-    with _lock:
-        with state._upload_registry_lock:
-            for entry in state._upload_registry.values():
-                for versions in entry.values():
-                    for v in versions:
-                        if hardware_id in v.get("hardware_ids", []):
-                            v["hardware_ids"].remove(hardware_id)
-                            return
-
-
-def get_all_assignments() -> dict[str, str]:
-    """Return all hardware ID to sketch path assignments.
-
-    Returns:
-        Dict of hardware_id -> sketch_dir.
-    """
-    result = {}
-    with _lock:
-        with state._upload_registry_lock:
-            for entry in state._upload_registry.values():
-                for versions in entry.values():
-                    for v in versions:
-                        for hw_id in v.get("hardware_ids", []):
-                            if os.path.isdir(v["path"]):
-                                result[hw_id] = v["path"]
-    return result
-
-
-def reset_for_tests() -> None:
-    """Reset internal state for testing (no-op)."""
-    pass
+get_assignment = _registry.get_assignment
+set_assignment = _registry.set_assignment
+clear_assignment = _registry.clear_assignment
+get_all_assignments = _registry.get_all_assignments
+reset_for_tests = _registry.reset_for_tests

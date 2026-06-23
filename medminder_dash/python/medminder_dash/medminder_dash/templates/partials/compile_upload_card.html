@@ -1,7 +1,7 @@
 <div class="card" id="compile-section">
     <h3 class="card-section-title">Step 2: Compile Sketch</h3>
     <p class="hint hint-mb">
-        Compile the MedMinderV2 sketch for the board selected above.
+        Compile the selected sketch for the board selected above.
     </p>
     <div class="flex-row-wide mb-075">
         <div class="form-group flex-1 mb-0">
@@ -45,7 +45,7 @@
             {% if not active_board %}disabled{% endif %}>Upload</button>
     <div id="upload-output" class="output-section">
         {% if not active_board %}
-            <div class="log-viewer">Waiting for board connection…</div>
+            <div class="log-viewer">Waiting for board connection&#8230;</div>
         {% else %}
             <div class="log-viewer">Ready</div>
         {% endif %}

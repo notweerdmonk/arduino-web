@@ -46,8 +46,8 @@
         },
         "arduino-sketch-tools": {
             "hashes": [
-                "sha256:482d98349a46d503d2becf628123eab982c549414f73746cb468224569f9101a",
-                "sha256:d7f7e7ee34808fa718ad7f83162bcdcca7aae05427a2d6a11f5fd4bee44bb7e8"
+                "sha256:59da75b2dea417b1f6c6a79a966368d3c253ec0e7dd3d27d11ca981d6bfb8926",
+                "sha256:ac3ba1e7af26e8c08c846f74bfdddba4f5ffb2ed64a4827d130aeb2a4b52ee6e"
             ],
             "index": "arduino-sketch-tools-local",
             "version": "==0.1.0"

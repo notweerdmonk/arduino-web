@@ -6,7 +6,7 @@
         <div class="flex-row">
             <button type="button" class="btn btn-danger" id="delete-confirm-btn"
                     hx-delete="/sketch"
-                    hx-vals='js:{path: document.getElementById("delete-confirm-modal").__deletePath}'
+                    hx-vals='js:{path: document.getElementById("delete-confirm-modal").__deletePath, hardware_id: (document.getElementById("active-board-hardware-id")?.value || "")}'
                     hx-target="#sketch-path-container"
                     hx-swap="outerHTML"
                     hx-on::after-request="hideModal('delete-confirm-modal')">

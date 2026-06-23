@@ -108,7 +108,9 @@ def init_html_routes(app: Flask, sock):
         port_path = norm_port.lstrip("/")
         return render_template("board_detail.html", port=norm_port,
                                port_path=port_path,
-                               board_name=board_name, board_info=board_info)
+                               board_name=board_name, board_info=board_info,
+                               show_sketch_tools=True,
+                               show_medicines_section=False)
 
     @app.route("/boards/grid")
     def html_boards_grid():
@@ -155,6 +157,7 @@ def init_html_routes(app: Flask, sock):
         active_board_port = request.args.get("port", "").strip()
         active_board_fqbn = ""
         active_board_hardware_id = ""
+        active_board_sketch = ""
         if not active_board_port:
             (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
         if not active_board_port:
@@ -194,10 +197,14 @@ def init_html_routes(app: Flask, sock):
             # default board is Arduino UNO
             active_board_fqbn = "arduino:avr:uno"
 
+        if active_board_hardware_id:
+            active_board_sketch = get_assignment(active_board_hardware_id) or ""
+
         return render_template("admin.html", ports=known_ports,
                                active_board=active_board_port,
                                active_board_fqbn=active_board_fqbn,
-                               active_board_hardware_id=active_board_hardware_id)
+                               active_board_hardware_id=active_board_hardware_id,
+                               active_board_sketch=active_board_sketch)
 
     @app.route("/admin/board-selector")
     def html_admin_board_selector():
@@ -214,7 +221,11 @@ def init_html_routes(app: Flask, sock):
         return render_template("partials/admin_board_selector.html",
                            ports=known_ports,
                            active_board=active_board_port,
-                           active_board_fqbn=active_board_fqbn)
+                           active_board_fqbn=active_board_fqbn,
+                           board_selector_label="Active Board (for compile and upload)",
+                           board_selector_hx_post="/admin/active-board",
+                           board_selector_hx_target="#compile-upload-card",
+                           board_selector_hx_swap="innerHTML")
 
     @app.route("/admin/active-board", methods=["POST"])
     def html_admin_active_board():

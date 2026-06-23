@@ -2,7 +2,7 @@
 ---
 # Mock Servers
 
-Flask dev servers with optional mock data injection for E2E testing.
+Flask dev servers with optional mock data injection for E2E testing. No shell hacks (`&`, `disown`, `&>/dev/null`) required — the server daemonizes itself.
 
 ## Server Scripts
 
@@ -23,6 +23,9 @@ python3 e2e/servers/arduino_dash_server.py --mock --bms
 
 # Custom port
 python3 e2e/servers/arduino_dash_server.py --mock --port 9000
+
+# With log capture
+python3 e2e/servers/arduino_dash_server.py --mock --logfile /tmp/arduino.log
 ```
 
 ### `medminder_dash_server.py`
@@ -36,7 +39,66 @@ python3 e2e/servers/medminder_dash_server.py --mock
 
 # With BMS daemon
 python3 e2e/servers/medminder_dash_server.py --mock --bms
+
+# With log capture
+python3 e2e/servers/medminder_dash_server.py --mock --logfile /tmp/medminder.log
 ```
+
+## CLI Reference
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--mock` | — | Inject test data (boards, sketches, medicines) |
+| `--bms` | — | Start BMS daemon (arduino-cli gRPC) |
+| `--port PORT` | 8765 / 8766 | TCP port to bind |
+| `--production` | — | Disable Flask debug + reloader |
+| `--pidfile PATH` | `/tmp/<script>.pid` | PID file path |
+| `--stop` | — | Stop a running server via its pidfile |
+| `--force` | — | With `--stop`: immediate SIGKILL |
+| `--logfile PATH` | /dev/null | Redirect stdout/stderr to file |
+
+## Why Daemonization?
+
+The bash tool tracks processes by session ID. A simple `os.setpgid(0, 0)` changes the process group but leaves the process in the same session — when the bash tool exits, the entire session receives SIGHUP and the server dies. `os.setsid()` creates a new session, making the process immune to SIGHUP from the tool. But `setsid()` requires the caller not be a process group leader, so the server forks first: the parent (group leader) exits immediately, and the child calls `setsid()` to start a fresh session.
+
+After `setsid()`, stdout/stderr are redirected to the logfile (or `/dev/null`). This means `python3 script.py --mock` returns instantly and the server lives independently — no `&`, no `disown`, no `&>/dev/null`.
+
+## Lifecycle
+
+### Starting
+
+The server daemonizes automatically: it forks, the parent exits immediately (the bash tool sees a completed command), and the child continues in a new session with stdout/stderr redirected.
+
+```bash
+python3 e2e/servers/arduino_dash_server.py --mock
+# Command returns immediately. Server is running in background.
+```
+
+### Stopping
+
+Use the built-in `--stop` flag (no `lsof`, no `kill`, no `pkill`):
+
+```bash
+# Stop arduino_dash (default pidfile: /tmp/arduino_dash_server.pid)
+python3 e2e/servers/arduino_dash_server.py --stop
+
+# Force-stop (skip graceful SIGTERM)
+python3 e2e/servers/arduino_dash_server.py --stop --force
+
+# Custom pidfile
+python3 e2e/servers/arduino_dash_server.py --pidfile /tmp/my.pid --stop
+
+# Stop medminder_dash
+python3 e2e/servers/medminder_dash_server.py --stop
+```
+
+The stop flow:
+1. Reads PID from pidfile
+2. Sends SIGTERM
+3. Polls every 100ms for up to 5s
+4. Escalates to SIGKILL if process doesn't exit
+5. Removes pidfile
+6. Exits with status 0
 
 ## `--mock` Data
 
@@ -69,21 +131,6 @@ The `--bms` flag starts the Board Management Service alongside the Flask dev ser
 4. UI daemon badge updates to "Connected"
 
 **Note:** `--bms` disables Flask debug mode (`use_reloader=False`). BMS subprocess terminates automatically on server exit.
-
-## Stopping Servers
-
-```bash
-# By port
-kill $(lsof -ti:8765) 2>/dev/null
-kill $(lsof -ti:8766) 2>/dev/null
-
-# By name
-pkill -f arduino_dash_server.py
-pkill -f medminder_dash_server.py
-
-# Verify
-lsof -i:8765 -i:8766
-```
 
 ## Playwright MCP Note
 

@@ -147,10 +147,10 @@ Each recipe lists step-by-step browser actions for the opencode agent.
 
 ## Cleanup
 
-Always close browser and shutdown servers after tests:
+Always close browser and shutdown servers after tests (using the `--stop` flag — no `kill`, `pkill`, or `lsof` needed):
 
 ```
 → playwright_browser_close()
-→ bash(command="pkill -f arduino_dash_server.py 2>/dev/null; pkill -f medminder_dash_server.py 2>/dev/null")
-→ bash(command="kill $(lsof -ti:8765 -ti:8766) 2>/dev/null")
+→ bash(command="python3 e2e/servers/arduino_dash_server.py --stop")
+→ bash(command="python3 e2e/servers/medminder_dash_server.py --stop")
 ```

@@ -339,6 +339,30 @@ the `finally` block, so only one log there.
 - One `style.css` per dashboard (not shared) — avoids cross-package dependency
 - Semantic class names over utility classes (`.text-muted`, `.result-banner--success`, `.modal-content`) matching how components are used in templates
 
+## 2026-06-24 17:57 — Phase 100c: Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header) ✅ COMPLETED
+
+**Goal**: Fix two non-blocking console errors:
+1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` does not resolve. Idiomorph was bundled in htmx 1.x but became a separate package in htmx 2.x. Fixed by changing to `https://unpkg.com/idiomorph/dist/idiomorph-ext.js` in both `base.html` templates.
+2. **WebSocket "Invalid frame header"** — `flask-sock` needs `simple-websocket` for WS transport on sync servers. Neither `pyproject.toml` listed it, so WS upgrade returned a garbled response. Fixed by adding `simple-websocket>=1.0.0` to both dashboards' `pyproject.toml`.
+
+**Files changed** (8 files):
+| File | Change |
+|------|--------|
+| `arduino_dash/.../templates/base.html:9` | Fixed idiomorph CDN URL |
+| `medminder_dash/.../templates/base.html:13` | Fixed idiomorph CDN URL |
+| `arduino_dash/pyproject.toml:14` | Added `simple-websocket>=1.0.0` |
+| `medminder_dash/pyproject.toml:15` | Added `simple-websocket>=1.0.0` |
+| `PLAN.md` | New Phase 100c entry |
+| `IMPLEMENTATION_PLAN.md`, `IMPLEMENTATION_TASK.md`, `IMPLEMENTATION_PROGRESS.md` | Phase 100c planning |
+| `IMPLEMENTATION_JOURNAL.md` | Detailed journal entry |
+| `TESTING_PLAN.md`, `TESTING_TASK.md`, `TESTING_PROGRESS.md`, `TESTING_JOURNAL.md` | Testing docs updated |
+
+**Verification**:
+- New CDN URL → HTTP 200 ✅
+- Old CDN URL → HTTP 404 ✅
+- simple-websocket dep present in both pyproject.toml ✅
+- No regression in test failures (both suites unchanged) ✅
+
 ## 2026-06-17 17:15 — Phase 78: Fix `_daemon_ready` Unprotected Access + Duplicate Log Spam
 
 **Goal**: Add thread lock protection to all `_daemon_ready` access sites across both dashboards and suppress duplicate info logs during pubsub reconnect cycles.

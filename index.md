@@ -4,7 +4,7 @@
 
 Welcome to the MedMinder documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-06-23 — Phases 94-100 complete (Phase 100: server process lifecycle — daemonize, `--pidfile`, `--stop`, `--force`). See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-06-24 — Phases 94-100c complete (Phase 100c: fix idiomorph CDN URL + WS transport dep). See [PLAN.md](PLAN.md) for full phase history.
 
 ---
 

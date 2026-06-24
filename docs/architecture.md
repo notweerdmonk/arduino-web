@@ -326,10 +326,12 @@ Prior to Phase 97, interactive UI behaviors used **Hyperscript** (`_=""` attribu
 **Idiomorph** is loaded from CDN and set as the swap strategy for daemon badge and board status elements:
 
 ```html
-<script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"></script>
+<script src="https://unpkg.com/idiomorph/dist/idiomorph-ext.js"></script>
 <body hx-ext="morph">
     <span hx-get="/daemon/status" hx-trigger="load" hx-target="this" hx-swap="morph">
 ```
+
+> **CDN note**: htmx 2.x moved all extensions to separate npm packages. Idiomorph is loaded from `idiomorph/dist/idiomorph-ext.js` (not `htmx.org/dist/ext/idiomorph.js`, which was the htmx 1.x path and returns 404).
 
 **Event delegation** replaced all `_=""` hyperscript attributes with a single `DOMContentLoaded` listener in `base.html` that handles modal toggles, dropdowns, and button state using `data-*` attributes and CSS class toggling.
 

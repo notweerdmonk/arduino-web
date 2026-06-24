@@ -522,6 +522,8 @@ Both dashboards initiate the WebSocket connection identically in `base.html`:
 
 This is the only WS connection in the app. It uses the HTMX WebSocket extension (`ws.js`) to open a persistent WS to `/ws/board-events`. The `<div>` is hidden (no content) — its sole purpose is to enable the WS extension. All WS messages arrive as HTMX OOB swaps.
 
+> **Transport dependency**: `flask-sock` requires a WebSocket transport implementation. The project uses `simple-websocket` which works with sync WSGI servers (Flask dev server, gunicorn sync workers). Without it, WS upgrade requests get a non-101 HTTP response causing `"Invalid frame header"` in the browser. Both dashboards declare `simple-websocket>=1.0.0` as a runtime dependency.
+
 ### WS Endpoint Registration
 
 **medminder_dash** `html_routes.py` (lines 771-783):

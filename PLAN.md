@@ -59,6 +59,36 @@ Before (broken):                          After (works):
 
 ---
 
+### Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Goal**: Fix two non-blocking console errors observed during Playwright E2E testing:
+
+1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` returns 404. Idiomorph is a separate npm package starting from htmx 2.x and is not bundled inside `htmx.org`.
+2. **WebSocket "Invalid frame header"** — `ws://localhost:8766/ws/board-events` fails because `flask-sock` lacks `simple-websocket` (the WS transport implementation). The Werkzeug/gunicorn sync workers return a non-101 response during WS upgrade.
+
+**Root cause analysis**:
+- Idiomorph was historically loaded from `htmx.org/dist/ext/idiomorph.js` when it was bundled inside htmx org (htmx 1.x). In htmx 2.x, all extensions became separate packages. The correct unpkg path is `idiomorph/dist/idiomorph-ext.js`.
+- `flask-sock` requires one of `simple-websocket` (for dev server / sync gunicorn) or `gevent-websocket` (for gevent worker). Without either, the WS upgrade request gets a garbled/non-101 HTTP response, causing the browser to emit "Invalid frame header".
+
+| Q | Scope | Files | Change |
+|---|-------|-------|--------|
+| 1 | arduino_dash base.html CDN | `base.html:9` | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| 2 | medminder_dash base.html CDN | `base.html:13` | Same URL change |
+| 3 | arduino_dash pyproject.toml dep | `pyproject.toml:13` | Add `simple-websocket>=1.0.0` |
+| 4 | medminder_dash pyproject.toml dep | `pyproject.toml:14` | Add `simple-websocket>=1.0.0` |
+
+**Verification**:
+| Test | Method | Pass Criteria |
+|------|--------|--------------|
+| Idiomorph CDN | `curl -I https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
+| Old URL dead | `curl -I https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
+| Pyproject deps | `grep simple-websocket */python/*/pyproject.toml` | 2 matches |
+| E2E console | Start dev server, check browser console | No 404 / Invalid frame header |
+
+---
+
 ### Phase 100b — Code Review Uniformity Sweep (Ruff + ESLint + djlint) ✅ COMPLETED
 
 **Date**: 2026-06-24

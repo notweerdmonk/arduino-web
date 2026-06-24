@@ -3426,6 +3426,46 @@ medminder: board-selector(/medicines) + Sketch Path (+ assigned-sketch-info) + a
 
 ---
 
+## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header) (2026-06-24)
+
+**Goal**: Fix two non-blocking console errors observed during Playwright E2E testing.
+
+### Bug 1: idiomorph.js 404
+
+**Root cause**: Both `base.html` templates loaded idiomorph from `https://unpkg.com/htmx.org/dist/ext/idiomorph.js`. This path existed in htmx 1.x (extensions bundled inside `htmx.org`). In htmx 2.x (both dashboards use 2.0.4), extensions are separate packages. The URL returns HTTP 404.
+
+**Fix**: Changed the CDN URL to `https://unpkg.com/idiomorph/dist/idiomorph-ext.js` in both base.html files.
+
+| File | Line | Change |
+|------|------|--------|
+| `arduino_dash/.../templates/base.html` | 9 | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| `medminder_dash/.../templates/base.html` | 13 | Same URL change |
+
+### Bug 2: WebSocket "Invalid frame header"
+
+**Root cause**: `flask-sock` creates a `Sock(app)` instance that wraps `app.wsgi_app` with a WS upgrade middleware. The middleware requires a WebSocket transport implementation (`simple-websocket` for sync servers, `gevent-websocket` for gevent). Neither was declared as a dependency. Without a transport, the middleware returns a non-101 response during WS upgrade.
+
+**Fix**: Added `simple-websocket>=1.0.0` to both `pyproject.toml` files.
+
+| File | Dep |
+|------|-----|
+| `arduino_dash/.../pyproject.toml` | `simple-websocket>=1.0.0` |
+| `medminder_dash/.../pyproject.toml` | `simple-websocket>=1.0.0` |
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| New idiomorph CDN: `curl -sIL https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
+| Old idiomorph CDN: `curl -sIL https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
+| simple-websocket in arduino_dash pyproject.toml | Present at line 14 |
+| simple-websocket in medminder_dash pyproject.toml | Present at line 15 |
+| No test regressions | Same pre-existing failures (unchanged) |
+
+**Test Impact**: 0 regressions. Pre-existing failures (arduino_dash: 111 errors from test-state-module mismatch, medminder_dash: 1 failure from Phase 99) unchanged.
+
+---
+
 ## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) (2026-06-22)
 
 **Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags.

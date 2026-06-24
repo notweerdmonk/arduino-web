@@ -397,7 +397,9 @@ All frontend updates use a single persistent WebSocket connection established by
 <div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
 ```
 
-The server sends raw HTML with `hx-swap-oob` attributes; HTMX swaps the content into the DOM. Three tiers of OOB broadcasts exist (all introduced in Phase 98):
+> **Transport dependency**: `flask-sock` needs a WebSocket transport implementation. Both dashboards depend on `simple-websocket>=1.0.0` which provides WS transport for sync WSGI servers (Flask dev server, gunicorn sync workers). Without it, WS upgrade fails with `"Invalid frame header"`.
+
+The server sends raw HTML with `hx-swap-oob` attributes; HTMX swaps the content into the DOM. Four tiers of OOB broadcasts exist:
 
 ### Tier 1 — Badge OOB
 

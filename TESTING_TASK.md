@@ -38,4 +38,23 @@
 | 5 | medminder_dash --stop cleanup | ✅ | "Stopped PID" ✓ |
 | 6 | medminder_dash --logfile capture | ✅ | 649 bytes ✓ |
 | 7 | Stale PID handling | ✅ | Cleans up pidfile ✓ |
+
+## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Status**: ✅ COMPLETED
+
+## Testing Tasks — All Passed
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | New idiomorph CDN resolves | ✅ | HTTP 200 (via follow-redirect) |
+| 2 | Old idiomorph CDN returns 404 | ✅ | HTTP 404 (via follow-redirect) |
+| 3 | simple-websocket in arduino_dash pyproject.toml | ✅ | Present at line 14 |
+| 4 | simple-websocket in medminder_dash pyproject.toml | ✅ | Present at line 15 |
+| 5 | idiomorph URL fixed in arduino_dash base.html | ✅ | `idiomorph/dist/idiomorph-ext.js` |
+| 6 | idiomorph URL fixed in medminder_dash base.html | ✅ | `idiomorph/dist/idiomorph-ext.js` |
+| 7 | No regressions — arduino_dash tests | ✅ | Same 111 pre-existing errors (no new failures) |
+| 8 | No regressions — medminder_dash tests | ✅ | Same 1 pre-existing failure (no new failures) |
 {% endraw %}

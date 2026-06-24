@@ -530,4 +530,75 @@ Similarly, `--stop` handles stale PIDs gracefully: if `os.kill()` raises `Proces
 | `nox -s 'tests(medminder_dash)'` | 186 passed, 1 skipped |
 
 ---
+
+---
+
+## Entry 3 — Phase 100c: Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+**Status**: ✅ Complete
+
+### Goal
+
+Fix two non-blocking console errors observed during Playwright E2E testing:
+
+1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` returns 404.
+2. **WebSocket "Invalid frame header"** — `ws://localhost:8766/ws/board-events` fails because `flask-sock` lacks `simple-websocket`.
+
+### Root Cause Analysis
+
+#### Bug 1: idiomorph.js 404
+
+The idiomorph JS was loaded from `https://unpkg.com/htmx.org/dist/ext/idiomorph.js`. This path existed in htmx 1.x where extensions were bundled inside the `htmx.org` npm package. Starting from htmx 2.x (both dashboards use 2.0.4), all extensions were extracted into separate npm packages. The idiomorph extension is now published as the standalone `idiomorph` package.
+
+**Correct URL**: `https://unpkg.com/idiomorph/dist/idiomorph-ext.js`
+
+The `-ext.js` suffix is significant — it registers itself as `htmx.defineExtension("morph", ...)`, which is what the templates reference via `hx-ext="morph"`.
+
+#### Bug 2: WS Invalid Frame Header
+
+`flask-sock` creates a `Sock(app)` instance that wraps `app.wsgi_app` with a middleware to intercept WebSocket upgrade requests. For this middleware to work, it needs a WebSocket transport implementation:
+
+| Transport | Requires | Use Case |
+|-----------|----------|----------|
+| `simple-websocket` | Nothing extra | Flask dev server + gunicorn sync workers |
+| `gevent-websocket` | `worker_class = 'gevent'` in gunicorn | Gunicorn with gevent workers |
+
+Neither `pyproject.toml` listed either dependency. The project uses `flask-sock` (which requires a WS transport) but never declared the transport package. The WS middleware silently fails, returning a non-101 HTTP response that the browser interprets as "Invalid frame header".
+
+**Fix**: Add `simple-websocket>=1.0.0` to both `pyproject.toml` files.
+
+### Changes Made
+
+| Q | File | Line | Change |
+|---|------|------|--------|
+| 1 | `arduino_dash/.../templates/base.html` | 9 | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| 2 | `medminder_dash/.../templates/base.html` | 13 | Same URL change |
+| 3 | `arduino_dash/.../pyproject.toml` | 14 | Added `"simple-websocket>=1.0.0",` |
+| 4 | `medminder_dash/.../pyproject.toml` | 15 | Added `"simple-websocket>=1.0.0",` |
+
+### Verification
+
+| Test | Result |
+|------|--------|
+| New CDN resolves | HTTP 200 ✅ |
+| Old CDN returns 404 | HTTP 404 ✅ |
+| simple-websocket in both pyproject.toml | Both present ✅ |
+| Correct CDN URL in both base.html | Both correct ✅ |
+| arduino_dash tests — no regressions | Same 111 pre-existing errors (no new failures) ✅ |
+| medminder_dash tests — no regressions | Same 1 pre-existing failure (no new failures) ✅ |
+
+### Pre-existing Test Failures (unrelated)
+
+| Suite | Failures | Root Cause |
+|-------|----------|------------|
+| arduino_dash | 111 errors | Tests access `_pending_responses_lock` etc. on `app` module, but state was extracted to `state.py` module. Tests need updating to use `state._pending_responses_lock`. |
+| medminder_dash | 1 failure | `test_sketch_path_uses_default_for_no_hardware_id` — likely from Phase 99 template homogenisation. |
+
+### Gotchas
+
+1. **CDN redirects**: unpkg uses HTTP 302 redirects to serve files. Final status (after `-L` follow) is 200 for the correct URL and 404 for the incorrect URL. `curl -I` (no follow) shows 302 for both.
+2. **simple-websocket version**: `flask-sock 0.7.x` requires `simple-websocket >= 1.0.0`. Using `>=1.0.0` is the correct minimum version pin.
+3. **No wheel rebuild needed**: Adding a dependency to `pyproject.toml` doesn't affect running tests — the dependency is resolved at install time (pipenv lock + sync). Since tests use the nox virtualenv with `pipenv sync --dev`, the package is only available when the wheel is rebuilt and installed.
+
 {% endraw %}

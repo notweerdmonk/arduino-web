@@ -32,4 +32,12 @@
 | 19 | Phase 100: medminder_dash --stop cleanup | ✅ | "Stopped PID" ✓ |
 | 20 | Phase 100: medminder_dash --logfile capture | ✅ | 649 bytes ✓ |
 | 21 | Phase 100: Stale PID handling | ✅ | Cleans up pidfile ✓ |
+| 22 | Phase 100c: New idiomorph CDN resolves | ✅ | HTTP 200 ✓ |
+| 23 | Phase 100c: Old idiomorph CDN returns 404 | ✅ | HTTP 404 ✓ |
+| 24 | Phase 100c: simple-websocket dep added (arduino_dash) | ✅ | pyproject.toml:14 |
+| 25 | Phase 100c: simple-websocket dep added (medminder_dash) | ✅ | pyproject.toml:15 |
+| 26 | Phase 100c: idiomorph URL fixed (arduino_dash base.html) | ✅ | Correct URL ✓ |
+| 27 | Phase 100c: idiomorph URL fixed (medminder_dash base.html) | ✅ | Correct URL ✓ |
+| 28 | Phase 100c: No regressions — arduino_dash tests | ✅ | 111 pre-existing errors unchanged |
+| 29 | Phase 100c: No regressions — medminder_dash tests | ✅ | 1 pre-existing failure unchanged |
 {% endraw %}

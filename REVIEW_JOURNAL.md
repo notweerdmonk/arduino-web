@@ -632,3 +632,46 @@ The HTML config section in `config/eslint.config.mjs`:
 ### Verdict
 
 ✅ ESLint inline JS linting configured and passing for all 4 HTML templates with inline `<script>` blocks. 0 errors, 4 informational warnings. All actionable issues resolved.
+
+---
+
+## 2026-06-24 17:57 — Phase 100c: Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Status**: ✅ COMPLETED
+
+### Scope
+
+Two non-blocking console errors fixed:
+
+1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` returned 404 because idiomorph was bundled inside `htmx.org` in v1.x but became a separate npm package in v2.x. Fixed by changing to `https://unpkg.com/idiomorph/dist/idiomorph-ext.js` in both `base.html` templates.
+
+2. **WebSocket "Invalid frame header"** — `flask-sock` needs `simple-websocket` for WS transport on sync servers. Neither dashboard's `pyproject.toml` declared this dependency. Fixed by adding `simple-websocket>=1.0.0` to both.
+
+### Changes Reviewed
+
+| File | Change |
+|------|--------|
+| `arduino_dash/.../templates/base.html:9` | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| `medminder_dash/.../templates/base.html:13` | Same |
+| `arduino_dash/pyproject.toml:14` | Added `simple-websocket>=1.0.0` |
+| `medminder_dash/pyproject.toml:15` | Added `simple-websocket>=1.0.0` |
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| New CDN: `curl -sIL https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 ✅ |
+| Old CDN: `curl -sIL https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 ✅ |
+| arduino_dash tests | Same 111 pre-existing errors (no regressions) ✅ |
+| medminder_dash tests | Same 1 pre-existing failure (no regressions) ✅ |
+
+### Pre-existing Failures (unrelated)
+
+| Suite | Count | Notes |
+|-------|-------|-------|
+| arduino_dash | 111 errors | Tests access state attributes via `app` module instead of `state` module — pre-existing since Phase 100 state extraction |
+| medminder_dash | 1 failure | `test_sketch_path_uses_default_for_no_hardware_id` — likely from Phase 99 template changes |
+
+### Verdict
+
+✅ **Phase 100c is approved and complete.** Both console errors are fixed. CDN URLs verified. Deps added to both pyproject.toml. No regressions introduced. All documentation updated.

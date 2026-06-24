@@ -84,4 +84,5 @@ PubSub protocol over Unix domain sockets (default `/tmp/board_mgr.sock`) or TCP
 - `gunicorn >= 20.0` — Production WSGI server
 - `board-manager-client` — PubSub client for BMS communication
 - `arduino-sketch-tools` — Flask extension for compile/upload orchestration
-- `flask-sock` — WebSocket support (optional, for live event streaming)
+- `flask-sock` — WebSocket support (for live event streaming)
+- `simple-websocket` — WebSocket transport for flask-sock (sync WSGI servers)

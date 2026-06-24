@@ -72,3 +72,12 @@ The dashboard is a Flask webapp that:
 | `GUNICORN_WORKERS` | `4` | `gunicorn_conf.py` | Number of gunicorn workers |
 | `GUNICORN_TIMEOUT` | `120` | `gunicorn_conf.py` | Gunicorn worker timeout |
 | `GUNICORN_LOG_LEVEL` | `info` | `gunicorn_conf.py` | Gunicorn log level |
+
+## Key Dependencies (runtime)
+
+- `flask >= 3.0` — Web framework
+- `gunicorn >= 20.0` — Production WSGI server
+- `board-manager-client` — PubSub client for BMS communication
+- `arduino-sketch-tools` — Flask extension for compile/upload orchestration
+- `flask-sock` — WebSocket support (for live event streaming)
+- `simple-websocket` — WebSocket transport for flask-sock (sync WSGI servers)

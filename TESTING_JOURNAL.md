@@ -339,4 +339,44 @@ Both `e2e/MCP_TESTING_GUIDE.md` and `e2e/agent_tools/GUIDE.md` received 3 new se
 | **Cleanup** (expanded) | SIGTERM→5s poll→SIGKILL escalation, stale pidfile detection via `ProcessLookupError`, lost pidfile recovery, orphaned BMS cleanup |
 
 **Fixes**: Removed duplicate old "Stopping Servers" (lsof/pkill) section from `MCP_TESTING_GUIDE.md`.
+
+---
+
+## 2026-06-24 17:57 — Phase 100c: Fix Console Errors — TESTS EXECUTED
+
+**Status**: ✅ COMPLETED — All verifications pass.
+
+### Test Results
+
+| # | Test | Method | Result |
+|---|------|--------|--------|
+| 1 | New idiomorph CDN resolves | `curl -sIL https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 ✅ |
+| 2 | Old idiomorph CDN returns 404 | `curl -sIL https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 ✅ |
+| 3 | arduino_dash pyproject.toml has simple-websocket | `grep simple-websocket` | Present at line 14 ✅ |
+| 4 | medminder_dash pyproject.toml has simple-websocket | `grep simple-websocket` | Present at line 15 ✅ |
+| 5 | arduino_dash base.html uses correct CDN | `grep idiomorph` | `idiomorph/dist/idiomorph-ext.js` ✅ |
+| 6 | medminder_dash base.html uses correct CDN | `grep idiomorph` | `idiomorph/dist/idiomorph-ext.js` ✅ |
+| 7 | No regressions — arduino_dash tests | `nox -s 'tests(arduino_dash)'` | Same 111 pre-existing errors ✅ |
+| 8 | No regressions — medminder_dash tests | `nox -s 'tests(medminder_dash)'` | Same 1 pre-existing failure ✅ |
+
+### Root Cause Summary
+
+**Bug 1 — idiomorph.js 404**:
+- htmx 1.x bundled extensions inside `htmx.org/dist/ext/`. htmx 2.x (used by both dashboards) moved extensions to separate packages.
+- The URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` no longer resolves.
+- Fixed by changing to `https://unpkg.com/idiomorph/dist/idiomorph-ext.js`.
+
+**Bug 2 — WS Invalid Frame Header**:
+- `flask-sock` needs a WebSocket transport implementation (`simple-websocket` for sync workers).
+- Without it, the WS upgrade request gets a garbled/non-101 HTTP response.
+- Fixed by adding `simple-websocket>=1.0.0` to both `pyproject.toml` files.
+
+### Pre-existing Test Failures
+
+Both test suites had pre-existing failures unrelated to Phase 100c changes:
+
+| Suite | Pre-existing Failures | Root Cause |
+|-------|-----------------------|------------|
+| arduino_dash | 111 errors | `_pending_responses_lock`, `_compile_results_lock`, etc. accessed via `app` module but live in `state` module. State was extracted in a prior phase but tests were not updated. |
+| medminder_dash | 1 failure | `test_sketch_path_uses_default_for_no_hardware_id` — assertion mismatch likely from Phase 99 template homogenisation. |
 {% endraw %}

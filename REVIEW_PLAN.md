@@ -190,6 +190,36 @@
 - [x] No shell hacks used — ✅
 {% endraw %}
 
+## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Review Criteria
+
+#### idiomorph CDN URL
+- [x] arduino_dash `base.html:9` — `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` ✅
+- [x] medminder_dash `base.html:13` — Same URL change ✅
+- [x] New URL returns HTTP 200 (`curl -sIL`) ✅
+- [x] Old URL returns HTTP 404 ✅
+
+#### simple-websocket dependency
+- [x] arduino_dash `pyproject.toml:14` — `simple-websocket>=1.0.0` added ✅
+- [x] medminder_dash `pyproject.toml:15` — `simple-websocket>=1.0.0` added ✅
+
+#### No regressions
+- [x] arduino_dash tests — same 111 pre-existing errors (unchanged) ✅
+- [x] medminder_dash tests — same 1 pre-existing failure (unchanged) ✅
+
+#### Documentation
+- [x] PLAN.md updated with Phase 100c entry ✅
+- [x] JOURNAL.md updated with Phase 100c entry ✅
+- [x] CODEBASE_REFERENCE.md updated with Phase 100c section ✅
+- [x] IMPLEMENTATION_* documents all updated ✅
+- [x] TESTING_* documents all updated ✅
+- [x] REVIEW_* documents all updated ✅
+
 ## 2026-06-24 12:32 — ESLint Inline JS Linting with eslint-plugin-html
 
 **Date**: 2026-06-24 12:32

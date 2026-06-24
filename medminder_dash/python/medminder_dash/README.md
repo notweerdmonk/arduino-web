@@ -235,6 +235,8 @@ Deploy-only endpoints, board list.
 
 - **flask** (>=3.0) — web framework
 - **gunicorn** (>=20.0) — WSGI server (production)
+- **flask-sock** (>=0.7.0) — WebSocket support (live event streaming)
+- **simple-websocket** (>=1.0.0) — WebSocket transport for flask-sock
 
 Runtime dependencies on `arduino-grpc`, `board-manager`,
 `board-manager-client`, and `arduino-sketch-tools` are resolved via

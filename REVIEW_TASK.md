@@ -35,6 +35,23 @@
 | 6 | No shell hacks used | ✅ |
 {% endraw %}
 
+## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+## Review Items — All Passed
+
+| # | Item | Result |
+|---|------|--------|
+| 1 | idiomorph CDN URL fixed in arduino_dash base.html | ✅ URL verified HTTP 200 |
+| 2 | idiomorph CDN URL fixed in medminder_dash base.html | ✅ URL verified HTTP 200 |
+| 3 | simple-websocket added to arduino_dash pyproject.toml | ✅ Present at line 14 |
+| 4 | simple-websocket added to medminder_dash pyproject.toml | ✅ Present at line 15 |
+| 5 | No test regressions | ✅ Same pre-existing failures (unchanged) |
+| 6 | All project/workflow docs updated | ✅ PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
+
 ## 2026-06-24 12:02 — Linter Fix Round: ruff + eslint + djlint
 
 **Status**: ✅ COMPLETED

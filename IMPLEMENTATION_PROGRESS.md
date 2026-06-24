@@ -1,36 +1,33 @@
 ---
 ---
 {% raw %}
-# Implementation Progress — Phase 100: Server Script Process Lifecycle (Disown & Cleanup)
+# Implementation Progress — Phase 100c: Fix Console Errors
 
-**Date**: 2026-06-22 16:14
+**Date**: 2026-06-24 17:57
 
-## Phase 100 — ✅ COMPLETED
+## Phase 100c — ✅ COMPLETED
 
 ## Milestones
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| Q1a | arduino_dash — `_daemonize(logfile)`, `--logfile`, `--pidfile`, `--stop`, `--force` | ✅ | |
-| Q1b | arduino_dash — setsid + redirect in daemonize() | ✅ | |
-| Q1c | arduino_dash — stale pidfile handling | ✅ | |
-| Q2 | medminder_dash — same changes + fix `--stop` ordering | ✅ | |
-| Q3a | Test: arduino_dash survival across bash exit | ✅ | HTTP 200 |
-| Q3b | Test: `--stop` cleanup | ✅ | |
-| Q3c | Test: `--logfile` capture | ✅ | 571 bytes |
-| Q3d | Test: medminder_dash survival + --stop + --logfile | ✅ | 649 bytes |
-| D1 | CODEBASE_REFERENCE.md update | ✅ | |
-| D2 | JOURNAL.md update | ✅ | |
-| D3 | IMPLEMENTATION_JOURNAL.md update | ✅ | |
-| D4 | TESTING_JOURNAL.md + PROGRESS.md update | ✅ | |
-| D5 | Documentation skill (user-facing docs) | ⏳ | |
+| Q1 | Fix idiomorph CDN in arduino_dash base.html | ✅ | `idiomorph/dist/idiomorph-ext.js` |
+| Q2 | Fix idiomorph CDN in medminder_dash base.html | ✅ | Same URL change |
+| Q3 | Add simple-websocket to arduino_dash pyproject.toml | ✅ | Line 14 |
+| Q4 | Add simple-websocket to medminder_dash pyproject.toml | ✅ | Line 15 |
+| T1 | Verify idiomorph CDN resolves (HTTP 200) | ✅ | `curl -sIL` → HTTP 200 |
+| T2 | Verify old CDN returns 404 | ✅ | `curl -sIL` → HTTP 404 |
+| T3 | Verify pyproject.toml deps | ✅ | Both files have dep |
+| T4 | Run nox tests for regressions | ✅ | Same pre-existing failures (no regressions) |
+| D1 | IMPLEMENTATION_JOURNAL.md update | ✅ | Detailed entry |
+| D2 | JOURNAL.md update | ✅ | Brief entry |
+| D3 | CODEBASE_REFERENCE.md update | ✅ | Phase 100c section |
+| D4 | TESTING docs update | ✅ | All 4 docs updated |
+| D5 | Documentation skill | ⬜ | |
 
 ## Key Decisions
 
-1. **Option 3 (setpgid + redirect) over fork-based daemonize** — no fork means no inherited pipes, no race conditions, simpler code
-2. **`os.setpgid(0, 0)` wrapped in try/except** — may fail if already group leader (catches PermissionError, continues safely)
-3. **`signal.signal(signal.SIGHUP, signal.SIG_IGN)`** — belt-and-suspenders; if the tool tracks PID directly, inbound SIGHUP is ignored
-4. **`_redirect_io()` dup2s stdout/stderr to the logfile** — this closes the tool's pipe, making the shell command finish immediately
-5. **`--logfile` is optional** — if omitted, stdout/stderr go to `/dev/null`
-6. **Self-contained duplication** — helper functions duplicated in each script rather than shared module, avoiding cross-file import deps for dev scripts
+1. **idiomorph CDN path**: Use `idiomorph/dist/idiomorph-ext.js` (the htmx extension file from the idiomorph package) rather than embedding the idiomorph core directly. The `-ext.js` suffix registers itself as `htmx.defineExtension("morph", ...)`, which is what the templates use via `hx-ext="morph"`.
+2. **simple-websocket over gevent-websocket**: `simple-websocket` works with sync WSGI servers (Flask dev server + gunicorn sync workers) without changing `worker_class` in gunicorn config. `gevent-websocket` would require switching to `gevent` workers.
+3. **Minimal version pin**: `>=1.0.0` is sufficient — flask-sock 0.7.x requires simple-websocket 1.0+.
 {% endraw %}

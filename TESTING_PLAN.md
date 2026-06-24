@@ -59,4 +59,24 @@ Server lifecycle changes require verification that:
 | 5 | --stop | medminder_dash | `python3 medminder_dash_server.py --stop` prints "Stopped PID X" |
 | 6 | --logfile | medminder_dash | Logfile has >0 bytes of output |
 | 7 | Stale pidfile | both | Dead PID in pidfile → cleaned up |
+
+## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Status**: ✅ COMPLETED
+
+## Test Strategy
+
+Two non-blocking console error fixes. Verification is mostly external (CDN resolution + dep presence):
+
+| # | Test | Method | Pass Criteria |
+|---|------|--------|--------------|
+| 1 | New idiomorph CDN resolves | `curl -sIL https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
+| 2 | Old idiomorph CDN returns 404 | `curl -sIL https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
+| 3 | simple-websocket in arduino_dash pyproject.toml | `grep simple-websocket arduino_dash/.../pyproject.toml` | Match found |
+| 4 | simple-websocket in medminder_dash pyproject.toml | `grep simple-websocket medminder_dash/.../pyproject.toml` | Match found |
+| 5 | Correct idiomorph URL in arduino_dash base.html | `grep idiomorph arduino_dash/.../base.html` | `idiomorph/dist/idiomorph-ext.js` |
+| 6 | Correct idiomorph URL in medminder_dash base.html | `grep idiomorph medminder_dash/.../base.html` | `idiomorph/dist/idiomorph-ext.js` |
+| 7 | No regressions from dep changes | `nox -s 'tests(arduino_dash)' 'tests(medminder_dash)'` | Same results as pre-change |
 {% endraw %}

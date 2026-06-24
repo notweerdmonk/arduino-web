@@ -182,6 +182,7 @@ The test suite covers:
 
 - **flask** (>=3.0.0) — web framework
 - **flask-sock** (>=0.7.0) — WebSocket support
+- **simple-websocket** (>=1.0.0) — WebSocket transport for flask-sock
 - **arduino-grpc** (>=0.1.0) — gRPC client stubs
 - **board-manager** (>=0.1.0) — board detection service
 - **board-manager-client** (>=0.1.0) — pubsub client

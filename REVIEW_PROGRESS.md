@@ -32,6 +32,10 @@
 | 4 | Verify --stop cleanup | ✅ | Clean shutdown, no orphans |
 | 5 | Verify stale pidfile handling | ✅ | Dead PID cleaned up |
 | 6 | Mark Phase 100 complete | ✅ | All docs updated |
+| 7 | Phase 100c: Fix idiomorph CDN URL (2 base.html files) | ✅ | HTTP 200 verified |
+| 8 | Phase 100c: Add simple-websocket dep (2 pyproject.toml files) | ✅ | Both files updated |
+| 9 | Phase 100c: Verify no test regressions | ✅ | Same pre-existing failures only |
+| 10 | Phase 100c: Update all docs | ✅ | PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
 {% endraw %}
 
 ## 2026-06-24 02:52 — Code Review: pubsub_infra→pubsub Rename + Documentation Sync

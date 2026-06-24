@@ -798,7 +798,7 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 | 1 | `service.py` — Move `_send_daemon_state_to` outside `initial_state_sent` guard | ✅ |
 | 2 | `service.py` — Improve daemon failure log (binary + addr context) | ✅ |
 | 3 | `arduino_dash/pubsub.py` — Reorder subscribes (`sys::daemon/ready` first) | ✅ |
-| 4 | `medminder_dash/pubsub_infra.py` — Same reorder | ✅ |
+| 4 | `medminder_dash/pubsub.py` — Same reorder | ✅ |
 | 5 | Syntax verification — `python3 -m py_compile` passes on all 3 files | ✅ |
 
 **Q5-6 — WS Handler SystemExit Silence** (2026-06-19 17:35):

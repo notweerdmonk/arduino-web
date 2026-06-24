@@ -157,7 +157,7 @@ medminder_dash/python/medminder_dash/
 │   ├── dash_state.py         # Dashboard-level shared state
 │   ├── gunicorn_conf.py      # Gunicorn config hooks
 │   ├── utils.py              # Utilites
-│   ├── pubsub_infra.py       # PubSub init, fallback scanner, board info resolution helpers
+│   ├── pubsub.py       # PubSub init, fallback scanner, board info resolution helpers
 │   ├── settings.py           # Application settings
 │   ├── sketch_gen.py         # alarm.hpp generation from medicine DB
 │   ├── sketch_management.py  # Sketch CRUD + upload routes

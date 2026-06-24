@@ -10,10 +10,124 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
+### Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) ✅ COMPLETED
+
+**Date**: 2026-06-22 16:14
+
+**Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags for proper lifecycle management.
+
+**Root cause**: When the bash tool's shell command exits, it sends SIGHUP to the entire process group. `disown` does not protect against process-group-level signals (only removes from bash job table). The server was killed between bash invocations.
+
+**Revised approach (Option 3)** — replaces earlier fork-based `_daemonize()`:
+
+```
+Before (broken):                          After (works):
+                                            1. os.setpgid(0,0) → new PGID
+┌─ bash tool ────────┐                    ┌─ bash tool ────────┐
+│  python3 script.py │                    │  python3 script.py │
+│  ┌─ server ───────┐│                    │  os.setpgid(0,0)  │
+│  │ app.run()──────││── tool waits──▶    │  _redirect_io()   │
+│  └────────────────┘│                    │  ⟐ pipe closes ⟐  │
+└────────────────────┘                    │  tool returns!     │
+    ↑ dies on exit                        └────────────────────┘
+                                             2. Flask continues
+                                                in own PGID,
+                                                logs→file|/dev/null
+```
+
+**Components**:
+- `os.setpgid(0, 0)` — new process group, immune to parent shell's group SIGHUP
+- `signal.signal(signal.SIGHUP, signal.SIG_IGN)` — belt-and-suspenders
+- `_redirect_io(logfile)` — dup2 stdout/stderr to file or `/dev/null`, closing the tool's pipe
+- `--logfile PATH` — optional, collects Flask logs (default: `/dev/null`)
+- `--pidfile PATH` — default `/tmp/<script>.pid`
+- `--stop` — reads pidfile, `os.kill(pid, SIGTERM)` → 5s poll → SIGKILL fallback
+- `--force` — with `--stop`, sends SIGKILL immediately
+
+**Files**: `e2e/servers/arduino_dash_server.py`, `e2e/servers/medminder_dash_server.py`
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | arduino_dash server | `_daemonize(logfile)`, `--pidfile`, `--stop`, `--force`, `--logfile` | ✅ |
+| Q2 | medminder_dash server | Same changes | ✅ |
+| Q3 | Integration test | Start, survive bash exit, `--stop` cleanup, log capture | ✅ |
+
+**Evolution** (traceability):
+1. **Initial plan**: `os.setpgid(0, 0)` + `disown` workaround — rejected because user wants no shell hacks
+2. **Iteration 2**: Fork-based `_daemonize()` — rejected because fork child inherits stdout/stderr, tool blocks until timeout
+3. **Final (Option 3)**: `os.setpgid(0, 0)` + `_redirect_io()` — no fork, pipe closes immediately, tool returns, logs captured
+
+---
+
+### Phase 100b — Code Review Uniformity Sweep (Ruff + ESLint + djlint) ✅ COMPLETED
+
+**Date**: 2026-06-24
+
+**Goal**: Eliminate all code-style inconsistencies, lint warnings, and formatting violations across the entire monorepo by running ruff (lint+format), ESLint (JS), and djlint (Jinja2 templates). Fix all discovered issues, verify with Playwright E2E, and update project documentation.
+
+**Results**:
+| Tool | Scope | Findings | Outcome |
+|------|-------|----------|---------|
+| Ruff check | All Python | 111+ errors (unused imports, trailing whitespace, blank lines, line-too-long) | 97 auto-fixed, 13 manual `# noqa: E402` (stdlib-before-third-party rule conflicts) |
+| Ruff format | All Python | 108 files reformatted | All clean |
+| djlint | 27 Jinja2 templates | 0 warnings after reformat | All clean |
+| ESLint | JS in templates | 0 real errors | 4 false positives (HTML `onchange`/`onclick` — not JS) |
+| Playwright | 10 E2E recipes (5+5) | 10/10 pass ✅ | Both dashboards verified |
+
+**Additional fixes discovered during sweep**:
+1. `dnd_overlay.html` (both dashboards): added `/* global showModal */` JSDoc comment, removed unused `e` parameter
+2. Uninstalled `arduino-dash`, `medminder-dash` from system pip; reinstalled from wheels into pipenv venv
+3. Fixed orphan `endraw` tags in REVIEW_PROGRESS.md, REVIEW_TASK.md, REVIEW_JOURNAL.md
+4. Fixed `setpgid` → `fork+setsid` architecture contradiction in IMPLEMENTATION_PLAN.md
+5. Fixed all unchecked checkboxes in IMPLEMENTATION_TASK.md
+6. Added local index sources to root Pipfile for all 6 packages
+7. Reordered PLAN.md phases to correct descending order (100→1)
+8. Removed duplicate Phase 100 entry
+9. Added missing runtime deps to medminder_dash `pyproject.toml` (`flask-sock`, `arduino-sketch-tools`, `board-manager-client`)
+10. Updated `.gitignore` with `.ruff_cache/` and `node_modules/`
+11. Fixed CODEBASE_REFERENCE.md stale references (CSS identity, gunicorn_conf.py, infra.py, file layout)
+
+**Post-sweep**: All 8 nox sessions pass, 10 Playwright E2E recipes pass, review docs updated.
+
+---
+
+### Phase 99 — HTML Template Homogenisation Across Both Dashboards ✅ COMPLETED
+
+**Date**: 2026-06-22 12:43
+
+**Goal**: Make all 14 shared templates structurally identical, extracting medicine-specific sections into separate partials and using template variables for route-path divergence.
+
+**Design** (see IMPLEMENTATION_PLAN.md for full details):
+1. **Q1 — board_detail.html**: Both apps converge on flat `<div>` + htmx `/last-upload` pattern. arduino_dash: remove `<form>` wrapper, move FQBN/Port above sketch, use `hx-include="#sketch_path, #fqbn"`, add Admin Page link. medminder_dash: switch hidden `#sketch_path` input → htmx `/last-upload` container, add hardware-id hidden input, guard DnD/browse/delete/modals behind `{% if show_sketch_tools %}`. Extract Medicines section (lines 74-92) to `partials/medicine_management.html`, guarded by `{% if show_medicines_section %}`
+2. **Q2 — admin.html**: Add assigned-sketch-info div to arduino_dash. Extract medicine management section (lines 65-105) to `partials/admin_medicine_section.html`. Both apps pass admin_board_selector attributes as Python route kwargs.
+3. **Q3 — admin_board_selector.html**: Extract route-dependent attributes (`hx-post`, `hx-target`, `hx-swap`, label) to template variables passed as render_template kwargs.
+4. **Q4 — compile_upload_card.html**: Add `Step 2:`/`Step 3:` to arduino_dash; converge description to generic text; converge `&#8230;` entity
+5. **T1-T3 — Trivial diffs**: dnd_overlay.html trailing newline, board_card.html defensive `or 'Unknown'`, delete_confirm_modal.html `hardware_id` in `hx-vals`
+6. **Q6 — base.html**: Add `dragover`/`drop` `preventDefault` listeners to medminder_dash
+
+**Post-plan addition**: Extracted `SketchRegistry` class to `arduino_sketch_tools` as a shared module. Both per-app `sketch_registry.py` files became thin wrappers. This was needed for the `assigned-sketch-info` feature in arduino_dash.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | board_detail.html | Flat div + htmx /last-upload; sketch tools guard; medicines partial extract | ✅ |
+| Q2 | admin.html | Route vars, medicine section extract, assigned-sketch div | ✅ |
+| Q3 | admin_board_selector.html | Template vars for `hx-post`, `hx-target`, `hx-swap`, label | ✅ |
+| Q4 | compile_upload_card.html | Step numbering, generic description, `&#8230;` entity | ✅ |
+| T1 | dnd_overlay.html | Trailing newline | ✅ |
+| T2 | board_card.html | `or 'Unknown'` | ✅ |
+| T3 | delete_confirm_modal.html | `hardware_id` in `hx-vals` | ✅ |
+| Q6 | base.html DnD listeners | `preventDefault` for medminder_dash | ✅ |
+| SR | SketchRegistry extract | Shared class in arduino_sketch_tools | ✅ |
+
+**Test results**: 119 arduino_dash ✓, 186 medminder_dash ✓
+
+**Files changed**: ~15 templates across both dashboards + 5 Python route files + 2 new partials + 1 new shared module.
+
+---
+
 ### Phase 98 — WS Push Migration: Badge OOB → Compile/Upload OOB → Compile Progress Bar ✅ COMPLETED
 
 **Date**: 2026-06-21 11:55
-**Status**: ✅ Completed
 
 **Goal**: Migrate all PubSub-driven frontend updates from HTMX polling to WS push across three tiers: (1) daemon badge + board status badge OOB, (2) compile/upload output OOB, (3) compile progress percentage bar + `[N%]` prefix.
 
@@ -43,7 +157,6 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 ### Phase 97 — Frontend Stack Optimization ✅ COMPLETED
 
 **Date**: 2026-06-20 22:17
-**Status**: ✅ Completed
 
 **Goal**: Reduce JS payload by removing Hyperscript (43KB), add Idiomorph for morphing swaps, and restructure swap targets for granular card-level refresh.
 
@@ -68,10 +181,11 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 **Audit fixes** (post-implementation): 8 inaccuracies fixed across CODEBASE_REFERENCE.md, IMPLEMENTATION_*.md, TESTING_*.md, REVIEW_*.md, setup.py.
 
+---
+
 ### Phase 96 — Wire test_ci.sh into Nox scripts_tests ✅ COMPLETED
 
 **Date**: 2026-06-20 20:03
-**Status**: ✅ Completed
 
 **Goal**: Add `test_ci.sh` (10 scenarios, 30 bash assertions) to the `scripts_tests` nox session. The script tests `scripts/ci.sh` flag parsing (`--help`, `--skip-builds`, `--skip-tests`, unknown flags), error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim in a temp dir with zero external dependencies beyond bash.
 
@@ -86,7 +200,6 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 ### Phase 95 — Git Tree Preparation Plan ✅ COMPLETED
 
 **Date**: 2026-06-20 15:40
-**Status**: ✅ Completed
 
 **Goal**: Clean up stale generated artifacts, missing `.gitignore` entries, stale workflow docs, and doc inaccuracies before committing — triggered by a pre-commit audit.
 
@@ -104,7 +217,6 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 ### Phase 94 — Noxfile Self-Healing Test Sessions ✅ COMPLETED
 
 **Date**: 2026-06-20
-**Status**: ✅ Completed
 
 **Goal**: Fix `tests` and `scripts_tests` sessions in `noxfile.py` to self-heal against stale `Pipfile.lock` hashes after wheel rebuilds. The `tests` session used `pipenv install --dev` which fails with hash mismatch when wheels are rebuilt but lock files still have old hashes. The `scripts_tests` session used `pipenv sync --dev` which silently does nothing when lock doesn't match Pipfile.
 
@@ -121,10 +233,11 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 | 3 | `nox -s all_tests` verification — 8/8 sessions pass | ✅ |
 | 4 | Docs sync | ✅ |
 
+---
+
 ### Phase 93 — GitHub Pages Jekyll Documentation Site ✅ COMPLETED
 
 **Date**: 2026-06-20
-**Status**: ✅ Completed
 
 **Goal**: Serve the project's documentation as a GitHub Pages site using Jekyll (Minima theme). Fix config/build issues (duplicate `plugins:`, missing `theme:`, missing front matter), fix broken relative links for nested-subpackage doc paths, eliminate Liquid warnings from Jinja2 template syntax, and add missing per-package README links to the top-level docs hub.
 
@@ -164,10 +277,178 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
+### Phase 90 — Fix Double BoardDetector Stop Log ✅ COMPLETED
+
+**Date**: 2026-06-19 17:49
+
+---
+
+### Phase 89 — Fix Daemon Badge "Disconnected" State ✅ COMPLETED
+
+**Date**: 2026-06-19 17:15
+
+**Goal**: Fix daemon badge always showing "Disconnected" despite arduino-cli daemon running.
+
+**Root cause**: Subscribe-order race condition — `sys::daemon/ready` was only emitted on first subscribe (server-side `initial_state_sent` guard), but clients subscribed `board::+::event` first. The daemon-ready event was already sent before the daemon-topic subscription was processed.
+
+**Changes**:
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | `service.py` — Move `_send_daemon_state_to()` outside `initial_state_sent` guard | ✅ |
+| 2 | `service.py` — Improve daemon failure log (binary + addr context) | ✅ |
+| 3 | `arduino_dash/pubsub.py` — Reorder subscribes (`sys::daemon/ready` first) | ✅ |
+| 4 | `medminder_dash/pubsub.py` — Same reorder | ✅ |
+| 5 | `arduino_dash/html_routes.py` — Add `except SystemExit:` with log | ✅ |
+| 6 | `medminder_dash/html_routes.py` — Replace bare `except:` with `except SystemExit:` + log + None check | ✅ |
+
+**Verification**: 119 arduino_dash ✅, 186 medminder_dash ✅.
+
+---
+
+### Phase 88 — Stale BMS Port Cleanup in boot.py ✅ COMPLETED
+
+**Date**: 2026-06-19 16:40
+
+**Goal**: Prevent `OSError: [Errno 98] Address already in use` when starting BMS via gunicorn's `when_ready` hook. A stale BMS from a previous unclean shutdown holds port 9090, causing the new BMS to fail on `_bind_tcp()`.
+
+**Root cause**: `gunicorn_conf.py` calls `start_bms()` → `python -m board_manager` → `service._bind_tcp()` → `sock.bind((host, port))`. If a prior BMS process survived (e.g., SIGKILL or gunicorn crash), `SO_REUSEADDR` cannot override an active LISTEN socket. The `bind()` raises `EADDRINUSE`.
+
+**Fix**: Added `_free_bms_resources(tcp_host, tcp_port, uds_path)` to `board_manager/python/board_manager/board_manager/boot.py:42-74`. Called at the top of `start_bms()` before spawning a new BMS. It:
+
+1. **Kills stale TCP holder**: Runs `lsof -ti tcp:<port>` to find PIDs listening on the target TCP port, sends `SIGTERM` (signal 15). Handles missing `lsof`, timeouts, and permission errors gracefully.
+2. **Cleans stale UDS socket**: If the UDS path exists, attempts to connect — if the connection succeeds, the socket is alive (skip removal); if it fails with `ConnectionRefusedError`, the socket is stale → unlink it.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Add `_free_bms_resources()` to `boot.py` | ✅ |
+| 2 | Verify — stale BMS killed, port freed, new BMS starts cleanly | ✅ |
+| 3 | Update docs — PLAN.md, IMPLEMENTATION_PLAN.md, journals, CODEBASE_REFERENCE | ✅ |
+
+---
+
+### Phase 87 — Favicon Links for arduino_dash ✅ COMPLETED
+
+**Date**: 2026-06-19 16:19
+
+**Goal**: Add favicon `<link>` tags to the `<head>` of dashboard, admin, and board_detail pages in arduino_dash. Favicon assets already exist at `static/favicon/`.
+
+**Design**:
+1. Add `{% block extra_head %}{% endblock %}` to `base.html`'s `<head>` (child templates can inject head content)
+2. Override `extra_head` in `dashboard.html`, `admin.html`, `board_detail.html` with 5 favicon link tags
+3. Update built/dist copies (pyoxidizer, dist-standalone) — same pattern as Phase 85
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
+| 2 | Add extra_head block to source base.html | ✅ |
+| 3 | Add favicon links to dashboard.html | ✅ |
+| 4 | Add favicon links to admin.html | ✅ |
+| 5 | Add favicon links to board_detail.html | ✅ |
+| 6 | Update built copies (pyoxidizer base/dashboard/board_detail) | ✅ |
+| 7 | Update dist-standalone copies (base/dashboard/board_detail) | ✅ |
+| 8 | Verify all 3 pages via MCP browser | ✅ |
+
+---
+
+### Phase 86 — Favicon Links for medminder_dash ✅ COMPLETED
+
+**Date**: 2026-06-19 15:55
+
+**Goal**: Add favicon `<link>` tags to the `<head>` of admin, board_detail, and index pages in medminder_dash. Favicon assets already exist at `static/favicon/`.
+
+**Design**:
+1. Add `{% block extra_head %}{% endblock %}` to `base.html`'s `<head>` (child templates can inject head content)
+2. Add `{% block extra_head %}` with 5 favicon link tags to `admin.html`
+3. Add same to `board_detail.html`
+4. Add same to `index.html`
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
+| 2 | Add extra_head block to base.html | ✅ |
+| 3 | Add favicon links to admin.html | ✅ |
+| 4 | Add favicon links to board_detail.html | ✅ |
+| 5 | Add favicon links to index.html | ✅ |
+| 6 | Verify all 3 pages via MCP browser | ✅ |
+
+---
+
+### Phase 85b — Fix HTMX Extension Mismatch Warning ✅ COMPLETED
+
+**Date**: 2026-06-19 01:20
+
+**Goal**: Fix the `"You are using an htmx 1 extension with htmx 2.0.4"` console warning by replacing the v1 bundled WS extension (`htmx.org@2.0.4/dist/ext/ws.js`) with the v2 standalone extension (`htmx-ext-ws@2.0.1/ws.js`).
+
+**Root cause**: htmx 2 extracted extensions into separate npm packages. The WS extension loaded from `unpkg.com/htmx.org@2.0.4/dist/ext/ws.js` is the v1 extension bundled inside the `htmx.org` package. It checks `htmx.version.startsWith("1.")` and warns when htmx 2 is detected.
+
+**Design**:
+1. Replace WS extension script tag in both source base.html templates
+2. Update all built/dist copies for consistency (scripts/pyoxidizer/, dist-standalone/)
+3. Verify no warning via browser console
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
+| 2 | Update arduino_dash base.html source template | ✅ |
+| 3 | Update medminder_dash base.html source template | ✅ |
+| 4 | Update built copies: scripts/pyoxidizer/*/build/*/prefix/*/base.html | ✅ |
+| 5 | Update built copies: dist-standalone/*/prefix/*/base.html | ✅ |
+| 6 | Test — MCP browser verify no console warning | ✅ |
+| 7 | Final journal entries, docs sync, CODEBASE_REFERENCE | ✅ |
+
+---
+
+### Phase 85 — MCP E2E Server Binding + BMS Daemon Support ✅ COMPLETED
+
+**Date**: 2026-06-19
+
+**Goal**: Fix server binding for Playwright MCP browser (container can't reach 127.0.0.1) and add `--bms` flag to start BMS daemon alongside dev server for complete E2E testing.
+
+**Design** (see e2e/agent_tools/GUIDE.md for full details):
+1. Changed server binding from `127.0.0.1` to `0.0.0.0` in both e2e server scripts
+2. Added `--bms` flag to both servers — starts arduino-cli daemon + board_manager service
+3. Calls `init_pubsub()` to connect dashboard to BMS; sets `_daemon_ready = True`
+4. Auto-cleanup via atexit + try/finally
+5. Documented in GUIDE.md: container networking, BMS lifecycle, Recipe 5b for Connected state
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Change host to 0.0.0.0 in both server scripts | ✅ |
+| 2 | Add --bms flag to arduino_dash_server.py | ✅ |
+| 3 | Add --bms flag to medminder_dash_server.py | ✅ |
+| 4 | Document in GUIDE.md (container note, BMS lifecycle, Recipe 5b, cleanup, troubleshooting) | ✅ |
+| 5 | Verify — MCP browser test with --bms shows "● Daemon Ready" | ✅ |
+
+---
+
+### Phase 84 — Playwright E2E Testing Infrastructure ✅ COMPLETED
+
+**Date**: 2026-06-19
+
+**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright. Deliverables: Python server helpers with `--mock` flag, MCP Testing Skill for agent-driven interactive testing, MCP Testing Guide, and shelved TypeScript `@playwright/test` spec files.
+
+**Design** (see IMPLEMENTATION_PLAN.md for full details):
+1. **Server helpers** — `e2e/servers/arduino_dash_server.py` + `medminder_dash_server.py` — start Flask dev servers with optional mock board state injection (`--mock` flag populates `_board_list`/`_known_ports`/`_upload_registry`)
+2. **MCP Testing Skill** — `.opencode/skills/mcp-e2e-testing/SKILL.md` — agent-referenceable skill doc for browser-based interactive testing via Playwright MCP tools
+3. **MCP Testing Guide** — `e2e/MCP_TESTING_GUIDE.md` — human-readable step-by-step for manual/interactive testing
+4. **Shelved TypeScript files** — `e2e/package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 `spec/*.spec.ts` files — written now, executable when `npm install` is run
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
+| 2 | Server helpers — arduino_dash + medminder_dash server scripts | ✅ |
+| 3 | Test server helpers — curl/HTTP verification of mock state | ✅ |
+| 4 | MCP Testing Skill (.opencode/skills/mcp-e2e-testing/SKILL.md) | ✅ |
+| 5 | MCP Testing Guide (e2e/MCP_TESTING_GUIDE.md) | ✅ |
+| 6 | Shelved TypeScript spec files (config, fixtures, 8 specs) | ✅ |
+| 7 | Final review — all docs synced, servers verified | ✅ |
+
+---
+
 ### Phase 83 — Unified Sketch Registry (hardware_id in registry, FCFS dedup, sketch_registry.json) ✅ COMPLETED
 
 **Date**: 2026-06-18
-**Status**: ✅ Completed
 
 **Goal**: Unify sketch registry with hardware_id as a first-class dimension, enabling board-scoped queries, one-to-many hardware_id→sketch mapping, and a persistent sketch_registry.json that serves as the warmup source and disk cross-reference.
 
@@ -196,163 +477,9 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
-### Phase 90 — Fix Double BoardDetector Stop Log ✅ COMPLETED
-
-**Date**: 2026-06-19 17:49
-**Status**: ✅ Completed
-
----
-
-### Phase 88 — Stale BMS Port Cleanup in boot.py ✅ COMPLETED
-
-**Date**: 2026-06-19 16:40
-**Status**: ✅ Completed
-
-**Goal**: Prevent `OSError: [Errno 98] Address already in use` when starting BMS via gunicorn's `when_ready` hook. A stale BMS from a previous unclean shutdown holds port 9090, causing the new BMS to fail on `_bind_tcp()`.
-
-**Root cause**: `gunicorn_conf.py` calls `start_bms()` → `python -m board_manager` → `service._bind_tcp()` → `sock.bind((host, port))`. If a prior BMS process survived (e.g., SIGKILL or gunicorn crash), `SO_REUSEADDR` cannot override an active LISTEN socket. The `bind()` raises `EADDRINUSE`.
-
-**Fix**: Added `_free_bms_resources(tcp_host, tcp_port, uds_path)` to `board_manager/python/board_manager/board_manager/boot.py:42-74`. Called at the top of `start_bms()` before spawning a new BMS. It:
-
-1. **Kills stale TCP holder**: Runs `lsof -ti tcp:<port>` to find PIDs listening on the target TCP port, sends `SIGTERM` (signal 15). Handles missing `lsof`, timeouts, and permission errors gracefully.
-2. **Cleans stale UDS socket**: If the UDS path exists, attempts to connect — if the connection succeeds, the socket is alive (skip removal); if it fails with `ConnectionRefusedError`, the socket is stale → unlink it.
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Add `_free_bms_resources()` to `boot.py` | ✅ |
-| 2 | Verify — stale BMS killed, port freed, new BMS starts cleanly | ✅ |
-| 3 | Update docs — PLAN.md, IMPLEMENTATION_PLAN.md, journals, CODEBASE_REFERENCE | ✅ |
-
----
-
-### Phase 87 — Favicon Links for arduino_dash ✅ COMPLETED
-
-**Date**: 2026-06-19 16:19
-**Status**: ✅ Completed
-
-**Goal**: Add favicon `<link>` tags to the `<head>` of dashboard, admin, and board_detail pages in arduino_dash. Favicon assets already exist at `static/favicon/`.
-
-**Design**:
-1. Add `{% block extra_head %}{% endblock %}` to `base.html`'s `<head>` (child templates can inject head content)
-2. Override `extra_head` in `dashboard.html`, `admin.html`, `board_detail.html` with 5 favicon link tags
-3. Update built/dist copies (pyoxidizer, dist-standalone) — same pattern as Phase 85
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
-| 2 | Add extra_head block to source base.html | ✅ |
-| 3 | Add favicon links to dashboard.html | ✅ |
-| 4 | Add favicon links to admin.html | ✅ |
-| 5 | Add favicon links to board_detail.html | ✅ |
-| 6 | Update built copies (pyoxidizer base/dashboard/board_detail) | ✅ |
-| 7 | Update dist-standalone copies (base/dashboard/board_detail) | ✅ |
-| 8 | Verify all 3 pages via MCP browser | ✅ |
-
----
-
-### Phase 86 — Favicon Links for medminder_dash ✅ COMPLETED
-
-**Date**: 2026-06-19 15:55
-**Status**: ✅ Completed
-
-**Goal**: Add favicon `<link>` tags to the `<head>` of admin, board_detail, and index pages in medminder_dash. Favicon assets already exist at `static/favicon/`.
-
-**Design**:
-1. Add `{% block extra_head %}{% endblock %}` to `base.html`'s `<head>` (child templates can inject head content)
-2. Add `{% block extra_head %}` with 5 favicon link tags to `admin.html`
-3. Add same to `board_detail.html`
-4. Add same to `index.html`
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
-| 2 | Add extra_head block to base.html | ✅ |
-| 3 | Add favicon links to admin.html | ✅ |
-| 4 | Add favicon links to board_detail.html | ✅ |
-| 5 | Add favicon links to index.html | ✅ |
-| 6 | Verify all 3 pages via MCP browser | ✅ |
-
----
-
-### Phase 85 — MCP E2E Server Binding + BMS Daemon Support ✅ COMPLETED
-
-**Date**: 2026-06-19
-**Status**: ✅ Completed
-
-**Goal**: Fix server binding for Playwright MCP browser (container can't reach 127.0.0.1) and add `--bms` flag to start BMS daemon alongside dev server for complete E2E testing.
-
-**Design** (see e2e/agent_tools/GUIDE.md for full details):
-1. Changed server binding from `127.0.0.1` to `0.0.0.0` in both e2e server scripts
-2. Added `--bms` flag to both servers — starts arduino-cli daemon + board_manager service
-3. Calls `init_pubsub()` to connect dashboard to BMS; sets `_daemon_ready = True`
-4. Auto-cleanup via atexit + try/finally
-5. Documented in GUIDE.md: container networking, BMS lifecycle, Recipe 5b for Connected state
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Change host to 0.0.0.0 in both server scripts | ✅ |
-| 2 | Add --bms flag to arduino_dash_server.py | ✅ |
-| 3 | Add --bms flag to medminder_dash_server.py | ✅ |
-| 4 | Document in GUIDE.md (container note, BMS lifecycle, Recipe 5b, cleanup, troubleshooting) | ✅ |
-| 5 | Verify — MCP browser test with --bms shows "● Daemon Ready" | ✅ |
-
----
-
-### Phase 84 — Playwright E2E Testing Infrastructure ✅ COMPLETED
-
-**Date**: 2026-06-19
-**Status**: ✅ Completed
-
-**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright. Deliverables: Python server helpers with `--mock` flag, MCP Testing Skill for agent-driven interactive testing, MCP Testing Guide, and shelved TypeScript `@playwright/test` spec files.
-
-**Design** (see IMPLEMENTATION_PLAN.md for full details):
-1. **Server helpers** — `e2e/servers/arduino_dash_server.py` + `medminder_dash_server.py` — start Flask dev servers with optional mock board state injection (`--mock` flag populates `_board_list`/`_known_ports`/`_upload_registry`)
-2. **MCP Testing Skill** — `.opencode/skills/mcp-e2e-testing/SKILL.md` — agent-referenceable skill doc for browser-based interactive testing via Playwright MCP tools
-3. **MCP Testing Guide** — `e2e/MCP_TESTING_GUIDE.md` — human-readable step-by-step for manual/interactive testing
-4. **Shelved TypeScript files** — `e2e/package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 `spec/*.spec.ts` files — written now, executable when `npm install` is run
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
-| 2 | Server helpers — arduino_dash + medminder_dash server scripts | ✅ |
-| 3 | Test server helpers — curl/HTTP verification of mock state | ✅ |
-| 4 | MCP Testing Skill (.opencode/skills/mcp-e2e-testing/SKILL.md) | ✅ |
-| 5 | MCP Testing Guide (e2e/MCP_TESTING_GUIDE.md) | ✅ |
-| 6 | Shelved TypeScript spec files (config, fixtures, 8 specs) | ✅ |
-| 7 | Final review — all docs synced, servers verified | ✅ |
-
----
-
-### Phase 85b — Fix HTMX Extension Mismatch Warning ✅ COMPLETED
-
-**Date**: 2026-06-19 01:20
-**Status**: ✅ Completed
-
-**Goal**: Fix the `"You are using an htmx 1 extension with htmx 2.0.4"` console warning by replacing the v1 bundled WS extension (`htmx.org@2.0.4/dist/ext/ws.js`) with the v2 standalone extension (`htmx-ext-ws@2.0.1/ws.js`).
-
-**Root cause**: htmx 2 extracted extensions into separate npm packages. The WS extension loaded from `unpkg.com/htmx.org@2.0.4/dist/ext/ws.js` is the v1 extension bundled inside the `htmx.org` package. It checks `htmx.version.startsWith("1.")` and warns when htmx 2 is detected.
-
-**Design**:
-1. Replace WS extension script tag in both source base.html templates
-2. Update all built/dist copies for consistency (scripts/pyoxidizer/, dist-standalone/)
-3. Verify no warning via browser console
-
-| Q | Scope | Status |
-|---|-------|--------|
-| 1 | Planning docs — IMPLEMENTATION_PLAN.md, TASK.md, PROGRESS.md, update PLAN.md | ✅ |
-| 2 | Update arduino_dash base.html source template | ✅ |
-| 3 | Update medminder_dash base.html source template | ✅ |
-| 4 | Update built copies: scripts/pyoxidizer/*/build/*/prefix/*/base.html | ✅ |
-| 5 | Update built copies: dist-standalone/*/prefix/*/base.html | ✅ |
-| 6 | Test — MCP browser verify no console warning | ✅ |
-| 7 | Final journal entries, docs sync, CODEBASE_REFERENCE | ✅ |
-
----
-
 ### Phase 82 — Sorted Upload Registry via bisect.insort ✅ COMPLETED
 
 **Date**: 2026-06-18
-**Status**: ✅ Completed
 
 **Goal**: Use `bisect.insort()` to maintain each per-sketch `list[dict]` in `_upload_registry` sorted by timestamp on insert, eliminating redundant `.sort()` calls at read time.
 
@@ -433,6 +560,8 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 | 8 | Modal refresh callbacks | Both modals pass hwParam | ✅ |
 | 9 | Tests + docs | `nox -s all_tests` green | ✅ |
 
+---
+
 ### Phase 79b — arduino_dash `init_pubsub` Reconnection Fix ✅ COMPLETED
 
 **Date**: 2026-06-18 13:02
@@ -461,6 +590,8 @@ except (ConnectionError, OSError) as e:
 
 **Additional fix**: Phase 79 regression in medminder_dash `test_admin.py:1014` — assertion asserted `b"flex:1"` (inline style replaced with `.flex-1` class in Phase 79). Changed to `b'class="flex-1"'`.
 
+---
+
 ### Phase 79 — Light Colorscheme + External CSS ✅ COMPLETED
 
 **Date**: 2026-06-17 17:30 → 2026-06-18
@@ -487,6 +618,8 @@ except (ConnectionError, OSError) as e:
 | 5 | Inline → classes | arduino_sketch_tools: 10 partials, 38 inline styles eliminated | ✅ |
 | 6 | Tests + docs | CSS-only changes, docs synced | ✅ |
 
+---
+
 ### Phase 78 — Fix `_daemon_ready` Unprotected Access + Duplicate Log Spam ✅ COMPLETED
 
 **Date**: 2026-06-17 17:15
@@ -504,8 +637,8 @@ except (ConnectionError, OSError) as e:
 | Lock+guard | arduino_dash | `pubsub.py:109-113` | Skip log if already ready |
 | Lock write | arduino_dash | `pubsub.py:117` | `with state._daemon_ready_lock:` |
 | Lock read | arduino_dash | `html_routes.py:122` | `with state._daemon_ready_lock:` |
-| Lock read | medminder_dash | `pubsub_infra.py:36` | `with state._daemon_ready_lock:` |
-| Guard | medminder_dash | `pubsub_infra.py:215-220` | Skip log if already ready |
+| Lock read | medminder_dash | `pubsub.py:36` | `with state._daemon_ready_lock:` |
+| Guard | medminder_dash | `pubsub.py:215-220` | Skip log if already ready |
 
 | Q | Scope | Key Changes | Status |
 |---|-------|-------------|--------|
@@ -513,6 +646,8 @@ except (ConnectionError, OSError) as e:
 | 2 | medminder_dash | Fix `_fallback_scan_loop` read, add guard | ✅ |
 | 3 | Tests | `nox -s all_tests` green | ✅ |
 | 4 | Docs sync | All workflow + project docs | ✅ |
+
+---
 
 ### Phase 77 — Template Port Path Cleanup ✅ COMPLETED
 
@@ -535,11 +670,34 @@ except (ConnectionError, OSError) as e:
 
 ---
 
-### Phase 51 — Align with arduino_dash Compile/WS Pattern ✅ COMPLETED
+### Phase 52 — Fix Phase 51 Regression Bugs ✅ COMPLETED
 
 **Date**: 2026-06-03
 
-**Completed**: 2026-06-03
+**Goal**: Two regression bugs introduced by Phase 51:
+
+1. **Medicines not populated when navigating from Board Grid**: `board_grid.html` Manage link goes to `/board/<port>` (`board_detail` route), NOT `/board/select/<port>` (`board_select` route). `board_detail()` sets `session["board_port"]` but never calls `_migrate_default_board()` → medicines loaded by `_load_from_alarm_hpp_if_needed()` into `"default"` key are never migrated to the selected board's key.
+
+2. **Extra board-event cards on every page**: `#live-events` div on `base.html` (Phase 51 Q4) broadcasts board connected/disconnected events via WS to every page. Fallback scanner detects 3 serial ports → 3 event cards on dashboard. Navbar board status already shows connection state via HTMX polling — WS board events are redundant.
+
+**Design decisions**:
+- **Fix `board_detail()` route, not grid link**: Add `_migrate_default_board()` + lazy alarm.hpp load to `board_detail()` since that's the route users actually hit via the Manage button. Don't change the URL pattern in `board_grid.html`.
+- **Remove `#live-events` from `base.html`**: The WS board events were meant for an admin/debug dashboard. Navbar board status (HTMX polling) makes WS-based events redundant. WS infrastructure stays for compile/upload progress streaming by `arduino_sketch_tools`.
+- **Remove `_load_from_alarm_hpp_if_needed()` from `create_app()`**: Was supposed to be done in Phase 50 Q2 but was left behind. Lazy bootstrap in `board_detail()` replaces it.
+
+| Q | Scope | Key Changes | Files | Status |
+|---|-------|-------------|-------|--------|
+| 1 | Fix `board_detail()` route | Add `_migrate_default_board()` + inline alarm.hpp bootstrap | `app.py` | ✅ |
+| 2 | Remove dead bootstrap function | Delete `_load_from_alarm_hpp_if_needed()` function and its call, inline in `board_detail()` | `app.py` | ✅ |
+| 3 | Remove `#live-events` + dead JS | Remove `#live-events` div, `htmx:beforeSwap` handler from `base.html` | `base.html` | ✅ |
+
+**Verification**: 75/75 medminder_dash tests pass (3 startup tests removed with deleted function).
+
+---
+
+### Phase 51 — Align with arduino_dash Compile/WS Pattern ✅ COMPLETED
+
+**Date**: 2026-06-03
 
 **Goal**: Resolve compilation status never updating by aligning 4 specific patterns with working `arduino_dash`:
 
@@ -562,33 +720,6 @@ except (ConnectionError, OSError) as e:
 | 4 | WS route + template | `app.py` WS route; `base.html` WS.js + event-feed + JS handler | `app.py`, `base.html` | ✅ |
 
 **Verification**: 78/78 medminder_dash tests pass.
-
----
-
-### Phase 52 — Fix Phase 51 Regression Bugs ✅ COMPLETED
-
-**Date**: 2026-06-03
-
-**Completed**: 2026-06-03
-
-**Goal**: Two regression bugs introduced by Phase 51:
-
-1. **Medicines not populated when navigating from Board Grid**: `board_grid.html` Manage link goes to `/board/<port>` (`board_detail` route), NOT `/board/select/<port>` (`board_select` route). `board_detail()` sets `session["board_port"]` but never calls `_migrate_default_board()` → medicines loaded by `_load_from_alarm_hpp_if_needed()` into `"default"` key are never migrated to the selected board's key.
-
-2. **Extra board-event cards on every page**: `#live-events` div on `base.html` (Phase 51 Q4) broadcasts board connected/disconnected events via WS to every page. Fallback scanner detects 3 serial ports → 3 event cards on dashboard. Navbar board status already shows connection state via HTMX polling — WS board events are redundant.
-
-**Design decisions**:
-- **Fix `board_detail()` route, not grid link**: Add `_migrate_default_board()` + lazy alarm.hpp load to `board_detail()` since that's the route users actually hit via the Manage button. Don't change the URL pattern in `board_grid.html`.
-- **Remove `#live-events` from `base.html`**: The WS board events were meant for an admin/debug dashboard. Navbar board status (HTMX polling) makes WS-based events redundant. WS infrastructure stays for compile/upload progress streaming by `arduino_sketch_tools`.
-- **Remove `_load_from_alarm_hpp_if_needed()` from `create_app()`**: Was supposed to be done in Phase 50 Q2 but was left behind. Lazy bootstrap in `board_detail()` replaces it.
-
-| Q | Scope | Key Changes | Files | Status |
-|---|-------|-------------|-------|--------|
-| 1 | Fix `board_detail()` route | Add `_migrate_default_board()` + inline alarm.hpp bootstrap | `app.py` | ✅ |
-| 2 | Remove dead bootstrap function | Delete `_load_from_alarm_hpp_if_needed()` function and its call, inline in `board_detail()` | `app.py` | ✅ |
-| 3 | Remove `#live-events` + dead JS | Remove `#live-events` div, `htmx:beforeSwap` handler from `base.html` | `base.html` | ✅ |
-
-**Verification**: 75/75 medminder_dash tests pass (3 startup tests removed with deleted function).
 
 ---
 
@@ -634,210 +765,6 @@ except (ConnectionError, OSError) as e:
 | 8 | Fallback board detection | Background daemon thread scanning `/dev/ttyACM*`/`/dev/ttyUSB*` every 5s when BMS offline, injects/removes entries from `_known_ports`, auto-start in `init_pubsub()` | ✅ |
 
 **Verification**: 53/53 tests pass (no regressions, 2 new routes).
-### Phase 1: Research & Fix gRPC Issues ✅ COMPLETED
-- [x] Research gRPC stubs issues in existing client
-- [x] Fix UploadRequest port parameter (string → Port object)
-- [x] Fix board detection method (BoardDetect → BoardListWatch/BoardList)
-- [x] Document findings in RESEARCH_JOURNAL.md
-- [x] Create clean Python module `arduino_grpc/`
-- [x] 22 unit tests passing
-- [x] 6 integration tests passing (Connection, Init, List, ListAll, Watch, Compile)
-
-### Phase 2: Integration Testing & Fixes ✅ COMPLETED
-- [x] Integration test with actual arduino-cli daemon (7/7 passing)
-- [x] Add timeout parameter to `watch_boards()`
-- [x] Add upload integration test (runs if board connected)
-- [x] Fix `BoardList` returning 0 ports (added `timeout` field to request)
-- [x] Fix instance resource leak (added `destroy()` → `Dispose` RPC called on `disconnect()`)
-
-### Phase 3: Board Manager Service ✅ COMPLETED
-- [x] Protocol & Router (PubSub messaging system)
-- [x] Subprocess Pool (`pool.py`, `board_worker.py`)
-- [x] BoardManagerService (`service.py`, `__main__.py`)
-- [x] Integration tests with arduino-cli daemon
-
-### Phase 4: Web App ✅ COMPLETED
-- [x] Flask app with HTMX + WebSocket
-- [x] PubSub client to BoardManagerService
-- [x] Dashboard, board detail, compile/upload UI
-- [x] Integration tests (full stack)
-
-### Phase 5: Private PyPI Wheel-Based Install ✅ COMPLETED
-- [x] Create `setup.py` bootstrap files (3 modules)
-- [x] Build wheels for all three packages
-- [x] Update `grpc_client/python/Pipfile` — private source, remove direct deps
-- [x] Update `board_manager/python/Pipfile` — private source, remove path dep
-- [x] Update `webapp/python/arduino_dash/Pipfile` — private sources, remove path deps
-- [x] Update `.env` files with `PROJECT_ROOT`
-- [x] Regenerate lock files, verify `pipenv install` from parent dirs
-- [x] Run all tests (143) and verify
-
-### Phase 6: Board Detection & Dashboard Live Updates ✅ COMPLETED
-- [x] Write BoardDetector (`board_detector.py`) — background thread polling `list_boards()` every 5s
-- [x] Integrate BoardDetector into `BoardManagerService.start()`/`stop()`
-- [x] Fix Flask app_context error in pubsub `_on_board_event` handler
-- [x] Add `/api/boards/grid` endpoint + `board_grid.html` partial
-- [x] Dashboard HTMX polling for live board list
-- [x] Fix test warnings across all modules (10 warnings eliminated)
-- [x] Write unit test for BoardDetector
-- [x] Fix protobuf int64 float rejection — `int(timeout)` cast in `client.py:149`, `DEFAULT_LIST_TIMEOUT` from `3.0` → `3`
-
-### Phase 7: Debug — Board Events Not Reaching Dashboard ✅ COMPLETED
-- [x] Add instrument logging at each event transition point
-- [x] Run with `--debug` to identify break point (timing race — events fire before subscriber connects)
-- [x] Fix root cause — cache board state in `_board_state`, re-emit synthetic "connected" events on subscribe
-- [x] Verify fix — boards appear in dashboard via `/api/boards/grid`
-
-### Phase 8: Fix _tick pool.poll inner loop crash ✅ COMPLETED
-- [x] Remove erroneous inner `for msg in msgs` loop in `service.py:126-129`
-- [x] Add regression tests (TestTick, 4 tests)
-- [x] Verify 157 tests pass
-
-### Phase 9: Fix Upload (exit status 1 crash cascade) ✅ COMPLETED
-- [x] Investigate `exit status 1` from avrdude — caused by crash cascade, not a separate bug
-- [x] Test standalone: `arduino-cli upload ...` — works fine
-- [x] Test via full BMS stack after crash fix — upload succeeds
-
-### Phase 10: Fix Async Response Handling — Compile/Upload Results ✅ COMPLETED
-- [x] Add `_pending_responses` dict + `_on_resp` handler for `resp::*` topics 🔴 Non-functional — `::` separator bug discovered
-- [x] Modify `api_compile`/`api_upload` to wait for response (60s timeout) and render HTML
-- [x] Create result partial templates
-- [x] Tests for response handling (10 new tests)
-- [x] End-to-end verification (deferred to Phase 12 — resolved by :: fix + streaming)
-
-### Phase 11: Real-time Progress + Polling + Logging ✅ COMPLETED
-- [x] Stage 1: Fix `::` separator in response topics
-- [x] Stage 2: Add `compile_stream()`/`upload_stream()` to gRPC client
-- [x] Stage 3: Board worker streaming + logging
-- [x] Stage 4: Service routing + logging
-- [x] Stage 5: WebApp polling endpoints + results cache
-- [x] Stage 6: Templates — WS progress + polling UI
-
-### Phase 12: DaemonManager + Spinner + Cleanup ✅ COMPLETED
-- [x] Q1: DaemonManager class + config + tests
-- [x] Q2: Service integration (start/stop daemon)
-- [x] A1: Fix stale UDS socket handling in PubSubClient._create_socket
-- [x] A2: Add retry to PubSubClient.connect() initial connection
-- [x] A3: Graceful init_pubsub on connection failure
-- [x] Q5a: CSS spinner in compile/upload partials
-- [x] Q5b: Remove Spawn/Remove buttons from board_detail
-- [x] Q5c: Board manager compile/upload status logs
-- [x] Q6a: Fix `_publish_daemon_ready()` — remove erroneous cleanup that closes listener sockets
-- [x] Q6b: Add regression test — verify sockets remain open after `_publish_daemon_ready()`
-- [x] Q4: WebApp daemon status badge + WS subscription
-- [x] Q7a: Fix badge freeze — add HTMX attributes to daemon_badge.html
-- [x] Q7b: Add spinner to compile_poll_pending.html + upload_poll_pending.html
-- [x] Q7c: Add BMS offline check in compile/upload endpoints + error partial
-- [x] Q3: BoardDetector linear retry delays + auto-restart via daemon_manager.ensure_alive()
-- [x] Q8a: `_daemon_ready` flag in `__init__`, set in `_publish_daemon_ready()`
-- [x] Q8b: `_send_daemon_state_to(conn)` method
-- [x] Q8c: Call `_send_daemon_state_to` in subscribe handler  
-- [x] Q8d: Tests for flag + subscribe re-emission
-- [x] Q9a: Fixed 2s reconnect delay (replaced exponential backoff)
-- [x] Q9b: Fix `_reconnect` killing reader thread + `_send` race condition
-- [x] Q10a: Guard `_on_daemon_ready` handler by message type
-- [x] Q10b: Check `is_connected` in badge endpoint
-- [x] Q10c: Tests for Q10a + Q10b
-
-### Phase 13: Fix Upload Error Message Leak ✅ COMPLETED
-- [x] Q11a: Fix `_make_error` to include `"status": "error"` key in board_worker.py
-- [x] Q11b: Fix BMS `_route_pool_message` — filter `::progress` from result log, log error `message`
-- [x] Q11c: Fix webapp error rendering + test
-- [x] Q11d: Final test run — 254 total (165+55+34), all passing, zero warnings
-
-### Phase 14: Port Path Normalization ✅ COMPLETED
-- [x] Q1: Fix `board_grid.html:13` — `lstrip('/')` on port in href
-- [x] Q2: Add `_norm_port(port)` helper that prepends `/` if missing
-- [x] Q3: Use `_norm_port` in all 7 API endpoints (compile, upload, poll, spawn, status, remove)
-- [x] Q4: Update tests — fix cache keys to use `/dev/ttyACM0` instead of `dev/ttyACM0`
-- [x] Q5: All 254 tests pass
-
-### Phase 15: UI/UX Improvements ✅ COMPLETED
-- [x] Larger log text (0.8rem → 0.95rem), shorter height (400px → 250px)
-- [x] Remove dead "Status" section from board_detail
-- [x] Board connection status badge in controls (top-right) — polls every 10s
-- [x] Verbose upload status messages — synthetic phase markers in board_worker
-- [x] 3 new connection-status tests, all 257 pass
-
-### Phase 16: UI Polish — Log Spacing Fix + Meta Info in Cards ✅ COMPLETED
-- [x] Q1: Fix log-viewer — `white-space: pre-wrap` causes `\n` in `<div>` blocks to render as blank lines (remove white-space property, confirmed working)
-- [x] Q2: Cleanup board_worker.py synthetic progress messages — remove trailing `\n` (redundant in block elements)
-- [x] Q3: Add `_compile_meta` / `_upload_meta` dicts in app.py — store port, board name, FQBN, sketch path during operations
-- [x] Q4: Update upload/compile card headings and info bars in templates (port, board, FQBN, sketch)
-- [x] Q5: Tests + verification — 261 total (165+62+34), all passing, zero warnings
-
-### Phase 17: Sketch Status Warnings ✅ COMPLETED
-- [x] Q1: Add `_get_sketch_mtime()` helper + `_last_compiled_sketch` / `_last_compile_mtime` tracking
-- [x] Q2: Warning computation in `api_upload()` — sketch path mismatch + modified detection → blocking confirmation
-- [x] Q3: New `POST /api/board/<port>/upload/confirm` and `GET /api/board/<port>/upload/section` endpoints
-- [x] Q4: New `upload_confirm.html` + `upload_init.html` templates, `.btn-warning`/`.btn-secondary` CSS
-- [x] Q5: Compile failure warning — show "sketch modified since last successful compile" in compile result
-- [x] Q6: 11 new tests (mtime helper, warnings, blocking flow, compile warning)
-- [x] Q7: Docs update + final test run — 73 webapp tests pass, **283 total**
-
-### Phase 18: Sketch File Browser + Drag-and-Drop ✅ COMPLETED
-- [x] Q1: Server upload endpoint `POST /api/sketch/upload` — multipart file receive, `uploads/` storage, `.meta` file
-- [x] Q2: Hyperscript setup + templates (modal, drop zone, button)
-- [x] Q3: Browse flow — hidden `<input webkitdirectory>`, Browse button triggers it, hyperscript handlers
-- [x] Q4: Drag-and-drop flow — drop zone with `dragover`/`drop` handlers via hyperscript, folder iteration
-- [x] Q5: Tests — upload endpoint (files + meta), cleanup
-- [x] Q6: Board_detail.html integration + final docs
-
-**Post-release Bugfixes**:
-- [x] Bug 1: Browse button doesn't open folder picker — `<input hidden>` blocks `.click()`
-  - Fix: Replace Browse `<button>` with `<label for="folder-input">` (pure HTML, zero script)
-  - Replace `hidden` attribute with CSS "visually hidden" pattern
-- [x] Bug 2: Drag-and-drop opens files in browser — `halt the default` exits handler early
-  - Fix: Use `halt the event` (prevent default AND continue) in DnD handlers
-  - Use `on drop(dataTransfer)` destructuring for event.dataTransfer access
-  - Add window-level `on drop from window` / `on dragover from window` to `<body>`
-- [x] All 287 tests still pass (frontend-only changes, no server logic changed)
-
-### Phase 19: Fix Browse/Upload/DnD UI Bugs ✅ COMPLETED
-- [x] Q1: Fix body DnD prevention — `halt the event` → `halt the event's default` in `base.html:47-48`
-- [x] Q2: Fix modal centering — `show me` → `set my.style.display to 'flex'` in `sketch_upload_modal.html`
-- [x] Q3: HTMX upload on Browse — file input `hx-post` auto-upload on change, server returns HTML `<input>` when `HX-Request` header present. Modal Upload button uses HTMX `hx-post` + `hx-include="#folder-input"` for DnD flow.
-- [x] Q4: Remove default sketch path + `_last_upload_by_ip` dict + `GET /api/last-upload` endpoint + `hx-get` on page load
-- [x] Q5: Sketch name in card meta — `_make_meta` includes `sketch_name` (basename), templates display it
-- [x] Q6: All 69 tests pass (14 new), docs updated
-
-**Phase 20 Bugfix: Three Regression Fixes ✅ COMPLETED**
-Three issues found after Phase 20:
-1. **Modal not shown** — I removed `on change` hyperscript from file input (broke modal for Browse)
-2. **DnD doesn't work** — `halt the event's default` is invalid hyperscript (body handler silently fails)
-3. **Wrong upload path** — returned path is upload root (`uploads/<ts>_<name>/`), not sketch subdirectory (`uploads/<ts>_<name>/<sketchname>/`)
-
-| Q | Fix | Files | Tests |
-|---|-----|-------|-------|
-| 1 | Body DnD: `halt the event's default` → `call event.preventDefault()` | base.html | Manual: DnD works |
-| 2 | Restore `on change` hyperscript + homogenise DnD/Browse flow | board_detail.html | Manual: modal shows |
-| 3 | Compute `sketch_dir` with subdirectory, add `root_name` to meta | app.py | Existing + path updates |
-| 4 | Last-upload scanner reconstructs `sketch_dir` from meta | app.py | Test path adjustments |
-| 5 | Update tests + docs + CODEBASE_REFERENCE | test_app.py, all docs | All 92 webapp pass |
-
-**Key hyperscript correction**: `halt the event's default` is NOT a valid hyperscript form. The valid forms are: `halt` (exit+P+SP), `halt the event` (P+SP+continue), `halt the bubbling` (SP+continue). Use `call event.preventDefault()` for preventDefault-only.
-
-**Phase 20 Bugfix Q6: .ino Filename Mismatch ✅ COMPLETED**
-Arduino CLI requires the `.ino` file to match the enclosing folder name. Uploading a folder
-`blinky2/` containing `blinky.ino` → compile fails looking for `blinky2.ino`.
-
-| Q | Change | Files | Tests |
-|---|--------|-------|-------|
-| 6 | Add `_normalize_ino_filename()` — scans `sketch_dir` for `.ino`, renames if exactly one mismatches | app.py | 6 new normalization tests |
-
-**Test totals**: 98 webapp tests (92 + 6). **307 grand total**, all passing, zero warnings.
-
-**Phase 20 Bugfix Q7: Button State Restoration After Upload ✅ COMPLETED**
-
-**Issues found during user testing**:
-1. **Issue 1 — Second upload hangs**: After first upload, `on htmx:afterRequest` hides modal and resets file input but does NOT restore button state. Upload button stays disabled with "Uploading..." text, Cancel button stays disabled. On second attempt, modal shows with disabled buttons → appears unresponsive.
-2. **Issue 2 — Browser "Upload files?" dialog**: Standard Chrome + Firefox security feature for `webkitdirectory`. Appears once per directory selection. Cannot be suppressed. Not present in DnD path. User accepted as standard behavior.
-
-| Q | Change | Files | Tests |
-|---|--------|-------|-------|
-| 7 | `on htmx:afterRequest`: restore Upload button text/enabled, Cancel button enabled. `on showModal`: defense-in-depth reset of button states. | `sketch_upload_modal.html` | Manual |
-
-**Decision**: Keep both Browse and DnD. Fix button state restoration. Browser dialog is standard behavior.
 
 ---
 
@@ -868,95 +795,266 @@ to hyperscript `fetch` + `FormData`, supporting both `__dndFiles` (DnD) and
 | 4 | hideModal: clear `__dndFiles` on cancel | `sketch_upload_modal.html` | Manual |
 | — | Run all 98 webapp tests — no regressions | — | All 98 pass |
 
----
+**Phase 20 Bugfix Q6: .ino Filename Mismatch ✅ COMPLETED**
+Arduino CLI requires the `.ino` file to match the enclosing folder name. Uploading a folder
+`blinky2/` containing `blinky.ino` → compile fails looking for `blinky2.ino`.
 
-### Phase 99 — HTML Template Homogenisation Across Both Dashboards ✅ COMPLETED
+| Q | Change | Files | Tests |
+|---|--------|-------|-------|
+| 6 | Add `_normalize_ino_filename()` — scans `sketch_dir` for `.ino`, renames if exactly one mismatches | app.py | 6 new normalization tests |
 
-**Date**: 2026-06-22 12:43
-**Status**: ✅ Completed
+**Test totals**: 98 webapp tests (92 + 6). **307 grand total**, all passing, zero warnings.
 
-**Goal**: Make all 14 shared templates structurally identical, extracting medicine-specific sections into separate partials and using template variables for route-path divergence.
+**Phase 20 Bugfix Q7: Button State Restoration After Upload ✅ COMPLETED**
 
-**Design** (see IMPLEMENTATION_PLAN.md for full details):
-1. **Q1 — board_detail.html**: Both apps converge on flat `<div>` + htmx `/last-upload` pattern. arduino_dash: remove `<form>` wrapper, move FQBN/Port above sketch, use `hx-include="#sketch_path, #fqbn"`, add Admin Page link. medminder_dash: switch hidden `#sketch_path` input → htmx `/last-upload` container, add hardware-id hidden input, guard DnD/browse/delete/modals behind `{% if show_sketch_tools %}`. Extract Medicines section (lines 74-92) to `partials/medicine_management.html`, guarded by `{% if show_medicines_section %}`
-2. **Q2 — admin.html**: Add assigned-sketch-info div to arduino_dash. Extract medicine management section (lines 65-105) to `partials/admin_medicine_section.html`. Both apps pass admin_board_selector attributes as Python route kwargs.
-3. **Q3 — admin_board_selector.html**: Extract route-dependent attributes (`hx-post`, `hx-target`, `hx-swap`, label) to template variables passed as render_template kwargs.
-4. **Q4 — compile_upload_card.html**: Add `Step 2:`/`Step 3:` to arduino_dash; converge description to generic text; converge `&#8230;` entity
-5. **T1-T3 — Trivial diffs**: dnd_overlay.html trailing newline, board_card.html defensive `or 'Unknown'`, delete_confirm_modal.html `hardware_id` in `hx-vals`
-6. **Q6 — base.html**: Add `dragover`/`drop` `preventDefault` listeners to medminder_dash
+**Issues found during user testing**:
+1. **Issue 1 — Second upload hangs**: After first upload, `on htmx:afterRequest` hides modal and resets file input but does NOT restore button state. Upload button stays disabled with "Uploading..." text, Cancel button stays disabled. On second attempt, modal shows with disabled buttons → appears unresponsive.
+2. **Issue 2 — Browser "Upload files?" dialog**: Standard Chrome + Firefox security feature for `webkitdirectory`. Appears once per directory selection. Cannot be suppressed. Not present in DnD path. User accepted as standard behavior.
 
-**Post-plan addition**: Extracted `SketchRegistry` class to `arduino_sketch_tools` as a shared module. Both per-app `sketch_registry.py` files became thin wrappers. This was needed for the `assigned-sketch-info` feature in arduino_dash.
+| Q | Change | Files | Tests |
+|---|--------|-------|-------|
+| 7 | `on htmx:afterRequest`: restore Upload button text/enabled, Cancel button enabled. `on showModal`: defense-in-depth reset of button states. | `sketch_upload_modal.html` | Manual |
 
-| Q | Scope | Key Changes | Status |
-|---|-------|-------------|--------|
-| Q1 | board_detail.html | Flat div + htmx /last-upload; sketch tools guard; medicines partial extract | ✅ |
-| Q2 | admin.html | Route vars, medicine section extract, assigned-sketch div | ✅ |
-| Q3 | admin_board_selector.html | Template vars for `hx-post`, `hx-target`, `hx-swap`, label | ✅ |
-| Q4 | compile_upload_card.html | Step numbering, generic description, `&#8230;` entity | ✅ |
-| T1 | dnd_overlay.html | Trailing newline | ✅ |
-| T2 | board_card.html | `or 'Unknown'` | ✅ |
-| T3 | delete_confirm_modal.html | `hardware_id` in `hx-vals` | ✅ |
-| Q6 | base.html DnD listeners | `preventDefault` for medminder_dash | ✅ |
-| SR | SketchRegistry extract | Shared class in arduino_sketch_tools | ✅ |
-
-**Test results**: 119 arduino_dash ✓, 186 medminder_dash ✓
-
-**Files changed**: ~15 templates across both dashboards + 5 Python route files + 2 new partials + 1 new shared module.
+**Decision**: Keep both Browse and DnD. Fix button state restoration. Browser dialog is standard behavior.
 
 ---
 
-### Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) ✅ COMPLETED
+### Phase 19: Fix Browse/Upload/DnD UI Bugs ✅ COMPLETED
 
-**Date**: 2026-06-22 16:14
-**Status**: ✅ Completed
+- [x] Q1: Fix body DnD prevention — `halt the event` → `halt the event's default` in `base.html:47-48`
+- [x] Q2: Fix modal centering — `show me` → `set my.style.display to 'flex'` in `sketch_upload_modal.html`
+- [x] Q3: HTMX upload on Browse — file input `hx-post` auto-upload on change, server returns HTML `<input>` when `HX-Request` header present. Modal Upload button uses HTMX `hx-post` + `hx-include="#folder-input"` for DnD flow.
+- [x] Q4: Remove default sketch path + `_last_upload_by_ip` dict + `GET /api/last-upload` endpoint + `hx-get` on page load
+- [x] Q5: Sketch name in card meta — `_make_meta` includes `sketch_name` (basename), templates display it
+- [x] Q6: All 69 tests pass (14 new), docs updated
 
-**Goal**: Make `e2e/servers/arduino_dash_server.py` and `medminder_dash_server.py` survive the bash tool's shell exit without requiring `&`, `&>/dev/null`, `disown`, or special timeouts. Add `--pidfile`, `--stop`, `--force`, `--logfile` flags for proper lifecycle management.
+**Phase 20 Bugfix: Three Regression Fixes ✅ COMPLETED**
+Three issues found after Phase 20:
+1. **Modal not shown** — I removed `on change` hyperscript from file input (broke modal for Browse)
+2. **DnD doesn't work** — `halt the event's default` is invalid hyperscript (body handler silently fails)
+3. **Wrong upload path** — returned path is upload root (`uploads/<ts>_<name>/`), not sketch subdirectory (`uploads/<ts>_<name>/<sketchname>/`)
 
-**Root cause**: When the bash tool's shell command exits, it sends SIGHUP to the entire process group. `disown` does not protect against process-group-level signals (only removes from bash job table). The server was killed between bash invocations.
+| Q | Fix | Files | Tests |
+|---|-----|-------|-------|
+| 1 | Body DnD: `halt the event's default` → `call event.preventDefault()` | base.html | Manual: DnD works |
+| 2 | Restore `on change` hyperscript + homogenise DnD/Browse flow | board_detail.html | Manual: modal shows |
+| 3 | Compute `sketch_dir` with subdirectory, add `root_name` to meta | app.py | Existing + path updates |
+| 4 | Last-upload scanner reconstructs `sketch_dir` from meta | app.py | Test path adjustments |
+| 5 | Update tests + docs + CODEBASE_REFERENCE | test_app.py, all docs | All 92 webapp pass |
 
-**Revised approach (Option 3)** — replaces earlier fork-based `_daemonize()`:
-
-```
-Before (broken):                          After (works):
-                                            1. os.setpgid(0,0) → new PGID
-┌─ bash tool ────────┐                    ┌─ bash tool ────────┐
-│  python3 script.py │                    │  python3 script.py │
-│  ┌─ server ───────┐│                    │  os.setpgid(0,0)  │
-│  │ app.run()──────││── tool waits──▶    │  _redirect_io()   │
-│  └────────────────┘│                    │  ⟐ pipe closes ⟐  │
-└────────────────────┘                    │  tool returns!     │
-    ↑ dies on exit                        └────────────────────┘
-                                             2. Flask continues
-                                                in own PGID,
-                                                logs→file|/dev/null
-```
-
-**Components**:
-- `os.setpgid(0, 0)` — new process group, immune to parent shell's group SIGHUP
-- `signal.signal(signal.SIGHUP, signal.SIG_IGN)` — belt-and-suspenders
-- `_redirect_io(logfile)` — dup2 stdout/stderr to file or `/dev/null`, closing the tool's pipe
-- `--logfile PATH` — optional, collects Flask logs (default: `/dev/null`)
-- `--pidfile PATH` — default `/tmp/<script>.pid`
-- `--stop` — reads pidfile, `os.kill(pid, SIGTERM)` → 5s poll → SIGKILL fallback
-- `--force` — with `--stop`, sends SIGKILL immediately
-
-**Files**: `e2e/servers/arduino_dash_server.py`, `e2e/servers/medminder_dash_server.py`
-
-| Q | Scope | Key Changes | Status |
-|---|-------|-------------|--------|
-| Q1 | arduino_dash server | `_daemonize(logfile)`, `--pidfile`, `--stop`, `--force`, `--logfile` | ✅ |
-| Q2 | medminder_dash server | Same changes | ✅ |
-| Q3 | Integration test | Start, survive bash exit, `--stop` cleanup, log capture | ✅ |
-
-**Evolution** (traceability):
-1. **Initial plan**: `os.setpgid(0, 0)` + `disown` workaround — rejected because user wants no shell hacks
-2. **Iteration 2**: Fork-based `_daemonize()` — rejected because fork child inherits stdout/stderr, tool blocks until timeout
-3. **Final (Option 3)**: `os.setpgid(0, 0)` + `_redirect_io()` — no fork, pipe closes immediately, tool returns, logs captured
+**Key hyperscript correction**: `halt the event's default` is NOT a valid hyperscript form. The valid forms are: `halt` (exit+P+SP), `halt the event` (P+SP+continue), `halt the bubbling` (SP+continue). Use `call event.preventDefault()` for preventDefault-only.
 
 ---
 
-## Phase 100 complete (Server Disown & Cleanup).
+### Phase 18: Sketch File Browser + Drag-and-Drop ✅ COMPLETED
 
-**Last Updated**: 2026-06-23 06:00
+- [x] Q1: Server upload endpoint `POST /api/sketch/upload` — multipart file receive, `uploads/` storage, `.meta` file
+- [x] Q2: Hyperscript setup + templates (modal, drop zone, button)
+- [x] Q3: Browse flow — hidden `<input webkitdirectory>`, Browse button triggers it, hyperscript handlers
+- [x] Q4: Drag-and-drop flow — drop zone with `dragover`/`drop` handlers via hyperscript, folder iteration
+- [x] Q5: Tests — upload endpoint (files + meta), cleanup
+- [x] Q6: Board_detail.html integration + final docs
+
+**Post-release Bugfixes**:
+- [x] Bug 1: Browse button doesn't open folder picker — `<input hidden>` blocks `.click()`
+  - Fix: Replace Browse `<button>` with `<label for="folder-input">` (pure HTML, zero script)
+  - Replace `hidden` attribute with CSS "visually hidden" pattern
+- [x] Bug 2: Drag-and-drop opens files in browser — `halt the default` exits handler early
+  - Fix: Use `halt the event` (prevent default AND continue) in DnD handlers
+  - Use `on drop(dataTransfer)` destructuring for event.dataTransfer access
+  - Add window-level `on drop from window` / `on dragover from window` to `<body>`
+- [x] All 287 tests still pass (frontend-only changes, no server logic changed)
+
+---
+
+### Phase 17: Sketch Status Warnings ✅ COMPLETED
+
+- [x] Q1: Add `_get_sketch_mtime()` helper + `_last_compiled_sketch` / `_last_compile_mtime` tracking
+- [x] Q2: Warning computation in `api_upload()` — sketch path mismatch + modified detection → blocking confirmation
+- [x] Q3: New `POST /api/board/<port>/upload/confirm` and `GET /api/board/<port>/upload/section` endpoints
+- [x] Q4: New `upload_confirm.html` + `upload_init.html` templates, `.btn-warning`/`.btn-secondary` CSS
+- [x] Q5: Compile failure warning — show "sketch modified since last successful compile" in compile result
+- [x] Q6: 11 new tests (mtime helper, warnings, blocking flow, compile warning)
+- [x] Q7: Docs update + final test run — 73 webapp tests pass, **283 total**
+
+---
+
+### Phase 16: UI Polish — Log Spacing Fix + Meta Info in Cards ✅ COMPLETED
+
+- [x] Q1: Fix log-viewer — `white-space: pre-wrap` causes `\n` in `<div>` blocks to render as blank lines (remove white-space property, confirmed working)
+- [x] Q2: Cleanup board_worker.py synthetic progress messages — remove trailing `\n` (redundant in block elements)
+- [x] Q3: Add `_compile_meta` / `_upload_meta` dicts in app.py — store port, board name, FQBN, sketch path during operations
+- [x] Q4: Update upload/compile card headings and info bars in templates (port, board, FQBN, sketch)
+- [x] Q5: Tests + verification — 261 total (165+62+34), all passing, zero warnings
+
+---
+
+### Phase 15: UI/UX Improvements ✅ COMPLETED
+
+- [x] Larger log text (0.8rem → 0.95rem), shorter height (400px → 250px)
+- [x] Remove dead "Status" section from board_detail
+- [x] Board connection status badge in controls (top-right) — polls every 10s
+- [x] Verbose upload status messages — synthetic phase markers in board_worker
+- [x] 3 new connection-status tests, all 257 pass
+
+---
+
+### Phase 14: Port Path Normalization ✅ COMPLETED
+
+- [x] Q1: Fix `board_grid.html:13` — `lstrip('/')` on port in href
+- [x] Q2: Add `_norm_port(port)` helper that prepends `/` if missing
+- [x] Q3: Use `_norm_port` in all 7 API endpoints (compile, upload, poll, spawn, status, remove)
+- [x] Q4: Update tests — fix cache keys to use `/dev/ttyACM0` instead of `dev/ttyACM0`
+- [x] Q5: All 254 tests pass
+
+---
+
+### Phase 13: Fix Upload Error Message Leak ✅ COMPLETED
+
+- [x] Q11a: Fix `_make_error` to include `"status": "error"` key in board_worker.py
+- [x] Q11b: Fix BMS `_route_pool_message` — filter `::progress` from result log, log error `message`
+- [x] Q11c: Fix webapp error rendering + test
+- [x] Q11d: Final test run — 254 total (165+55+34), all passing, zero warnings
+
+---
+
+### Phase 12: DaemonManager + Spinner + Cleanup ✅ COMPLETED
+
+- [x] Q1: DaemonManager class + config + tests
+- [x] Q2: Service integration (start/stop daemon)
+- [x] A1: Fix stale UDS socket handling in PubSubClient._create_socket
+- [x] A2: Add retry to PubSubClient.connect() initial connection
+- [x] A3: Graceful init_pubsub on connection failure
+- [x] Q5a: CSS spinner in compile/upload partials
+- [x] Q5b: Remove Spawn/Remove buttons from board_detail
+- [x] Q5c: Board manager compile/upload status logs
+- [x] Q6a: Fix `_publish_daemon_ready()` — remove erroneous cleanup that closes listener sockets
+- [x] Q6b: Add regression test — verify sockets remain open after `_publish_daemon_ready()`
+- [x] Q4: WebApp daemon status badge + WS subscription
+- [x] Q7a: Fix badge freeze — add HTMX attributes to daemon_badge.html
+- [x] Q7b: Add spinner to compile_poll_pending.html + upload_poll_pending.html
+- [x] Q7c: Add BMS offline check in compile/upload endpoints + error partial
+- [x] Q3: BoardDetector linear retry delays + auto-restart via daemon_manager.ensure_alive()
+- [x] Q8a: `_daemon_ready` flag in `__init__`, set in `_publish_daemon_ready()`
+- [x] Q8b: `_send_daemon_state_to(conn)` method
+- [x] Q8c: Call `_send_daemon_state_to` in subscribe handler
+- [x] Q8d: Tests for flag + subscribe re-emission
+- [x] Q9a: Fixed 2s reconnect delay (replaced exponential backoff)
+- [x] Q9b: Fix `_reconnect` killing reader thread + `_send` race condition
+- [x] Q10a: Guard `_on_daemon_ready` handler by message type
+- [x] Q10b: Check `is_connected` in badge endpoint
+- [x] Q10c: Tests for Q10a + Q10b
+
+---
+
+### Phase 11: Real-time Progress + Polling + Logging ✅ COMPLETED
+
+- [x] Stage 1: Fix `::` separator in response topics
+- [x] Stage 2: Add `compile_stream()`/`upload_stream()` to gRPC client
+- [x] Stage 3: Board worker streaming + logging
+- [x] Stage 4: Service routing + logging
+- [x] Stage 5: WebApp polling endpoints + results cache
+- [x] Stage 6: Templates — WS progress + polling UI
+
+---
+
+### Phase 10: Fix Async Response Handling — Compile/Upload Results ✅ COMPLETED
+
+- [x] Add `_pending_responses` dict + `_on_resp` handler for `resp::*` topics 🔴 Non-functional — `::` separator bug discovered
+- [x] Modify `api_compile`/`api_upload` to wait for response (60s timeout) and render HTML
+- [x] Create result partial templates
+- [x] Tests for response handling (10 new tests)
+- [x] End-to-end verification (deferred to Phase 12 — resolved by :: fix + streaming)
+
+---
+
+### Phase 9: Fix Upload (exit status 1 crash cascade) ✅ COMPLETED
+
+- [x] Investigate `exit status 1` from avrdude — caused by crash cascade, not a separate bug
+- [x] Test standalone: `arduino-cli upload ...` — works fine
+- [x] Test via full BMS stack after crash fix — upload succeeds
+
+---
+
+### Phase 8: Fix _tick pool.poll inner loop crash ✅ COMPLETED
+
+- [x] Remove erroneous inner `for msg in msgs` loop in `service.py:126-129`
+- [x] Add regression tests (TestTick, 4 tests)
+- [x] Verify 157 tests pass
+
+---
+
+### Phase 7: Debug — Board Events Not Reaching Dashboard ✅ COMPLETED
+
+- [x] Add instrument logging at each event transition point
+- [x] Run with `--debug` to identify break point (timing race — events fire before subscriber connects)
+- [x] Fix root cause — cache board state in `_board_state`, re-emit synthetic "connected" events on subscribe
+- [x] Verify fix — boards appear in dashboard via `/api/boards/grid`
+
+---
+
+### Phase 6: Board Detection & Dashboard Live Updates ✅ COMPLETED
+
+- [x] Write BoardDetector (`board_detector.py`) — background thread polling `list_boards()` every 5s
+- [x] Integrate BoardDetector into `BoardManagerService.start()`/`stop()`
+- [x] Fix Flask app_context error in pubsub `_on_board_event` handler
+- [x] Add `/api/boards/grid` endpoint + `board_grid.html` partial
+- [x] Dashboard HTMX polling for live board list
+- [x] Fix test warnings across all modules (10 warnings eliminated)
+- [x] Write unit test for BoardDetector
+- [x] Fix protobuf int64 float rejection — `int(timeout)` cast in `client.py:149`, `DEFAULT_LIST_TIMEOUT` from `3.0` → `3`
+
+---
+
+### Phase 5: Private PyPI Wheel-Based Install ✅ COMPLETED
+
+- [x] Create `setup.py` bootstrap files (3 modules)
+- [x] Build wheels for all three packages
+- [x] Update `grpc_client/python/Pipfile` — private source, remove direct deps
+- [x] Update `board_manager/python/Pipfile` — private source, remove path dep
+- [x] Update `webapp/python/arduino_dash/Pipfile` — private sources, remove path deps
+- [x] Update `.env` files with `PROJECT_ROOT`
+- [x] Regenerate lock files, verify `pipenv install` from parent dirs
+- [x] Run all tests (143) and verify
+
+---
+
+### Phase 4: Web App ✅ COMPLETED
+
+- [x] Flask app with HTMX + WebSocket
+- [x] PubSub client to BoardManagerService
+- [x] Dashboard, board detail, compile/upload UI
+- [x] Integration tests (full stack)
+
+---
+
+### Phase 3: Board Manager Service ✅ COMPLETED
+
+- [x] Protocol & Router (PubSub messaging system)
+- [x] Subprocess Pool (`pool.py`, `board_worker.py`)
+- [x] BoardManagerService (`service.py`, `__main__.py`)
+- [x] Integration tests with arduino-cli daemon
+
+---
+
+### Phase 2: Integration Testing & Fixes ✅ COMPLETED
+
+- [x] Integration test with actual arduino-cli daemon (7/7 passing)
+- [x] Add timeout parameter to `watch_boards()`
+- [x] Add upload integration test (runs if board connected)
+- [x] Fix `BoardList` returning 0 ports (added `timeout` field to request)
+- [x] Fix instance resource leak (added `destroy()` → `Dispose` RPC called on `disconnect()`)
+
+---
+
+### Phase 1: Research & Fix gRPC Issues ✅ COMPLETED
+
+- [x] Research gRPC stubs issues in existing client
+- [x] Fix UploadRequest port parameter (string → Port object)
+- [x] Fix board detection method (BoardDetect → BoardListWatch/BoardList)
+- [x] Document findings in RESEARCH_JOURNAL.md
+- [x] Create clean Python module `arduino_grpc/`
+- [x] 22 unit tests passing
+- [x] 6 integration tests passing (Connection, Init, List, ListAll, Watch, Compile)
 
 {% endraw %}

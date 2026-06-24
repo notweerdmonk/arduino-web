@@ -26,22 +26,22 @@
 
 ### Q1 — arduino_dash_server.py
 
-- [ ] Remove `_daemonize()` function (fork-based, superseded by setpgid + redirect)
-- [ ] Add `_redirect_io(logfile)` function — closes stdin, dup2 stdout/stderr
-- [ ] Add `--logfile` CLI argument
-- [ ] Replace `_daemonize()` call with: `os.setpgid(0, 0)` (try/except) + `signal.signal()` + `_redirect_io()`
-- [ ] Verify `--stop` runs before setpgid/redirect (already correct)
+- [x] Remove `_daemonize()` function (fork-based, superseded by fork + setsid + redirect)
+- [x] Add `_redirect_io(logfile)` function — closes stdin, dup2 stdout/stderr
+- [x] Add `--logfile` CLI argument
+- [x] Replace `_daemonize()` call with: `os.fork()` + `os.setsid()` + `_redirect_io()`
+- [x] Verify `--stop` runs before daemonize (already correct)
 
 ### Q2 — medminder_dash_server.py
 
-- [ ] Same changes as Q1
-- [ ] Fix ordering: `--stop` check should come before setpgid (currently reversed)
+- [x] Same changes as Q1
+- [x] Fix ordering: `--stop` check should come before daemonize (currently reversed)
 
 ### Q3 — Integration Tests
 
-- [ ] Kill any leftover servers
-- [ ] Start arduino_dash with `python3 script.py --mock --production`, verify HTTP 200 in next invocation
-- [ ] Test `--logfile` capture
-- [ ] Test `--stop` cleanup
-- [ ] Repeat for medminder_dash on port 8766
+- [x] Kill any leftover servers
+- [x] Start arduino_dash with `python3 script.py --mock --production`, verify HTTP 200 in next invocation
+- [x] Test `--logfile` capture
+- [x] Test `--stop` cleanup
+- [x] Repeat for medminder_dash on port 8766
 {% endraw %}

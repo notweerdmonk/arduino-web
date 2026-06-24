@@ -147,7 +147,7 @@ The CI pipeline supports `--skip-tests` and `--skip-builds` flags. The `test_ci.
 | `api_routes.py` | `test_api_medicines.py` | Medicine CRUD, validation |
 | `html_routes.py` | `test_admin.py` | Admin pages, board selector |
 | `html_routes.py` | `test_routes.py` | Board routes, connection status, sketch path |
-| `pubsub_infra.py` | `test_pubsub.py` | Hardware ID flow, port info |
+| `pubsub.py` | `test_pubsub.py` | Hardware ID flow, port info |
 | `sketch_gen.py` | `test_sketch_gen.py` | alarm.hpp generation/parsing |
 | `sketch_registry.py` | `test_sketch_registry.py` | Assignment CRUD |
 | `sketch_management.py` | `test_e2e_sketch.py` | End-to-end sketch upload flow |

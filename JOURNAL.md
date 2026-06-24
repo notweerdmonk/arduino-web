@@ -23,7 +23,7 @@
 
 **Files changed** (10 source + 4 template):
 - `arduino_dash/pubsub.py` — `_broadcast_daemon_badge()`, board badge OOB in `_on_board_event()`
-- `medminder_dash/pubsub_infra.py` — same
+- `medminder_dash/pubsub.py` — same
 - `arduino_grpc/client.py` — `compile_stream()` yields 4-tuple
 - `board_manager/board_worker.py` — `_make_progress()` with percent, compile progress-only messages
 - `arduino_sketch_tools/extension.py` — OOB targeting, percent tracking, progress bar broadcast, `[N%]` prefix
@@ -354,8 +354,8 @@ the `finally` block, so only one log there.
 | 3 | arduino_dash `pubsub.py:109-114` | Lock + duplicate guard in `_on_daemon_ready` |
 | 4 | arduino_dash `pubsub.py:118` | Lock-protected `_on_pubsub_reconnect` write |
 | 5 | arduino_dash `html_routes.py:122` | Lock-protected `html_daemon_status` read |
-| 6 | medminder_dash `pubsub_infra.py:36` | Lock-protected `_fallback_scan_loop` read |
-| 7 | medminder_dash `pubsub_infra.py:215-220` | Duplicate guard inside existing lock |
+| 6 | medminder_dash `pubsub.py:36` | Lock-protected `_fallback_scan_loop` read |
+| 7 | medminder_dash `pubsub.py:215-220` | Duplicate guard inside existing lock |
 
 **Key design decision**: Duplicate check is inside the lock (`with _daemon_ready_lock: if _daemon_ready: return`) for atomic check-and-set — prevents both TOCTOU race and the log/re-set cycle.
 
@@ -402,6 +402,35 @@ the `finally` block, so only one log there.
 - Create research documents
 - Fix gRPC stubs issues
 - Create clean Python module structure
+
+---
+
+## 2026-06-24 12:16 — Linter Fix Round: Full Execution
+
+**Event**: Complete linter fix pass across all Python packages and HTML templates.
+
+**Work done**:
+1. **Ruff check**: 111+ errors fixed (F401, F841, E402, E731, E741) — manual fixes for non-auto-fixable cases, auto-fix for the rest
+2. **Ruff format**: 52 files formatted across 8 packages
+3. **djlint**: 27 template files reformatted (3 template directories)
+4. **ESLint**: Config exists at `config/eslint.config.mjs`; no standalone JS files to lint
+5. **grpc_client**: Generated protobuf files excluded from ruff via `pyproject.toml`
+
+**Verification**: `ruff check .` → All checks passed. `ruff format . --check` → All 108 files formatted. `djlint --check` → Linting passed.
+
+---
+
+## 2026-06-24 12:32 — ESLint Inline JS Linting + MCP Config Technique
+
+**Event**: Set up ESLint to lint inline JavaScript inside Jinja2 HTML templates using `eslint-plugin-html`.
+
+**Key technique — ESLint MCP proxy config**: The ESLint MCP server reads the config only from the working directory root (`eslint.config.mjs`). To keep the project organized, a top-level proxy file imports and re-exports the real config from `config/eslint.config.mjs`. This respects the MCP limitation without cluttering the root.
+
+**eslint-plugin-html**: Installed v8.1.4. Uses CJS monkey-patching (exports `{}`, patches ESLint's internal `_verifyWithFlatConfigArrayAndWithoutProcessors`). No `processor` needed in flat config — just `plugins: { html }` on the HTML files block.
+
+**Critical gotcha**: `globals` defined for standalone `.js`/`.mjs` files do NOT carry over to inline scripts extracted from HTML. The HTML config section needs its own `languageOptions.globals`.
+
+**Results**: 0 errors, 4 warnings (all false positives from HTML `onchange`/`onclick` attributes). Both `dnd_overlay.html` files fixed (added `/* global showModal */`, removed unused `e` param).
 
 ---
 
@@ -2903,7 +2932,7 @@ Removed `REPO_ROOT`/`MEDMINDER_ROOT`/`sys.path.insert` from `settings.py` + `app
 - Precedence: config file → env var `BOARD_MGR_DETECTION_MODE` → CLI `--board-detection-mode` → default "watch"
 - `--board-detection-mode {watch,udev}` added to `__main__.py`
 - BoardDetector mode passed from config in `service.py:84`
-- FallbackScanner startup call removed from both dashboards (`pubsub.py:104`, `pubsub_infra.py:145`)
+- FallbackScanner startup call removed from both dashboards (`pubsub.py:104`, `pubsub.py:145`)
 - FallbackScanner code retained (functions still importable), only the automatic startup call removed
 
 **Notable design decisions during implementation:**
@@ -2927,7 +2956,7 @@ Removed `REPO_ROOT`/`MEDMINDER_ROOT`/`sys.path.insert` from `settings.py` + `app
 
 **Design decisions**: Reuse existing `board-changed` event name. Keep `load` trigger for initial render. Server-side unchanged. No new tests (frontend-only JS + attribute changes).
 
-**Files changed**: 10 files across both dashboards (base.html, dashboard.html/index.html, admin.html, admin_board_selector.html, pubsub.py/pubsub_infra.py)
+**Files changed**: 10 files across both dashboards (base.html, dashboard.html/index.html, admin.html, admin_board_selector.html, pubsub.py/pubsub.py)
 
 ---
 
@@ -2935,7 +2964,7 @@ Removed `REPO_ROOT`/`MEDMINDER_ROOT`/`sys.path.insert` from `settings.py` + `app
 
 **Bug**: WS connects (101 Switching Protocols) but `board-changed` never fires — `board_event.html` has no `.board-event` class, `beforeSwap` handler query returns empty. Also removed dead OOB wrapper from medminder_dash's `_on_board_event` targeting missing `#live-events`.
 
-**Fix**: Added `class="board-event"` to both `board_event.html` partials. Removed OOB wrapper from `medminder_dash/pubsub_infra.py:204` — now sends raw rendered HTML matching arduino_dash's pattern.
+**Fix**: Added `class="board-event"` to both `board_event.html` partials. Removed OOB wrapper from `medminder_dash/pubsub.py:204` — now sends raw rendered HTML matching arduino_dash's pattern.
 
 ---
 
@@ -2965,7 +2994,7 @@ Removed `REPO_ROOT`/`MEDMINDER_ROOT`/`sys.path.insert` from `settings.py` + `app
 
 **Approach**: Server-driven OOB swap — wrap `board_event.html` output with `<div hx-swap-oob="afterbegin:#live-events-card">` in WS broadcast calls only (not in template, since template is also used by non-WS `/api/boards/event` route). Add `<details id="live-events-card">` card at top of admin.html with dark-theme CSS. Leaner event items (no `.card` class, `padding: 0.25rem 0.5rem`). `afterbegin` = newest first.
 
-**Files changed**: `pubsub.py`, `pubsub_infra.py`, 2× `admin.html`, 1× `board_event.html`
+**Files changed**: `pubsub.py`, `pubsub.py`, 2× `admin.html`, 1× `board_event.html`
 
 **Verification**: All 5 test suites green (102 + 152 + 211 + 47 + 24 = 536 total). No test changes needed.
 
@@ -3024,7 +3053,7 @@ Two-part fix:
 - **Atomic dedup in `_on_board_event`**: Check `port in state._known_ports` under lock before processing. Thread-safe — first caller wins, subsequent callers return early.
 - **`daemon_ready` guard in fallback scanner**: Skip scanning entirely when BMS is available. Scanner only activates when BMS is down.
 
-Both fixes applied to medminder_dash (`pubsub_infra.py`) and arduino_dash (`pubsub.py`).
+Both fixes applied to medminder_dash (`pubsub.py`) and arduino_dash (`pubsub.py`).
 
 ### Test Results
 All 4 relevant suites green. 3 pre-existing failures (hash mismatch, unrelated scripts test).
@@ -3151,7 +3180,7 @@ All 4 relevant suites green. 3 pre-existing failures (hash mismatch, unrelated s
 12:47:24  BMS finally starts → nobody connects → no _on_daemon_ready logs EVER
 ```
 
-**Fix**: Wrap `connect()` in try/except `(ConnectionError, OSError)` — 3 lines added to `arduino_dash/pubsub.py:97-100`. Matches medminder_dash's `pubsub_infra.py:134-136` exactly.
+**Fix**: Wrap `connect()` in try/except `(ConnectionError, OSError)` — 3 lines added to `arduino_dash/pubsub.py:97-100`. Matches medminder_dash's `pubsub.py:134-136` exactly.
 
 **Files changed**:
 | File | Change |
@@ -3438,7 +3467,7 @@ Both servers verified with curl against 8+ endpoints each:
 
 3. **`arduino_dash/pubsub.py`** — `sys::daemon/ready` subscribed first in both `init_pubsub()` and `_on_pubsub_reconnect()`.
 
-4. **`medminder_dash/pubsub_infra.py`** — Same reorder in both `init_pubsub()` and `_on_pubsub_reconnect()`.
+4. **`medminder_dash/pubsub.py`** — Same reorder in both `init_pubsub()` and `_on_pubsub_reconnect()`.
 
 **Verification**: All 3 modified files pass `python3 -m py_compile`.
 
@@ -3448,7 +3477,7 @@ Both servers verified with curl against 8+ endpoints each:
 
 **Goal**: Refactor all bare `SCREAMING_SNAKE_CASE` constants in protocol.py,
 boot.py, config.py, service.py, board_detector.py, pool.py, pubsub_client.py,
-gunicorn_conf.py (×2), pubsub.py, and pubsub_infra.py into typed enums,
+gunicorn_conf.py (×2), pubsub.py, and pubsub.py into typed enums,
 IntEnums, (str, Enum) mixins, and dataclasses.
 
 **9 quanta completed**:
@@ -3462,7 +3491,7 @@ IntEnums, (str, Enum) mixins, and dataclasses.
 | 5 | `pool.py` | `MAX_RESTARTS = 3` | `PoolLimits(IntEnum)` |
 | 6 | `pubsub_client.py` | `_RECONNECT_DELAY`, `_CONNECT_RETRY_DELAYS` | `ReconnectConfig` class |
 | 7 | `gunicorn_conf.py` (×2) | `"GUNICORN_BIND"` etc. | `DashEnv` / `GunicornEnv(str, Enum)` |
-| 8 | `pubsub.py` + `pubsub_infra.py` | `"sys::daemon/ready"` etc. | `PubSubTopic(str, Enum)` |
+| 8 | `pubsub.py` + `pubsub.py` | `"sys::daemon/ready"` etc. | `PubSubTopic(str, Enum)` |
 | 9 | ALL SUITES | Verification | ✅ zero regressions |
 
 **Gotchas encountered**:
@@ -3587,7 +3616,7 @@ and nox-not-found guard using a fake nox shim.
 **Q3 — Restructure Swap Targets**:
 - Created board_card.html partial in both dashboards
 - Added /boards/grid/card/<port> endpoints in both html_routes.py
-- Added data-event-port to WS broadcast HTML in pubsub.py and pubsub_infra.py
+- Added data-event-port to WS broadcast HTML in pubsub.py and pubsub.py
 - WS handler now does targeted per-card htmx.ajax refresh alongside full board-changed
 
 **User cosmetic changes (incorporated)**:
@@ -3603,7 +3632,7 @@ and nox-not-found guard using a fake nox shim.
 - Pre-existing pipenv lock failures (board_manager, board_manager_client, arduino_sketch_tools, arduino_dash, medminder_dash) — unrelated to Phase 97
 
 **Files changed (45 files total, 989 insertions, 719 deletions)**:
-[List notable files: base.html (both), admin.html (both), board_detail.html (arduino), all modal partials, dnd_overlay.html (both), medicine_form.html, html_routes.py (both), pubsub.py, pubsub_infra.py, style.css (both), daemon_badge.html (both), board_status_badge.html (both), board_card.html (both, new), all 20 project/workflow docs]
+[List notable files: base.html (both), admin.html (both), board_detail.html (arduino), all modal partials, dnd_overlay.html (both), medicine_form.html, html_routes.py (both), pubsub.py, pubsub.py, style.css (both), daemon_badge.html (both), board_status_badge.html (both), board_card.html (both, new), all 20 project/workflow docs]
 
 ## 2026-06-21 09:36 — Phase 97 Audit Fixes (Post-Implementation Docs Sync) ✅ COMPLETED
 
@@ -3725,4 +3754,54 @@ GUIDE files updated with 3 new sections documenting server script lifecycle:
 - **Disown** — explains why `&>/dev/null & disown` was fragile and how `_daemonize()` (fork + setsid + redirect) replaces it
 - **Script Architecture** — lifecycle helpers table, CLI flags, main() execution order
 - **Cleanup** (expanded) — stale pidfiles, SIGKILL fallback, orphaned BMS cleanup
+
+## 2026-06-24 12:00 — Pipenv Lock Bug with Local Sources
+
+**Finding**: `pipenv install "click<8.2"` fails on re-lock for projects with local `[[source]]` dependencies, but standalone `pipenv lock` + `pipenv sync --dev` works fine.
+
+**Root cause**: `pipenv install` runs install then re-lock. The re-lock codepath uses a different resolution pipeline than standalone `pipenv lock`. During re-lock, pipenv fails to index local file-based sources properly when resolving transitive dependencies — e.g., `arduino-sketch-tools → arduino-grpc>=0.1.0` resolves to `(from versions: none)` because the re-lock doesn't re-scan the local dist directories.
+
+**Workaround**: Manually add the constraint to Pipfile's `[dev-packages]`, then `pipenv lock` (succeeds) + `pipenv sync --dev` (installs from lock). This bypasses the broken install-then-re-lock codepath.
+
+**Affected**: medminder_dash Pipfile with local wheel sources (`arduino-grpc-local`, `board-manager-local`, `board-manager-client-local`, `arduino-sketch-tools-local`). May affect other packages with similar setups.
+
+**Resolution**: `click = "<8.2"` added to `[dev-packages]` manually → `pipenv lock` → `pipenv sync --dev` → click 8.4.1 downgraded to compatible version. djlint now works.
+
+---
+
+## 2026-06-24 06:23 — Caveat: djlint + click Compatibility (Final Resolution)
+
+**Supersedes**: The `click<8.2` approach above was incomplete — djlint still crashed with click 8.1.8.
+
+**Finding**: djlint 1.39.3 crashes with click ≥ 8.1.8 with:
+
+```
+AttributeError: 'builtin_function_or_method' object has no attribute '__click_params__'
+```
+
+**Root cause**: djlint's `__init__.py` uses a `@partial` decorator hack at line 77 (`from functools import partial`) as a workaround for mypyc-compiled wheels. This decorator wraps the `main` function as a `functools.partial` object before click's `@click.option()` decorators are applied. Click ≥ 8.1.8 changed `_param_memo`'s handling of non-function callables, causing the `__click_params__` attribute assignment to fail on the partial object.
+
+**Final fix**: Pin click to `==8.1.3` (the minimum version required by Flask). Both `click` and `djlint` were removed from `medminder_dash`'s venv and installed in a new project-root virtualenv (`Pipfile` at repo root) with djlint as a dev dependency for cross-module HTML template linting.
+
+**Scope**: Development environment only — no project source code changes were needed.
+
+---
+
+## 2026-06-24 12:02 — Linter Fix Round: ruff + eslint + djlint
+
+### Summary
+
+Executed a comprehensive linter fix pass across the entire medminder_dash codebase:
+- **ruff**: Fixed 85 errors (74 auto-fixed, 11 manual) — 0 remaining
+- **ruff format**: Formatted 16 files — all 29 checked files now consistent
+- **djlint**: Fixed 8 warnings (entities, inline styles, meta tags) — 0 remaining
+- **eslint**: Config exists at `config/eslint.config.mjs`; no standalone `.js` files in project
+
+### Key Code Changes
+
+1. **Fixed F841 unused variables** — `hardware_id` in `api_routes.py:api_sketch_delete()` and `html_routes.py:html_sketch_delete()` now correctly passed to `_render_sketch_path_selector()`
+2. **Fixed E402 import ordering** — `app.py` and `pubsub.py` reorganized to comply with PEP8
+3. **Replaced inline styles with CSS classes** — Added `.modal-hidden` and `.word-break-all` to `static/style.css`; updated JS `showModal`/`hideModal` functions
+4. **Fixed entity references** — `&#9889;` → `⚡`, `&#8230;` → `…`
+5. **Added meta tags** to `base.html`
 {% endraw %}

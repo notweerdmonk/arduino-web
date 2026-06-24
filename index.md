@@ -108,7 +108,7 @@ Base: `medminder_dash/python/medminder_dash/`
 | [README.md](medminder_dash/python/medminder_dash/README.md) | Package overview, install, usage |
 | [docs/index.md](medminder_dash/python/medminder_dash/medminder_dash/docs/index.md) | Package overview, module summary, env vars |
 | [docs/app.md](medminder_dash/python/medminder_dash/medminder_dash/docs/app.md) | Flask app factory `create_app()`, `_migrate_default_board` |
-| [docs/pubsub_infra.md](medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub_infra.md) | PubSub infrastructure, event handlers, WS broadcast |
+| [docs/pubsub.md](medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub.md) | PubSub infrastructure, event handlers, WS broadcast |
 | [docs/html_routes.md](medminder_dash/python/medminder_dash/medminder_dash/docs/html_routes.md) | All HTML routes with method + description |
 | [docs/api_routes.md](medminder_dash/python/medminder_dash/medminder_dash/docs/api_routes.md) | JSON API endpoints, medicine CRUD, deploy |
 | [docs/medicines_state.md](medminder_dash/python/medminder_dash/medminder_dash/docs/medicines_state.md) | `Medicine` dataclass, `MedicineStore` CRUD, persistence |

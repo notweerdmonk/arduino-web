@@ -194,7 +194,7 @@ If upload progress is needed in the future, it would require:
 | Both `templates/partials/board_status_badge.html` | Strip hx-* attributes |
 | Both `templates/board_detail.html` | Unique badge IDs, add progress bar |
 | `arduino_dash/.../pubsub.py` | `_broadcast_daemon_badge()`, board badge OOB |
-| `medminder_dash/.../pubsub_infra.py` | Same |
+| `medminder_dash/.../pubsub.py` | Same |
 | `arduino_sketch_tools/.../extension.py:180-214` | OOB targeting + progress tracking |
 | `arduino_grpc/.../client.py:305` | `compile_stream()` yields 4-tuple |
 | `board_manager/.../board_worker.py:39-154` | `_make_progress()` with percent |

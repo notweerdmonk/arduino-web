@@ -93,7 +93,7 @@ All 8 nox sessions executed and passed:
 | base.html hx-trigger = "load" | grep on base.html | `every 10s` removed ✅ |
 | daemon_badge.html stripped of hx-* | grep on partial | 0 hx-* attributes ✅ |
 | _broadcast_daemon_badge() in arduino_dash/pubsub.py | grep | Method exists ✅ |
-| _broadcast_daemon_badge() in medminder_dash/pubsub_infra.py | grep | Method exists ✅ |
+| _broadcast_daemon_badge() in medminder_dash/pubsub.py | grep | Method exists ✅ |
 | No test regressions | `nox -s all_tests` | All pass ✅ |
 
 #### Q2 — Board Status Badge OOB ✅
@@ -103,7 +103,7 @@ All 8 nox sessions executed and passed:
 | board_status_badge.html stripped of hx-* | grep on partial | 0 hx-* attributes ✅ |
 | board_detail.html unique per-port badge IDs | grep on template | IDs contain port filter ✅ |
 | Badge OOB broadcast in arduino_dash _on_board_event() | grep pubsub.py | Present ✅ |
-| Badge OOB broadcast in medminder_dash _on_board_event() | grep pubsub_infra.py | Present ✅ |
+| Badge OOB broadcast in medminder_dash _on_board_event() | grep pubsub.py | Present ✅ |
 | No test regressions | `nox -s all_tests` | All pass ✅ |
 
 #### Q3 — Compile/Upload OOB Targeting ✅

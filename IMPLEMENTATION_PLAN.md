@@ -34,30 +34,33 @@ python3 script.py --stop --force                               # force kill
 ### Iteration 1: `os.setpgid(0, 0)` + shell hacks (rejected)
 - User wants no `&`, `disown`, `&>/dev/null`, or special timeouts
 
-### Iteration 2: Fork-based `_daemonize()` (rejected)
-- `os.fork()` + `os._exit(0)` parent exit + `os.setsid()` in child
-- **Problem**: the forked child inherits the parent's open stdout/stderr file descriptors, so the bash tool's pipe never sees EOF → tool blocks until timeout → tool kills everything
+### Iteration 2: `os.setpgid(0, 0)` + `_redirect_io()` (rejected)
+- `os.setpgid(0, 0)` changes process GROUP but not SESSION
+- The bash tool tracks processes by SESSION, not PGID
+- When the shell session exits, SIGHUP is sent to ALL processes in the session regardless of PGID
+- The server still dies between bash invocations
 
-### Iteration 3 (final): `os.setpgid(0, 0)` + `_redirect_io()` ✅
+### Iteration 3 (final): `os.fork()` + `os.setsid()` + `_redirect_io()` ✅
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                  Process Model                           │
 │                                                          │
-│  bash tool (PGID=1000)                                   │
-│    │ SIGHUP on exit (to PGID=1000)                       │
-│    ├── Flask server (PGID=1001) ← os.setpgid(0,0)       │
-│    │   ✔ immune to parent group SIGHUP                   │
-│    │   ✔ ignores explicit SIGHUP too                     │
-│    │   ✘ stdout/stderr still open → pipe held open      │
-│    └── _redirect_io() → dup2 to file or /dev/null        │
-│        ✔ pipe closes → tool returns immediately          │
-│        ✔ Flask continues serving                         │
-│        ✔ logs captured to --logfile                      │
+│  bash tool (session leader)                              │
+│    │ SIGHUP on exit (to entire session)                  │
+│    └── bash (shell session)                              │
+│          └── python3 (our script)                        │
+│                ├── fork                                  │
+│                ├── parent: os._exit(0) ──▶ tool returns  │
+│                └── child: os.setsid() ──▶ new session    │
+│                      ├── SIGHUP ignored (new session)    │
+│                      ├── _redirect_io() → file|/dev/null │
+│                      ├── Flask serves forever            │
+│                      └── logs captured in --logfile      │
 └──────────────────────────────────────────────────────────┘
 ```
 
-The key insight: `os.setpgid(0, 0)` protects the server from SIGHUP, but the tool still waits because the server's stdout/stderr file descriptors are connected to the tool's pipe. By redirecting them to a file (or `/dev/null`), the pipe closes and the tool returns immediately.
+Key insight: `os.setpgid(0, 0)` changes only the process GROUP, but the tool tracks by SESSION. When the session leader (bash) dies, SIGHUP reaches every process in the session. Only `os.setsid()` (which requires a prior `fork()`) creates a new session. The fork's parent exits immediately so the tool's pipe closes and the command returns. The child redirects stdout/stderr to capture logs.
 
 ## CLI Flags
 
@@ -85,13 +88,15 @@ The key insight: `os.setpgid(0, 0)` protects the server from SIGHUP, but the too
 ```
 1. Parse args
 2. --stop? → handle and exit(0)
-3. os.setpgid(0, 0)           ← new process group
-4. signal(SIGHUP, SIG_IGN)    ← ignore SIGHUP
-5. _redirect_io(logfile)      ← dup2 stdout/stderr → pipe closes → tool returns
-6. Inject mock state (if --mock)
-7. Start BMS (if --bms)
-8. Write pidfile
-9. app.run()                  ← Flask serves forever
+3. os.fork()
+4. Parent: os._exit(0)        ← immediate exit → pipe closes → tool returns
+5. Child:  os.setsid()        ← new session, immune to parent SIGHUP
+6. signal(SIGHUP, SIG_IGN)    ← belt-and-suspenders
+7. _redirect_io(logfile)      ← dup2 stdout/stderr to file
+8. Inject mock state (if --mock)
+9. Start BMS (if --bms)
+10. Write pidfile
+11. app.run()                  ← Flask serves forever
 ```
 
 ## Quantums

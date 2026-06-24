@@ -30,7 +30,7 @@
 - Called from `_on_daemon_ready()` — broadcasts immediately when daemon becomes ready
 - Called from `_on_pubsub_reconnect()` — re-broadcasts on reconnect to refresh all clients
 
-**`medminder_dash/pubsub_infra.py`**:
+**`medminder_dash/pubsub.py`**:
 - Same `_broadcast_daemon_badge()` method added with identical behavior
 
 ### Gotchas
@@ -65,7 +65,7 @@
 - Template context includes `event["port"]` and `event["connected"]` (boolean)
 - Uses port-safe ID `board-status-badge--{port_safe}` to target the correct badge element
 
-**`medminder_dash/pubsub_infra.py` `_on_board_event()`**:
+**`medminder_dash/pubsub.py` `_on_board_event()`**:
 - Same addition — badge OOB broadcast after event-feed broadcast
 
 ### Gotchas
@@ -245,7 +245,7 @@ Phase 98 successfully migrated all PubSub-driven frontend updates from HTMX poll
 | File | Q | Change |
 |------|---|--------|
 | `arduino_dash/pubsub.py` | 1,2 | `_broadcast_daemon_badge()`, board badge OOB |
-| `medminder_dash/pubsub_infra.py` | 1,2 | Same as above |
+| `medminder_dash/pubsub.py` | 1,2 | Same as above |
 | Both `base.html` | 1 | `hx-trigger="every 10s, load"` → `"load"` |
 | Both `daemon_badge.html` | 1 | Stripped hx-* attributes |
 | Both `board_status_badge.html` | 2 | Stripped hx-* attributes |

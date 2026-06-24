@@ -20,7 +20,7 @@ All tiers use a single persistent WebSocket connection (`/ws/board-events`) esta
 |---|------|---------------|
 | 1 | `board_event.html` (medminder_dash) | `/home/weerdmonk/Projects/medminder/medminder_dash/python/medminder_dash/medminder_dash/templates/partials/board_event.html` |
 | 2 | `board_event.html` (arduino_dash) | `/home/weerdmonk/Projects/medminder/arduino_dash/python/arduino_dash/arduino_dash/templates/partials/board_event.html` |
-| 3 | `pubsub_infra.py` (medminder_dash) | `/home/weerdmonk/Projects/medminder/medminder_dash/python/medminder_dash/medminder_dash/pubsub_infra.py` |
+| 3 | `pubsub.py` (medminder_dash) | `/home/weerdmonk/Projects/medminder/medminder_dash/python/medminder_dash/medminder_dash/pubsub.py` |
 | 4 | `pubsub.py` (arduino_dash) | `/home/weerdmonk/Projects/medminder/arduino_dash/python/arduino_dash/arduino_dash/pubsub.py` |
 | 5 | `base.html` (medminder_dash) | `/home/weerdmonk/Projects/medminder/medminder_dash/python/medminder_dash/medminder_dash/templates/base.html` |
 | 6 | `base.html` (arduino_dash) | `/home/weerdmonk/Projects/medminder/arduino_dash/python/arduino_dash/arduino_dash/templates/base.html` |
@@ -94,7 +94,7 @@ All tiers use a single persistent WebSocket connection (`/ws/board-events`) esta
 
 ## 2. Tier 0 — PubSub Infrastructure
 
-### medminder_dash `pubsub_infra.py` (436 lines)
+### medminder_dash `pubsub.py` (436 lines)
 
 #### `init_pubsub` (lines 154-196)
 ```python
@@ -677,7 +677,7 @@ This tiny template is rendered inline within the board grid (inside each board c
 
 ### Daemon Badge OOB Broadcasting
 
-**File:** `medminder_dash` `pubsub_infra.py:283-294`, `arduino_dash` `pubsub.py:306-317`
+**File:** `medminder_dash` `pubsub.py:283-294`, `arduino_dash` `pubsub.py:306-317`
 
 The daemon badge is broadcast via WS when:
 
@@ -694,7 +694,7 @@ def _broadcast_daemon_badge() -> None:
         with state._app.app_context():
             badge = render_template("partials/daemon_badge.html", ready=ready)
         oob = f'<span id="daemon-badge" hx-swap-oob="true">{badge}</span>'
-        broadcast_ws(oob)    # pubsub_infra.py:292
+        broadcast_ws(oob)    # pubsub.py:292
         # _broadcast_ws(oob)  # pubsub.py:315
     except Exception:
         _logger.exception("Failed to broadcast daemon badge")
@@ -704,7 +704,7 @@ def _broadcast_daemon_badge() -> None:
 
 ### Board Status Badge OOB Broadcasting
 
-**File:** `medminder_dash` `pubsub_infra.py:274-278`, `arduino_dash` `pubsub.py:198-202`
+**File:** `medminder_dash` `pubsub.py:274-278`, `arduino_dash` `pubsub.py:198-202`
 
 The board status badge is broadcast as part of `_on_board_event()` — the same handler that pushes board connect/disconnect events (Section 2). After broadcasting the board event HTML, it renders and broadcasts the badge OOB:
 

@@ -14,7 +14,7 @@
 > - [`arduino_dash/docs/index.md`](../arduino_dash/python/arduino_dash/docs/index.md) — arduino-dash package overview
 > - [`arduino_dash/docs/pubsub.md`](../arduino_dash/python/arduino_dash/docs/pubsub.md) — PubSub event handlers
 > - [`medminder_dash/docs/index.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/index.md) — medminder-dash package overview
-> - [`medminder_dash/docs/pubsub_infra.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub_infra.md) — PubSub infrastructure
+> - [`medminder_dash/docs/pubsub.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub.md) — PubSub infrastructure
 > - [`medminder_dash/docs/medicines_state.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/medicines_state.md) — Medicine data model
 > - [`medminder_dash/docs/sketch_gen.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_gen.md) — alarm.hpp generation
 
@@ -300,7 +300,7 @@ All frontend updates use a single persistent WebSocket connection (`/ws/board-ev
 | Tier | Category | Mechanism | Source Code |
 |------|----------|-----------|-------------|
 | 0 | Board connect/disconnect events | OOB `<div hx-swap-oob="afterbegin:#live-events-card">` | `html_routes.py` WS handler |
-| 1 | Daemon + board status badges | OOB `<span hx-swap-oob="true">` on daemon/board state change | `pubsub.py` / `pubsub_infra.py` |
+| 1 | Daemon + board status badges | OOB `<span hx-swap-oob="true">` on daemon/board state change | `pubsub.py` / `pubsub.py` |
 | 2 | Compile/upload output | OOB `<span hx-swap-oob="beforeend:#...-output-{port_safe}">` | `extension.py` |
 | 3 | Compile progress bar | OOB `<progress hx-swap-oob="true">` on percent change | `extension.py` |
 

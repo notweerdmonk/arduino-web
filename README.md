@@ -263,7 +263,7 @@ medminder/
     └── docs/                                # Per-package docs (14 modules)
         ├── index.md
         ├── app.md
-        ├── pubsub_infra.md
+        ├── pubsub.md
         ├── html_routes.md
         ├── api_routes.md
         ├── medicines_state.md

@@ -189,3 +189,132 @@
 - [x] No regression in dashboard tests — ✅ (119 + 186 pass)
 - [x] No shell hacks used — ✅
 {% endraw %}
+
+## 2026-06-24 12:32 — ESLint Inline JS Linting with eslint-plugin-html
+
+**Date**: 2026-06-24 12:32
+
+**Status**: ✅ COMPLETED
+
+### Scope
+
+Configure ESLint to lint inline JavaScript inside Jinja2 HTML templates using `eslint-plugin-html`. Work around ESLint MCP limitation (only reads config from working directory root).
+
+### Review Criteria
+
+#### Configuration
+- [x] `eslint-plugin-html` v8.1.4 installed as devDependency ✅
+- [x] Top-level `eslint.config.mjs` proxy config importing from `config/eslint.config.mjs` ✅
+- [x] HTML config section has own `languageOptions.globals` (browser globals don't carry over from `.js` section) ✅
+- [x] `plugins: { html }` registered for HTML files (monkey-patch, no `processor` needed) ✅
+
+#### Lint Results
+- [x] 0 errors across 4 HTML templates with inline `<script>` ✅
+- [x] 4 warnings (false positives from HTML `onchange`/`onclick` attributes) ✅
+
+#### Fixes Applied
+- [x] `dnd_overlay.html` — added `/* global showModal */` linter directive ✅
+- [x] `dnd_overlay.html` — removed unused `e` parameter in `dragleave` handler ✅
+
+## 2026-06-24 02:52 — Code Review: pubsub_infra→pubsub Rename + Documentation Sync
+
+**Date**: 2026-06-24 02:52
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Scope of Review
+
+The changes under review span:
+1. **Rename** `pubsub_infra.py` → `pubsub.py` (and `pubsub_infra.md` → `pubsub.md`) with all import references updated
+2. **Documentation synchronization** across 45+ files (code references, plan/task/progress journals)
+3. **Code quality audit** using ruff linter + ruff format check
+
+### Review Criteria
+
+#### Correctness
+- [x] No missed `pubsub_infra` references in source files ✅
+- [x] All imports updated correctly ✅
+- [x] E2E server imports consistent with renamed module ✅
+
+#### Linter Results
+- [x] Ruff check executed — 208 errors found ✅
+- [x] Ruff format check executed — 56 files need formatting ✅
+- [x] Linter suggestions for HTML/JavaScript documented ✅
+
+#### Code Quality (app.py)
+- [x] Unused imports identified and quantified ✅
+- [x] E402 (import order) violations identified ✅
+
+#### Security
+- [x] XSS vectors reviewed in template/WS code ✅
+- [x] Path traversal protections reviewed ✅
+
+#### Test Coverage
+- [x] Test imports updated for rename ✅
+- [x] Unused imports in tests identified ✅
+
+## 2026-06-24 03:40 — Code Review: JS Linting Setup (ESLint)
+
+**Date**: 2026-06-24 03:40
+
+**Status**: ✅ COMPLETED
+
+### Scope
+
+Set up ESLint for the project's JavaScript (inline `<script>` in base.html templates). TypeScript linting skipped per user request.
+
+### Files Under Review
+
+| Language | Location | Description |
+|----------|----------|-------------|
+| JavaScript (inline) | `arduino_dash/.../base.html:23-105` | DnD prevention, WS event handling, JS helpers |
+| JavaScript (inline) | `medminder_dash/.../base.html:23-105` | DnD prevention, WS event handling, JS helpers |
+| TypeScript | `e2e/` (10 files) | ⏸️ Skipped per user request |
+
+### Review Criteria
+
+- [x] ESLint config created in `config/` ✅
+- [x] Inline JS linting — 22 warnings, 0 errors ✅
+- [ ] TypeScript linting — ⏸️ Skipped (needs typescript-eslint)
+- [x] All findings documented in REVIEW_JOURNAL.md ✅
+- [ ] djlint ⏸️ Postponed (blocked by click compatibility issue)
+
+## 2026-06-24 12:02 — Linter Fix Round: ruff + eslint + djlint
+
+**Date**: 2026-06-24 12:02
+
+**Status**: ✅ COMPLETED
+
+### Scope
+
+Full pass across all project Python, JS, and HTML template files to fix linting warnings/errors:
+
+1. **ruff** — Fix all F401/E402/F841/E731/E713 errors (85 total)
+2. **ruff format** — Format all Python files (16 reformatted)
+3. **eslint** — No standalone `.js` project files exist; config created in `config/eslint.config.mjs`
+4. **djlint** — Fix all 8 template warnings (H021/H023/H030/H031)
+
+### Review Criteria
+
+#### Ruff Check
+- [x] F841 unused local variables in `api_routes.py` and `html_routes.py` fixed ✅
+- [x] E402 import ordering in `app.py` and `pubsub.py` fixed ✅
+- [x] E402 in `medminder_dash_server.py` suppressed with `# noqa` (legitimate sys.path usage) ✅
+- [x] 0 remaining ruff errors across all examined Python files ✅
+
+#### Ruff Format
+- [x] All 29 examined Python files properly formatted ✅
+
+#### ESLint
+- [x] `config/eslint.config.mjs` exists with JS recommended rules ✅
+- [x] No standalone `.js` files in project (all JS inline in HTML templates) — properly documented ✅
+- [x] ESLint MCP plugin available for inline JS linting (requires extraction to standalone files) ✅
+
+#### djlint
+- [x] Entity references (`&#9889;`, `&#8230;`) replaced with actual Unicode characters ✅
+- [x] Inline `style="display:none"` replaced with CSS class `.modal-hidden` ✅
+- [x] Inline `style="word-break:break-all"` replaced with CSS class `.word-break-all` ✅
+- [x] Meta description/keywords added to `base.html` ✅
+- [x] 0 remaining djlint errors across 25 template files ✅
+- [x] `showModal`/`hideModal` JS functions updated to use `classList` instead of `style.display` ✅
+- [x] `hx-on::after-request` handler updated to use `classList.add('modal-hidden')` ✅

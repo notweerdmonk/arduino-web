@@ -68,7 +68,7 @@ def post_worker_init(worker):
     """Initialize PubSub connection in each gunicorn worker."""
     cfg = _get_bms_config()
     worker.log.info("Initializing PubSub for worker %d", worker.pid)
-    from medminder_dash.pubsub_infra import init_pubsub
+    from medminder_dash.pubsub import init_pubsub
     from medminder_dash.wsgi import app
 
     init_pubsub(

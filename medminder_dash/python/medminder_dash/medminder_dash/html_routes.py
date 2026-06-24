@@ -14,7 +14,7 @@ from werkzeug.utils import secure_filename
 
 from medminder_dash import state
 from medminder_dash.medicines_state import Medicine
-from medminder_dash.pubsub_infra import (
+from medminder_dash.pubsub import (
     add_ws_client,
     is_connected,
     is_daemon_ready,

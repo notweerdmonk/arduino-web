@@ -63,7 +63,7 @@ Gunicorn hook — called when the master process is ready.
 Gunicorn hook — called after each worker process initializes.
 
 1. Calls `_get_bms_config()` to get connection parameters.
-2. Calls `medminder_dash.pubsub_infra.init_pubsub(app, ...)` to establish the
+2. Calls `medminder_dash.pubsub.init_pubsub(app, ...)` to establish the
    PubSub connection in each worker.
 
 | Param | Type | Purpose |

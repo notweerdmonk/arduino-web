@@ -50,7 +50,7 @@ PubSub protocol over Unix domain sockets (default `/tmp/board_mgr.sock`) or TCP
 | `app` | `app.py` | Flask app factory + deployment tracking |
 | `api_routes` | `api_routes.py` | JSON API routes (`/api/...`) |
 | `html_routes` | `html_routes.py` | HTML page and partial routes |
-| `pubsub_infra` | `pubsub_infra.py` | PubSub client lifecycle, WebSocket broadcast, board event handling |
+| `pubsub` | `pubsub.py` | PubSub client lifecycle, WebSocket broadcast, board event handling |
 | `state` | `state.py` | Shared mutable state (ports, WS clients, pending responses, locks) |
 | `utils` | `utils.py` | Port validation, board lookup, medicine validation, display helpers |
 | `settings` | `settings.py` | Sketch directory configuration and persistence |

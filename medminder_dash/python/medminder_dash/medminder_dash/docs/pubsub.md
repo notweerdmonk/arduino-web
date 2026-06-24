@@ -1,8 +1,8 @@
 ---
 ---
-# `pubsub_infra.py` — PubSub Infrastructure
+# `pubsub.py` — PubSub Infrastructure
 
-**File:** `medminder_dash/pubsub_infra.py`
+**File:** `medminder_dash/pubsub.py`
 
 PubSub client lifecycle, board event handling, WebSocket broadcast, response
 waiting, and fallback board scanning.

@@ -19,7 +19,7 @@ def test_resolve_board_info_includes_hardware_id():
     mock_client.list_boards.return_value = [board]
 
     with patch("arduino_grpc.client.ArduinoGrpcClient", return_value=mock_client):
-        from medminder_dash.pubsub_infra import _resolve_board_info
+        from medminder_dash.pubsub import _resolve_board_info
 
         result = _resolve_board_info("/dev/ttyACM0")
         assert result["hardware_id"] == "USB VID:PID=2341:0043 SER=12345"
@@ -41,7 +41,7 @@ def test_resolve_board_info_empty_hardware_id():
     mock_client.list_boards.return_value = [board]
 
     with patch("arduino_grpc.client.ArduinoGrpcClient", return_value=mock_client):
-        from medminder_dash.pubsub_infra import _resolve_board_info
+        from medminder_dash.pubsub import _resolve_board_info
 
         result = _resolve_board_info("/dev/ttyACM0")
         assert result["hardware_id"] == ""
@@ -55,7 +55,7 @@ def test_resolve_board_info_empty_on_exception():
         mock_instance.connect.side_effect = Exception("connection failed")
         mock_cls.return_value = mock_instance
 
-        from medminder_dash.pubsub_infra import _resolve_board_info
+        from medminder_dash.pubsub import _resolve_board_info
 
         result = _resolve_board_info("/dev/ttyACM0")
         assert result == {"board": "", "fqbn": "", "hardware_id": ""}

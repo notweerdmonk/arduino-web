@@ -11,6 +11,9 @@ from typing import Any, Optional
 from medminder_dash import state
 from board_manager_client.pubsub_client import PubSubClient
 
+from .settings import load_sketch_dir
+
+
 class PubSubTopic(str, Enum):
     """PubSub topic constants for board manager communication."""
 
@@ -102,9 +105,6 @@ def _fallback_scan_loop(ps: PubSubClient) -> None:
         except Exception:
             _logger.exception("Fallback scanner error")
         time.sleep(state._fallback_scan_interval)
-
-
-from .settings import load_sketch_dir
 
 
 def _resolve_board_info(port: str) -> dict:
@@ -269,11 +269,22 @@ def _on_board_event(msg: dict) -> None:
             from flask import render_template
 
             with state._app.app_context():
-                event_html = '<div hx-swap-oob="afterbegin:#live-events-card" data-event-port="' + port + '">' + render_template("partials/board_event.html", events=[data]) + '</div>'
+                event_html = (
+                    '<div hx-swap-oob="afterbegin:#live-events-card" data-event-port="'
+                    + port
+                    + '">'
+                    + render_template("partials/board_event.html", events=[data])
+                    + "</div>"
+                )
             broadcast_ws(event_html)
             port_safe = port.replace("/", "_")
-            connected = (event == "connected")
-            badge = render_template("partials/board_status_badge.html", port=port, port_path=port.lstrip("/"), connected=connected)
+            connected = event == "connected"
+            badge = render_template(
+                "partials/board_status_badge.html",
+                port=port,
+                port_path=port.lstrip("/"),
+                connected=connected,
+            )
             oob = f'<span id="board-status-badge--{port_safe}" hx-swap-oob="true">{badge}</span>'
             broadcast_ws(oob)
         except Exception:
@@ -284,6 +295,7 @@ def _broadcast_daemon_badge() -> None:
     """Broadcast daemon badge OOB update via WebSocket."""
     try:
         from flask import render_template
+
         with state._daemon_ready_lock:
             ready = state._daemon_ready
         with state._app.app_context():

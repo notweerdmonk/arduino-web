@@ -79,4 +79,34 @@ Two non-blocking console error fixes. Verification is mostly external (CDN resol
 | 5 | Correct idiomorph URL in arduino_dash base.html | `grep idiomorph arduino_dash/.../base.html` | `idiomorph/dist/idiomorph-ext.js` |
 | 6 | Correct idiomorph URL in medminder_dash base.html | `grep idiomorph medminder_dash/.../base.html` | `idiomorph/dist/idiomorph-ext.js` |
 | 7 | No regressions from dep changes | `nox -s 'tests(arduino_dash)' 'tests(medminder_dash)'` | Same results as pre-change |
+## Phase 101 — Redesign & Rebuild Standalone Distributions
+
+**Date**: 2026-06-24 18:54
+
+**Status**: ✅ COMPLETED
+
+## Test Strategy
+
+Verification of rebuilt PyOxidizer standalone binaries (no Python test suite — standalone builds are environment-dependent and can't run unit tests). Strategy:
+
+1. **Smoke test** — Each binary `--help` must exit 0 with usage output
+2. **Module verification** — All current Python modules present in the bundle's `site-packages`
+3. **Template verification** — All templates + partials present in each dashboard bundle
+4. **Static file verification** — `style.css`, favicon files present
+5. **simple-websocket dep** — Present in both dashboard bundles
+
+## Test Scenarios
+
+| # | Test | Method | Pass Criteria |
+|---|------|--------|--------------|
+| 1 | arduino-dash smoke | `dist-standalone/arduino-dash/arduino-dash --help` | Exit 0, usage output |
+| 2 | medminder-dash smoke | `dist-standalone/medminder-dash/medminder-dash --help` | Exit 0, usage output |
+| 3 | board-manager smoke | `dist-standalone/board-manager/board-manager --help` | Exit 0, usage output |
+| 4 | arduino-dash modules | `ls .../arduino_dash/` | html_routes, api_routes, pubsub, settings, state, utils, sketch_registry present |
+| 5 | medminder-dash modules | `ls .../medminder_dash/` | Same 7 modules present |
+| 6 | arduino-dash templates | `ls .../templates/` | base.html, admin.html, board_detail.html + all partials |
+| 7 | medminder-dash templates | `ls .../templates/` | Same as above |
+| 8 | simple-websocket (arduino-dash) | `ls .../site-packages/simple_websocket/` | Directory exists |
+| 9 | simple-websocket (medminder-dash) | `ls .../site-packages/simple_websocket/` | Directory exists |
+| 10 | Static files | `ls .../static/style.css` + `ls .../static/favicon/` | All files present in both dashboards |
 {% endraw %}

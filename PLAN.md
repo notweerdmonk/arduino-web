@@ -1087,4 +1087,52 @@ Three issues found after Phase 20:
 - [x] 22 unit tests passing
 - [x] 6 integration tests passing (Connection, Init, List, ListAll, Watch, Compile)
 
+---
+
+### Phase 101 — Redesign & Rebuild Standalone Distributions (PyOxidizer) ✅ COMPLETED
+
+**Date**: 2026-06-24 18:54
+
+**Goal**: Rebuild the `dist-standalone/` bundles (arduino-dash, medminder-dash, board-manager) from current source code, replace hardcoded absolute paths in pyoxidizer.bzl with portable paths, and add missing `simple-websocket` runtime dependency.
+
+**Problem**: The existing dist-standalone bundles were built from an old codebase version. They are missing 6 Python modules (html_routes, api_routes, pubsub, settings, state, utils, sketch_registry), 14+ templates, all static files, and the `simple-websocket` dep. The pyoxidizer.bzl configs have hardcoded `/home/weerdmonk/...` absolute paths making them non-portable.
+
+**Approach**:
+1. Replace hardcoded paths with `@REPO_ROOT@` placeholder in pyoxidizer.bzl files
+2. Add `simple-websocket>=1.0.0` to dashboard PyOxidizer config
+3. Fix `pip_download()` → `pip_install()` for local wheel paths
+4. Build fresh wheels (`nox -s all_builds`)
+5. Rebuild standalone binaries via `./scripts/build_standalone.sh` (sed-substitutes `@REPO_ROOT@` then git-restores tracked files)
+6. Smoke-test each binary, verify modules/templates/deps
+
+**Key learnings**: PyOxidizer Starlark has no `__file__`; `load()` from another bzl also fails (CP04). Solution: `@REPO_ROOT@` placeholder → `sed` substitution in build script + `git checkout` cleanup via RETURN trap. `pip_download()` only supports PyPI — use `pip_install()` for local wheel paths.
+
+**Files**:
+- `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
+- `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
+- `scripts/pyoxidizer/board-manager/pyoxidizer.bzl` — @REPO_ROOT@ + pip_install for local wheels
+- `scripts/build_standalone.sh` — sed substitution + git restore cleanup logic
+
+| Q | Scope | Change | Status |
+|---|-------|--------|--------|
+| Q1 | pyoxidizer.bzl (3 files) | @REPO_ROOT@ placeholder + simple-websocket + pip_install | ✅ |
+| Q2 | Wheel build | `nox -s all_builds` | ✅ |
+| Q3 | Standalone build | `./scripts/build_standalone.sh` | ✅ |
+| Q4 | Verification | Smoke test + module/template/dep audit | ✅ |
+
+### Phase 101 (continued) — Portability Fix: Commit .bzl Changes
+
+**Date**: 2026-06-24 21:00
+
+**Problem**: Phase 101's `pyoxidizer.bzl` changes (`@REPO_ROOT@` placeholder, `pip_download()` → `pip_install()`, `simple-websocket` dep) were **never committed**. The `build_standalone.sh` RETURN trap's `git checkout` restored the original hardcoded-path versions after each build. The tracked files still have non-portable absolute paths and use `pip_download()` (PyPI-only) for local wheels.
+
+**Goal**: Commit the three `.bzl` files with `@REPO_ROOT@` + `pip_install()` + `simple-websocket` so that `git checkout` in the build script restores the portable placeholder versions. Then rebuild and verify.
+
+| Q | Scope | Change | Status |
+|---|-------|--------|--------|
+| Q1 | 3 pyoxidizer.bzl files | @REPO_ROOT@ + pip_install + simple-websocket (commit to git) | ✅ |
+| Q2 | Build | `nox -s all_builds` then `./scripts/build_standalone.sh` | ✅ |
+| Q3 | Verification | Smoke test + module/template/dep audit | ✅ |
+| Q4 | Agent-facing docs | Update IMPLEMENTATION_*, JOURNAL, CODEBASE_REFERENCE | ✅ |
+
 {% endraw %}

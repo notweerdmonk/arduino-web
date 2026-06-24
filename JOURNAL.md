@@ -3,6 +3,38 @@
 {% raw %}
 # MedMinder Project Journal
 
+## 2026-06-25 09:06 — Phase 101 Continuation: Commit + Rebuild + Reverify ✅ COMPLETED
+
+**Goal**: Phase 101's `.bzl` changes were never committed — `git checkout` restored hardcoded paths. Commit them, rebuild, reverify.
+
+**Q1 — Commit** (committed as `e98b878` by user):
+- 3 `.bzl` files: `@REPO_ROOT@` + `pip_install()` + `simple-websocket>=1.0.0`
+- Stale `_repo_root.bzl` deleted (never tracked, included in commit)
+
+**Q2 — Build**:
+- `nox -s all_builds` — all 7 sessions passed in 54s, all 6 wheels verified
+- `./scripts/build_standalone.sh` — all 3 binaries built (~51 MB each)
+
+**Q3 — Verification**:
+- Smoke test (`--help`): All 3 binaries pass ✅
+- Bundle integrity: arduino-dash 25/25 modules/templates/deps ✅, medminder-dash 25/25 ✅, board-manager headless ✅
+- `simple-websocket` present in both dashboard bundles ✅
+- `.bzl` files restored to `@REPO_ROOT@` placeholders after build ✅
+
+## 2026-06-24 20:31 — Phase 101: Redesign & Rebuild Standalone Distributions ✅ COMPLETED
+
+**Goal**: Rebuild `dist-standalone/` PyOxidizer bundles from current source, fix hardcoded absolute paths, add `simple-websocket`.
+
+**Approach change**: `__file__` NOT available in PyOxidizer Starlark. `load()` from another `.bzl` file also fails (CP04 error). Switched to `@REPO_ROOT@` placeholder → `sed` substitution in `build_standalone.sh`.
+
+**`pip_download` vs `pip_install`**: Dashboard configs used `pip_download()` for local wheels, which only resolves from PyPI. Switched all local wheel references to `pip_install()`.
+
+**Git restore cleanup**: `sed -i` on tracked `.bzl` files, then `git checkout` via `RETURN` trap in `build_standalone.sh`.
+
+**Build success**: All 3 binaries built (~51 MB each), all `--help` smoke tests pass.
+
+**Verification**: All modules, templates (including all partials), static files (favicon, style.css), and `simple-websocket` dep confirmed present in both dashboard bundles. Orphan templates (`deploy.html`, `admin_sketch_dir.html`) still present in medminder_dash (expected).
+
 ## 2026-06-21 11:55 — Phase 98: WS Push Migration (Q1-Q5) ✅ COMPLETED
 
 **Goal**: Migrate all PubSub-driven frontend updates from HTMX polling to WS push across three tiers.

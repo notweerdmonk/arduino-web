@@ -36,6 +36,17 @@
 | 8 | Phase 100c: Add simple-websocket dep (2 pyproject.toml files) | ✅ | Both files updated |
 | 9 | Phase 100c: Verify no test regressions | ✅ | Same pre-existing failures only |
 | 10 | Phase 100c: Update all docs | ✅ | PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
+
+| 11 | Phase 101: pyoxidizer.bzl — @REPO_ROOT@ + simple-websocket + pip_install | ✅ | 3 files updated |
+| 12 | Phase 101: build_standalone.sh — sed + git cleanup | ✅ | RETURN trap + explicit before die |
+| 13 | Phase 101: Wheel build (nox -s all_builds) | ✅ | 6 wheels built |
+| 14 | Phase 101: Standalone build | ✅ | 3 binaries, 51MB each |
+| 15 | Phase 101: Smoke test all 3 binaries | ✅ | --help exits 0 |
+| 16 | Phase 101: Module audit (both dashboards) | ✅ | All 7 modules present |
+| 17 | Phase 101: Template audit | ✅ | All templates + partials |
+| 18 | Phase 101: Static file audit | ✅ | style.css + favicons |
+| 19 | Phase 101: simple-websocket dep audit | ✅ | Present in both dashboards |
+| 20 | Phase 101: All docs updated | ✅ | PLAN, JOURNAL, CODEBASE, IMPLEMENTATION_*, TESTING_*, REVIEW_* |
 {% endraw %}
 
 ## 2026-06-24 02:52 — Code Review: pubsub_infra→pubsub Rename + Documentation Sync

@@ -90,7 +90,16 @@ build_app() {
     local install_dir="${config_path}/build/x86_64-unknown-linux-gnu/release/install"
     local output_dir="${REPO_ROOT}/dist-standalone/${app_name}"
 
+    # Restore original .bzl on exit (we sed @REPO_ROOT@ in-place)
+    local bzl_file="${config_path}/pyoxidizer.bzl"
+    cleanup() { git -C "${REPO_ROOT}" checkout -- "${bzl_file}" 2>/dev/null || true; }
+    trap cleanup RETURN
+
     log "Building ${app_name} from ${config_path}"
+
+    # Substitute @REPO_ROOT@ placeholder with actual path.
+    # PyOxidizer Starlark has no __file__ and load() doesn't work for var import.
+    sed -i "s|@REPO_ROOT@|${REPO_ROOT}|g" "${bzl_file}"
 
     if [[ "${dry_run}" -eq 1 ]]; then
         log "  (dry-run) ${PYOXIDIZER} build --path ${config_path} --release"
@@ -108,12 +117,14 @@ build_app() {
     if ! "${PYOXIDIZER}" build --path "${config_path}" --release 2>&1 | while IFS= read -r line; do
         printf '  [pyoxidizer] %s\n' "${line}"
     done; then
+        git -C "${REPO_ROOT}" checkout -- "${bzl_file}" 2>/dev/null || true
         die "build failed for ${app_name}" 2
     fi
 
     # Verify binary exists
     local binary_path="${install_dir}/${binary_name}"
     if [[ ! -f "${binary_path}" ]]; then
+        git -C "${REPO_ROOT}" checkout -- "${bzl_file}" 2>/dev/null || true
         die "binary not found after build: ${binary_path}" 2
     fi
 

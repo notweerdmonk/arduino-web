@@ -40,4 +40,14 @@
 | 27 | Phase 100c: idiomorph URL fixed (medminder_dash base.html) | ✅ | Correct URL ✓ |
 | 28 | Phase 100c: No regressions — arduino_dash tests | ✅ | 111 pre-existing errors unchanged |
 | 29 | Phase 100c: No regressions — medminder_dash tests | ✅ | 1 pre-existing failure unchanged |
+| 30 | Phase 101: arduino-dash smoke (`--help`) | ✅ | Exit 0 |
+| 31 | Phase 101: medminder-dash smoke (`--help`) | ✅ | Exit 0 |
+| 32 | Phase 101: board-manager smoke (`--help`) | ✅ | Exit 0 |
+| 33 | Phase 101: arduino-dash modules (7 modules) | ✅ | All present |
+| 34 | Phase 101: medminder-dash modules (7 modules) | ✅ | All present |
+| 35 | Phase 101: templates (both dashboards) | ✅ | All templates + partials |
+| 36 | Phase 101: simple-websocket dep (arduino-dash) | ✅ | Present |
+| 37 | Phase 101: simple-websocket dep (medminder-dash) | ✅ | Present |
+| 38 | Phase 101: static files (both dashboards) | ✅ | style.css + favicons |
+| 39 | Phase 101: All 3 binaries built (51MB each) | ✅ | `.tar.gz` archives created |
 {% endraw %}

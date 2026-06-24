@@ -188,6 +188,44 @@
 - [x] All 6 server lifecycle scenarios pass (both apps) — ✅
 - [x] No regression in dashboard tests — ✅ (119 + 186 pass)
 - [x] No shell hacks used — ✅
+
+## Phase 101 — Redesign & Rebuild Standalone Distributions
+
+**Date**: 2026-06-24 18:54
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Review Criteria
+
+#### Config Correctness
+- [x] `@REPO_ROOT@` placeholder replaces all hardcoded absolute paths in 3 pyoxidizer.bzl files ✅
+- [x] `"simple-websocket>=1.0.0"` added to both dashboard pyoxidizer.bzl files ✅
+- [x] `pip_download()` → `pip_install()` for all local wheel paths ✅
+- [x] `build_standalone.sh`: `sed -i` substitution + `git checkout` cleanup via RETURN trap ✅
+
+#### Build Verification
+- [x] `nox -s all_builds` — all 6 wheels built successfully ✅
+- [x] `./scripts/build_standalone.sh` — all 3 binaries built (51MB each) ✅
+- [x] No build errors or warnings ✅
+
+#### Binary Verification
+- [x] arduino-dash `--help` — exit 0, usage output ✅
+- [x] medminder-dash `--help` — exit 0, usage output ✅
+- [x] board-manager `--help` — exit 0, usage output ✅
+
+#### Bundle Contents
+- [x] All 7 current Python modules present in both dashboard bundles ✅
+- [x] All templates + partials present in both dashboard bundles ✅
+- [x] Static files (style.css, favicons) present in both dashboard bundles ✅
+- [x] `simple-websocket` dep present in both dashboard bundles ✅
+
+#### Documentation
+- [x] PLAN.md updated with corrected approach (@REPO_ROOT@ placeholder, not __file__) ✅
+- [x] IMPLEMENTATION_* docs updated with actual approach ✅
+- [x] TESTING_* docs updated with test results ✅
+- [x] REVIEW_* docs updated (this file) ✅
+- [x] CODEBASE_REFERENCE.md updated with Phase 101 section ✅
+- [x] JOURNAL.md updated with Phase 101 entry ✅
 {% endraw %}
 
 ## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)

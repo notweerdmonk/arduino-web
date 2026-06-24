@@ -601,4 +601,86 @@ Neither `pyproject.toml` listed either dependency. The project uses `flask-sock`
 2. **simple-websocket version**: `flask-sock 0.7.x` requires `simple-websocket >= 1.0.0`. Using `>=1.0.0` is the correct minimum version pin.
 3. **No wheel rebuild needed**: Adding a dependency to `pyproject.toml` doesn't affect running tests — the dependency is resolved at install time (pipenv lock + sync). Since tests use the nox virtualenv with `pipenv sync --dev`, the package is only available when the wheel is rebuilt and installed.
 
+---
+
+## Entry 4 — Phase 101: Redesign & Rebuild Standalone Distributions
+
+**Date**: 2026-06-24 18:54
+
+### Objective
+
+Rebuild the three `dist-standalone/` PyOxidizer bundles from current source code, fix hardcoded absolute paths, and add missing `simple-websocket` dependency to dashboard builds.
+
+### Root Cause
+
+The existing `dist-standalone/` directories were built from an old codebase version predating many current modules and features:
+
+| Missing from old dist | Count | Details |
+|-----------------------|-------|---------|
+| Python modules | 6+ | `html_routes.py`, `api_routes.py`, `pubsub.py`, `settings.py`, `state.py`, `utils.py`, `sketch_registry.py` |
+| Templates (medminder-dash) | 14 | `admin.html` + 13 partials |
+| Templates (arduino-dash) | 5 | `admin.html`, 4 partials |
+| Static files | 8 | `style.css` + 7 favicon files |
+| simple-websocket dep | 1 | Added in Phase 100c but not reflected in PyOxidizer configs |
+
+Additionally, the `pyoxidizer.bzl` files contain hardcoded absolute paths (`/home/weerdmonk/Projects/medminder/...`) making them non-portable across machines.
+
+### Approach
+
+1. **Derive REPO_ROOT from `__file__`** — Use Starlark string operations (`rsplit("/", N)`) to compute the repo root from the config file's own location, avoiding any import dependencies
+2. **Add `simple-websocket>=1.0.0`** to both dashboard PyOxidizer `pip_install()` lists
+3. **Build fresh wheels** via `nox -s all_builds`
+4. **Rebuild standalone binaries** via `./scripts/build_standalone.sh`
+5. **Verify** each binary for modules, templates, static files, and deps
+
+### Key Design Decisions
+
+1. **Starlark string ops over `import os`**: PyOxidizer's Starlark dialect may not support `import os`. Using `rsplit("/", N)` is pure Starlark and guaranteed portable.
+2. **No orphan cleanup needed**: Rebuilding from current wheels automatically excludes stale files since they aren't in the current source package.
+3. **Rebuild instead of patch**: Rather than individually copying missing files into the old dist, a full rebuild from current source is cleaner and guaranteed correct.
+
+---
+
+### Actual Outcome vs Plan
+
+**Date**: 2026-06-24 20:31
+
+**Approach change**: The initial plan relied on `__file__` to derive `REPO_ROOT` from the `.bzl` config file's location. PyOxidizer's Starlark dialect does NOT provide `__file__`. Attempting `load()` from another `.bzl` file to import the variable also fails (CP04 error — `load()` only works for rules, not data import). **Final approach**: Placeholder `@REPO_ROOT@` string in `.bzl` files → `sed -i` substitution in `build_standalone.sh`.
+
+**`pip_download` vs `pip_install`**: Dashboard configs used `pip_download()` for local wheel dependencies (arduino-dash, medminder-dash). `pip_download()` resolves from PyPI only — it cannot find local `.whl` files. Switched all local wheel references to `pip_install()` which accepts file paths.
+
+**Git restore cleanup**: The `sed -i` in-place substitution modifies tracked `.bzl` files in the working tree. `build_standalone.sh` now sets a `RETURN` trap that runs `git checkout` on the `.bzl` files, restoring their original `@REPO_ROOT@` placeholders after each binary build.
+
+**Build success**: All 3 binaries built successfully (~51 MB each). All `--help` smoke tests pass.
+
+**Verification — modules, templates, static, deps**:
+
+- **Both dashboard bundles**: `html_routes.py`, `api_routes.py`, `pubsub.py`, `settings.py`, `state.py`, `utils.py`, `sketch_registry.py` — all present ✅
+- **Templates**: `base.html`, `admin.html`, `board_detail.html` + all partials including `dnd_overlay.html`, `admin_board_selector.html`, `compile_upload_card.html`, `board_event.html`, `board_status_badge.html`, `daemon_badge.html`, `medicine_management.html` — all present ✅
+- **Static**: `favicon/` files, `style.css` — all present ✅
+- **simple-websocket dep**: present in both dashboard bundles ✅
+- **Orphan templates** (`deploy.html`, `admin_sketch_dir.html`): Present in medminder_dash bundle. Expected — user confirmed they should remain.
+
+---
+
+## 2026-06-25 09:06 — Phase 101 Continuation: Commit + Rebuild + Reverify
+
+**Trigger**: Phase 101's `.bzl` changes were never committed — `git checkout` in `build_standalone.sh` restored hardcoded paths.
+
+**Q1 — Commit** (committed as `e98b878` by user):
+- 3 `.bzl` files: `@REPO_ROOT@` + `pip_install()` + `simple-websocket>=1.0.0`
+- Stale `_repo_root.bzl` deleted (never tracked, included in commit)
+- Build script `git checkout` now restores `@REPO_ROOT@` placeholders correctly
+
+**Q2 — Build**:
+- `nox -s all_builds` — all 7 sessions passed in 54s, all 6 wheels verified present
+- `./scripts/build_standalone.sh` — all 3 binaries built (~51 MB each), `.tar.gz` archives created
+
+**Q3 — Verification**:
+- Smoke test (`--help`): board-manager ✅, arduino-dash ✅, medminder-dash ✅ (all exit 0)
+- **arduino-dash modules** (25/25): html_routes.py, api_routes.py, pubsub.py, settings.py, state.py, utils.py, sketch_registry.py + all templates/partials/static/simple-websocket ✅
+- **medminder-dash modules** (25/25): Same 7 modules + all templates/partials/static/simple-websocket ✅ (includes orphan templates deploy.html, admin_sketch_dir.html — expected)
+- **board-manager** (headless): No web templates. modules: board_manager/, board_manager_client/. utils.py present ✅
+
+**Restore verified**: `.bzl` files restored to `@REPO_ROOT@` placeholders after build (cleanup trap fired correctly).
 {% endraw %}

@@ -1,94 +1,56 @@
 ---
 ---
 {% raw %}
-# Implementation Plan — Phase 100c: Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+# Implementation Plan — Phase 101 (cont.): Standalone Build Portability Fix
 
-**Date**: 2026-06-24 17:57
-**Status**: Completed
+**Date**: 2026-06-24 21:00
+**Status**: 🔄 In Progress
 
 ## Motivation
 
-During Playwright E2E testing, two non-blocking console errors were observed:
+Phase 101 replaced hardcoded paths in `pyoxidizer.bzl` with `@REPO_ROOT@` placeholders, fixed `pip_download()` → `pip_install()`, and added `simple-websocket` dep. However, those changes were **never committed to git**. The `build_standalone.sh` RETURN trap runs `git checkout -- <bzl_file>` after each build, restoring the original hardcoded-path versions. Three issues remain in the tracked files:
 
-1. **idiomorph.js 404** — `<script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js">` returns HTTP 404. The idiomorph JS is a separate npm package (`idiomorph`) and is no longer bundled inside `htmx.org` since htmx 2.x.
-2. **WebSocket "Invalid frame header"** — `ws://localhost:8766/ws/board-events` fails because `flask-sock` lacks a WebSocket transport implementation. `simple-websocket` provides WS support for Flask dev server and gunicorn sync workers.
+1. **Non-portable absolute paths** — `/home/weerdmonk/Projects/medminder/...` hardcoded in all 3 `.bzl` files
+2. **`pip_download()` for local wheels** — Both dashboard configs use `pip_download()` which only works with PyPI indexes; local `.whl` files are likely silently skipped
+3. **Missing `simple-websocket>=1.0.0`** — Dashboard configs don't bundle the WebSocket transport dependency
 
-## Root Cause Analysis
+## Changes per File
 
-### Bug 1: idiomorph.js 404
+### `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl`
+- Prefix all 5 local wheel paths with `@REPO_ROOT@/` + relative path
+- Change `pip_download()` → `pip_install()` for local wheels
+- Add `"simple-websocket>=1.0.0"` to the PyPI `pip_install()` block
 
-```
-Current (broken):     https://unpkg.com/htmx.org/dist/ext/idiomorph.js  → 404
-Correct:              https://unpkg.com/idiomorph/dist/idiomorph-ext.js → 200
-```
+### `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl`
+- Same 3 changes as arduino-dash
 
-- htmx 1.x bundled extensions inside `htmx.org/dist/ext/`. htmx 2.x moved all extensions to separate npm packages.
-- The idiomorph extension is now published as the `idiomorph` npm package.
-- The htmx extension file is at `idiomorph/dist/idiomorph-ext.js`.
-- Both dashboards load the wrong URL identically (copy-pasted during Phase 97 Q2).
+### `scripts/pyoxidizer/board-manager/pyoxidizer.bzl`
+- Prefix both local wheel paths with `@REPO_ROOT@/` + relative path
+- Already uses `pip_install()` — no change needed
+- No `simple-websocket` — not a dashboard app
 
-### Bug 2: WS Invalid Frame Header
+### `scripts/pyoxidizer/board-manager/_repo_root.bzl` (stale artifact)
+- Delete — created during Phase 101 experimentation with `load()`, which failed with CP04
 
-```
-Browser → ws://localhost:8766/ws/board-events
-  → flask-sock middleware (no simple-websocket installed)
-  → Werkzeug/gunicorn sync worker returns non-101 HTTP response
-  → Browser: "Invalid frame header"
-```
+## Build Script is Already Correct
 
-- `flask-sock` creates a `Sock(app)` instance wrapping `app.wsgi_app` with a middleware.
-- The middleware intercepts WebSocket upgrade requests and needs a WS transport:
-  - `simple-websocket` — works with sync servers (Flask dev, gunicorn sync)
-  - `gevent-websocket` — works with gunicorn gevent worker
-- Without either, the middleware doesn't properly handle the upgrade, returning a garbled response.
-- `simple-websocket` is the right choice: zero-config, no worker class change needed.
-- Neither `pyproject.toml` listed this dependency — it was only accidentally installed via transitive deps in some envs.
+`scripts/build_standalone.sh` already has:
+- `sed -i "s|@REPO_ROOT@|${REPO_ROOT}|g"` — substitutes placeholder before each build
+- `trap cleanup RETURN` — runs `git checkout` to restore placeholders after each build
+- Explicit `git checkout` before `die()` — catches exit paths (RETURN trap skipped on exit)
 
-## Architecture
-
-Minimal change — no architectural impact:
-- **idiomorph**: Just a URL string swap in 2 template files.
-- **simple-websocket**: Just a line addition in 2 `pyproject.toml` files (runtime dep).
-
-### CDN URL Diff
-
-```
-- src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"
-+ src="https://unpkg.com/idiomorph/dist/idiomorph-ext.js"
-```
-
-### Dependency Diff
-
-```toml
-dependencies = [
-    ...
-    "flask-sock>=0.7.0",
-+   "simple-websocket>=1.0.0",
-    ...
-]
-```
+No changes needed to the build script itself.
 
 ## Quantums
 
-| Q | Scope | Files | Key Change |
-|---|-------|-------|------------|
-| 1 | arduino_dash base.html | `arduino_dash/.../templates/base.html:9` | Fix idiomorph CDN URL |
-| 2 | medminder_dash base.html | `medminder_dash/.../templates/base.html:13` | Fix idiomorph CDN URL |
-| 3 | arduino_dash pyproject.toml | `arduino_dash/.../pyproject.toml:13` | Add `simple-websocket>=1.0.0` |
-| 4 | medminder_dash pyproject.toml | `medminder_dash/.../pyproject.toml:14` | Add `simple-websocket>=1.0.0` |
-
-## Test Plan
-
-| Test | Method | Pass Criteria |
-|------|--------|--------------|
-| Idiomorph CDN resolves | `webfetch https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
-| Old CDN returns 404 | `webfetch https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
-| Pyproject deps | `grep simple-websocket */python/*/pyproject.toml` | 2 matches |
-| No regressions | `nox -s all_tests` | All sessions pass |
+| Q | Scope | Key Change | Status |
+|---|-------|------------|--------|
+| Q1 | 3 pyoxidizer.bzl files | @REPO_ROOT@ + pip_install + simple-websocket; committed as e98b878 | ✅ |
+| Q2 | Build standalone binaries | `nox -s all_builds` + `./scripts/build_standalone.sh` | ✅ |
+| Q3 | Verification | Smoke test + module/template/dep audit for all 3 binaries | ✅ |
+| Q4 | Agent-facing docs | Update IMPLEMENTATION_*, JOURNAL, CODEBASE_REFERENCE | ✅ |
 
 ## Rollback
 
-Each change is atomic and easily reversible:
-- **Q1/Q2**: Revert the URL string in the two base.html files.
-- **Q3/Q4**: Remove the `simple-websocket` line from the two pyproject.toml files.
+Before committing: `git checkout -- scripts/pyoxidizer/*/pyoxidizer.bzl` restores hardcoded paths. After committing: `git revert HEAD` undoes the commit.
 {% endraw %}

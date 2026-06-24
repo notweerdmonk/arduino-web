@@ -379,4 +379,174 @@ Both test suites had pre-existing failures unrelated to Phase 100c changes:
 |-------|-----------------------|------------|
 | arduino_dash | 111 errors | `_pending_responses_lock`, `_compile_results_lock`, etc. accessed via `app` module but live in `state` module. State was extracted in a prior phase but tests were not updated. |
 | medminder_dash | 1 failure | `test_sketch_path_uses_default_for_no_hardware_id` — assertion mismatch likely from Phase 99 template homogenisation. |
+---
+
+## 2026-06-24 20:31 — Phase 101: Redesign & Rebuild Standalone Distributions — TESTS EXECUTED
+
+**Status**: ✅ COMPLETED — All verifications pass.
+
+### Key Findings
+
+1. **`__file__` not available in PyOxidizer Starlark** — The initial plan to derive `REPO_ROOT` via `rsplit("/", N)` from `__file__` failed because Starlark has no `__file__` variable. `load()` from another generated `.bzl` file also failed (CP04 error). Solution: `@REPO_ROOT@` placeholder + `sed -i` substitution in `build_standalone.sh`.
+
+2. **`pip_download()` vs `pip_install()`** — Dashboard configs used `pip_download()` for local wheel paths, but `pip_download()` only resolves from PyPI indexes. Changed all local wheel references to `pip_install()`.
+
+3. **Cleanup via RETURN trap** — `build_standalone.sh` uses `trap cleanup RETURN` for normal function return, with explicit `git checkout` before `die` calls (exit skips RETURN trap).
+
+4. **All 3 binaries built and verified** — 51MB each, all modules/templates/static files/deps present.
+
+### Test Results
+
+| # | Test | Result |
+|---|------|--------|
+| 1 | arduino-dash --help | ✅ Exit 0 |
+| 2 | medminder-dash --help | ✅ Exit 0 |
+| 3 | board-manager --help | ✅ Exit 0 |
+| 4 | arduino-dash modules | ✅ All 7 present |
+| 5 | medminder-dash modules | ✅ All 7 present |
+| 6 | Templates (arduino-dash) | ✅ All present |
+| 7 | Templates (medminder-dash) | ✅ All present |
+| 8 | simple-websocket (arduino-dash) | ✅ Present |
+| 9 | simple-websocket (medminder-dash) | ✅ Present |
+| 10 | Static files (both dashboards) | ✅ style.css + favicons |
+
+### Orphan Templates
+
+`deploy.html` and `admin_sketch_dir.html` are still present in medminder-dash dist. Expected — user confirmed they should remain.
+
+---
+
+## 2026-06-24 20:45 — Standalone Bundle Testing: Infrastructure Survey
+
+**Status**: Research complete — planning next steps.
+
+### Goal
+
+Survey existing testing infrastructure and identify gaps for testing the 3 PyOxidizer standalone binaries (`arduino-dash`, `medminder-dash`, `board-manager`) in `dist-standalone/`.
+
+### Current State: What IS Tested
+
+| Layer | Tests | Scope |
+|-------|-------|-------|
+| **Per-package unit tests** | ~418+ pytest tests via `nox -s tests(pkg)` | Code logic, not binary |
+| **scripts/ test suite** | 170 tests (128 pytest + 42 bash) via `nox -s scripts_tests` | Script behavior, not binary |
+| **Wheel installation** | `scripts/test_installs.sh` — import + `--help` smoke | Wheels only, not standalone |
+| **PyOxidizer build** | `--help` smoke in `build_standalone.sh` lines 137-145 | Binary responds to `--help` |
+| **E2E browser tests** | 10 MCP recipes + 22 shelved Playwright specs | Flask dev servers only |
+| **CI pipeline** | `scripts/ci.sh` — tests + builds | No standalone involvement |
+
+### Current Testing Infrastructure
+
+#### E2E Directory
+
+```
+e2e/
+├── agent_tools/
+│   ├── AGENT.md, COMMAND.md, GUIDE.md, SKILL.md
+├── docs/
+│   ├── index.md              # E2E docs landing page
+│   ├── servers.md            # Mock server reference
+│   ├── scenarios.md          # 10 test scenario recipes
+│   └── agent-tools.md        # Agent integration
+├── fixtures/test-data.ts     # Shelved
+├── servers/
+│   ├── arduino_dash_server.py      # Flask dev server (278 lines)
+│   └── medminder_dash_server.py    # Flask dev server (316 lines)
+├── specs/                         # Shelved @playwright/test specs
+│   ├── arduino_dash/              # 4 spec files, 12 tests
+│   └── medminder_dash/            # 4 spec files, 10 tests
+├── MCP_TESTING_GUIDE.md           # 530-line testing guide
+└── playwright.config.ts           # Shelved
+```
+
+#### Server Scripts (`e2e/servers/`)
+
+Both scripts provide:
+- CLI: `--mock`, `--bms`, `--port`, `--production`, `--pidfile`, `--stop`, `--force`, `--logfile`
+- Daemonization: `os.fork()` + `os.setsid()` + `_redirect_io()`
+- Mock data: injects into `state` module (boards, sketches, medicines)
+- Tested via: `python3 e2e/servers/arduino_dash_server.py --mock` (not standalone binary)
+
+**Both serve Flask dev servers — not standalone binaries.**
+
+#### Standalone Build (`scripts/build_standalone.sh`)
+
+Builds all 3 apps via PyOxidizer. After each build:
+1. Copies install dir to `dist-standalone/<app>/`
+2. Runs `--help` smoke test (greps for usage/help/options)
+3. Packages to `.tar.gz`
+
+**Only `--help` smoke. No HTTP serving test.**
+
+#### Standalone Bundle Structure
+
+```
+dist-standalone/arduino-dash/
+├── arduino-dash     # ~51 MB compiled binary
+├── COPYING.txt
+└── prefix/          # ~100 MB sidecar (C extensions)
+```
+
+The binary requires `prefix/` adjacent at runtime.
+
+### What is MISSING for Standalone Binary Testing
+
+| # | Gap | Details |
+|---|-----|---------|
+| 1 | **No start/stop lifecycle** | No script launches `dist-standalone/<app>/<binary>` and manages its lifecycle. No pidfile, no `--stop`, no `--logfile` for standalone. |
+| 2 | **No mock data injection** | Standalone binary has no `--mock` flag. Dev servers inject mock data into in-memory state before `app.run()`. The gunicorn entry point in the binary has no injection hook. |
+| 3 | **No HTTP smoke tests** | No test verifies the binary actually serves HTTP responses — only `--help` is tested. |
+| 4 | **No port binding tests** | No test verifies the binary binds to the expected port or handles port conflicts. |
+| 5 | **No E2E recipes for standalone** | All 10 MCP recipes and 22 shelved Playwright specs target dev servers. None target standalone. |
+| 6 | **No `test_standalone` nox session** | `noxfile.py` has `build_standalone` (build only). No `test_standalone`. |
+| 7 | **No CI integration** | `scripts/ci.sh` excludes standalone build/test. |
+| 8 | **No missing `prefix/` handling** | No test verifies graceful error when `prefix/` is absent. |
+| 9 | **No daemonization for standalone** | The binary uses gunicorn's daemon model. No MCP guide covers starting/stopping standalone instances. |
+| 10 | **No `webServer` in Playwright config** | Shelved `playwright.config.ts` points to dev server scripts, not standalone binaries. |
+
+### Specific Gaps per Application
+
+| App | Binary | Current Test | What Should Be Tested |
+|-----|--------|-------------|----------------------|
+| board-manager | `board-manager` | `--help` only | gRPC port binding, daemon mode, board detection |
+| arduino-dash | `arduino-dash` | `--help` only | HTTP serving, dashboard render, admin, sketch upload |
+| medminder-dash | `medminder-dash` | `--help` only | HTTP serving, board grid, medicine CRUD, compile/upload |
+
+### Capability Comparison: Dev Server vs Standalone
+
+| Capability | Flask Dev Server | Standalone Binary |
+|------------|-----------------|-------------------|
+| Start script | `e2e/servers/*_server.py` | None |
+| Daemonization | `fork + setsid` (built-in) | Gunicorn handles (different) |
+| Mock data | `--mock` flag | Not available |
+| Shutdown | `--stop` flag | None |
+| MCP recipes | 10 recipes | Zero |
+| Playwright specs | 22 specs (shelved) | Zero |
+| Port config | 8765/8766 `--port` | Gunicorn bind config |
+| CI integration | `nox -s all_tests` | Not in CI |
+| PID file | Built-in | None |
+| Log capture | `--logfile` flag | None |
+
+### Options for Filling the Gaps (Not Yet Decided)
+
+1. **Add `--mock` flag to the standalone binary's gunicorn entry point** — enable mock data injection, then all existing MCP recipes work against standalone with the binary's own port.
+
+2. **Create standalone-specific E2E scripts** — bash/Python scripts that start the binary (requires real BMS or other setup), curl-test it, shut it down.
+
+3. **Use real backend services** — run `board-manager` standalone as BMS, point `arduino-dash` standalone at it — full integration test (requires real Arduino for meaningful results).
+
+### Key Files Referenced
+
+| File | Path |
+|------|------|
+| Build script | `scripts/build_standalone.sh` |
+| Arduino dash server | `e2e/servers/arduino_dash_server.py` |
+| Medminder dash server | `e2e/servers/medminder_dash_server.py` |
+| E2E testing guide | `e2e/agent_tools/GUIDE.md` |
+| MCP testing guide | `e2e/MCP_TESTING_GUIDE.md` |
+| CI script | `scripts/ci.sh` |
+| Noxfile | `noxfile.py` |
+| E2E doc index | `e2e/docs/index.md` |
+| Scenarios doc | `e2e/docs/scenarios.md` |
+| Servers doc | `e2e/docs/servers.md` |
 {% endraw %}

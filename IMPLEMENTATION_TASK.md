@@ -1,50 +1,52 @@
 ---
 ---
 {% raw %}
-# Implementation Task — Phase 100c: Fix Console Errors
+# Implementation Task — Phase 101 (cont.): Standalone Build Portability Fix
 
-**Date**: 2026-06-24 17:57
+**Date**: 2026-06-24 21:00
 
 ## Task Breakdown
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| Q1 | Fix idiomorph CDN URL in arduino_dash base.html | ✅ | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
-| Q2 | Fix idiomorph CDN URL in medminder_dash base.html | ✅ | Same URL change |
-| Q3 | Add `simple-websocket>=1.0.0` to arduino_dash pyproject.toml | ✅ | Inserted after `flask-sock>=0.7.0` |
-| Q4 | Add `simple-websocket>=1.0.0` to medminder_dash pyproject.toml | ✅ | Inserted after `flask-sock>=0.7.0` |
-| T1 | Verify idiomorph CDN resolves (HTTP 200) | ✅ | `curl -sIL` → HTTP 200 |
-| T2 | Verify old CDN returns 404 | ✅ | `curl -sIL` → HTTP 404 |
-| T3 | Verify pyproject.toml deps | ✅ | Both files have `simple-websocket>=1.0.0` |
-| T4 | Run nox tests for regressions | ✅ | Same pre-existing failures (no new regressions) |
-| D1 | Update IMPLEMENTATION_JOURNAL.md | ✅ | Detailed entry |
-| D2 | Update JOURNAL.md | ✅ | Brief entry |
-| D3 | Update CODEBASE_REFERENCE.md | ✅ | Phase 100c section |
-| D4 | Update TESTING docs (JOURNAL, PROGRESS, TASK, PLAN) | ✅ | All 4 docs updated |
-| D5 | Run documentation skill | ⬜ | User-facing docs |
+| Q1 | Fix & commit pyoxidizer.bzl (3 files) + clean stale artifacts | ✅ | @REPO_ROOT@, pip_install, simple-websocket — committed as e98b878 |
+| Q2 | Build wheels + standalone binaries | ✅ | `nox -s all_builds` → `./scripts/build_standalone.sh` |
+| Q3 | Verify bundles | ✅ | Smoke test + module/template/dep audit |
+| D1 | Update IMPLEMENTATION_JOURNAL.md | ✅ | Appended Q2+Q3 continuation entry |
+| D2 | Update JOURNAL.md | ✅ | Appended Phase 101 continuation entry |
+| D3 | Update CODEBASE_REFERENCE.md | ✅ | Added continuation note with commit `e98b878` ref |
+| D4 | Update IMPLEMENTATION_PLAN / TASK / PROGRESS | ✅ | All Q2-Q4/D1-D6 marked complete |
+| D5 | Update TESTING_* docs | ✅ | Already complete |
+| D6 | Update REVIEW_* docs | ✅ | Already complete |
 
 ## Detailed Tasks
 
-### Q1 — arduino_dash base.html idiomorph URL
+### Q1 — Fix pyoxidizer.bzl files
 
-- [ ] Change script `src` from `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` to `https://unpkg.com/idiomorph/dist/idiomorph-ext.js`
+- [x] arduino-dash/pyoxidizer.bzl: replace hardcoded paths with @REPO_ROOT@ prefix
+- [x] arduino-dash/pyoxidizer.bzl: change `pip_download()` → `pip_install()`
+- [x] arduino-dash/pyoxidizer.bzl: add `"simple-websocket>=1.0.0"`
+- [x] medminder-dash/pyoxidizer.bzl: replace hardcoded paths with @REPO_ROOT@ prefix
+- [x] medminder-dash/pyoxidizer.bzl: change `pip_download()` → `pip_install()`
+- [x] medminder-dash/pyoxidizer.bzl: add `"simple-websocket>=1.0.0"`
+- [x] board-manager/pyoxidizer.bzl: replace hardcoded paths with @REPO_ROOT@ prefix
+- [x] Delete stale `scripts/pyoxidizer/board-manager/_repo_root.bzl`
+- [x] git add + commit .bzl changes (user committed as e98b878)
 
-### Q2 — medminder_dash base.html idiomorph URL
+### Q2 — Build wheels + standalone binaries
 
-- [ ] Same change as Q1
+- [ ] `nox -s all_builds` — exit 0
+- [ ] Check all 6 wheels exist in their dist dirs
+- [ ] `./scripts/build_standalone.sh` — all 3 apps built successfully
+- [ ] dist-standalone/ has all 3 app dirs with binaries
 
-### Q3 — arduino_dash pyproject.toml
+### Q3 — Verification
 
-- [ ] Add `"simple-websocket>=1.0.0",` after `"flask-sock>=0.7.0",`
-
-### Q4 — medminder_dash pyproject.toml
-
-- [ ] Add `"simple-websocket>=1.0.0",` after `"flask-sock>=0.7.0",`
-
-### T1-T4 — Verification
-
-- [ ] T1: New idiomorph CDN returns HTTP 200
-- [ ] T2: Old idiomorph CDN returns HTTP 404
-- [ ] T3: simple-websocket appears in both pyproject.toml files
-- [ ] T4: nox tests pass (no regressions)
+- [ ] Smoke test: `<binary> --help` for all 3 apps
+- [ ] New modules present in arduino-dash dist
+- [ ] New modules present in medminder-dash dist
+- [ ] Templates present in both dashboard dists
+- [ ] simple-websocket present in both dashboard dists
+- [ ] Static files (style.css, favicons) present in both dashboard dists
+- [ ] Orphan templates (deploy.html, admin_sketch_dir.html) present in medminder-dash (expected)
 {% endraw %}

@@ -675,3 +675,51 @@ Two non-blocking console errors fixed:
 ### Verdict
 
 ✅ **Phase 100c is approved and complete.** Both console errors are fixed. CDN URLs verified. Deps added to both pyproject.toml. No regressions introduced. All documentation updated.
+
+---
+
+## 2026-06-24 20:31 — Phase 101: Redesign & Rebuild Standalone Distributions
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+### Scope
+
+Rebuild all 3 `dist-standalone/` PyOxidizer bundles (`arduino-dash`, `medminder-dash`, `board-manager`) from current source code. Fix hardcoded absolute paths in `pyoxidizer.bzl`, add missing `simple-websocket` dep, and fix `pip_download()` → `pip_install()` for local wheel paths.
+
+### Key Changes
+
+| File | Change |
+|------|--------|
+| `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl` | @REPO_ROOT@ placeholder, simple-websocket dep, pip_install for local wheels |
+| `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl` | Same changes |
+| `scripts/pyoxidizer/board-manager/pyoxidizer.bzl` | @REPO_ROOT@ placeholder, pip_install for local wheels |
+| `scripts/build_standalone.sh` | sed -i substitution of @REPO_ROOT@, git checkout cleanup via RETURN trap, explicit restore before die |
+
+### Key Learnings
+
+1. **`__file__` not available** in PyOxidizer's Starlark dialect — `error[CM01]: Variable '__file__' not found`. `load()` from another `.bzl` file also fails (`CP04: IOError: No such file or directory`). Solution: `@REPO_ROOT@` placeholder + `sed -i` in build script.
+
+2. **`pip_download()` only works for PyPI** — local wheel paths require `pip_install()`. Both dashboard configs had `pip_download()` for local wheels that silently produced no results.
+
+3. **RETURN trap** — `trap cleanup RETURN` handles normal function returns, but `exit` inside `die()` skips the RETURN trap. Explicit `git checkout` before `die` calls is required.
+
+4. **Orphan templates remain** — `deploy.html`, `admin_sketch_dir.html` still in medminder-dash dist. Expected — user confirmed they should stay.
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| All 3 binaries built (51MB each) | ✅ |
+| arduino-dash --help | ✅ Exit 0 |
+| medminder-dash --help | ✅ Exit 0 |
+| board-manager --help | ✅ Exit 0 |
+| 7 modules in arduino-dash bundle | ✅ |
+| 7 modules in medminder-dash bundle | ✅ |
+| All templates + partials (both dashboards) | ✅ |
+| Static files (style.css + favicons, both) | ✅ |
+| simple-websocket dep (both dashboards) | ✅ |
+| All project & workflow docs updated | ✅ |
+
+### Verdict
+
+✅ **Phase 101 is approved and complete.** All 3 binaries rebuilt from current source. Modules, templates, static files, and `simple-websocket` dep verified. Hardcoded paths replaced with `@REPO_ROOT@` placeholder + `sed` substitution. `pip_download()` → `pip_install()` for local wheels. All documentation updated.

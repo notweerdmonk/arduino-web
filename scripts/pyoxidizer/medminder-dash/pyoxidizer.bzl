@@ -42,23 +42,20 @@ def make_exe():
         config=python_config,
     )
 
-    local_wheels = exe.pip_download([
-        "/home/weerdmonk/Projects/medminder/grpc_client/python/arduino_grpc/dist/arduino-grpc/arduino_grpc-0.1.0-py3-none-any.whl",
-        "/home/weerdmonk/Projects/medminder/board_manager/python/board_manager/dist/board-manager/board_manager-0.1.0-py3-none-any.whl",
-        "/home/weerdmonk/Projects/medminder/board_manager_client/python/board_manager_client/dist/board_manager_client-0.1.0-py3-none-any.whl",
-        "/home/weerdmonk/Projects/medminder/arduino_sketch_tools/python/arduino_sketch_tools/dist/arduino-sketch-tools/arduino_sketch_tools-0.1.0-py3-none-any.whl",
-        "/home/weerdmonk/Projects/medminder/medminder_dash/python/medminder_dash/dist/medminder-dash/medminder_dash-0.1.0-py3-none-any.whl",
-    ])
-    exe.add_python_resources(local_wheels)
-
-    pypi_pkgs = exe.pip_install([
+    all_wheels = exe.pip_install([
+        "@REPO_ROOT@/grpc_client/python/arduino_grpc/dist/arduino-grpc/arduino_grpc-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/board_manager/python/board_manager/dist/board-manager/board_manager-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/board_manager_client/python/board_manager_client/dist/board-manager-client/board_manager_client-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/arduino_sketch_tools/python/arduino_sketch_tools/dist/arduino-sketch-tools/arduino_sketch_tools-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/medminder_dash/python/medminder_dash/dist/medminder-dash/medminder_dash-0.1.0-py3-none-any.whl",
         "flask>=3.0",
         "gunicorn>=20.0",
         "flask-sock>=0.7.0",
         "grpcio>=1.80.0",
         "protobuf>=6.33.6",
+        "simple-websocket>=1.0.0",
     ])
-    exe.add_python_resources(pypi_pkgs)
+    exe.add_python_resources(all_wheels)
 
     return exe
 

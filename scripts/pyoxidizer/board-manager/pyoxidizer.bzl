@@ -43,8 +43,8 @@ def make_exe():
     )
 
     all_wheels = exe.pip_install([
-        "/home/weerdmonk/Projects/medminder/grpc_client/python/arduino_grpc/dist/arduino-grpc/arduino_grpc-0.1.0-py3-none-any.whl",
-        "/home/weerdmonk/Projects/medminder/board_manager/python/board_manager/dist/board-manager/board_manager-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/grpc_client/python/arduino_grpc/dist/arduino-grpc/arduino_grpc-0.1.0-py3-none-any.whl",
+        "@REPO_ROOT@/board_manager/python/board_manager/dist/board-manager/board_manager-0.1.0-py3-none-any.whl",
         "grpcio>=1.80.0",
         "protobuf>=6.33.6",
     ])

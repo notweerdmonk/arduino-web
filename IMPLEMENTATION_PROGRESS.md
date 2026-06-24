@@ -1,33 +1,25 @@
 ---
 ---
 {% raw %}
-# Implementation Progress — Phase 100c: Fix Console Errors
+# Implementation Progress — Phase 101 (cont.): Standalone Build Portability Fix
 
-**Date**: 2026-06-24 17:57
-
-## Phase 100c — ✅ COMPLETED
+**Date**: 2026-06-24 21:00
 
 ## Milestones
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| Q1 | Fix idiomorph CDN in arduino_dash base.html | ✅ | `idiomorph/dist/idiomorph-ext.js` |
-| Q2 | Fix idiomorph CDN in medminder_dash base.html | ✅ | Same URL change |
-| Q3 | Add simple-websocket to arduino_dash pyproject.toml | ✅ | Line 14 |
-| Q4 | Add simple-websocket to medminder_dash pyproject.toml | ✅ | Line 15 |
-| T1 | Verify idiomorph CDN resolves (HTTP 200) | ✅ | `curl -sIL` → HTTP 200 |
-| T2 | Verify old CDN returns 404 | ✅ | `curl -sIL` → HTTP 404 |
-| T3 | Verify pyproject.toml deps | ✅ | Both files have dep |
-| T4 | Run nox tests for regressions | ✅ | Same pre-existing failures (no regressions) |
-| D1 | IMPLEMENTATION_JOURNAL.md update | ✅ | Detailed entry |
-| D2 | JOURNAL.md update | ✅ | Brief entry |
-| D3 | CODEBASE_REFERENCE.md update | ✅ | Phase 100c section |
-| D4 | TESTING docs update | ✅ | All 4 docs updated |
-| D5 | Documentation skill | ⬜ | |
+| Q1 | Fix & commit pyoxidizer.bzl (3 files) | ✅ | @REPO_ROOT@ + pip_install + simple-websocket — committed as e98b878 |
+| Q2 | Build wheels + standalone | ✅ | nox -s all_builds → build_standalone.sh; all 3 binaries 51MB each |
+| Q3 | Verification | ✅ | Smoke test + module/template/dep audit + bundle integrity |
+| D1 | IMPLEMENTATION_JOURNAL.md | ✅ | Appended Q2+Q3 continuation entry |
+| D2 | JOURNAL.md | ✅ | Appended Phase 101 continuation entry |
+| D3 | CODEBASE_REFERENCE.md | ✅ | Added continuation note with commit `e98b878` ref |
+| D4 | IMPLEMENTATION_PLAN / TASK / PROGRESS | ✅ | All Q2-Q4/D1-D6 marked complete |
+| D5 | TESTING_* docs | ✅ | Already complete |
+| D6 | REVIEW_* docs | ✅ | Already complete |
 
-## Key Decisions
+## Key Context
 
-1. **idiomorph CDN path**: Use `idiomorph/dist/idiomorph-ext.js` (the htmx extension file from the idiomorph package) rather than embedding the idiomorph core directly. The `-ext.js` suffix registers itself as `htmx.defineExtension("morph", ...)`, which is what the templates use via `hx-ext="morph"`.
-2. **simple-websocket over gevent-websocket**: `simple-websocket` works with sync WSGI servers (Flask dev server + gunicorn sync workers) without changing `worker_class` in gunicorn config. `gevent-websocket` would require switching to `gevent` workers.
-3. **Minimal version pin**: `>=1.0.0` is sufficient — flask-sock 0.7.x requires simple-websocket 1.0+.
+Phase 101's changes were never committed — `git checkout` in build script restored hardcoded paths. Need to commit `.bzl` files with `@REPO_ROOT@` + `pip_install()` + `simple-websocket` so the git-checkout restore works correctly.
 {% endraw %}

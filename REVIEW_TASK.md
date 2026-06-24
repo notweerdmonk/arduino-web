@@ -33,6 +33,27 @@
 | 4 | medminder_dash survival, --stop, --logfile | ✅ |
 | 5 | Stale pidfile + ProcessLookupError handling | ✅ |
 | 6 | No shell hacks used | ✅ |
+
+## Phase 101 — Redesign & Rebuild Standalone Distributions
+
+**Date**: 2026-06-24 18:54
+
+**Status**: ✅ REVIEWED AND APPROVED
+
+## Review Items — All Passed
+
+| # | Item | Result |
+|---|------|--------|
+| 1 | pyoxidizer.bzl — @REPO_ROOT@ placeholder + simple-websocket + pip_install | ✅ |
+| 2 | build_standalone.sh — sed substitution + git checkout cleanup | ✅ |
+| 3 | nox -s all_builds — all wheels built | ✅ |
+| 4 | ./scripts/build_standalone.sh — all 3 binaries built | ✅ |
+| 5 | Smoke test: all 3 binaries `--help` | ✅ |
+| 6 | Modules present in both dashboard bundles | ✅ |
+| 7 | Templates + partials present | ✅ |
+| 8 | Static files present | ✅ |
+| 9 | simple-websocket dep present | ✅ |
+| 10 | All project & workflow docs updated | ✅ |
 {% endraw %}
 
 ## Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)

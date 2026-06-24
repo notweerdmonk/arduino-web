@@ -3662,4 +3662,60 @@ pipenv run python e2e/servers/medminder_dash_server.py --mock --port 8766 --prod
 | `e2e/servers/medminder_dash_server.py:296` | — | Same pattern |
 | `Pipfile` | 6-34 | Local index sources for all 6 packages |
 
-```{% endraw %}
+```
+## Phase 101 — Redesign & Rebuild Standalone Distributions ✅ COMPLETED (2026-06-24)
+
+**Continuation (2026-06-25)** — `.bzl` changes committed as `e98b878`, binaries rebuilt and reverified. All 3 binaries pass smoke test + bundle integrity audit. See commit `e98b878`.
+
+**Goal**: Rebuild `dist-standalone/` PyOxidizer bundles from current source code, fix hardcoded absolute paths, add `simple-websocket` dependency to dashboard builds.
+
+### Key Finding — `__file__` Not Available in Starlark
+
+PyOxidizer's Starlark dialect does NOT provide the `__file__` variable. The initial approach (derive `REPO_ROOT` via `rsplit("/", N)` from config file location) is impossible. `load()` from another `.bzl` file also fails (CP04 error — `load()` only imports rules, not data).
+
+### Solution — `@REPO_ROOT@` Placeholder + `sed` Substitution
+
+Each `pyoxidizer.bzl` file uses `@REPO_ROOT@` as a placeholder string. The `build_standalone.sh` script runs `sed -i` on the `.bzl` files before each build, substituting the actual project root path. After the build, a `RETURN` trap runs `git checkout` on the `.bzl` files to restore the placeholders.
+
+### `pip_download` vs `pip_install`
+
+Dashboard configs used `pip_download()` for local wheel dependencies. `pip_download()` only resolves packages from PyPI — it cannot find local `.whl` files. Switched all local wheel references to `pip_install()` which accepts file paths.
+
+| Old | New | Reason |
+|-----|-----|--------|
+| `pip_download("arduino-dash", ...)` | `pip_install(".../arduino_dash-*.whl")` | `pip_download` needs PyPI; `pip_install` accepts local paths |
+
+### Build Script — Cleanup/Restore Pattern
+
+**File**: `scripts/build_standalone.sh`
+
+```bash
+# RETURN trap restores tracked .bzl files
+cleanup() {
+    git checkout -- scripts/pyoxidizer/*/pyoxidizer.bzl
+}
+trap cleanup RETURN
+
+# Substitute placeholder with real path
+sed -i "s|@REPO_ROOT@|$PROJECT_ROOT|g" scripts/pyoxidizer/$APP/pyoxidizer.bzl
+```
+
+### Verification
+
+- 3 binaries built (~51 MB each), all `--help` passes ✅
+- All modules (`html_routes.py`, `api_routes.py`, `pubsub.py`, etc.) present in both dashboard bundles ✅
+- All templates (including all partials) present ✅
+- Static files (favicon, style.css) present ✅
+- `simple-websocket` dep present ✅
+- Orphan templates (`deploy.html`, `admin_sketch_dir.html`) remain in medminder_dash bundle (expected — user confirmed) ✅
+
+### File References
+
+| File | Purpose |
+|------|---------|
+| `scripts/pyoxidizer/board-manager/pyoxidizer.bzl` | Board manager config (uses `@REPO_ROOT@`) |
+| `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl` | Arduino dash config (uses `@REPO_ROOT@`, `pip_install` for local wheels) |
+| `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl` | MedMinder dash config (uses `@REPO_ROOT@`, `pip_install` for local wheels) |
+| `scripts/build_standalone.sh` | Build script with `sed` + `RETURN` trap cleanup pattern |
+
+{% endraw %}

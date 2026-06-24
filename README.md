@@ -208,8 +208,12 @@ medminder/
 │       └── index.md                         # Wheel install validation environment
 │
 ├── dist-standalone-install/
-│   └── docs/
-│       └── index.md                         # Standalone binary distribution
+│   └── docs/                                # Standalone binary distribution (5 files)
+│       ├── index.md                         # Overview + quick start
+│       ├── architecture.md                  # PyOxidizer bundling design
+│       ├── api.md                           # CLI flags reference
+│       ├── guide.md                         # User guide + deployment
+│       └── tests.md                         # Testing methodology
 │
 ├── board_manager/python/board_manager/
 │   └── docs/                                # Per-package docs (11 modules)
@@ -290,6 +294,10 @@ medminder/
 - [e2e/docs/index.md](e2e/docs/index.md) — E2E browser testing
 - [dist-test-install/docs/index.md](dist-test-install/docs/index.md) — wheel install validation
 - [dist-standalone-install/docs/index.md](dist-standalone-install/docs/index.md) — standalone binary distribution
+- [dist-standalone-install/docs/architecture.md](dist-standalone-install/docs/architecture.md) — PyOxidizer bundling design
+- [dist-standalone-install/docs/api.md](dist-standalone-install/docs/api.md) — CLI flags reference
+- [dist-standalone-install/docs/guide.md](dist-standalone-install/docs/guide.md) — user guide + deployment
+- [dist-standalone-install/docs/tests.md](dist-standalone-install/docs/tests.md) — testing methodology
 
 ## Acknowledgements
 

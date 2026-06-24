@@ -57,4 +57,25 @@
 | 6 | idiomorph URL fixed in medminder_dash base.html | ✅ | `idiomorph/dist/idiomorph-ext.js` |
 | 7 | No regressions — arduino_dash tests | ✅ | Same 111 pre-existing errors (no new failures) |
 | 8 | No regressions — medminder_dash tests | ✅ | Same 1 pre-existing failure (no new failures) |
+## Phase 101 — Redesign & Rebuild Standalone Distributions
+
+**Date**: 2026-06-24 18:54
+
+**Status**: ✅ COMPLETED
+
+## Testing Tasks — All Passed
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | arduino-dash smoke (`--help`) | ✅ | Exit 0, usage output shown |
+| 2 | medminder-dash smoke (`--help`) | ✅ | Exit 0, usage output shown |
+| 3 | board-manager smoke (`--help`) | ✅ | Exit 0, usage output shown |
+| 4 | arduino-dash modules | ✅ | All 7 modules present |
+| 5 | medminder-dash modules | ✅ | All 7 modules present |
+| 6 | arduino-dash templates | ✅ | All templates + partials present |
+| 7 | medminder-dash templates | ✅ | All templates + partials present |
+| 8 | simple-websocket in arduino-dash | ✅ | Present in dist |
+| 9 | simple-websocket in medminder-dash | ✅ | Present in dist |
+| 10 | Static files (style.css + favicons) | ✅ | Present in both dashboards |
+| 11 | All 3 binaries built | ✅ | 51MB each, `.tar.gz` archives created |
 {% endraw %}

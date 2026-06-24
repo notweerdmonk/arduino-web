@@ -542,3 +542,9 @@ input[type="checkbox"] { accent-color: var(--checkbox-accent); }
 
 /* Margin top 0.75rem */
 .mt-075 { margin-top: 0.75rem; }
+
+/* Hidden state for modal backdrop (shown via JS by removing this class) */
+.modal-backdrop.modal-hidden { display: none; }
+
+/* Word break utility (replaces inline style="word-break:...") */
+.word-break-all { word-break: break-all; }

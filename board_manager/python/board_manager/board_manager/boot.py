@@ -37,6 +37,7 @@ class BmsEnv(str, Enum):
 @dataclass(frozen=True)
 class BmsDefaults:
     """Default configuration values for Board Manager Service."""
+
     UDS_PATH: str = "/tmp/board_mgr.sock"
     TCP_HOST: str = "127.0.0.1"
     TCP_PORT: int = 9090
@@ -55,15 +56,19 @@ def _get_bms_env_config() -> dict:
         "tcp_host": os.environ.get(BmsEnv.TCP_HOST, BmsDefaults.TCP_HOST),
         "tcp_port": int(os.environ.get(BmsEnv.TCP_PORT, str(BmsDefaults.TCP_PORT))),
         "uds_path": os.environ.get(BmsEnv.UDS_PATH, BmsDefaults.UDS_PATH),
-        "arduino_daemon": os.environ.get(BmsEnv.ARDUINO_DAEMON, BmsDefaults.ARDUINO_DAEMON),
-        "daemon_binary": os.environ.get(BmsEnv.DAEMON_BINARY, BmsDefaults.DAEMON_BINARY),
+        "arduino_daemon": os.environ.get(
+            BmsEnv.ARDUINO_DAEMON, BmsDefaults.ARDUINO_DAEMON
+        ),
+        "daemon_binary": os.environ.get(
+            BmsEnv.DAEMON_BINARY, BmsDefaults.DAEMON_BINARY
+        ),
         "log_level": os.environ.get(BmsEnv.LOG_LEVEL, BmsDefaults.LOG_LEVEL),
     }
 
 
 def _free_bms_resources(tcp_host: str, tcp_port: int, uds_path: str) -> None:
     """Kill any stale BMS process holding the target TCP port.
-    
+
     This prevents OSError: [Errno 98] Address already in use when a previous
     BMS instance (from an unclean shutdown) is still running. Also cleans up
     stale UDS socket files.
@@ -71,11 +76,15 @@ def _free_bms_resources(tcp_host: str, tcp_port: int, uds_path: str) -> None:
     try:
         result = subprocess.run(
             ["lsof", "-ti", f"tcp:{tcp_port}"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0 and result.stdout.strip():
             for pid in result.stdout.strip().splitlines():
-                logger.warning("Killing stale BMS (PID %s) on %s:%s", pid, tcp_host, tcp_port)
+                logger.warning(
+                    "Killing stale BMS (PID %s) on %s:%s", pid, tcp_host, tcp_port
+                )
                 try:
                     os.kill(int(pid), 15)
                 except (OSError, ValueError) as e:
@@ -108,13 +117,21 @@ def start_bms() -> subprocess.Popen:
     cfg = _get_bms_env_config()
     _free_bms_resources(cfg["tcp_host"], cfg["tcp_port"], cfg["uds_path"])
     args = [
-        sys.executable, "-m", "board_manager",
-        "--tcp-host", cfg["tcp_host"],
-        "--tcp-port", str(cfg["tcp_port"]),
-        "--uds-path", cfg["uds_path"],
-        "--arduino-daemon", cfg["arduino_daemon"],
-        "--daemon-binary", cfg["daemon_binary"],
-        "--log-level", cfg["log_level"],
+        sys.executable,
+        "-m",
+        "board_manager",
+        "--tcp-host",
+        cfg["tcp_host"],
+        "--tcp-port",
+        str(cfg["tcp_port"]),
+        "--uds-path",
+        cfg["uds_path"],
+        "--arduino-daemon",
+        cfg["arduino_daemon"],
+        "--daemon-binary",
+        cfg["daemon_binary"],
+        "--log-level",
+        cfg["log_level"],
     ]
     logger.info("Starting BMS: %s", " ".join(str(a) for a in args))
     proc = subprocess.Popen(args)
@@ -135,7 +152,9 @@ def stop_bms(proc: subprocess.Popen | None, timeout: float = 5.0) -> None:
         proc.wait(timeout=timeout)
         logger.info("BMS (PID %d) stopped gracefully", proc.pid)
     except subprocess.TimeoutExpired:
-        logger.warning("BMS (PID %d) did not exit in %.1fs, sending SIGKILL", proc.pid, timeout)
+        logger.warning(
+            "BMS (PID %d) did not exit in %.1fs, sending SIGKILL", proc.pid, timeout
+        )
         proc.kill()
         proc.wait()
 
@@ -179,5 +198,11 @@ def wait_for_bms(
         except (OSError, ConnectionRefusedError):
             pass
         time.sleep(0.2)
-    logger.warning("BMS not ready within %.1fs (UDS=%s TCP=%s:%s)", timeout, uds_path, tcp_host, tcp_port)
+    logger.warning(
+        "BMS not ready within %.1fs (UDS=%s TCP=%s:%s)",
+        timeout,
+        uds_path,
+        tcp_host,
+        tcp_port,
+    )
     return False

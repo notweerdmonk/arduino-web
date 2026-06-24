@@ -1,16 +1,12 @@
 """Tests for subprocess pool"""
 
-import os
-import signal
 import socket
 import subprocess
-import sys
-import time
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from board_manager.pool import BoardPool, BoardProc, PoolLimits
+from board_manager.pool import BoardPool, PoolLimits
 from board_manager.protocol import encode_and_frame
 
 
@@ -256,7 +252,12 @@ class TestBoardPoolStatus:
             mock_sp.return_value = (parent, child)
             pool.spawn("/dev/ttyACM0")
 
-            mock_sp2 = MagicMock(return_value=(MagicMock(spec=socket.socket), MagicMock(spec=socket.socket)))
+            mock_sp2 = MagicMock(
+                return_value=(
+                    MagicMock(spec=socket.socket),
+                    MagicMock(spec=socket.socket),
+                )
+            )
             mock_sp2.return_value[1].fileno.return_value = 6
 
         with patch("board_manager.pool.socket.socketpair") as mock_sp2:

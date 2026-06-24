@@ -3,9 +3,8 @@
 import os
 import tempfile
 
-import pytest
 
-from board_manager.config import load_config, Config
+from board_manager.config import load_config
 
 
 class TestConfigDefaults:
@@ -18,11 +17,13 @@ class TestConfigDefaults:
         assert cfg.log_level == "INFO"
 
     def test_cli_args_override(self):
-        cfg = load_config({
-            "tcp_host": "0.0.0.0",
-            "tcp_port": 8080,
-            "log_level": "DEBUG",
-        })
+        cfg = load_config(
+            {
+                "tcp_host": "0.0.0.0",
+                "tcp_port": 8080,
+                "log_level": "DEBUG",
+            }
+        )
         assert cfg.tcp_host == "0.0.0.0"
         assert cfg.tcp_port == 8080
         assert cfg.log_level == "DEBUG"

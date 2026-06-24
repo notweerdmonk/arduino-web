@@ -4,7 +4,6 @@ import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from board_manager.boot import (
     _get_bms_env_config,
@@ -140,5 +139,3 @@ class TestWaitForBms:
         result = wait_for_bms(timeout=0.5)
 
         assert result is False
-
-

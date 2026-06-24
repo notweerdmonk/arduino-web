@@ -1,14 +1,10 @@
 """Tests for board worker subprocess"""
 
-import json
-import os
 import socket
-import sys
-from unittest.mock import MagicMock, patch, PropertyMock
 
 import pytest
 
-from board_manager.protocol import encode_and_frame, FrameReader
+from board_manager.protocol import FrameReader
 
 
 @pytest.fixture
@@ -65,6 +61,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             import board_manager.board_worker as bw
+
             client = FakeClient()
             msg = {"id": "r1", "body": {"method": "ping"}, "reply_to": "resp:r1"}
             bw._handle_message(msg, client, child)
@@ -84,6 +81,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             import board_manager.board_worker as bw
+
             client = FakeClient()
             msg = {"id": "r1", "body": {"method": "nonexistent"}, "reply_to": "resp:r1"}
             bw._handle_message(msg, client, child)
@@ -103,6 +101,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             import board_manager.board_worker as bw
+
             client = FakeClient()
             msg = {"id": "r1", "body": {"method": "init"}, "reply_to": "resp:r1"}
             bw._handle_message(msg, client, child)
@@ -123,6 +122,7 @@ class TestHandleMessage:
         try:
             from unittest.mock import MagicMock
             import board_manager.board_worker as bw
+
             client = FakeClient()
 
             mock_board = MagicMock()
@@ -131,7 +131,11 @@ class TestHandleMessage:
             mock_board.name = "Arduino Uno"
             client.boards = [mock_board]
 
-            msg = {"id": "r1", "body": {"method": "list_boards", "params": {"timeout": 3}}, "reply_to": "resp:r1"}
+            msg = {
+                "id": "r1",
+                "body": {"method": "list_boards", "params": {"timeout": 3}},
+                "reply_to": "resp:r1",
+            }
             bw._handle_message(msg, client, child)
 
             reader = FrameReader("newline")
@@ -151,6 +155,7 @@ class TestHandleMessage:
         try:
             from unittest.mock import MagicMock
             import board_manager.board_worker as bw
+
             client = FakeClient()
 
             mock_result = MagicMock()
@@ -160,7 +165,14 @@ class TestHandleMessage:
             mock_result.sketch_path = "/tmp/sketch"
             client.compile_result = mock_result
 
-            msg = {"id": "r1", "body": {"method": "compile", "params": {"sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno"}}, "reply_to": "resp:r1"}
+            msg = {
+                "id": "r1",
+                "body": {
+                    "method": "compile",
+                    "params": {"sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno"},
+                },
+                "reply_to": "resp:r1",
+            }
             bw._handle_message(msg, client, child)
 
             reader = FrameReader("newline")
@@ -180,7 +192,12 @@ class TestHandleMessage:
             assert result["data"]["success"] is True
             assert result["data"]["output"] == "Compilation successful"
             # Should also have a progress message
-            progress = [m for m in msgs if m.get("type") == "event" and m.get("topic", "").endswith("::progress")]
+            progress = [
+                m
+                for m in msgs
+                if m.get("type") == "event"
+                and m.get("topic", "").endswith("::progress")
+            ]
             assert len(progress) >= 1
         finally:
             parent.close()
@@ -191,6 +208,7 @@ class TestHandleMessage:
         try:
             from unittest.mock import MagicMock
             import board_manager.board_worker as bw
+
             client = FakeClient()
 
             mock_result = MagicMock()
@@ -199,7 +217,18 @@ class TestHandleMessage:
             mock_result.error = ""
             client.upload_result = mock_result
 
-            msg = {"id": "r1", "body": {"method": "upload", "params": {"sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno", "port": "/dev/ttyACM0"}}, "reply_to": "resp:r1"}
+            msg = {
+                "id": "r1",
+                "body": {
+                    "method": "upload",
+                    "params": {
+                        "sketch_path": "/tmp/sketch",
+                        "fqbn": "arduino:avr:uno",
+                        "port": "/dev/ttyACM0",
+                    },
+                },
+                "reply_to": "resp:r1",
+            }
             bw._handle_message(msg, client, child)
 
             reader = FrameReader("newline")
@@ -217,7 +246,12 @@ class TestHandleMessage:
             assert result["status"] == "ok"
             assert result["data"]["success"] is True
             assert result["data"]["output"] == "Upload successful"
-            progress = [m for m in msgs if m.get("type") == "event" and m.get("topic", "").endswith("::progress")]
+            progress = [
+                m
+                for m in msgs
+                if m.get("type") == "event"
+                and m.get("topic", "").endswith("::progress")
+            ]
             assert len(progress) >= 1
         finally:
             parent.close()
@@ -228,10 +262,24 @@ class TestHandleMessage:
         try:
             from arduino_grpc.exceptions import UploadError
             import board_manager.board_worker as bw
-            client = FakeClient()
-            client.upload_error = UploadError("Wrong port or board not in bootloader mode")
 
-            msg = {"id": "r1", "body": {"method": "upload", "params": {"sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno", "port": "/dev/ttyACM0"}}, "reply_to": "resp:r1"}
+            client = FakeClient()
+            client.upload_error = UploadError(
+                "Wrong port or board not in bootloader mode"
+            )
+
+            msg = {
+                "id": "r1",
+                "body": {
+                    "method": "upload",
+                    "params": {
+                        "sketch_path": "/tmp/sketch",
+                        "fqbn": "arduino:avr:uno",
+                        "port": "/dev/ttyACM0",
+                    },
+                },
+                "reply_to": "resp:r1",
+            }
             bw._handle_message(msg, client, child)
 
             reader = FrameReader("newline")
@@ -245,10 +293,20 @@ class TestHandleMessage:
                 msgs.append(m)
 
             # First messages are progress (starting upload...), then the error
-            progress = [m for m in msgs if m.get("type") == "event" and m.get("topic", "").endswith("::progress")]
+            progress = [
+                m
+                for m in msgs
+                if m.get("type") == "event"
+                and m.get("topic", "").endswith("::progress")
+            ]
             assert len(progress) >= 3
-            assert any("Starting upload to" in m.get("data", {}).get("output", "") for m in progress)
-            assert any("Upload failed" in m.get("data", {}).get("error", "") for m in progress)
+            assert any(
+                "Starting upload to" in m.get("data", {}).get("output", "")
+                for m in progress
+            )
+            assert any(
+                "Upload failed" in m.get("data", {}).get("error", "") for m in progress
+            )
 
             error = [m for m in msgs if m.get("type") == "error"][-1]
             assert error["status"] == "error"
@@ -265,6 +323,7 @@ class TestHandleMessage:
         try:
             from unittest.mock import MagicMock
             import board_manager.board_worker as bw
+
             client = FakeClient()
 
             mock_c = MagicMock()
@@ -281,7 +340,18 @@ class TestHandleMessage:
             client.compile_result = mock_c
             client.upload_result = mock_u
 
-            msg = {"id": "r1", "body": {"method": "compile_and_upload", "params": {"sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno", "port": "/dev/ttyACM0"}}, "reply_to": "resp:r1"}
+            msg = {
+                "id": "r1",
+                "body": {
+                    "method": "compile_and_upload",
+                    "params": {
+                        "sketch_path": "/tmp/sketch",
+                        "fqbn": "arduino:avr:uno",
+                        "port": "/dev/ttyACM0",
+                    },
+                },
+                "reply_to": "resp:r1",
+            }
             bw._handle_message(msg, client, child)
 
             reader = FrameReader("newline")

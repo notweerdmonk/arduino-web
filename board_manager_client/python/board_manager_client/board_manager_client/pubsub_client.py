@@ -1,30 +1,30 @@
 """Persistent PubSub client for BoardManagerService with auto-reconnect"""
 
-import json
 import logging
 import os
 import select
 import socket
 import threading
 import time
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 
 OnReconnect = Callable[[], None]
 
-from board_manager.protocol import (
+logger = logging.getLogger("board_manager_client")
+
+from board_manager.protocol import (  # noqa: E402
     FrameReader,
     Handshake,
     encode_and_frame,
 )
-from board_manager.router import _match
-
-logger = logging.getLogger("board_manager_client")
+from board_manager.router import _match  # noqa: E402
 
 EventHandler = Callable[[dict], None]
 
 
 class ReconnectConfig:
     """Reconnection timing configuration."""
+
     RECONNECT_DELAY: float = 2.0
     CONNECT_RETRY_DELAYS: list[float] = [0.5, 1.0, 2.0]
 
@@ -84,16 +84,34 @@ class PubSubClient:
             for attempt, delay in enumerate(ReconnectConfig.CONNECT_RETRY_DELAYS):
                 try:
                     self._connect_once()
-                    logger.info("Connected to BoardManagerService (mode: %s)", "UDS" if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX else "TCP")
+                    logger.info(
+                        "Connected to BoardManagerService (mode: %s)",
+                        "UDS"
+                        if self.use_uds
+                        and self._sock
+                        and self._sock.family == socket.AF_UNIX
+                        else "TCP",
+                    )
                     return
                 except (ConnectionError, OSError) as e:
                     last_error = e
-                    logger.warning("Connect attempt %d/%d failed: %s, retrying in %.1fs...", attempt + 1, len(ReconnectConfig.CONNECT_RETRY_DELAYS), e, delay)
+                    logger.warning(
+                        "Connect attempt %d/%d failed: %s, retrying in %.1fs...",
+                        attempt + 1,
+                        len(ReconnectConfig.CONNECT_RETRY_DELAYS),
+                        e,
+                        delay,
+                    )
                     time.sleep(delay)
             logger.error("All connect attempts failed: %s", last_error)
             raise last_error  # type: ignore[misc]
         self._connect_once()
-        logger.info("Connected to BoardManagerService (mode: %s)", "UDS" if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX else "TCP")
+        logger.info(
+            "Connected to BoardManagerService (mode: %s)",
+            "UDS"
+            if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX
+            else "TCP",
+        )
 
     def _connect_once(self) -> None:
         """Perform a single connection attempt, including handshake and resubscribe."""
@@ -235,12 +253,14 @@ class PubSubClient:
             message: Message payload dict.
             reply_to: Optional response topic for subscribers.
         """
-        self._send({
-            "type": "publish",
-            "topic": topic,
-            "body": message,
-            "reply_to": reply_to,
-        })
+        self._send(
+            {
+                "type": "publish",
+                "topic": topic,
+                "body": message,
+                "reply_to": reply_to,
+            }
+        )
 
     def _send(self, msg: dict) -> None:
         """Send a framed message over the socket.
@@ -288,7 +308,13 @@ class PubSubClient:
                 if not ready:
                     continue
                 data = sock.recv(65536)
-            except (OSError, ConnectionError, ValueError, TypeError, AttributeError) as e:
+            except (
+                OSError,
+                ConnectionError,
+                ValueError,
+                TypeError,
+                AttributeError,
+            ) as e:
                 if self._running:
                     logger.warning("Connection lost (%s), reconnecting...", e)
                     self._reconnect()
@@ -307,7 +333,10 @@ class PubSubClient:
                     msg = self._reader.read_one()
                     if msg is None:
                         break
-                    logger.debug("_read_loop: dispatching msg with topic='%s'", msg.get("topic", ""))
+                    logger.debug(
+                        "_read_loop: dispatching msg with topic='%s'",
+                        msg.get("topic", ""),
+                    )
                     self._dispatch(msg)
             except Exception as e:
                 logger.error("_read_loop: error processing message (%s), skipping", e)
@@ -323,10 +352,19 @@ class PubSubClient:
             matched: list[EventHandler] = []
             for pattern, hlist in self._handlers.items():
                 if pattern == "*" or _match(topic, pattern):
-                    logger.debug("_dispatch: topic '%s' matched pattern '%s' (%d handlers)", topic, pattern, len(hlist))
+                    logger.debug(
+                        "_dispatch: topic '%s' matched pattern '%s' (%d handlers)",
+                        topic,
+                        pattern,
+                        len(hlist),
+                    )
                     matched.extend(hlist)
         if not matched:
-            logger.debug("_dispatch: topic '%s' matched NO patterns (known patterns: %s)", topic, list(self._handlers.keys()))
+            logger.debug(
+                "_dispatch: topic '%s' matched NO patterns (known patterns: %s)",
+                topic,
+                list(self._handlers.keys()),
+            )
         for h in matched:
             try:
                 h(msg)
@@ -346,4 +384,8 @@ class PubSubClient:
         try:
             self.connect()
         except (ConnectionError, OSError) as e:
-            logger.warning("Reconnect failed (%s), retrying in %.1fs...", e, ReconnectConfig.RECONNECT_DELAY)
+            logger.warning(
+                "Reconnect failed (%s), retrying in %.1fs...",
+                e,
+                ReconnectConfig.RECONNECT_DELAY,
+            )

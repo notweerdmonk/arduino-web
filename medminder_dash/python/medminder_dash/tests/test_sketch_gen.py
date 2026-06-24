@@ -1,6 +1,12 @@
 from pathlib import Path
 
-from medminder_dash.sketch_gen import generate_alarm_hpp, minute_to_decade, parse_alarm_hpp, unesc_text, validate_hour
+from medminder_dash.sketch_gen import (
+    generate_alarm_hpp,
+    minute_to_decade,
+    parse_alarm_hpp,
+    unesc_text,
+    validate_hour,
+)
 from medminder_dash.medicines_state import Medicine
 import pytest
 
@@ -48,7 +54,7 @@ class TestGenerateAlarmHpp:
     def test_single_medicine(self):
         meds = [Medicine(name="Ibup", hour=8, minute=30, day_of_week=1)]
         result = generate_alarm_hpp(meds)
-        assert "{0, 1, 8, 3, \"Ibup\"}" in result
+        assert '{0, 1, 8, 3, "Ibup"}' in result
         assert "const Medicine medicines[] = {" in result
 
     def test_multiple_medicines(self):
@@ -57,8 +63,8 @@ class TestGenerateAlarmHpp:
             Medicine(name="PaRa", hour=8, minute=0, day_of_week=0),
         ]
         result = generate_alarm_hpp(meds)
-        assert "{0, 1, 8, 3, \"Ibup\"}" in result
-        assert "{0, 0, 8, 0, \"PaRa\"}" in result
+        assert '{0, 1, 8, 3, "Ibup"}' in result
+        assert '{0, 0, 8, 0, "PaRa"}' in result
 
     def test_disabled_medicine_skipped(self):
         meds = [
@@ -66,8 +72,8 @@ class TestGenerateAlarmHpp:
             Medicine(name="PaRa", hour=8, minute=0, day_of_week=0, enabled=False),
         ]
         result = generate_alarm_hpp(meds)
-        assert "\"Ibup\"" in result
-        assert "\"PaRa\"" not in result
+        assert '"Ibup"' in result
+        assert '"PaRa"' not in result
 
     def test_struct_definition_present(self):
         result = generate_alarm_hpp([])
@@ -81,13 +87,13 @@ class TestGenerateAlarmHpp:
     def test_hour_24_midnight(self):
         meds = [Medicine(name="Midn", hour=24, minute=0)]
         result = generate_alarm_hpp(meds)
-        assert ", 24, 0, \"" in result
-        assert "\"Midn\"" in result
+        assert ', 24, 0, "' in result
+        assert '"Midn"' in result
 
     def test_day_of_month(self):
         meds = [Medicine(name="Bill", hour=9, minute=0, day_of_month=15)]
         result = generate_alarm_hpp(meds)
-        assert "{15, 0, 9, 0, \"Bill\"}" in result
+        assert '{15, 0, 9, 0, "Bill"}' in result
 
     def test_text_with_quotes_and_backslashes(self):
         meds = [Medicine(name='Te"st', hour=8, minute=0)]
@@ -113,8 +119,8 @@ class TestGenerateAlarmHpp:
             "};\n"
             "\n"
             "const Medicine medicines[] = {\n"
-            "  {0, 1, 8, 3, \"Ibup\"},\n"
-            "  {0, 0, 8, 0, \"PaRa\"},\n"
+            '  {0, 1, 8, 3, "Ibup"},\n'
+            '  {0, 0, 8, 0, "PaRa"},\n'
             "};\n"
             "\n"
             "#define N_MED  (sizeof(medicines) / sizeof(medicines[0]))\n"
@@ -147,31 +153,49 @@ class TestParseAlarmHpp:
     def test_single_entry(self, tmp_path: Path):
         p = tmp_path / "alarm.hpp"
         p.write_text(
-            '#ifndef ALARM_HPP\n'
-            '#define ALARM_HPP\n'
-            'struct Medicine { ... };\n'
-            'const Medicine medicines[] = {\n'
+            "#ifndef ALARM_HPP\n"
+            "#define ALARM_HPP\n"
+            "struct Medicine { ... };\n"
+            "const Medicine medicines[] = {\n"
             '  {0, 2, 12, 3, "Test"},\n'
-            '};\n'
-            '#define N_MED ...\n'
-            '#endif\n'
+            "};\n"
+            "#define N_MED ...\n"
+            "#endif\n"
         )
         result = parse_alarm_hpp(p)
         assert len(result) == 1
-        assert result[0] == {"name": "Test", "hour": 12, "minute": 30, "day_of_week": 2, "day_of_month": 0}
+        assert result[0] == {
+            "name": "Test",
+            "hour": 12,
+            "minute": 30,
+            "day_of_week": 2,
+            "day_of_month": 0,
+        }
 
     def test_multiple_entries(self, tmp_path: Path):
         p = tmp_path / "alarm.hpp"
         p.write_text(
-            'const Medicine medicines[] = {\n'
+            "const Medicine medicines[] = {\n"
             '  {0, 1, 8, 3, "Ibup"},\n'
             '  {0, 0, 8, 0, "PaRa"},\n'
-            '};\n'
+            "};\n"
         )
         result = parse_alarm_hpp(p)
         assert len(result) == 2
-        assert result[0] == {"name": "Ibup", "hour": 8, "minute": 30, "day_of_week": 1, "day_of_month": 0}
-        assert result[1] == {"name": "PaRa", "hour": 8, "minute": 0, "day_of_week": 0, "day_of_month": 0}
+        assert result[0] == {
+            "name": "Ibup",
+            "hour": 8,
+            "minute": 30,
+            "day_of_week": 1,
+            "day_of_month": 0,
+        }
+        assert result[1] == {
+            "name": "PaRa",
+            "hour": 8,
+            "minute": 0,
+            "day_of_week": 0,
+            "day_of_month": 0,
+        }
 
     def test_file_not_found(self):
         assert parse_alarm_hpp("/nonexistent/alarm.hpp") == []
@@ -179,10 +203,10 @@ class TestParseAlarmHpp:
     def test_c_string_escapes(self, tmp_path: Path):
         p = tmp_path / "alarm.hpp"
         p.write_text(
-            'const Medicine medicines[] = {\n'
+            "const Medicine medicines[] = {\n"
             '  {0, 0, 8, 0, "Te\\"st"},\n'
             '  {0, 0, 9, 0, "foo\\\\bar"},\n'
-            '};\n'
+            "};\n"
         )
         result = parse_alarm_hpp(p)
         assert result[0]["name"] == 'Te"st'
@@ -190,11 +214,7 @@ class TestParseAlarmHpp:
 
     def test_decade_conversion(self, tmp_path: Path):
         p = tmp_path / "alarm.hpp"
-        p.write_text(
-            'const Medicine medicines[] = {\n'
-            '  {0, 0, 10, 5, "Last"},\n'
-            '};\n'
-        )
+        p.write_text('const Medicine medicines[] = {\n  {0, 0, 10, 5, "Last"},\n};\n')
         result = parse_alarm_hpp(p)
         assert result[0]["minute"] == 50
 

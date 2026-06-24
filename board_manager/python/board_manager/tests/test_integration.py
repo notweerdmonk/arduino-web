@@ -1,12 +1,10 @@
 """Integration tests for BoardManagerService with live daemon"""
 
-import json
 import os
 import socket
 import subprocess
 import sys
 import time
-import threading
 
 import pytest
 
@@ -21,12 +19,20 @@ def board_manager_service():
     """Start BoardManagerService in a subprocess"""
     proc = subprocess.Popen(
         [
-            sys.executable, "-m", "board_manager",
-            "--tcp-port", str(TCP_PORT),
-            "--uds-path", UDS_PATH,
-            "--log-level", "DEBUG",
+            sys.executable,
+            "-m",
+            "board_manager",
+            "--tcp-port",
+            str(TCP_PORT),
+            "--uds-path",
+            UDS_PATH,
+            "--log-level",
+            "DEBUG",
         ],
-        env={**os.environ, "PYTHONPATH": "/home/weerdmonk/Projects/medminder/board_manager/python"},
+        env={
+            **os.environ,
+            "PYTHONPATH": "/home/weerdmonk/Projects/medminder/board_manager/python",
+        },
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
@@ -78,7 +84,11 @@ class TestBoardManagerIntegration:
         sock.sendall(Handshake.NEWLINE.value)
 
         reader = FrameReader("newline")
-        sock.sendall(encode_and_frame({"type": "subscribe", "topic": "board::+::event"}, "newline"))
+        sock.sendall(
+            encode_and_frame(
+                {"type": "subscribe", "topic": "board::+::event"}, "newline"
+            )
+        )
 
         data = sock.recv(4096)
         reader.feed(data)
@@ -110,13 +120,18 @@ class TestBoardManagerIntegration:
         finally:
             sock.setblocking(True)
 
-        sock.sendall(encode_and_frame({
-            "type": "publish",
-            "topic": "sys::health",
-            "id": "h1",
-            "reply_to": "resp::h1",
-            "body": {"method": "health", "params": {}},
-        }, "newline"))
+        sock.sendall(
+            encode_and_frame(
+                {
+                    "type": "publish",
+                    "topic": "sys::health",
+                    "id": "h1",
+                    "reply_to": "resp::h1",
+                    "body": {"method": "health", "params": {}},
+                },
+                "newline",
+            )
+        )
 
         time.sleep(0.2)
         try:
@@ -152,13 +167,18 @@ class TestBoardManagerIntegration:
         finally:
             sock.setblocking(True)
 
-        sock.sendall(encode_and_frame({
-            "type": "publish",
-            "topic": "unknown::topic",
-            "id": "r1",
-            "reply_to": "resp::r1",
-            "body": {"method": "list_all_boards", "params": {}},
-        }, "newline"))
+        sock.sendall(
+            encode_and_frame(
+                {
+                    "type": "publish",
+                    "topic": "unknown::topic",
+                    "id": "r1",
+                    "reply_to": "resp::r1",
+                    "body": {"method": "list_all_boards", "params": {}},
+                },
+                "newline",
+            )
+        )
 
         time.sleep(0.3)
         try:
@@ -195,13 +215,17 @@ class TestBoardManagerIntegration:
         finally:
             sock.setblocking(True)
 
-        sock.sendall(encode_and_frame({"type": "subscribe", "topic": "test::unsub"}, "newline"))
+        sock.sendall(
+            encode_and_frame({"type": "subscribe", "topic": "test::unsub"}, "newline")
+        )
         time.sleep(0.1)
         data = sock.recv(4096)
         reader.feed(data)
         assert reader.read_one() is not None
 
-        sock.sendall(encode_and_frame({"type": "unsubscribe", "topic": "test::unsub"}, "newline"))
+        sock.sendall(
+            encode_and_frame({"type": "unsubscribe", "topic": "test::unsub"}, "newline")
+        )
         time.sleep(0.1)
         data = sock.recv(4096)
         reader = FrameReader("newline")
@@ -222,7 +246,11 @@ class TestBoardManagerIntegration:
             socks.append(sock)
 
         for sock in socks:
-            sock.sendall(encode_and_frame({"type": "subscribe", "topic": "board::+::event"}, "newline"))
+            sock.sendall(
+                encode_and_frame(
+                    {"type": "subscribe", "topic": "board::+::event"}, "newline"
+                )
+            )
 
         time.sleep(0.2)
         for sock in socks:
@@ -243,13 +271,18 @@ class TestBoardManagerIntegration:
 
         self._drain(sock)
 
-        sock.sendall(encode_and_frame({
-            "type": "publish",
-            "topic": "board::/dev/ttyINT1::cmd",
-            "id": "r2",
-            "reply_to": "resp::r2",
-            "body": {"method": "status", "params": {}},
-        }, "newline"))
+        sock.sendall(
+            encode_and_frame(
+                {
+                    "type": "publish",
+                    "topic": "board::/dev/ttyINT1::cmd",
+                    "id": "r2",
+                    "reply_to": "resp::r2",
+                    "body": {"method": "status", "params": {}},
+                },
+                "newline",
+            )
+        )
 
         time.sleep(1)
         data = self._recv_all(sock)

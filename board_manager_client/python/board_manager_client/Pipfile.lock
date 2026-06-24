@@ -28,16 +28,16 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:8413f8324894a93cd33a2029edaeb65f5b4ef556eca65a60b238abea9f0d7b6a",
-                "sha256:c2000abc26b71258fad1573a7b497a8ccff0621374143afcdf58d798d5673203"
+                "sha256:29a1c0d00ba51226304ed15218029a8e7cb8cc4dbc996c1f49f9784ca2004b82",
+                "sha256:b61f0442bf1bc7f88f22ec3156208c2d6d3e99577c2e5de51658fadd3202e808"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"
         },
         "board-manager": {
             "hashes": [
-                "sha256:0bd578d54fb9d921b8b77ce68cae280520f65ac7851945b15e836d4c5e9d55f1",
-                "sha256:8f00a319dea32fd614bcc27d8edf88a80cbbbbd797f7d1bbf53813a98c0221fd"
+                "sha256:4081a179150410e67c8160f7addfa2e3f71aefdcfb7de72df7baf74ccb988d82",
+                "sha256:c42c91be0fb77a898d0687fb2306d542356ad56a09c87a2cbca2a99054d14d97"
             ],
             "index": "board-manager-local",
             "version": "==0.1.0"

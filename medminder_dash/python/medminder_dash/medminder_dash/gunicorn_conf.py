@@ -31,7 +31,7 @@ def _get_bms_config():
         "uds_path": os.environ.get("BOARD_MGR_UDS_PATH", "/tmp/board_mgr.sock"),
         "tcp_host": os.environ.get("BOARD_MGR_TCP_HOST", "127.0.0.1"),
         "tcp_port": int(os.environ.get("BOARD_MGR_TCP_PORT", "9090")),
-        "use_uds": not (os.environ.get("BMS_NO_UDS", "").lower() in ("1", "true")),
+        "use_uds": os.environ.get("BMS_NO_UDS", "").lower() not in ("1", "true"),
     }
 
 

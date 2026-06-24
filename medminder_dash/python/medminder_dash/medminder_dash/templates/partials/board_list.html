@@ -1,11 +1,9 @@
 {% if ports %}
     {% for port in ports %}
-    <option value="{{ port.port if port is mapping else port }}">
-        {{ port.port if port is mapping else port }}
-        {% if port is mapping and port.board %}
-            - {{ port.board }}
-        {% endif %}
-    </option>
+        <option value="{{ port.port if port is mapping else port }}">
+            {{ port.port if port is mapping else port }}
+            {% if port is mapping and port.board %}- {{ port.board }}{% endif %}
+        </option>
     {% endfor %}
 {% else %}
     <option value="">No boards connected</option>

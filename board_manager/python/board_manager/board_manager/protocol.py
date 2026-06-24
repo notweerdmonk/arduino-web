@@ -3,7 +3,7 @@
 import json
 import struct
 from enum import Enum, IntEnum
-from typing import Any, Optional
+from typing import Optional
 
 
 class Handshake(Enum):
@@ -21,6 +21,7 @@ class Framing(IntEnum):
 
 class FramingMode(str, Enum):
     """Supported framing modes for the protocol."""
+
     NEWLINE = "newline"
     LENGTH = "length"
 
@@ -89,11 +90,11 @@ class FrameReader:
         """Read one length-prefixed frame from the buffer."""
         if len(self._buf) < Framing.HEADER_LENGTH:
             return None
-        length = struct.unpack("!I", self._buf[:Framing.HEADER_LENGTH])[0]
+        length = struct.unpack("!I", self._buf[: Framing.HEADER_LENGTH])[0]
         needed = Framing.HEADER_LENGTH + length
         if len(self._buf) < needed:
             return None
-        payload = bytes(self._buf[Framing.HEADER_LENGTH:needed])
+        payload = bytes(self._buf[Framing.HEADER_LENGTH : needed])
         del self._buf[:needed]
         return decode_frame(payload)
 

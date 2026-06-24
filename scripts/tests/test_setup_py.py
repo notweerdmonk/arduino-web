@@ -194,9 +194,7 @@ class TestQ9ToQ13SetupArgs:
     def test_setup_py_has_keywords(self, packages, import_name):
         d = next(d for n, d in packages if n == import_name)
         text = (d / "setup.py").read_text()
-        assert "keywords=" in text, (
-            f"{import_name}/setup.py should have keywords="
-        )
+        assert "keywords=" in text, f"{import_name}/setup.py should have keywords="
 
     @pytest.mark.parametrize("import_name", ALL_PACKAGES)
     def test_setup_py_has_install_requires(self, packages, import_name):
@@ -206,11 +204,14 @@ class TestQ9ToQ13SetupArgs:
             f"{import_name}/setup.py should have install_requires"
         )
 
-    @pytest.mark.parametrize("import_name", [
-        "board-manager",
-        "arduino-dash",
-        "medminder-dash",
-    ])
+    @pytest.mark.parametrize(
+        "import_name",
+        [
+            "board-manager",
+            "arduino-dash",
+            "medminder-dash",
+        ],
+    )
     def test_setup_py_has_entry_points(self, packages, import_name):
         d = next(d for n, d in packages if n == import_name)
         text = (d / "setup.py").read_text()
@@ -218,11 +219,14 @@ class TestQ9ToQ13SetupArgs:
             f"{import_name}/setup.py should declare entry_points"
         )
 
-    @pytest.mark.parametrize("import_name", [
-        "arduino-grpc",
-        "board-manager-client",
-        "arduino-sketch-tools",
-    ])
+    @pytest.mark.parametrize(
+        "import_name",
+        [
+            "arduino-grpc",
+            "board-manager-client",
+            "arduino-sketch-tools",
+        ],
+    )
     def test_setup_py_no_entry_points(self, packages, import_name):
         d = next(d for n, d in packages if n == import_name)
         text = (d / "setup.py").read_text()
@@ -326,11 +330,14 @@ class TestQ14Metadata:
         actual = _run_setup_py(d, "--version")
         assert actual == expected
 
-    @pytest.mark.parametrize("import_name,expected", [
-        (n, e["script"])
-        for n, e in PACKAGE_EXPECTATIONS.items()
-        if e["script"] is not None
-    ])
+    @pytest.mark.parametrize(
+        "import_name,expected",
+        [
+            (n, e["script"])
+            for n, e in PACKAGE_EXPECTATIONS.items()
+            if e["script"] is not None
+        ],
+    )
     def test_console_script_declared(self, packages, import_name, expected):
         d = next(d for n, d in packages if n == import_name)
         toml_text = (d / "pyproject.toml").read_text()
@@ -339,9 +346,11 @@ class TestQ14Metadata:
             r"\[project\.scripts\]\s*\n((?:\S+\s*=\s*\"[^\"]+\"\s*\n)+)",
             toml_text,
         )
-        assert m is not None, f"no [project.scripts] table in {import_name}/pyproject.toml"
+        assert m is not None, (
+            f"no [project.scripts] table in {import_name}/pyproject.toml"
+        )
         entries = m.group(1)
-        assert f'{expected} =' in entries, (
+        assert f"{expected} =" in entries, (
             f"{import_name}/pyproject.toml [project.scripts] missing {expected!r}; "
             f"found entries:\n{entries}"
         )
@@ -354,9 +363,10 @@ class TestQ14Metadata:
             f"a :main entry; got {target!r}"
         )
 
-    @pytest.mark.parametrize("import_name", [
-        n for n, e in PACKAGE_EXPECTATIONS.items() if e["script"] is None
-    ])
+    @pytest.mark.parametrize(
+        "import_name",
+        [n for n, e in PACKAGE_EXPECTATIONS.items() if e["script"] is None],
+    )
     def test_no_console_script(self, packages, import_name):
         d = next(d for n, d in packages if n == import_name)
         toml_text = (d / "pyproject.toml").read_text()
@@ -370,11 +380,14 @@ class TestQ14Metadata:
                 f"{import_name} should not declare [project.scripts]"
             )
 
-    @pytest.mark.parametrize("import_name,expected_globs", [
-        (n, e["package_data"])
-        for n, e in PACKAGE_EXPECTATIONS.items()
-        if e["package_data"]
-    ])
+    @pytest.mark.parametrize(
+        "import_name,expected_globs",
+        [
+            (n, e["package_data"])
+            for n, e in PACKAGE_EXPECTATIONS.items()
+            if e["package_data"]
+        ],
+    )
     def test_package_data_globs_present(self, packages, import_name, expected_globs):
         d = next(d for n, d in packages if n == import_name)
         toml_text = (d / "pyproject.toml").read_text()
@@ -393,11 +406,14 @@ class TestQ14Metadata:
                 f"found:\n{block}"
             )
 
-    @pytest.mark.parametrize("import_name,expected_globs", [
-        (n, e["package_data"])
-        for n, e in PACKAGE_EXPECTATIONS.items()
-        if e["package_data"]
-    ])
+    @pytest.mark.parametrize(
+        "import_name,expected_globs",
+        [
+            (n, e["package_data"])
+            for n, e in PACKAGE_EXPECTATIONS.items()
+            if e["package_data"]
+        ],
+    )
     def test_package_data_targets_correct_package(
         self, packages, import_name, expected_globs
     ):
@@ -421,9 +437,7 @@ class TestQ14Metadata:
             assert (d / "pyproject.toml").is_file(), (
                 f"{import_name} missing pyproject.toml"
             )
-            assert (d / "Pipfile").is_file(), (
-                f"{import_name} missing Pipfile"
-            )
+            assert (d / "Pipfile").is_file(), f"{import_name} missing Pipfile"
 
     def test_all_6_pyproject_toml_have_pep621_metadata(self, packages):
         # Every package's pyproject.toml must declare [project] with a

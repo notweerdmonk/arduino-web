@@ -17,6 +17,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 include = ["arduino_grpc*", "cc*"]
 
+[tool.ruff]
+exclude = ["cc/arduino/cli/commands/v1/"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",

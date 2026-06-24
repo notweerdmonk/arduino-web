@@ -14,37 +14,37 @@ PACKAGES = [
         "board_manager",
         "board-manager",
         ROOT / "board_manager/python/board_manager",
-        ROOT / "board_manager/python/board_manager/dist"
+        ROOT / "board_manager/python/board_manager/dist",
     ),
     (
         "board_manager_client",
         "board-manager-client",
         ROOT / "board_manager_client/python/board_manager_client",
-        ROOT / "board_manager_client/python/board_manager_client/dist"
+        ROOT / "board_manager_client/python/board_manager_client/dist",
     ),
     (
         "arduino_sketch_tools",
         "arduino-sketch-tools",
         ROOT / "arduino_sketch_tools/python/arduino_sketch_tools",
-        ROOT / "arduino_sketch_tools/python/arduino_sketch_tools/dist"
+        ROOT / "arduino_sketch_tools/python/arduino_sketch_tools/dist",
     ),
     (
         "arduino_dash",
         "arduino-dash",
         ROOT / "arduino_dash/python/arduino_dash",
-        ROOT / "arduino_dash/python/arduino_dash/dist"
+        ROOT / "arduino_dash/python/arduino_dash/dist",
     ),
     (
         "arduino_grpc",
         "arduino-grpc",
         ROOT / "grpc_client/python/arduino_grpc/",
-        ROOT / "grpc_client/python/arduino_grpc/dist"
+        ROOT / "grpc_client/python/arduino_grpc/dist",
     ),
     (
         "medminder_dash",
         "medminder-dash",
         ROOT / "medminder_dash/python/medminder_dash",
-        ROOT / "medminder_dash/python/medminder_dash/dist"
+        ROOT / "medminder_dash/python/medminder_dash/dist",
     ),
 ]
 
@@ -132,8 +132,7 @@ def test_installs(session):
         nox -s test_installs -- --skip-install
     """
     with session.chdir(ROOT):
-        session.run("bash", "scripts/test_installs.sh", *session.posargs,
-                     external=True)
+        session.run("bash", "scripts/test_installs.sh", *session.posargs, external=True)
 
 
 @nox.session
@@ -148,9 +147,13 @@ def build_standalone(session):
         nox -s build_standalone -- board-manager
     """
     with session.chdir(ROOT):
-        session.run("bash", "scripts/build_standalone.sh", *session.posargs,
-                     external=True,
-                     env={"PYOXIDIZER": "pyoxidizer"})
+        session.run(
+            "bash",
+            "scripts/build_standalone.sh",
+            *session.posargs,
+            external=True,
+            env={"PYOXIDIZER": "pyoxidizer"},
+        )
 
 
 def _write_index_html(pkg_outdir: Path, pip_name: str):
@@ -161,7 +164,11 @@ def _write_index_html(pkg_outdir: Path, pip_name: str):
         pip_name: The pip-installable package name.
     """
     dist_root = pkg_outdir.parent
-    files = sorted(f.name for f in pkg_outdir.iterdir() if f.name.endswith(".whl") or f.name.endswith(".tar.gz"))
+    files = sorted(
+        f.name
+        for f in pkg_outdir.iterdir()
+        if f.name.endswith(".whl") or f.name.endswith(".tar.gz")
+    )
     pkg_html = "<!DOCTYPE html>\n<html><body>\n"
     pkg_html += "".join(f'<a href="{f}">{f}</a><br>\n' for f in files)
     pkg_html += "</body></html>\n"

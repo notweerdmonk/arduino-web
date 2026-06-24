@@ -5,7 +5,8 @@
     </div>
     {% if not diff.alarm_hpp_exists %}
         <div class="card alarm-hpp-empty">
-            alarm.hpp has not been generated yet.<br>
+            alarm.hpp has not been generated yet.
+            <br>
             Click <strong>Generate alarm.hpp FROM metadata</strong> below to create it from the current medicine schedule.
         </div>
     {% elif diff.alarm_hpp_error %}
@@ -16,21 +17,23 @@
         <div id="alarm-hpp-list">
             {% if diff.alarm_hpp %}
                 {% for m in diff.alarm_hpp %}
-                <div class="card alarm-hpp-item">
-                    <div>
-                        <div class="fw-medium">{{ m.name }}</div>
-                        <div class="hint">
-                            {{ "%02d:%02d" | format(m.hour, m.minute) }}
-                            {% if m.day_of_week %}{{ day_name(m.day_of_week) }}{% else %}Every day{% endif %}
-                            {% if m.day_of_month %}· Day {{ m.day_of_month }} of month{% endif %}
+                    <div class="card alarm-hpp-item">
+                        <div>
+                            <div class="fw-medium">{{ m.name }}</div>
+                            <div class="hint">
+                                {{ "%02d:%02d" | format(m.hour, m.minute) }}
+                                {% if m.day_of_week %}
+                                    {{ day_name(m.day_of_week) }}
+                                {% else %}
+                                    Every day
+                                {% endif %}
+                                {% if m.day_of_month %}· Day {{ m.day_of_month }} of month{% endif %}
+                            </div>
                         </div>
                     </div>
-                </div>
                 {% endfor %}
             {% else %}
-                <div class="card alarm-hpp-empty">
-                    alarm.hpp has no medicines.
-                </div>
+                <div class="card alarm-hpp-empty">alarm.hpp has no medicines.</div>
             {% endif %}
         </div>
     {% endif %}

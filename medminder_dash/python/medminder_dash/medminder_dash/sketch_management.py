@@ -4,12 +4,10 @@ import bisect
 import datetime
 import json
 import os
-import shutil
 from typing import Optional
 from pathlib import Path
 
-from flask import jsonify, render_template, request
-from werkzeug.utils import secure_filename
+from flask import render_template, request
 
 from medminder_dash import state
 from medminder_dash.settings import _DEFAULT_SKETCH_DIR
@@ -98,7 +96,9 @@ def _find_existing_version(user_sketches: dict, checksum: str) -> Optional[dict]
     return None
 
 
-def _update_meta_hw_ids(sketch_dir: str, hardware_ids: list, board_timestamps: dict) -> None:
+def _update_meta_hw_ids(
+    sketch_dir: str, hardware_ids: list, board_timestamps: dict
+) -> None:
     """Update hardware_id and board_timestamp metadata in .meta file.
 
     Args:
@@ -262,7 +262,9 @@ def _render_sketch_path_selector(
                 label = f"{name} ({local_dt.strftime('%Y-%m-%d %H:%M:%S')})"
             except (ValueError, TypeError):
                 pass
-        board_labels = [hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels]
+        board_labels = [
+            hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels
+        ]
         if board_labels:
             label += f" [{' / '.join(board_labels)}]"
         sketches.append({"name": label, "path": v["path"]})

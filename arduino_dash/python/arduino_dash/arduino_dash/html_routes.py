@@ -8,7 +8,7 @@ import logging
 import os
 import shutil
 
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, render_template, request, session
 from werkzeug.utils import secure_filename
 
 from arduino_dash import state
@@ -22,13 +22,11 @@ from arduino_dash.sketch_management import (
     _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
-    _warm_upload_registry,
     _render_sketch_path_selector,
 )
 from arduino_dash.sketch_registry import get_assignment, set_assignment
 from arduino_dash.utils import (
     find_board_info_by_fqbn,
-    find_board_info_by_port,
     get_first_board,
     get_port_info,
     get_known_boards,
@@ -48,8 +46,9 @@ def _get_active_board_info():
     return ("", "", "")
 
 
-def _resolve_board_info(active_board_port, active_board_fqbn,
-                        active_board_hardware_id, known_ports):
+def _resolve_board_info(
+    active_board_port, active_board_fqbn, active_board_hardware_id, known_ports
+):
     """Resolve board info, falling back to known ports if needed."""
     info = get_port_info(active_board_port)
     if not info:
@@ -63,8 +62,7 @@ def _resolve_board_info(active_board_port, active_board_fqbn,
             result = get_first_board(known_ports)
             if not result:
                 raise ValueError("port missing")
-            (active_board_port, active_board_fqbn,
-             active_board_hardware_id) = result
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = result
             if not active_board_fqbn:
                 raise ValueError("fqbn missing")
     else:
@@ -92,6 +90,7 @@ def _resolve_board_info(active_board_port, active_board_fqbn,
 
 def init_html_routes(app: Flask, sock):
     """Register all HTML route handlers on the Flask app."""
+
     @app.route("/")
     def dashboard():
         """Render the main dashboard page."""
@@ -106,11 +105,15 @@ def init_html_routes(app: Flask, sock):
         board_info = get_port_info(norm_port)
         board_name = board_info.get("board", "") or norm_port
         port_path = norm_port.lstrip("/")
-        return render_template("board_detail.html", port=norm_port,
-                               port_path=port_path,
-                               board_name=board_name, board_info=board_info,
-                               show_sketch_tools=True,
-                               show_medicines_section=False)
+        return render_template(
+            "board_detail.html",
+            port=norm_port,
+            port_path=port_path,
+            board_name=board_name,
+            board_info=board_info,
+            show_sketch_tools=True,
+            show_medicines_section=False,
+        )
 
     @app.route("/boards/grid")
     def html_boards_grid():
@@ -140,7 +143,12 @@ def init_html_routes(app: Flask, sock):
         port_path = norm_port.lstrip("/")
         with state._board_list_lock:
             connected = norm_port in state._board_list
-        return render_template("partials/board_status_badge.html", port=norm_port, port_path=port_path, connected=connected)
+        return render_template(
+            "partials/board_status_badge.html",
+            port=norm_port,
+            port_path=port_path,
+            connected=connected,
+        )
 
     @app.route("/daemon/status")
     def html_daemon_status():
@@ -148,7 +156,9 @@ def init_html_routes(app: Flask, sock):
         connected = state.pubsub is not None and state.pubsub.is_connected
         with state._daemon_ready_lock:
             daemon_ready = state._daemon_ready
-        return render_template("partials/daemon_badge.html", ready=connected and daemon_ready)
+        return render_template(
+            "partials/daemon_badge.html", ready=connected and daemon_ready
+        )
 
     @app.route("/admin")
     def admin():
@@ -159,21 +169,32 @@ def init_html_routes(app: Flask, sock):
         active_board_hardware_id = ""
         active_board_sketch = ""
         if not active_board_port:
-            (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                _get_active_board_info()
+            )
         if not active_board_port:
             if known_ports:
                 result = get_first_board(known_ports)
                 if not result:
                     return "port missing", 500
-                (active_board_port, active_board_fqbn,
-                 active_board_hardware_id) = result
+                (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                    result
+                )
                 if not active_board_fqbn:
                     return "fqbn missing", 500
-                session["admin_active_board"] = (active_board_port, active_board_fqbn, active_board_hardware_id)
+                session["admin_active_board"] = (
+                    active_board_port,
+                    active_board_fqbn,
+                    active_board_hardware_id,
+                )
 
         # fetch fqbn and hardware id for active board port
         else:
-            info = state._board_list.get(active_board_port, {}) if isinstance(active_board_port, str) else {}
+            info = (
+                state._board_list.get(active_board_port, {})
+                if isinstance(active_board_port, str)
+                else {}
+            )
             # info missing for active_board_port
             # try to find port based on fqbn
             if not info:
@@ -200,11 +221,14 @@ def init_html_routes(app: Flask, sock):
         if active_board_hardware_id:
             active_board_sketch = get_assignment(active_board_hardware_id) or ""
 
-        return render_template("admin.html", ports=known_ports,
-                               active_board=active_board_port,
-                               active_board_fqbn=active_board_fqbn,
-                               active_board_hardware_id=active_board_hardware_id,
-                               active_board_sketch=active_board_sketch)
+        return render_template(
+            "admin.html",
+            ports=known_ports,
+            active_board=active_board_port,
+            active_board_fqbn=active_board_fqbn,
+            active_board_hardware_id=active_board_hardware_id,
+            active_board_sketch=active_board_sketch,
+        )
 
     @app.route("/admin/board-selector")
     def html_admin_board_selector():
@@ -214,18 +238,21 @@ def init_html_routes(app: Flask, sock):
 
         try:
             (active_board_port, active_board_fqbn, _) = _resolve_board_info(
-                active_board_port, active_board_fqbn, "", known_ports)
+                active_board_port, active_board_fqbn, "", known_ports
+            )
         except ValueError as e:
             return str(e), 500
 
-        return render_template("partials/admin_board_selector.html",
-                           ports=known_ports,
-                           active_board=active_board_port,
-                           active_board_fqbn=active_board_fqbn,
-                           board_selector_label="Active Board (for compile and upload)",
-                           board_selector_hx_post="/admin/active-board",
-                           board_selector_hx_target="#compile-upload-card",
-                           board_selector_hx_swap="innerHTML")
+        return render_template(
+            "partials/admin_board_selector.html",
+            ports=known_ports,
+            active_board=active_board_port,
+            active_board_fqbn=active_board_fqbn,
+            board_selector_label="Active Board (for compile and upload)",
+            board_selector_hx_post="/admin/active-board",
+            board_selector_hx_target="#compile-upload-card",
+            board_selector_hx_swap="innerHTML",
+        )
 
     @app.route("/admin/active-board", methods=["POST"])
     def html_admin_active_board():
@@ -252,21 +279,31 @@ def init_html_routes(app: Flask, sock):
     @app.route("/board/compile-upload-card")
     def html_board_compile_upload_card():
         """Render the compile-upload card partial."""
-        (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
+        (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+            _get_active_board_info()
+        )
         known_ports = get_known_boards()
 
         try:
-            (active_board_port, active_board_fqbn, active_board_hardware_id) = _resolve_board_info(
-                active_board_port, active_board_fqbn, active_board_hardware_id, known_ports)
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                _resolve_board_info(
+                    active_board_port,
+                    active_board_fqbn,
+                    active_board_hardware_id,
+                    known_ports,
+                )
+            )
         except ValueError as e:
             return str(e), 500
 
-        active_board_path = (active_board_port or '').lstrip("/")
-        return render_template("partials/compile_upload_card.html",
-                               active_board=active_board_port,
-                               active_board_path=active_board_path,
-                               active_board_fqbn=active_board_fqbn,
-                               active_board_hardware_id=active_board_hardware_id)
+        active_board_path = (active_board_port or "").lstrip("/")
+        return render_template(
+            "partials/compile_upload_card.html",
+            active_board=active_board_port,
+            active_board_path=active_board_path,
+            active_board_fqbn=active_board_fqbn,
+            active_board_hardware_id=active_board_hardware_id,
+        )
 
     @app.route("/last-upload")
     def html_last_upload():
@@ -334,9 +371,15 @@ def init_html_routes(app: Flask, sock):
                 if hardware_id and hardware_id not in existing["hardware_ids"]:
                     existing["hardware_ids"].append(hardware_id)
                     existing["board_timestamps"][hardware_id] = server_ts
-                    _update_meta_hw_ids(existing["path"], existing["hardware_ids"], existing["board_timestamps"])
+                    _update_meta_hw_ids(
+                        existing["path"],
+                        existing["hardware_ids"],
+                        existing["board_timestamps"],
+                    )
                     _save_registry()
-                    _broadcast_ws('<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>')
+                    _broadcast_ws(
+                        '<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>'
+                    )
             else:
                 meta = {
                     "ip": ip,
@@ -351,15 +394,21 @@ def init_html_routes(app: Flask, sock):
                 }
                 with open(os.path.join(upload_dir, ".meta"), "w") as mf:
                     json.dump(meta, mf)
-                bisect.insort(versions, {
-                    "path": sketch_dir,
-                    "checksum": checksum,
-                    "server_timestamp": server_ts,
-                    "hardware_ids": meta["hardware_ids"],
-                    "board_timestamps": meta["board_timestamps"],
-                }, key=lambda v: v["server_timestamp"])
+                bisect.insort(
+                    versions,
+                    {
+                        "path": sketch_dir,
+                        "checksum": checksum,
+                        "server_timestamp": server_ts,
+                        "hardware_ids": meta["hardware_ids"],
+                        "board_timestamps": meta["board_timestamps"],
+                    },
+                    key=lambda v: v["server_timestamp"],
+                )
                 _save_registry()
-                _broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
+                _broadcast_ws(
+                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
+                )
                 if hardware_id:
                     set_assignment(hardware_id, sketch_dir)
 
@@ -369,7 +418,6 @@ def init_html_routes(app: Flask, sock):
     def html_sketch_delete():
         """Handle sketch deletion and return the updated path selector."""
         sketch_path = request.args.get("path", "")
-        hardware_id = request.args.get("hardware_id", "").strip()
         if not sketch_path:
             return _render_sketch_path_selector()
         norm_path = os.path.normpath(sketch_path)
@@ -393,17 +441,24 @@ def init_html_routes(app: Flask, sock):
                         break
             if removed:
                 all_latest = [vs[-1] for vs in entries.values() if vs]
-                latest = max(all_latest, key=lambda v: v["server_timestamp"]) if all_latest else None
+                latest = (
+                    max(all_latest, key=lambda v: v["server_timestamp"])
+                    if all_latest
+                    else None
+                )
         if removed:
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             _save_registry()
-            _broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
+            _broadcast_ws(
+                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
+            )
             if latest is not None:
                 return _render_sketch_path_selector(latest.get("path", ""))
             return _render_sketch_path_selector()
         return _render_sketch_path_selector()
 
     if sock:
+
         @sock.route("/ws/board-events")
         def ws_board_events(ws):
             """WebSocket endpoint that streams board events to clients."""

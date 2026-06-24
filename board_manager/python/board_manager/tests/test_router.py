@@ -1,7 +1,5 @@
 """Tests for pub/sub topic router with :: separator"""
 
-import pytest
-
 from board_manager.router import TopicRouter, _match
 
 

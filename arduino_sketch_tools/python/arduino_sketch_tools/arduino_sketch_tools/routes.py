@@ -5,7 +5,8 @@ import time
 from flask import Blueprint, current_app, render_template, request, jsonify
 
 compile_bp = Blueprint(
-    "arduino_sketch_tools", __name__,
+    "arduino_sketch_tools",
+    __name__,
     template_folder="templates",
 )
 
@@ -18,7 +19,9 @@ def api_compile(port: str):
     if port is None:
         return jsonify({"error": "Invalid port"}), 400
     if not tools.pubsub.is_connected:
-        return render_template("partials/bms_offline.html", section_id="compile-section", action="Compile")
+        return render_template(
+            "partials/bms_offline.html", section_id="compile-section", action="Compile"
+        )
     sketch_path = request.form.get("sketch_path", "")
     fqbn = request.form.get("fqbn", "arduino:avr:uno")
     verbose = request.form.get("verbose", "false").lower() == "true"
@@ -29,7 +32,10 @@ def api_compile(port: str):
         tools._compile_meta[port] = tools._make_meta(port, sketch_path)
     tools.pubsub.publish(
         f"board::{port}::cmd",
-        {"method": "compile", "params": {"sketch_path": sketch_path, "fqbn": fqbn, "verbose": verbose}},
+        {
+            "method": "compile",
+            "params": {"sketch_path": sketch_path, "fqbn": fqbn, "verbose": verbose},
+        },
         resp_topic,
     )
     return render_template("partials/compile_in_progress.html", port=port)
@@ -51,8 +57,12 @@ def api_compile_poll(port: str):
         if started and time.time() - started > tools.COMPILE_TIMEOUT:
             with tools._compile_meta_lock:
                 tools._compile_meta.pop(port, None)
-            return render_template("partials/compile_timeout.html", port=port, meta=meta)
-        return render_template("partials/compile_poll_pending.html", port=port, meta=meta)
+            return render_template(
+                "partials/compile_timeout.html", port=port, meta=meta
+            )
+        return render_template(
+            "partials/compile_poll_pending.html", port=port, meta=meta
+        )
     if result.get("status") == "ok":
         sketch_path = result.get("data", {}).get("sketch_path", meta.get("sketch", ""))
         if sketch_path:
@@ -61,7 +71,9 @@ def api_compile_poll(port: str):
             with tools._last_compile_mtime_lock:
                 tools._last_compile_mtime[port] = tools._get_sketch_mtime(sketch_path)
             with tools._last_compile_checksum_lock:
-                tools._last_compile_checksum[port] = tools._compute_sketch_checksum(sketch_path)
+                tools._last_compile_checksum[port] = tools._compute_sketch_checksum(
+                    sketch_path
+                )
     compile_warning: str | None = None
     if result.get("status") == "error":
         with tools._last_compiled_sketch_lock:
@@ -87,8 +99,13 @@ def api_compile_poll(port: str):
                 compile_warning = "sketch_modified"
     with tools._compile_meta_lock:
         tools._compile_meta.pop(port, None)
-    return render_template("partials/compile_result.html", result=result, port=port, meta=meta,
-                           compile_warning=compile_warning)
+    return render_template(
+        "partials/compile_result.html",
+        result=result,
+        port=port,
+        meta=meta,
+        compile_warning=compile_warning,
+    )
 
 
 @compile_bp.route("/board/<path:port>/upload", methods=["POST"])
@@ -99,7 +116,9 @@ def api_upload(port: str):
     if port is None:
         return jsonify({"error": "Invalid port"}), 400
     if not tools.pubsub.is_connected:
-        return render_template("partials/bms_offline.html", section_id="upload-section", action="Upload")
+        return render_template(
+            "partials/bms_offline.html", section_id="upload-section", action="Upload"
+        )
     sketch_path = request.form.get("sketch_path", "")
     fqbn = request.form.get("fqbn", "arduino:avr:uno")
     verbose = request.form.get("verbose", "false").lower() == "true"
@@ -108,7 +127,9 @@ def api_upload(port: str):
     with tools._last_compiled_sketch_lock:
         last_sketch = tools._last_compiled_sketch.get(port)
     if last_sketch and last_sketch != sketch_path:
-        warnings.append({"type": "sketch_path_changed", "old": last_sketch, "new": sketch_path})
+        warnings.append(
+            {"type": "sketch_path_changed", "old": last_sketch, "new": sketch_path}
+        )
     modified = False
     with tools._last_compile_mtime_lock:
         last_mtime = tools._last_compile_mtime.get(port)
@@ -128,8 +149,14 @@ def api_upload(port: str):
         warnings.append({"type": "sketch_modified"})
 
     if warnings:
-        return render_template("partials/upload_confirm.html", port=port, warnings=warnings,
-                               sketch_path=sketch_path, fqbn=fqbn, verbose=verbose)
+        return render_template(
+            "partials/upload_confirm.html",
+            port=port,
+            warnings=warnings,
+            sketch_path=sketch_path,
+            fqbn=fqbn,
+            verbose=verbose,
+        )
 
     with tools._last_uploaded_sketch_lock:
         tools._last_uploaded_sketch[port] = sketch_path
@@ -141,7 +168,15 @@ def api_upload(port: str):
         tools._upload_meta[port] = tools._make_meta(port, sketch_path)
     tools.pubsub.publish(
         f"board::{port}::cmd",
-        {"method": "upload", "params": {"sketch_path": sketch_path, "fqbn": fqbn, "port": port, "verbose": verbose}},
+        {
+            "method": "upload",
+            "params": {
+                "sketch_path": sketch_path,
+                "fqbn": fqbn,
+                "port": port,
+                "verbose": verbose,
+            },
+        },
         resp_topic,
     )
     return render_template("partials/upload_in_progress.html", port=port)
@@ -159,10 +194,14 @@ def api_upload_poll(port: str):
     with tools._upload_meta_lock:
         meta = tools._upload_meta.get(port, {})
     if result is None:
-        return render_template("partials/upload_poll_pending.html", port=port, meta=meta)
+        return render_template(
+            "partials/upload_poll_pending.html", port=port, meta=meta
+        )
     with tools._upload_meta_lock:
         tools._upload_meta.pop(port, None)
-    return render_template("partials/upload_result.html", result=result, port=port, meta=meta)
+    return render_template(
+        "partials/upload_result.html", result=result, port=port, meta=meta
+    )
 
 
 @compile_bp.route("/board/<path:port>/upload/confirm", methods=["POST"])
@@ -173,7 +212,9 @@ def api_upload_confirm(port: str):
     if port is None:
         return jsonify({"error": "Invalid port"}), 400
     if not tools.pubsub.is_connected:
-        return render_template("partials/bms_offline.html", section_id="upload-section", action="Upload")
+        return render_template(
+            "partials/bms_offline.html", section_id="upload-section", action="Upload"
+        )
     sketch_path = request.form.get("sketch_path", "")
     fqbn = request.form.get("fqbn", "arduino:avr:uno")
     verbose = request.form.get("verbose", "false").lower() == "true"
@@ -186,7 +227,15 @@ def api_upload_confirm(port: str):
         tools._upload_meta[port] = tools._make_meta(port, sketch_path)
     tools.pubsub.publish(
         f"board::{port}::cmd",
-        {"method": "upload", "params": {"sketch_path": sketch_path, "fqbn": fqbn, "port": port, "verbose": verbose}},
+        {
+            "method": "upload",
+            "params": {
+                "sketch_path": sketch_path,
+                "fqbn": fqbn,
+                "port": port,
+                "verbose": verbose,
+            },
+        },
         resp_topic,
     )
     return render_template("partials/upload_in_progress.html", port=port)

@@ -23,8 +23,8 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:8413f8324894a93cd33a2029edaeb65f5b4ef556eca65a60b238abea9f0d7b6a",
-                "sha256:c2000abc26b71258fad1573a7b497a8ccff0621374143afcdf58d798d5673203"
+                "sha256:29a1c0d00ba51226304ed15218029a8e7cb8cc4dbc996c1f49f9784ca2004b82",
+                "sha256:b61f0442bf1bc7f88f22ec3156208c2d6d3e99577c2e5de51658fadd3202e808"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"

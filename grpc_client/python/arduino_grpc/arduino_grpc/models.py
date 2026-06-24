@@ -7,6 +7,7 @@ from typing import Optional, Dict
 @dataclass
 class Port:
     """Represents a port where an Arduino board is connected"""
+
     address: str
     protocol: str = "serial"
     protocol_label: str = ""
@@ -29,6 +30,7 @@ class Port:
 @dataclass
 class Board:
     """Represents a detected Arduino board"""
+
     port: Port
     fqbn: str
     name: str
@@ -56,6 +58,7 @@ class Board:
 @dataclass
 class CompileResult:
     """Result of sketch compilation"""
+
     success: bool
     output: str = ""
     error: str = ""
@@ -83,6 +86,7 @@ class CompileResult:
 @dataclass
 class UploadResult:
     """Result of sketch upload"""
+
     success: bool
     output: str = ""
     error: str = ""

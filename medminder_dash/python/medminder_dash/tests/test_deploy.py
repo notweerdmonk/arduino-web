@@ -1,6 +1,3 @@
-import os
-import tempfile
-
 import pytest
 from medminder_dash.app import create_app
 from medminder_dash.medicines_state import Medicine
@@ -12,6 +9,7 @@ def app():
     app.config["TESTING"] = True
     with app.app_context():
         from medminder_dash.app import store
+
         store._medicines.clear()
         store._lock = __import__("threading").Lock()
     yield app
@@ -25,6 +23,7 @@ def client(app):
 @pytest.fixture
 def seeded_store(app):
     from medminder_dash.app import store
+
     m1 = Medicine(name="Ibup", hour=8, minute=30, day_of_week=1, day_of_month=0)
     store.add(m1)
     store.add(Medicine(name="PaRa", hour=20, minute=0, day_of_week=3, day_of_month=0))
@@ -34,6 +33,7 @@ def seeded_store(app):
 class TestOnlyEnabled:
     def test_returns_enabled_only(self, app):
         from medminder_dash.app import store
+
         m1 = Medicine(name="A", hour=1, minute=0)
         m2 = Medicine(name="B", hour=2, minute=0)
         m2.enabled = False
@@ -45,12 +45,14 @@ class TestOnlyEnabled:
 
     def test_returns_all_when_all_enabled(self, app):
         from medminder_dash.app import store
+
         store.add(Medicine(name="A", hour=1, minute=0))
         store.add(Medicine(name="B", hour=2, minute=0))
         assert len(store.only_enabled()) == 2
 
     def test_returns_empty_when_none_enabled(self, app):
         from medminder_dash.app import store
+
         m1 = Medicine(name="A", hour=1, minute=0)
         m2 = Medicine(name="B", hour=2, minute=0)
         m1.enabled = False

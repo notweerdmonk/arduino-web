@@ -93,6 +93,10 @@ medminder/
 ├── dist-test-install/          # Wheel install smoke test
 ├── dist-standalone/            # Built standalone binaries
 ├── noxfile.py
+├── eslint.config.mjs          # ESLint proxy config (imports config/)
+├── config/
+│   └── eslint.config.mjs      # ESLint flat config (JS + HTML sections)
+├── package.json                # ESLint dev dependencies
 ├── PLAN.md
 ├── JOURNAL.md
 ├── CODEBASE_REFERENCE.md
@@ -3492,4 +3496,130 @@ python3 e2e/servers/arduino_dash_server.py --stop --force
 
 # Custom pidfile:
 python3 e2e/servers/arduino_dash_server.py --pidfile /tmp/my.pid --stop
+---
+
+## Code Review — Linting, Formatting, and E2E Testing (2026-06-24)
+
+**Type**: Code Quality / DevOps
+
+**Goal**: Zero-lint codebase across all packages (Python ruff, djlint, JS ESLint), confirm Playwright E2E tests pass, and document findings.
+
+### Ruff — Python Lint & Format
+
+| Tool | Scope | Files | Result |
+|------|-------|-------|--------|
+| `ruff check` | All Python packages | 111+ errors fixed | ✱ 97 auto-fixed (F401, F841, E731, E741, E713) + 13 manual `# noqa: E402` |
+| `ruff format` | All Python packages | 108 files formatted | ✅ All 108 checked clean |
+
+**Notable fixes**: F401 (unused imports), F841 (unused variables), E731 (lambda assignment), E741 (ambiguous variable names), E713 (negative membership test).
+
+**Exclusion**: Generated protobuf files in `grpc_client/python/arduino_grpc/cc/` excluded via:
+```toml
+# grpc_client/python/arduino_grpc/pyproject.toml
+[tool.ruff]
+exclude = ["cc/arduino/cli/commands/v1/"]
+```
+
+### djlint — HTML/Jinja2 Template Format
+
+| Scope | Files Reformatted | Lint Warnings |
+|-------|-------------------|---------------|
+| `arduino_dash/.../templates/` | 27 across 3 template dirs | 0 |
+| `medminder_dash/.../templates/` | (same set) | 0 |
+| `arduino_sketch_tools/.../templates/` | (same set) | 0 |
+
+### ESLint — JavaScript Lint
+
+| Item | Detail |
+|------|--------|
+| Config | `eslint.config.mjs` (root proxy → `config/eslint.config.mjs`) |
+| Plugin | `eslint-plugin-html` v8.1.4 (CJS monkey-patch, no `processor` export) |
+| Errors | **0** |
+| Warnings | 4 (false positives — `handleFolderInput`/`uploadSketch` called via HTML `onchange`/`onclick` in `base.html`) |
+
+**Key files**:
+
+| File | Role |
+|------|------|
+| `eslint.config.mjs` (root) | Proxy that imports from `config/eslint.config.mjs` (MCP reads only root config) |
+| `config/eslint.config.mjs` | Full flat config with `.js`/`.mjs` + `.html` (inline JS) sections, browser globals for HTML section |
+| `dnd_overlay.html` (both dashboards) | Added `/* global showModal */`, removed unused `e` param in `dragleave` handler |
+
+**Architecture**: Root proxy pattern required because `eslint_lint-files` MCP tool reads config only from agent working directory root. The proxy re-exports the real config from `config/`.
+
+**Dependency**: `eslint-plugin-html` v8.1.4 installed via npm (`npm init -y` + `npm install eslint-plugin-html@8.1.4 --save-dev` in project root).
+
+### Flask Debug Mode + Daemonize (Critical Finding)
+
+| Issue | Detail |
+|-------|--------|
+| Symptom | `ValueError: I/O operation on closed file` at `werkzeug/_reloader.py:421:ensure_echo_on` |
+| Root cause | `_daemonize()` forks + closes stdin before Flask debug reloader forks again; the reloaded child tries `echo_on()` on closed stdin |
+| Workaround | Pass `--production` flag to disable debug mode (`debug_mode = not (args.bms or args.production)`) |
+
+### Playwright E2E Testing
+
+Both dashboards tested via MCP browser tools — all 10 recipes pass:
+
+| Recipe | Dashboard | Status |
+|--------|-----------|--------|
+| 1. Dashboard empty state | arduino_dash | ✅ |
+| 2. Board grid with mock data | arduino_dash | ✅ |
+| 3. Admin page | arduino_dash | ✅ |
+| 4. Sketch selector with board label | arduino_dash | ✅ |
+| 5. Daemon status badge (disconnected) | arduino_dash | ✅ |
+| 6. Board detail page | arduino_dash | ✅ |
+| 7. Home page | medminder_dash | ✅ |
+| 8. Medicine list via API | medminder_dash | ✅ |
+| 9. Admin page | medminder_dash | ✅ |
+| 10. 404 error page | both | ✅ |
+
+**Console errors (non-blocking, both dashboards identical)**:
+
+| Error | Cause |
+|-------|-------|
+| idiomorph.js 404 | CDN path `htmx.org@2.0.10/dist/ext/idiomorph.js` doesn't exist for unpkg |
+| WS connection failure | No BMS daemon running (expected for `--mock` without `--bms`) |
+
+### Package Management
+
+| State | Action |
+|-------|--------|
+| Before | `arduino-dash`, `medminder-dash` installed as editable (`pip install -e`) at system level |
+| After | Uninstalled from system pip; installed from pre-built wheels into pipenv venv (`pipenv run pip install .whl`) |
+
+**Top-level Pipfile** updated with local index sources for all 6 packages:
+```ini
+[[source]]
+url = "file://${PROJECT_ROOT}/grpc_client/python/arduino_grpc/dist"
+name = "arduino-grpc-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/arduino_dash/python/arduino_dash/dist"
+name = "arduino-dash"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/medminder_dash/python/medminder_dash/dist"
+name = "medminder-dash"
+```
+
+### Server Commands (pipenv)
+
+```bash
+pipenv run python e2e/servers/arduino_dash_server.py --mock --port 8765 --production
+pipenv run python e2e/servers/medminder_dash_server.py --mock --port 8766 --production
+```
+
+### Key Files Referenced
+
+| File | Line(s) | Purpose |
+|------|---------|---------|
+| `eslint.config.mjs` (root) | 1-2 | Proxy config for MCP |
+| `config/eslint.config.mjs` | 1-47 | Full ESLint flat config |
+| `grpc_client/python/.../pyproject.toml` | `[tool.ruff]` | Ruff exclusion for generated protobuf stubs |
+| `dnd_overlay.html` (both) | top | `/* global showModal */`, removed unused `e` |
+| `e2e/servers/arduino_dash_server.py:260` | — | `debug_mode = not (args.bms or args.production)` |
+| `e2e/servers/medminder_dash_server.py:296` | — | Same pattern |
+| `Pipfile` | 6-34 | Local index sources for all 6 packages |
+
 ```{% endraw %}

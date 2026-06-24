@@ -217,6 +217,7 @@ def detect_venv(
 
     Detection order for ``"auto"`` is: pipenv > poetry > uv > system.
     """
+
     def _system_detector(root: Path) -> Tuple[Path, Path]:
         python, pip = _detect_system()
         return python, pip
@@ -550,14 +551,14 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="Path to a local arduino-cli checkout (the directory containing "
-             "the `cc/arduino/cli/commands/v1/*.proto` files).",
+        "the `cc/arduino/cli/commands/v1/*.proto` files).",
     )
     p.add_argument(
         "--proto-url",
         type=str,
         default=None,
         help="URL to a zip archive that contains the arduino-cli rpc protos "
-             "(e.g. a GitHub release asset).",
+        "(e.g. a GitHub release asset).",
     )
     p.add_argument(
         "--out",
@@ -570,7 +571,7 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="Path to a local googleapis checkout. If not provided, "
-             "googleapis-common-protos is used for well-known types.",
+        "googleapis-common-protos is used for well-known types.",
     )
     p.add_argument(
         "--venv",
@@ -582,7 +583,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--install-deps",
         action="store_true",
         help="Install grpcio-tools and googleapis-common-protos into the "
-             "chosen environment if missing.",
+        "chosen environment if missing.",
     )
     p.add_argument(
         "--no-prompt",

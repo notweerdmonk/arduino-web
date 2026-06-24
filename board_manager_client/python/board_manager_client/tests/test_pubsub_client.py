@@ -1,9 +1,7 @@
 """Tests for board_manager_client PubSubClient"""
 
-import json
 import os
 import socket
-import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,6 +18,7 @@ def pubsub():
 
 class DummySocket:
     """Minimal socket-like object for connect/create_socket tests"""
+
     def __init__(self, family=socket.AF_INET):
         self.family = family
         self.closed = False
@@ -28,7 +27,7 @@ class DummySocket:
         self.sent: list[bytes] = []
 
     def connect(self, address):
-        if getattr(self, '_should_fail', False):
+        if getattr(self, "_should_fail", False):
             raise ConnectionRefusedError("refused")
         self.connected = True
 
@@ -65,12 +64,16 @@ class TestPubSubClient:
         assert pubsub._sock is None
 
     def test_subscribe_adds_topic(self, pubsub):
-        handler = lambda m: None
+        def handler(m):
+            return None
+
         pubsub.subscribe("board::+/event", handler)
         assert "board::+/event" in pubsub._subscriptions
 
     def test_unsubscribe_removes_topic(self, pubsub):
-        handler = lambda m: None
+        def handler(m):
+            return None
+
         pubsub.subscribe("test/topic", handler)
         pubsub.unsubscribe("test/topic")
         assert "test/topic" not in pubsub._subscriptions
@@ -112,7 +115,7 @@ class TestPubSubClient:
         assert len(received) == 1
 
     def test_dispatch_error_handler_does_not_crash(self, pubsub):
-        pubsub.subscribe("test/topic", lambda m: 1/0)
+        pubsub.subscribe("test/topic", lambda m: 1 / 0)
         pubsub._dispatch({"topic": "test/topic", "data": "crash"})
 
     def test_dispatch_resp_star_matches_double_colon(self, pubsub):
@@ -138,8 +141,10 @@ class TestPubSubClientConnect:
     def test_connect_uds(self, tmp_path):
         socket_path = os.path.join(str(tmp_path), "uds.sock")
         open(socket_path, "w").close()
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             return DummySocket(family=family)
+
         with patch("socket.socket", side_effect=make_sock):
             client = PubSubClient(use_uds=True, uds_path=socket_path)
             client.connect()
@@ -149,11 +154,13 @@ class TestPubSubClientConnect:
     def test_connect_tcp_fallback(self, tmp_path):
         socket_path = os.path.join(str(tmp_path), "missing.sock")
         uds_sock = DummySocket(family=socket.AF_UNIX)
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             if family == socket.AF_UNIX:
                 uds_sock._should_fail = True
                 raise OSError("unix not available")
             return DummySocket(family=socket.AF_INET)
+
         with patch("socket.socket", side_effect=make_sock):
             client = PubSubClient(use_uds=True, uds_path=socket_path)
             client.connect()
@@ -164,8 +171,10 @@ class TestPubSubClientConnect:
         socket_path = os.path.join(str(tmp_path), "resub.sock")
         open(socket_path, "w").close()
         handler = MagicMock()
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             return DummySocket(family=family)
+
         with patch("socket.socket", side_effect=make_sock):
             client = PubSubClient(use_uds=True, uds_path=socket_path)
             client.subscribe("test/topic", handler)
@@ -179,19 +188,23 @@ class TestStaleUdsSocket:
         socket_path = os.path.join(str(tmp_path), "stale.sock")
         open(socket_path, "w").close()
         connect_calls: list = []
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             if family == socket.AF_UNIX:
                 s = DummySocket(family=socket.AF_UNIX)
+
                 def _connect(addr):
                     connect_calls.append(("uds", addr))
                     if len(connect_calls) == 1:
                         raise ConnectionRefusedError("stale socket")
                     s.connected = True
+
                 s.connect = _connect
                 return s
             s = DummySocket(family=socket.AF_INET)
             s.connect = lambda addr: connect_calls.append(("tcp", addr))
             return s
+
         with patch("socket.socket", side_effect=make_sock):
             client = PubSubClient(use_uds=True, uds_path=socket_path)
             client.connect()
@@ -202,19 +215,23 @@ class TestStaleUdsSocket:
     def test_stale_uds_unlink_fails_gracefully(self, tmp_path):
         socket_path = os.path.join(str(tmp_path), "missing.sock")
         connect_calls: list = []
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             if family == socket.AF_UNIX:
                 s = DummySocket(family=socket.AF_UNIX)
+
                 def _connect(addr):
                     connect_calls.append(("uds", addr))
                     if len(connect_calls) == 1:
                         raise ConnectionRefusedError("stale socket")
                     s.connected = True
+
                 s.connect = _connect
                 return s
             s = DummySocket(family=socket.AF_INET)
             s.connect = lambda addr: connect_calls.append(("tcp", addr))
             return s
+
         with patch("socket.socket", side_effect=make_sock):
             client = PubSubClient(use_uds=True, uds_path=socket_path)
             client.connect()
@@ -225,15 +242,19 @@ class TestStaleUdsSocket:
         socket_path = os.path.join(str(tmp_path), "appeared.sock")
         open(socket_path, "w").close()
         connect_count = [0]
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             s = DummySocket(family=family)
+
             def _connect(addr):
                 connect_count[0] += 1
                 if connect_count[0] == 1:
                     raise ConnectionRefusedError("stale")
                 s.connected = True
+
             s.connect = _connect
             return s
+
         with (
             patch("socket.socket", side_effect=make_sock),
             patch("os.unlink", side_effect=lambda p: os.remove(p)),
@@ -247,14 +268,18 @@ class TestStaleUdsSocket:
 class TestConnectRetry:
     def test_retry_succeeds_on_second_attempt(self):
         call_count = [0]
+
         def make_sock(family=socket.AF_INET, *args, **kwargs):
             call_count[0] += 1
             s = DummySocket()
             if call_count[0] == 1:
+
                 def _connect_fail(addr):
                     raise ConnectionRefusedError("no")
+
                 s.connect = _connect_fail
             return s
+
         with (
             patch("socket.socket", side_effect=make_sock),
             patch("time.sleep"),
@@ -267,10 +292,13 @@ class TestConnectRetry:
     def test_retry_all_fail_raises(self):
         def make_sock(*args, **kwargs):
             s = DummySocket()
+
             def _connect_fail(addr):
                 raise ConnectionRefusedError("always")
+
             s.connect = _connect_fail
             return s
+
         with (
             patch("socket.socket", side_effect=make_sock),
             patch("time.sleep"),
@@ -300,4 +328,5 @@ class TestPubSubClientReconnect:
 
     def test_reconnect_delay_is_fixed(self):
         from board_manager_client.pubsub_client import ReconnectConfig
+
         assert ReconnectConfig.RECONNECT_DELAY == 2.0

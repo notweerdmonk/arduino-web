@@ -1,34 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}MedMinder{% endblock %}</title>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-    <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    {% block extra_head %}{% endblock %}
-</head>
-<body hx-ext="morph">
-    <nav>
-        <a href="/" class="brand">MedMinder</a>
-        <a href="/admin">Admin</a>
-        <span id="daemon-badge" class="badge-container" hx-get="/daemon/status" hx-trigger="load" hx-target="this" hx-swap="morph"></span>
-    </nav>
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
-    <div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
-    <script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description"
+              content="MedMinder - Medicine reminder and dispenser management dashboard">
+        <meta name="keywords"
+              content="medicine, reminder, arduino, dispenser, health">
+        <title>{% block title %}MedMinder{% endblock %}</title>
+        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/idiomorph.js"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        {% block extra_head %}{% endblock %}
+    </head>
+    <body hx-ext="morph">
+        <nav>
+            <a href="/" class="brand">MedMinder</a>
+            <a href="/admin">Admin</a>
+            <span id="daemon-badge"
+                  class="badge-container"
+                  hx-get="/daemon/status"
+                  hx-trigger="load"
+                  hx-target="this"
+                  hx-swap="morph"></span>
+        </nav>
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+        <div id="event-feed" hx-ext="ws" ws-connect="/ws/board-events"></div>
+        <script>
         function showModal(id) {
             var el = document.getElementById(id);
-            if (el) el.style.display = 'flex';
+            if (el) el.classList.remove('modal-hidden');
         }
         function hideModal(id) {
             var el = document.getElementById(id);
             if (el) {
-                el.style.display = 'none';
+                el.classList.add('modal-hidden');
                 if (el.__deletePath !== undefined) el.__deletePath = null;
                 if (el.__dndFiles !== undefined) el.__dndFiles = null;
             }
@@ -102,6 +111,6 @@
                 htmx.trigger('body', 'board-changed');
             }
         });
-    </script>
-</body>
+        </script>
+    </body>
 </html>

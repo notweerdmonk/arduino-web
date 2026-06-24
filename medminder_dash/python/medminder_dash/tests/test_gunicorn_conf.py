@@ -3,7 +3,6 @@
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from medminder_dash import gunicorn_conf as conf
 
@@ -75,12 +74,12 @@ class TestWhenReady:
 
 
 class TestPostWorkerInit:
-    @patch("medminder_dash.pubsub_infra.init_pubsub")
+    @patch("medminder_dash.pubsub.init_pubsub")
     def test_calls_init_pubsub(self, mock_init):
         conf.post_worker_init(MockWorker())
         mock_init.assert_called_once()
 
-    @patch("medminder_dash.pubsub_infra.init_pubsub")
+    @patch("medminder_dash.pubsub.init_pubsub")
     def test_passes_bms_config(self, mock_init):
         env = {
             "BOARD_MGR_TCP_HOST": "0.0.0.0",

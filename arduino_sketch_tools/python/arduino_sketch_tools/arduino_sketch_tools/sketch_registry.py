@@ -32,7 +32,9 @@ class SketchRegistry:
                 for entry in self._registry.values():
                     for versions in entry.values():
                         for v in versions:
-                            if hardware_id in v.get("hardware_ids", []) and os.path.isdir(v["path"]):
+                            if hardware_id in v.get(
+                                "hardware_ids", []
+                            ) and os.path.isdir(v["path"]):
                                 return v["path"]
         return None
 

@@ -2,12 +2,10 @@
 
 from flask import session
 
-from arduino_dash import state
 from arduino_dash.utils import (
     get_first_board,
     get_port_info,
     find_board_info_by_fqbn,
-    find_board_info_by_port,
 )
 
 
@@ -21,8 +19,9 @@ def _get_active_board_info():
     return ("", "", "")
 
 
-def _resolve_board_info(active_board_port, active_board_fqbn,
-                        active_board_hardware_id, known_ports):
+def _resolve_board_info(
+    active_board_port, active_board_fqbn, active_board_hardware_id, known_ports
+):
     """Resolve board info, falling back to known ports if needed."""
     info = get_port_info(active_board_port)
     if not info:
@@ -36,8 +35,7 @@ def _resolve_board_info(active_board_port, active_board_fqbn,
             result = get_first_board(known_ports)
             if not result:
                 raise ValueError("port missing")
-            (active_board_port, active_board_fqbn,
-             active_board_hardware_id) = result
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = result
             if not active_board_fqbn:
                 raise ValueError("fqbn missing")
     else:

@@ -2,8 +2,7 @@
 
 import logging
 import threading
-import time
-from typing import Any, Callable, Optional
+from typing import Any, Optional
 
 from board_manager.board_detector import BoardEventCallback
 

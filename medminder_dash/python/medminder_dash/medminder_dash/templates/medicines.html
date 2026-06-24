@@ -1,42 +1,38 @@
 <div id="medicine-list">
     {% if medicines %}
         {% for med in medicines %}
-        <div class="card medicine-card" id="med-{{ med.id }}">
-            <div class="medicine-card-left">
-                <form hx-put="/medicine/{{ med.id }}/toggle"
-                      hx-target="#medicine-list"
-                      hx-swap="outerHTML"
-                      class="flex-row">
-                    <input type="checkbox"
-                           class="checkbox-lg"
-                           {{ "checked" if med.enabled else "" }}
-                           onchange="this.form.requestSubmit()">
-                </form>
-                <div>
-                    <div class="{{ 'medicine-name-enabled' if med.enabled else 'medicine-name-disabled' }}">
-                        {{ med.name }}
-                    </div>
-                    <div class="hint">
-                        {{ time_display(med.hour, med.minute) }}
-                        · {{ day_name(med.day_of_week) if med.day_of_week else 'Every day' }}
-                        {% if med.day_of_month %}
-                            · Day {{ med.day_of_month }} of month
-                        {% endif %}
+            <div class="card medicine-card" id="med-{{ med.id }}">
+                <div class="medicine-card-left">
+                    <form hx-put="/medicine/{{ med.id }}/toggle"
+                          hx-target="#medicine-list"
+                          hx-swap="outerHTML"
+                          class="flex-row">
+                        <input type="checkbox"
+                               class="checkbox-lg"
+                               {{ "checked" if med.enabled else "" }}
+                               onchange="this.form.requestSubmit()">
+                    </form>
+                    <div>
+                        <div class="{{ 'medicine-name-enabled' if med.enabled else 'medicine-name-disabled' }}">{{ med.name }}</div>
+                        <div class="hint">
+                            {{ time_display(med.hour, med.minute) }}
+                            · {{ day_name(med.day_of_week) if med.day_of_week else 'Every day' }}
+                            {% if med.day_of_month %}· Day {{ med.day_of_month }} of month{% endif %}
+                        </div>
                     </div>
                 </div>
+                <div class="flex-row">
+                    <button class="btn btn-primary"
+                            hx-get="/medicine/{{ med.id }}/edit"
+                            hx-target="#medicine-form-container"
+                            hx-swap="innerHTML">Edit</button>
+                    <button class="btn btn-danger"
+                            hx-delete="/medicine/{{ med.id }}"
+                            hx-target="#medicine-list"
+                            hx-swap="outerHTML"
+                            hx-confirm="Delete {{ med.name }}?">Delete</button>
+                </div>
             </div>
-            <div class="flex-row">
-                <button class="btn btn-primary"
-                        hx-get="/medicine/{{ med.id }}/edit"
-                        hx-target="#medicine-form-container"
-                        hx-swap="innerHTML">Edit</button>
-                <button class="btn btn-danger"
-                        hx-delete="/medicine/{{ med.id }}"
-                        hx-target="#medicine-list"
-                        hx-swap="outerHTML"
-                        hx-confirm="Delete {{ med.name }}?">Delete</button>
-            </div>
-        </div>
         {% endfor %}
     {% else %}
         <div class="card empty-state-card">

@@ -30,13 +30,16 @@ logger = logging.getLogger(__name__)
 
 def init_api_routes(app: Flask):
     """Register all /api/ route handlers on the Flask app."""
+
     @app.route("/api/board/<path:port>/spawn", methods=["POST"])
     def api_spawn(port: str):
         """Spawn the board monitor for the given port."""
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(f"board::{port}::cmd", {"method": "spawn"}, f"resp:spawn:{port}")
+        state.pubsub.publish(
+            f"board::{port}::cmd", {"method": "spawn"}, f"resp:spawn:{port}"
+        )
         return jsonify({"status": "accepted"})
 
     @app.route("/api/board/<path:port>/status")
@@ -45,7 +48,9 @@ def init_api_routes(app: Flask):
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(f"board::{port}::cmd", {"method": "status"}, f"resp:status:{port}")
+        state.pubsub.publish(
+            f"board::{port}::cmd", {"method": "status"}, f"resp:status:{port}"
+        )
         return jsonify({"status": "accepted"})
 
     @app.route("/api/board/<path:port>/remove", methods=["POST"])
@@ -54,7 +59,9 @@ def init_api_routes(app: Flask):
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(f"board::{port}::cmd", {"method": "remove"}, f"resp:remove:{port}")
+        state.pubsub.publish(
+            f"board::{port}::cmd", {"method": "remove"}, f"resp:remove:{port}"
+        )
         return jsonify({"status": "accepted"})
 
     @app.route("/api/boards")
@@ -73,11 +80,18 @@ def init_api_routes(app: Flask):
         with state._upload_registry_lock:
             if key not in state._upload_registry:
                 from arduino_dash.html_routes import _warm_upload_registry
+
                 _warm_upload_registry()
             entries = state._upload_registry.get(key, {})
             for name, versions in entries.items():
                 for v in versions:
-                    all_versions.append({"name": name, "path": v["path"], "timestamp": v["server_timestamp"]})
+                    all_versions.append(
+                        {
+                            "name": name,
+                            "path": v["path"],
+                            "timestamp": v["server_timestamp"],
+                        }
+                    )
         all_versions.sort(key=lambda v: v["timestamp"], reverse=True)
         return jsonify(all_versions)
 
@@ -134,9 +148,15 @@ def init_api_routes(app: Flask):
                 if hardware_id and hardware_id not in existing["hardware_ids"]:
                     existing["hardware_ids"].append(hardware_id)
                     existing["board_timestamps"][hardware_id] = server_ts
-                    _update_meta_hw_ids(existing["path"], existing["hardware_ids"], existing["board_timestamps"])
+                    _update_meta_hw_ids(
+                        existing["path"],
+                        existing["hardware_ids"],
+                        existing["board_timestamps"],
+                    )
                     _save_registry()
-                    _broadcast_ws('<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>')
+                    _broadcast_ws(
+                        '<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>'
+                    )
             else:
                 meta = {
                     "ip": ip,
@@ -151,15 +171,21 @@ def init_api_routes(app: Flask):
                 }
                 with open(os.path.join(upload_dir, ".meta"), "w") as mf:
                     json.dump(meta, mf)
-                bisect.insort(versions, {
-                    "path": sketch_dir,
-                    "checksum": checksum,
-                    "server_timestamp": server_ts,
-                    "hardware_ids": meta["hardware_ids"],
-                    "board_timestamps": meta["board_timestamps"],
-                }, key=lambda v: v["server_timestamp"])
+                bisect.insort(
+                    versions,
+                    {
+                        "path": sketch_dir,
+                        "checksum": checksum,
+                        "server_timestamp": server_ts,
+                        "hardware_ids": meta["hardware_ids"],
+                        "board_timestamps": meta["board_timestamps"],
+                    },
+                    key=lambda v: v["server_timestamp"],
+                )
                 _save_registry()
-                _broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
+                _broadcast_ws(
+                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
+                )
                 if hardware_id:
                     set_assignment(hardware_id, sketch_dir)
 
@@ -169,7 +195,6 @@ def init_api_routes(app: Flask):
     def api_sketch_delete():
         """Delete an uploaded sketch by path."""
         sketch_path = request.args.get("path", "")
-        hardware_id = request.args.get("hardware_id", "").strip()
         if not sketch_path:
             return jsonify({"error": "Missing path"}), 400
         norm_path = os.path.normpath(sketch_path)
@@ -194,6 +219,8 @@ def init_api_routes(app: Flask):
         if removed:
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             _save_registry()
-            _broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
+            _broadcast_ws(
+                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
+            )
             return jsonify({"status": "deleted"})
         return jsonify({"error": "Not found"}), 404

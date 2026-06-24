@@ -10,7 +10,7 @@ from typing import Optional
 from flask import render_template, request
 
 from arduino_dash import state
-from arduino_dash.pubsub import _compute_sketch_checksum, _get_sketch_mtime
+from arduino_dash.pubsub import _compute_sketch_checksum
 
 REGISTRY_DIR = Path.home() / ".config" / "arduino-dash"
 REGISTRY_FILE = str(REGISTRY_DIR / "sketch_registry.json")
@@ -18,7 +18,7 @@ REGISTRY_FILE = str(REGISTRY_DIR / "sketch_registry.json")
 
 def _save_registry() -> None:
     """Persist the upload registry to disk as JSON.
-    
+
     Caller must hold state._upload_registry_lock.
     """
     REGISTRY_DIR.mkdir(parents=True, exist_ok=True)
@@ -32,7 +32,7 @@ def _save_registry() -> None:
 
 def _load_registry() -> None:
     """Load the upload registry from disk into memory.
-    
+
     Caller must hold state._upload_registry_lock.
     """
     if not os.path.isfile(REGISTRY_FILE):
@@ -57,7 +57,9 @@ def _find_existing_version(user_sketches: dict, checksum: str) -> Optional[dict]
     return None
 
 
-def _update_meta_hw_ids(sketch_dir: str, hardware_ids: list, board_timestamps: dict) -> None:
+def _update_meta_hw_ids(
+    sketch_dir: str, hardware_ids: list, board_timestamps: dict
+) -> None:
     """Update the hardware IDs and board timestamps in a sketch's .meta file."""
     meta_path = os.path.join(os.path.dirname(sketch_dir), ".meta")
     try:
@@ -181,16 +183,27 @@ def _render_sketch_path_selector(selected_path: str = "", hardware_id: str = "")
         ts = v.get("server_timestamp", "")
         if ts:
             try:
-                dt = datetime.datetime.fromisoformat(ts).replace(tzinfo=datetime.timezone.utc)
+                dt = datetime.datetime.fromisoformat(ts).replace(
+                    tzinfo=datetime.timezone.utc
+                )
                 local_dt = dt.astimezone()
                 label = f"{name} ({local_dt.strftime('%Y-%m-%d %H:%M:%S')})"
             except (ValueError, TypeError):
                 pass
-        board_labels = [hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels]
+        board_labels = [
+            hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels
+        ]
         if board_labels:
             label += f" [{' / '.join(board_labels)}]"
         sketches.append({"name": label, "path": v["path"]})
         seen_paths.add(v["path"])
     if selected_path and selected_path not in seen_paths:
-        sketches.append({"name": os.path.basename(selected_path) or selected_path, "path": selected_path})
-    return render_template("partials/sketch_path_selector.html", sketches=sketches, selected=selected_path)
+        sketches.append(
+            {
+                "name": os.path.basename(selected_path) or selected_path,
+                "path": selected_path,
+            }
+        )
+    return render_template(
+        "partials/sketch_path_selector.html", sketches=sketches, selected=selected_path
+    )

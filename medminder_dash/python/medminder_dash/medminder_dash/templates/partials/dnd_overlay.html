@@ -3,6 +3,7 @@
 </div>
 <script>
 (function() {
+    /* global showModal */
     var overlay = document.getElementById('dnd-overlay');
     var dragCounter = 0;
     var dndActive = false;
@@ -42,7 +43,7 @@
         }
     });
 
-    document.addEventListener('dragleave', function(e) {
+    document.addEventListener('dragleave', function() {
         if (dragCounter > 0) {
             dragCounter--;
             if (dragCounter === 0) hideOverlay();

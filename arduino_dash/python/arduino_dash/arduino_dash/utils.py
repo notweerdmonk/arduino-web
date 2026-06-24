@@ -5,9 +5,9 @@ import re
 from typing import Optional, Tuple
 
 from arduino_dash import state
-from board_manager_client.pubsub_client import PubSubClient
 
 PORT_RE = re.compile(r"^/dev/[a-zA-Z0-9_/]+$")
+
 
 def is_valid_port(port: str) -> bool:
     """Check whether a port string matches the expected /dev/... format."""
@@ -31,14 +31,14 @@ def get_known_boards() -> list[dict]:
         return list(state._board_list.values())
 
 
-def get_first_board(boards : list[dict]) -> Tuple[str, str, str]:
+def get_first_board(boards: list[dict]) -> Tuple[str, str, str]:
     """Return the (port, fqbn, hardware_id) of the first board in the list."""
     if isinstance(boards, list) and boards:
         first = boards[0]
         return (
             first.get("port", ""),
             first.get("fqbn", ""),
-            first.get("hardware_id", "")
+            first.get("hardware_id", ""),
         )
 
 
@@ -48,25 +48,25 @@ def get_port_info(port: str) -> Optional[dict]:
         return state._board_list.get(port, {})
 
 
-def find_board_info_by_port(port : str, boards: list[dict]) -> dict:
+def find_board_info_by_port(port: str, boards: list[dict]) -> dict:
     """Find board info by port string."""
     return next(
         (
-            b for b in boards
-            if (
-                b.get("port", "") if isinstance(b, dict) else ""
-            ) == port
-        ), {}
+            b
+            for b in boards
+            if (b.get("port", "") if isinstance(b, dict) else "") == port
+        ),
+        {},
     )
 
 
-def find_board_info_by_fqbn(fqbn : str, boards: list[dict]) -> dict:
+def find_board_info_by_fqbn(fqbn: str, boards: list[dict]) -> dict:
     """Find board info by FQBN string."""
     return next(
         (
-            b for b in boards
-            if (
-                b.get("fqbn", "") if isinstance(b, dict) else ""
-            ) == fqbn
-        ), {}
+            b
+            for b in boards
+            if (b.get("fqbn", "") if isinstance(b, dict) else "") == fqbn
+        ),
+        {},
     )

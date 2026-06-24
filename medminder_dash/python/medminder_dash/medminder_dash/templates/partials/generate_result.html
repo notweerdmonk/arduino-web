@@ -1,9 +1,7 @@
 {% if ok %}
-<div class="result-banner result-banner--success">
-    Generated <code>{{ path }}</code> with {{ count }} medicine{{ 's' if count != 1 else '' }}.
-</div>
+    <div class="result-banner result-banner--success">
+        Generated <code>{{ path }}</code> with {{ count }} medicine{{ 's' if count != 1 else '' }}.
+    </div>
 {% else %}
-<div class="result-banner result-banner--error">
-    Error generating alarm.hpp: {{ error }}
-</div>
+    <div class="result-banner result-banner--error">Error generating alarm.hpp: {{ error }}</div>
 {% endif %}

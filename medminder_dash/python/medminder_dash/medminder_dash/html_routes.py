@@ -32,7 +32,6 @@ from medminder_dash.sketch_management import (
     _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
-    _warm_upload_registry,
     _render_sketch_path_selector,
 )
 from medminder_dash.sketch_registry import (
@@ -92,8 +91,9 @@ def _resolve_first_port_info(ports):
     return port, fqbn, hw_id
 
 
-def _resolve_board_info(active_board_port, active_board_fqbn,
-                        active_board_hardware_id, ports):
+def _resolve_board_info(
+    active_board_port, active_board_fqbn, active_board_hardware_id, ports
+):
     """Resolve and reconcile board info from session state and known ports.
 
     Args:
@@ -114,8 +114,9 @@ def _resolve_board_info(active_board_port, active_board_fqbn,
             if not active_board_port:
                 raise ValueError("port missing")
         elif ports:
-            (active_board_port, active_board_fqbn,
-             active_board_hardware_id) = _resolve_first_port_info(ports)
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                _resolve_first_port_info(ports)
+            )
     else:
         port = info.get("port", "")
         if not port:
@@ -281,9 +282,14 @@ def _require_any_board():
     return _get_active_board_info()[0]
 
 
-def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
-                     load_sketch_dir_param=None,
-                     get_alarm_hpp_path_param=None):
+def init_html_routes(
+    app: Flask,
+    sock,
+    store_param,
+    migrate_default_board,
+    load_sketch_dir_param=None,
+    get_alarm_hpp_path_param=None,
+):
     """Register all HTML page and partial routes on the Flask app.
 
     Args:
@@ -298,7 +304,7 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
     store = store_param
     # load_sketch_dir_param and get_alarm_hpp_path_param are kept for
     # compatibility with existing callers but routes use the module-level
-    # imports from pubsub_infra / settings directly.
+    # imports from pubsub / settings directly.
 
     # ------------------------------------------------------------------ #
     #  Routes from app.py create_app() — HTML pages and partials          #
@@ -439,16 +445,23 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         active_board_sketch = ""
 
         if not active_board_port:
-            (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                _get_active_board_info()
+            )
 
         if not active_board_port:
             if ports:
                 try:
-                    (active_board_port, active_board_fqbn,
-                     active_board_hardware_id) = _resolve_first_port_info(ports)
+                    (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                        _resolve_first_port_info(ports)
+                    )
                 except ValueError as e:
                     return str(e), 500
-                session["admin_active_board"] = (active_board_port, active_board_fqbn, active_board_hardware_id)
+                session["admin_active_board"] = (
+                    active_board_port,
+                    active_board_fqbn,
+                    active_board_hardware_id,
+                )
 
         else:
             info = get_port_info(active_board_port)
@@ -466,7 +479,11 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
                 active_board_port = ""
                 active_board_fqbn = ""
                 active_board_hardware_id = ""
-            session["admin_active_board"] = (active_board_port, active_board_fqbn, active_board_hardware_id)
+            session["admin_active_board"] = (
+                active_board_port,
+                active_board_fqbn,
+                active_board_hardware_id,
+            )
 
         if not active_board_fqbn:
             active_board_fqbn = "arduino:avr:uno"
@@ -500,7 +517,9 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         (active_board_port, active_board_fqbn, _) = _get_active_board_info()
         if not active_board_port and ports:
             try:
-                (active_board_port, active_board_fqbn, _) = _resolve_first_port_info(ports)
+                (active_board_port, active_board_fqbn, _) = _resolve_first_port_info(
+                    ports
+                )
             except ValueError as e:
                 return str(e), 500
         try:
@@ -523,22 +542,29 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
     @app.route("/board/compile-upload-card")
     def html_board_compile_upload_card():
         """Render the compile/upload card partial."""
-        (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
+        (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+            _get_active_board_info()
+        )
         ports = get_known_ports()
         if not active_board_port and ports:
             try:
-                (active_board_port, active_board_fqbn,
-                 active_board_hardware_id) = _resolve_first_port_info(ports)
+                (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                    _resolve_first_port_info(ports)
+                )
             except ValueError as e:
                 return str(e), 500
         try:
-            (active_board_port, active_board_fqbn,
-             active_board_hardware_id) = _resolve_board_info(
-                active_board_port, active_board_fqbn, active_board_hardware_id, ports
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
+                _resolve_board_info(
+                    active_board_port,
+                    active_board_fqbn,
+                    active_board_hardware_id,
+                    ports,
+                )
             )
         except ValueError as e:
             return str(e), 500
-        active_board_path = (active_board_port or '').lstrip("/")
+        active_board_path = (active_board_port or "").lstrip("/")
         return render_template(
             "partials/compile_upload_card.html",
             active_board=active_board_port,
@@ -705,9 +731,7 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         board_info = get_port_info(norm_port)
         board_name = (board_info or {}).get("board", "") or norm_port
         hardware_id = (board_info or {}).get("hardware_id", "")
-        sketch_path = (
-            get_board_sketch_assignment(hardware_id) if hardware_id else None
-        )
+        sketch_path = get_board_sketch_assignment(hardware_id) if hardware_id else None
         if not sketch_path:
             sketch_path = _resolve_latest_upload()
         if not sketch_path:
@@ -735,7 +759,10 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         connected = bool(info)
         port_path = norm_port.lstrip("/")
         return render_template(
-            "partials/board_status_badge.html", port=norm_port, port_path=port_path, connected=connected
+            "partials/board_status_badge.html",
+            port=norm_port,
+            port_path=port_path,
+            connected=connected,
         )
 
     @app.route("/boards")
@@ -801,11 +828,17 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         if hardware_id:
             assigned = get_board_sketch_assignment(hardware_id)
             if assigned and os.path.isdir(assigned):
-                return _render_sketch_path_selector(assigned, include_default=True, hardware_id=hardware_id)
+                return _render_sketch_path_selector(
+                    assigned, include_default=True, hardware_id=hardware_id
+                )
         selected_path = _resolve_latest_upload()
         if selected_path is None:
-            return _render_sketch_path_selector(include_default=True, hardware_id=hardware_id)
-        return _render_sketch_path_selector(selected_path, include_default=True, hardware_id=hardware_id)
+            return _render_sketch_path_selector(
+                include_default=True, hardware_id=hardware_id
+            )
+        return _render_sketch_path_selector(
+            selected_path, include_default=True, hardware_id=hardware_id
+        )
 
     @app.route("/sketch/upload", methods=["POST"])
     def html_sketch_upload():
@@ -860,9 +893,15 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
                 if hardware_id and hardware_id not in existing["hardware_ids"]:
                     existing["hardware_ids"].append(hardware_id)
                     existing["board_timestamps"][hardware_id] = server_ts
-                    _update_meta_hw_ids(existing["path"], existing["hardware_ids"], existing["board_timestamps"])
+                    _update_meta_hw_ids(
+                        existing["path"],
+                        existing["hardware_ids"],
+                        existing["board_timestamps"],
+                    )
                     _save_registry()
-                    broadcast_ws('<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>')
+                    broadcast_ws(
+                        '<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>'
+                    )
             else:
                 meta = {
                     "ip": ip,
@@ -877,17 +916,21 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
                 }
                 with open(os.path.join(upload_dir, ".meta"), "w") as mf:
                     json.dump(meta, mf)
-                bisect.insort(versions,
+                bisect.insort(
+                    versions,
                     {
                         "path": sketch_dir,
                         "checksum": checksum,
                         "server_timestamp": server_ts,
                         "hardware_ids": meta["hardware_ids"],
                         "board_timestamps": meta["board_timestamps"],
-                    }, key=lambda v: v["server_timestamp"]
+                    },
+                    key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
+                broadcast_ws(
+                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
+                )
 
         if hardware_id:
             set_assignment(hardware_id, sketch_dir)
@@ -900,11 +943,11 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
         sketch_path = request.args.get("path", "")
         hardware_id = request.args.get("hardware_id", "")
         if not sketch_path:
-            return _render_sketch_path_selector()
+            return _render_sketch_path_selector(hardware_id=hardware_id)
         norm_path = os.path.normpath(sketch_path)
         norm_base = os.path.normpath(state.UPLOAD_BASE_DIR)
         if not norm_path.startswith(norm_base):
-            return _render_sketch_path_selector()
+            return _render_sketch_path_selector(hardware_id=hardware_id)
 
         ip = request.remote_addr or "unknown"
         ua = request.headers.get("User-Agent", "unknown")
@@ -922,12 +965,20 @@ def init_html_routes(app: Flask, sock, store_param, migrate_default_board,
                         break
             if removed:
                 all_latest = [vs[-1] for vs in entries.values() if vs]
-                latest = max(all_latest, key=lambda v: v["server_timestamp"]) if all_latest else None
+                latest = (
+                    max(all_latest, key=lambda v: v["server_timestamp"])
+                    if all_latest
+                    else None
+                )
         if removed:
             _save_registry()
-            broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
+            broadcast_ws(
+                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
+            )
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             if latest is not None:
-                return _render_sketch_path_selector(latest.get("path", ""))
-            return _render_sketch_path_selector()
-        return _render_sketch_path_selector()
+                return _render_sketch_path_selector(
+                    latest.get("path", ""), hardware_id=hardware_id
+                )
+            return _render_sketch_path_selector(hardware_id=hardware_id)
+        return _render_sketch_path_selector(hardware_id=hardware_id)

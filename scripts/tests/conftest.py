@@ -23,12 +23,18 @@ INSTALL_DEPS_SCRIPT = SCRIPTS_DIR / "install_arduino_deps.sh"
 # The 6 Python packages. Each entry is (importable_name, setup_py_dir).
 # setup_py_dir is the directory that contains both setup.py and Pipfile.
 PACKAGES = [
-    ("arduino-grpc",         REPO_ROOT / "grpc_client"          / "python" / "arduino_grpc"),
-    ("board-manager",        REPO_ROOT / "board_manager"        / "python" / "board_manager"),
-    ("board-manager-client", REPO_ROOT / "board_manager_client" / "python" / "board_manager_client"),
-    ("arduino-sketch-tools", REPO_ROOT / "arduino_sketch_tools" / "python" / "arduino_sketch_tools"),
-    ("arduino-dash",         REPO_ROOT / "arduino_dash"         / "python" / "arduino_dash"),
-    ("medminder-dash",       REPO_ROOT / "medminder_dash"       / "python" / "medminder_dash"),
+    ("arduino-grpc", REPO_ROOT / "grpc_client" / "python" / "arduino_grpc"),
+    ("board-manager", REPO_ROOT / "board_manager" / "python" / "board_manager"),
+    (
+        "board-manager-client",
+        REPO_ROOT / "board_manager_client" / "python" / "board_manager_client",
+    ),
+    (
+        "arduino-sketch-tools",
+        REPO_ROOT / "arduino_sketch_tools" / "python" / "arduino_sketch_tools",
+    ),
+    ("arduino-dash", REPO_ROOT / "arduino_dash" / "python" / "arduino_dash"),
+    ("medminder-dash", REPO_ROOT / "medminder_dash" / "python" / "medminder_dash"),
 ]
 
 
@@ -63,6 +69,7 @@ def gen_grpc_module():
     sys.path.insert(0, str(SCRIPTS_DIR))
     try:
         import gen_grpc_bindings  # type: ignore[import-not-found]
+
         return gen_grpc_bindings
     finally:
         sys.path[:] = saved

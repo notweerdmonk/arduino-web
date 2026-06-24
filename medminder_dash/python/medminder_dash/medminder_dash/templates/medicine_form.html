@@ -1,28 +1,31 @@
 <div id="medicine-form-container" class="card">
     <h3 class="page-heading">{{ "Edit" if medicine else "Add" }} Medicine</h3>
-
     {% if errors %}
-    <div class="alert-box-error">
-        {% for err in errors %}
-            <div>{{ err }}</div>
-        {% endfor %}
-    </div>
+        <div class="alert-box-error">
+            {% for err in errors %}<div>{{ err }}</div>{% endfor %}
+        </div>
     {% endif %}
-
-    <form hx-{{ "put" if medicine else "post" }}="/medicine{{ '/' + (medicine.id|string) if medicine else '' }}"
+    <form hx-
+          {{ "put" if medicine else "post" }}
+          None="/medicine{{ '/' + (medicine.id|string) if medicine else '' }}"
           hx-target="#medicine-form-container"
           hx-swap="outerHTML"
           class="form-layout">
         <div class="form-group">
             <label>Name</label>
-            <input type="text" name="name" maxlength="8"
+            <input type="text"
+                   name="name"
+                   maxlength="8"
                    value="{{ medicine.name if medicine else '' }}"
                    placeholder="e.g. Ibup, PaRa">
         </div>
         <div class="form-grid">
             <div class="form-group">
                 <label>Hour (1-24)</label>
-                <input type="number" name="hour" min="1" max="24"
+                <input type="number"
+                       name="hour"
+                       min="1"
+                       max="24"
                        value="{{ medicine.hour if medicine else '' }}"
                        placeholder="8">
             </div>
@@ -30,9 +33,10 @@
                 <label>Minute</label>
                 <select name="minute">
                     {% for m in [0, 10, 20, 30, 40, 50] %}
-                    <option value="{{ m }}" {{ "selected" if medicine and medicine.minute == m else "" }}>
-                        {{ "{:02d}".format(m) }}
-                    </option>
+                        <option value="{{ m }}"
+                                {{ "selected" if medicine and medicine.minute == m else "" }}>
+                            {{ "{:02d}".format(m) }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -41,25 +45,30 @@
             <div class="form-group">
                 <label>Day of Week</label>
                 <select name="day_of_week">
-                    <option value="0" {{ "selected" if not medicine or medicine.day_of_week == 0 else "" }}>Every day</option>
-                    {% for d in range(1, 8) %}
-                    <option value="{{ d }}" {{ "selected" if medicine and medicine.day_of_week == d else "" }}>
-                        {{ day_name(d) }}
+                    <option value="0"
+                            {{ "selected" if not medicine or medicine.day_of_week == 0 else "" }}>Every day
                     </option>
+                    {% for d in range(1, 8) %}
+                        <option value="{{ d }}"
+                                {{ "selected" if medicine and medicine.day_of_week == d else "" }}>
+                            {{ day_name(d) }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
                 <label>Day of Month (0=any)</label>
-                <input type="number" name="day_of_month" min="0" max="31"
+                <input type="number"
+                       name="day_of_month"
+                       min="0"
+                       max="31"
                        value="{{ medicine.day_of_month if medicine else '0' }}">
             </div>
         </div>
         <div class="flex-row">
-            <button type="submit" class="btn btn-primary">
-                {{ "Update" if medicine else "Add" }} Medicine
-            </button>
-            <button type="button" class="btn btn-secondary"
+            <button type="submit" class="btn btn-primary">{{ "Update" if medicine else "Add" }} Medicine</button>
+            <button type="button"
+                    class="btn btn-secondary"
                     hx-get="/medicines"
                     hx-target="#medicine-list"
                     hx-swap="innerHTML"

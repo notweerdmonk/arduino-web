@@ -1,7 +1,6 @@
 """Tests for ArduinoSketchTools Flask Extension"""
 
-import threading
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from flask import Flask
@@ -61,7 +60,9 @@ class TestArduinoSketchTools:
 
     def test_init_app_registers_blueprint(self):
         _app = Flask(__name__)
-        ext = ArduinoSketchTools(broadcast_ws=lambda h: None, get_board_info=lambda p: {})
+        ext = ArduinoSketchTools(
+            broadcast_ws=lambda h: None, get_board_info=lambda p: {}
+        )
         ext.init_app(_app)
         assert "arduino_sketch_tools" in _app.extensions
         assert "arduino_sketch_tools" in _app.blueprints
@@ -69,7 +70,9 @@ class TestArduinoSketchTools:
     def test_init_app_with_pubsub_subscribes(self):
         _app = Flask(__name__)
         mock_pubsub = MagicMock()
-        ext = ArduinoSketchTools(broadcast_ws=lambda h: None, get_board_info=lambda p: {})
+        ext = ArduinoSketchTools(
+            broadcast_ws=lambda h: None, get_board_info=lambda p: {}
+        )
         ext.init_app(_app, pubsub=mock_pubsub)
         mock_pubsub.subscribe.assert_any_call("resp::compile::*", ext._on_compile_resp)
         mock_pubsub.subscribe.assert_any_call("resp::upload::*", ext._on_upload_resp)
@@ -78,7 +81,9 @@ class TestArduinoSketchTools:
 class TestOnCompileResp:
     def test_stores_result(self, tools):
         topic = "resp::compile::/dev/ttyACM0"
-        tools._on_compile_resp({"topic": topic, "status": "ok", "data": {"output": "ok"}})
+        tools._on_compile_resp(
+            {"topic": topic, "status": "ok", "data": {"output": "ok"}}
+        )
         with tools._compile_results_lock:
             cached = tools._compile_results.get("/dev/ttyACM0")
         assert cached is not None
@@ -88,10 +93,15 @@ class TestOnCompileResp:
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "Compiling foo.c...\n", "percent": 25.0}})
+        tools._on_compile_resp(
+            {
+                "topic": topic,
+                "data": {"output": "Compiling foo.c...\n", "percent": 25.0},
+            }
+        )
         assert len(ws_html) == 2
         assert "compile-progress" in ws_html[0]
-        assert "value=\"25\"" in ws_html[0]
+        assert 'value="25"' in ws_html[0]
         assert "compile-line" in ws_html[1]
         assert "foo.c" in ws_html[1]
         assert "[25%]" in ws_html[1]
@@ -101,7 +111,9 @@ class TestOnCompileResp:
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "", "error": "", "percent": 50.0}})
+        tools._on_compile_resp(
+            {"topic": topic, "data": {"output": "", "error": "", "percent": 50.0}}
+        )
         assert len(ws_html) == 1
         assert "compile-progress" in ws_html[0]
 
@@ -109,7 +121,12 @@ class TestOnCompileResp:
         ws_html = []
         tools._broadcast_ws = lambda h: ws_html.append(h)
         topic = "resp::compile::/dev/ttyACM0::progress"
-        tools._on_compile_resp({"topic": topic, "data": {"output": "<script>alert('xss')</script>", "percent": 0.0}})
+        tools._on_compile_resp(
+            {
+                "topic": topic,
+                "data": {"output": "<script>alert('xss')</script>", "percent": 0.0},
+            }
+        )
         assert len(ws_html) == 2
         assert "compile-progress" in ws_html[0]
         assert "compile-line" in ws_html[1]
@@ -121,10 +138,13 @@ class TestOnCompileResp:
         sketch_dir.mkdir()
         (sketch_dir / "main.ino").write_text("void setup() {}")
         topic = "resp::compile::/dev/ttyACM0"
-        tools._on_compile_resp({
-            "topic": topic, "status": "ok",
-            "data": {"sketch_path": str(sketch_dir), "output": "ok"},
-        })
+        tools._on_compile_resp(
+            {
+                "topic": topic,
+                "status": "ok",
+                "data": {"sketch_path": str(sketch_dir), "output": "ok"},
+            }
+        )
         with tools._last_compiled_sketch_lock:
             assert tools._last_compiled_sketch.get("/dev/ttyACM0") == str(sketch_dir)
         with tools._last_compile_mtime_lock:
@@ -143,7 +163,9 @@ class TestOnCompileResp:
 class TestOnUploadResp:
     def test_stores_result(self, tools):
         topic = "resp::upload::/dev/ttyACM0"
-        tools._on_upload_resp({"topic": topic, "status": "ok", "data": {"output": "uploaded"}})
+        tools._on_upload_resp(
+            {"topic": topic, "status": "ok", "data": {"output": "uploaded"}}
+        )
         with tools._upload_results_lock:
             cached = tools._upload_results.get("/dev/ttyACM0")
         assert cached is not None
@@ -178,9 +200,14 @@ class TestApiCompile:
         mock_pubsub = MagicMock()
         mock_pubsub.publish.return_value = None
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno", "verbose": "true",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+                "verbose": "true",
+            },
+        )
         assert resp.status_code == 200
         assert b"Compiling" in resp.data
         assert b"/compile/poll" in resp.data
@@ -199,7 +226,8 @@ class TestApiCompile:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "ok", "data": {"output": "built ok"},
+                "status": "ok",
+                "data": {"output": "built ok"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")
         assert resp.status_code == 200
@@ -209,7 +237,9 @@ class TestApiCompile:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Build failed",
+                "status": "error",
+                "code": "fail",
+                "message": "Build failed",
                 "data": {"error": "compilation error"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")
@@ -220,9 +250,13 @@ class TestApiCompile:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = False
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"offline" in resp.data
         mock_pubsub.publish.assert_not_called()
@@ -233,9 +267,14 @@ class TestApiUpload:
         mock_pubsub = MagicMock()
         mock_pubsub.publish.return_value = None
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno", "verbose": "true",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+                "verbose": "true",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         assert b"/upload/poll" in resp.data
@@ -254,7 +293,8 @@ class TestApiUpload:
         with tools._upload_results_lock:
             tools._upload_results["/dev/ttyACM0"] = {
                 "topic": "resp::upload::/dev/ttyACM0",
-                "status": "ok", "data": {"output": "uploaded ok"},
+                "status": "ok",
+                "data": {"output": "uploaded ok"},
             }
         resp = client.get("/board/dev/ttyACM0/upload/poll")
         assert resp.status_code == 200
@@ -264,7 +304,9 @@ class TestApiUpload:
         with tools._upload_results_lock:
             tools._upload_results["/dev/ttyACM0"] = {
                 "topic": "resp::upload::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Cannot open port",
+                "status": "error",
+                "code": "fail",
+                "message": "Cannot open port",
                 "data": {"error": "upload failed"},
             }
         resp = client.get("/board/dev/ttyACM0/upload/poll")
@@ -278,10 +320,18 @@ class TestCompileMeta:
         mock_pubsub.publish.return_value = None
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        tools._get_board_info = lambda p: {"port": p, "board": "Arduino Uno", "fqbn": "arduino:avr:uno"}
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno",
-        })
+        tools._get_board_info = lambda p: {
+            "port": p,
+            "board": "Arduino Uno",
+            "fqbn": "arduino:avr:uno",
+        }
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         with tools._compile_meta_lock:
             meta = tools._compile_meta.get("/dev/ttyACM0")
@@ -292,11 +342,16 @@ class TestCompileMeta:
     def test_meta_cleared_on_poll(self, client, tools):
         with tools._compile_meta_lock:
             tools._compile_meta["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Uno", "fqbn": "avr:uno", "sketch": "/s",
+                "port": "/dev/ttyACM0",
+                "board": "Uno",
+                "fqbn": "avr:uno",
+                "sketch": "/s",
             }
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
-                "topic": "resp::compile::/dev/ttyACM0", "status": "ok", "data": {"output": "ok"},
+                "topic": "resp::compile::/dev/ttyACM0",
+                "status": "ok",
+                "data": {"output": "ok"},
             }
         client.get("/board/dev/ttyACM0/compile/poll")
         with tools._compile_meta_lock:
@@ -309,10 +364,18 @@ class TestUploadMeta:
         mock_pubsub.publish.return_value = None
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        tools._get_board_info = lambda p: {"port": p, "board": "Uno", "fqbn": "arduino:avr:uno"}
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno",
-        })
+        tools._get_board_info = lambda p: {
+            "port": p,
+            "board": "Uno",
+            "fqbn": "arduino:avr:uno",
+        }
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         with tools._upload_meta_lock:
             meta = tools._upload_meta.get("/dev/ttyACM0")
@@ -323,11 +386,16 @@ class TestUploadMeta:
     def test_meta_cleared_on_poll(self, client, tools):
         with tools._upload_meta_lock:
             tools._upload_meta["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Uno", "fqbn": "avr:uno", "sketch": "/s",
+                "port": "/dev/ttyACM0",
+                "board": "Uno",
+                "fqbn": "avr:uno",
+                "sketch": "/s",
             }
         with tools._upload_results_lock:
             tools._upload_results["/dev/ttyACM0"] = {
-                "topic": "resp::upload::/dev/ttyACM0", "status": "ok", "data": {"output": "ok"},
+                "topic": "resp::upload::/dev/ttyACM0",
+                "status": "ok",
+                "data": {"output": "ok"},
             }
         client.get("/board/dev/ttyACM0/upload/poll")
         with tools._upload_meta_lock:
@@ -341,9 +409,13 @@ class TestUploadConfirmWarnings:
         tools.pubsub = mock_pubsub
         with tools._last_compiled_sketch_lock:
             tools._last_compiled_sketch["/dev/ttyACM0"] = "/old/sketch"
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/new/sketch", "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/new/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Warnings detected" in resp.data
         assert b"Sketch path changed" in resp.data
@@ -353,9 +425,13 @@ class TestUploadConfirmWarnings:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload/confirm", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload/confirm",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         mock_pubsub.publish.assert_called_once()
@@ -369,9 +445,13 @@ class TestUploadConfirmWarnings:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = False
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload/confirm", data={
-            "sketch_path": "/tmp/sketch", "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload/confirm",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"offline" in resp.data
 
@@ -386,9 +466,13 @@ class TestUploadConfirmWarnings:
             tools._last_compiled_sketch["/dev/ttyACM0"] = str(sketch_dir)
         with tools._last_compile_mtime_lock:
             tools._last_compile_mtime["/dev/ttyACM0"] = 1000000
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": str(sketch_dir), "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": str(sketch_dir),
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Warnings detected" in resp.data
         mock_pubsub.publish.assert_not_called()
@@ -406,7 +490,9 @@ class TestCompileWarning:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Build failed",
+                "status": "error",
+                "code": "fail",
+                "message": "Build failed",
                 "data": {"error": "compilation error"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")
@@ -425,7 +511,9 @@ class TestCompileWarning:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Build failed",
+                "status": "error",
+                "code": "fail",
+                "message": "Build failed",
                 "data": {"error": "compilation error"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")
@@ -436,7 +524,9 @@ class TestCompileWarning:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Build failed",
+                "status": "error",
+                "code": "fail",
+                "message": "Build failed",
                 "data": {"error": "compilation error"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")
@@ -456,7 +546,9 @@ class TestCompileWarning:
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
                 "topic": "resp::compile::/dev/ttyACM0",
-                "status": "error", "code": "fail", "message": "Build failed",
+                "status": "error",
+                "code": "fail",
+                "message": "Build failed",
                 "data": {"error": "compilation error"},
             }
         resp = client.get("/board/dev/ttyACM0/compile/poll")

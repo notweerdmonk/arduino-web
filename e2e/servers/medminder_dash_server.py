@@ -12,7 +12,6 @@ Usage:
 
 import argparse
 import atexit
-import json
 import os
 import signal
 import subprocess
@@ -22,6 +21,7 @@ import time
 from pathlib import Path
 
 # ── Lifecycle helpers ──────────────────────────────────────────────────────────
+
 
 def _get_default_pidfile() -> str:
     """Derive a pidfile path from the script name, e.g. /tmp/medminder_dash_server.pid."""
@@ -66,9 +66,9 @@ def _stop_server(pidfile: str, force: bool = False) -> None:
         sys.exit(0)
 
     if not force:
-        for _ in range(50):          # poll up to 5 s (50 × 100 ms)
+        for _ in range(50):  # poll up to 5 s (50 × 100 ms)
             try:
-                os.kill(pid, 0)       # check if alive
+                os.kill(pid, 0)  # check if alive
                 time.sleep(0.1)
             except ProcessLookupError:
                 break
@@ -118,15 +118,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_PYTHON = PROJECT_ROOT / "medminder_dash" / "python"
 sys.path.insert(0, str(PACKAGE_PYTHON))
 
-import medminder_dash.state as state
-from medminder_dash.app import create_app
-from medminder_dash.medicines_state import Medicine, _compute_data_path
-from medminder_dash.pubsub_infra import init_pubsub
+import medminder_dash.state as state  # noqa: E402  (sys.path was modified above)
+from medminder_dash.app import create_app  # noqa: E402
+from medminder_dash.medicines_state import Medicine, _compute_data_path  # noqa: E402
+from medminder_dash.pubsub import init_pubsub  # noqa: E402
 
 MOCK_PORT_1 = "/dev/ttyTEST0"
 MOCK_PORT_2 = "/dev/ttyTEST1"
 MOCK_HW_ID_1 = "HW-TEST-001"
 MOCK_HW_ID_2 = "HW-TEST-002"
+
 
 def _start_bms() -> subprocess.Popen:
     """Start the BMS daemon as a subprocess, return Popen handle."""
@@ -149,8 +150,12 @@ def _stop_bms(proc: subprocess.Popen | None) -> None:
 
 MOCK_MEDICINES = [
     dict(name="Aspirin", hour=8, minute=0, day_of_week=0, day_of_month=0, enabled=True),
-    dict(name="VitaminD", hour=12, minute=30, day_of_week=0, day_of_month=0, enabled=True),
-    dict(name="Ibuprofen", hour=18, minute=0, day_of_week=0, day_of_month=0, enabled=True),
+    dict(
+        name="VitaminD", hour=12, minute=30, day_of_week=0, day_of_month=0, enabled=True
+    ),
+    dict(
+        name="Ibuprofen", hour=18, minute=0, day_of_week=0, day_of_month=0, enabled=True
+    ),
 ]
 
 # Point MedicineStore at a temp file so mock data never pollutes production data
@@ -158,7 +163,8 @@ _temp_data_file = Path(tempfile.mkstemp(suffix="board_meta.json")[1])
 _temp_data_file.write_text("{}")
 _original_data_path = _compute_data_path()
 
-import medminder_dash.medicines_state as ms
+import medminder_dash.medicines_state as ms  # noqa: E402 (monkey-patch after app setup)
+
 ms._compute_data_path = lambda: _temp_data_file
 
 app = create_app()
@@ -197,6 +203,7 @@ def _inject_mock_state():
 
     # Inject medicines into the app's store (created by create_app() above)
     import medminder_dash.app as medminder_app
+
     app_store = medminder_app.store
     app_store._board_meta = {}
     app_store._medicines = []
@@ -205,7 +212,9 @@ def _inject_mock_state():
     app_store.load_board(MOCK_PORT_1)
     for med_data in MOCK_MEDICINES:
         app_store.add(Medicine(**med_data))
-    print(f"[medminder_dash_server] {len(MOCK_MEDICINES)} sample medicines injected for {MOCK_PORT_1}")
+    print(
+        f"[medminder_dash_server] {len(MOCK_MEDICINES)} sample medicines injected for {MOCK_PORT_1}"
+    )
 
 
 def main():
@@ -253,7 +262,7 @@ def main():
         "--logfile",
         default=None,
         help="Redirect stdout/stderr to this file (captures Flask logs). "
-             "Omit to send to /dev/null.",
+        "Omit to send to /dev/null.",
     )
     args = parser.parse_args()
 
@@ -267,7 +276,9 @@ def main():
 
     if args.mock:
         _inject_mock_state()
-        print(f"[medminder_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})")
+        print(
+            f"[medminder_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})"
+        )
     else:
         print("[medminder_dash_server] Starting with empty state (no --mock)")
 
@@ -291,7 +302,9 @@ def main():
 
     print(f"[medminder_dash_server] Listening on http://0.0.0.0:{args.port}")
     try:
-        app.run(host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader)
+        app.run(
+            host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader
+        )
     finally:
         _remove_pidfile(pidfile)
         _stop_bms(bms_proc)

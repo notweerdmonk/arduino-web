@@ -5,8 +5,6 @@ import re
 import time
 import threading
 
-from flask import current_app
-
 PORT_RE = re.compile(r"^/dev/[a-zA-Z0-9_/]+$")
 
 
@@ -30,7 +28,9 @@ class ArduinoSketchTools:
 
     COMPILE_TIMEOUT = 150
 
-    def __init__(self, pubsub=None, broadcast_ws=None, get_board_info=None, record_deploy=None):
+    def __init__(
+        self, pubsub=None, broadcast_ws=None, get_board_info=None, record_deploy=None
+    ):
         """Initialize the extension with optional pubsub, broadcast, and hooks."""
         self.pubsub = pubsub
         self._broadcast_ws = broadcast_ws or (lambda html: None)
@@ -72,6 +72,7 @@ class ArduinoSketchTools:
             self.pubsub.subscribe("resp::compile::*", self._on_compile_resp)
             self.pubsub.subscribe("resp::upload::*", self._on_upload_resp)
         from arduino_sketch_tools.routes import compile_bp
+
         app.register_blueprint(compile_bp)
 
     def _norm_port(self, port: str) -> str | None:
@@ -97,16 +98,17 @@ class ArduinoSketchTools:
         if not os.path.isdir(sketch_dir):
             return ""
         import hashlib
+
         hasher = hashlib.sha256()
         file_paths = []
         for root, _dirs, files in os.walk(sketch_dir):
             for f in files:
-                if f.endswith(('.ino', '.cpp', '.h', '.hpp', '.c')):
+                if f.endswith((".ino", ".cpp", ".h", ".hpp", ".c")):
                     file_paths.append(os.path.join(root, f))
         file_paths.sort()
         for fp in file_paths:
             try:
-                with open(fp, 'rb') as fh:
+                with open(fp, "rb") as fh:
                     while True:
                         chunk = fh.read(65536)
                         if not chunk:
@@ -132,7 +134,7 @@ class ArduinoSketchTools:
         max_mtime: float | None = None
         for root, _dirs, files in os.walk(sketch_path):
             for f in files:
-                if f.endswith(('.ino', '.cpp', '.h', '.hpp', '.c')):
+                if f.endswith((".ino", ".cpp", ".h", ".hpp", ".c")):
                     try:
                         mtime = os.path.getmtime(os.path.join(root, f))
                         if max_mtime is None or mtime > max_mtime:
@@ -152,7 +154,9 @@ class ArduinoSketchTools:
             Metadata dict with port, board info, sketch info, and start time.
         """
         board_info = self._get_board_info(port)
-        utils_dir = os.path.basename(os.path.normpath(sketch_path)) if sketch_path else ""
+        utils_dir = (
+            os.path.basename(os.path.normpath(sketch_path)) if sketch_path else ""
+        )
         return {
             "port": port,
             "board": board_info.get("board", ""),
@@ -172,10 +176,10 @@ class ArduinoSketchTools:
         topic = msg.get("topic", "")
         if not topic.startswith("resp::compile::"):
             return
-        rest = topic[len("resp::compile::"):]
+        rest = topic[len("resp::compile::") :]
         is_progress = rest.endswith("::progress")
         if is_progress:
-            port = rest[:-len("::progress")]
+            port = rest[: -len("::progress")]
             data = msg.get("data", {})
             out = data.get("output", "")
             err = data.get("error", "")
@@ -189,7 +193,12 @@ class ArduinoSketchTools:
                     bar = f'<progress id="compile-progress-{port_safe}" value="{pct_int}" max="100" hx-swap-oob="true"></progress>'
                     self._broadcast_ws(bar)
             if out or err:
-                text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                text = (
+                    (out + err)
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
                 pct_prefix = f"[{pct_int}%] " if percent >= 0 else ""
                 html = f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}"><div class="compile-line" data-port="{port}">{pct_prefix}{text}</div></span>'
                 self._broadcast_ws(html)
@@ -203,7 +212,9 @@ class ArduinoSketchTools:
                     with self._last_compiled_sketch_lock:
                         self._last_compiled_sketch[port] = sketch_path
                     with self._last_compile_mtime_lock:
-                        self._last_compile_mtime[port] = self._get_sketch_mtime(sketch_path)
+                        self._last_compile_mtime[port] = self._get_sketch_mtime(
+                            sketch_path
+                        )
 
     def _on_upload_resp(self, msg: dict) -> None:
         """Handle an upload response message from pubsub.
@@ -214,15 +225,20 @@ class ArduinoSketchTools:
         topic = msg.get("topic", "")
         if not topic.startswith("resp::upload::"):
             return
-        rest = topic[len("resp::upload::"):]
+        rest = topic[len("resp::upload::") :]
         is_progress = rest.endswith("::progress")
         if is_progress:
-            port = rest[:-len("::progress")]
+            port = rest[: -len("::progress")]
             data = msg.get("data", {})
             out = data.get("output", "")
             err = data.get("error", "")
             if out or err:
-                text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                text = (
+                    (out + err)
+                    .replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
                 port_safe = port.replace("/", "_")
                 html = f'<span hx-swap-oob="beforeend:#upload-output-{port_safe}"><div class="upload-line" data-port="{port}">{text}</div></span>'
                 self._broadcast_ws(html)

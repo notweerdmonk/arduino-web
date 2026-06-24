@@ -1,10 +1,9 @@
 """Unit tests for Arduino gRPC client"""
 
 import unittest
-from unittest.mock import Mock, MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 import grpc
 
-from cc.arduino.cli.commands.v1 import commands_pb2 as rpc_pb2
 from cc.arduino.cli.commands.v1 import common_pb2 as common_pb2
 from cc.arduino.cli.commands.v1 import port_pb2 as port_pb2
 from cc.arduino.cli.commands.v1 import board_pb2 as board_pb2
@@ -12,7 +11,7 @@ from cc.arduino.cli.commands.v1 import compile_pb2 as compile_pb2
 from cc.arduino.cli.commands.v1 import upload_pb2 as upload_pb2
 
 from arduino_grpc.client import ArduinoGrpcClient
-from arduino_grpc.models import Port, Board, CompileResult, UploadResult
+from arduino_grpc.models import CompileResult, UploadResult
 from arduino_grpc import exceptions
 
 
@@ -310,7 +309,9 @@ class TestArduinoGrpcClientUpload(unittest.TestCase):
 
         self.client.stub.Upload.return_value = iter([mock_result])
 
-        result = self.client.upload("/path/to/sketch", "arduino:avr:uno", "/dev/ttyUSB0")
+        result = self.client.upload(
+            "/path/to/sketch", "arduino:avr:uno", "/dev/ttyUSB0"
+        )
 
         self.assertIsInstance(result, UploadResult)
         self.assertTrue(result.success)
@@ -346,7 +347,11 @@ class TestArduinoGrpcClientUpload(unittest.TestCase):
 
         self.client.stub.Upload.return_value = iter([chunk1, chunk2])
 
-        results = list(self.client.upload_stream("/path/to/sketch", "arduino:avr:uno", "/dev/ttyUSB0"))
+        results = list(
+            self.client.upload_stream(
+                "/path/to/sketch", "arduino:avr:uno", "/dev/ttyUSB0"
+            )
+        )
 
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0][0], "Uploading...\n")

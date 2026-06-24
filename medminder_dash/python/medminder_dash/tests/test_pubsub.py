@@ -2,15 +2,15 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 def test_resolve_board_info_includes_hardware_id():
     """_resolve_board_info returns hardware_id from Port.hardware_id."""
     from arduino_grpc.models import Board, Port
 
     board = Board(
-        port=Port(address="/dev/ttyACM0", hardware_id="USB VID:PID=2341:0043 SER=12345"),
+        port=Port(
+            address="/dev/ttyACM0", hardware_id="USB VID:PID=2341:0043 SER=12345"
+        ),
         fqbn="arduino:avr:uno",
         name="Arduino Uno",
     )

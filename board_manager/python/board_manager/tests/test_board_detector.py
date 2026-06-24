@@ -2,7 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from board_manager.board_detector import BoardDetector
 
@@ -13,7 +12,9 @@ def _make_board(port: str, fqbn: str, name: str) -> Board:
     return Board(port=Port(address=port, protocol="serial"), fqbn=fqbn, name=name)
 
 
-def _make_board_with_hardware_id(port: str, fqbn: str, name: str, hardware_id: str) -> Board:
+def _make_board_with_hardware_id(
+    port: str, fqbn: str, name: str, hardware_id: str
+) -> Board:
     return Board(
         port=Port(address=port, protocol="serial", hardware_id=hardware_id),
         fqbn=fqbn,
@@ -35,7 +36,9 @@ class TestBoardDetector:
             detector._running = False
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector._running = True
             detector._run_once()
 
@@ -60,11 +63,19 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._known_boards = {
-                "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
+                "/dev/ttyACM0": {
+                    "port": "/dev/ttyACM0",
+                    "fqbn": "arduino:avr:uno",
+                    "name": "Arduino Uno",
+                },
             }
 
             mock_client.list_boards.return_value = [
@@ -87,11 +98,19 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._known_boards = {
-                "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
+                "/dev/ttyACM0": {
+                    "port": "/dev/ttyACM0",
+                    "fqbn": "arduino:avr:uno",
+                    "name": "Arduino Uno",
+                },
             }
             detector._run_once()
 
@@ -103,6 +122,7 @@ class TestBoardDetector:
         mock_client = MagicMock()
 
         call_count = [0]
+
         def list_boards_fn(**kwargs):
             call_count[0] += 1
             if call_count[0] > 1:
@@ -116,11 +136,19 @@ class TestBoardDetector:
         def callback(port, msg):
             events.append((port, msg))
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._known_boards = {
-                "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
+                "/dev/ttyACM0": {
+                    "port": "/dev/ttyACM0",
+                    "fqbn": "arduino:avr:uno",
+                    "name": "Arduino Uno",
+                },
             }
             detector._run_once()
 
@@ -136,8 +164,12 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._run_once()
 
@@ -154,7 +186,9 @@ class TestBoardDetector:
             raise RuntimeError("callback crashed")
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector._running = True
             detector._run_once()
 
@@ -169,7 +203,9 @@ class TestBoardDetector:
             def callback(port, msg):
                 events.append((port, msg))
 
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._run_once()
 
@@ -184,7 +220,9 @@ class TestBoardDetector:
         def callback(port, msg):
             events.append((port, msg))
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector = BoardDetector(
                 callback=callback,
                 poll_interval=0.01,
@@ -192,6 +230,7 @@ class TestBoardDetector:
             )
             detector.start()
             import time
+
             time.sleep(0.1)
             detector.stop()
 
@@ -211,8 +250,12 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._run_once()
 
@@ -232,12 +275,24 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
-            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
+            detector = BoardDetector(
+                callback=callback, poll_interval=0.01, list_timeout=3
+            )
             detector._running = True
             detector._known_boards = {
-                "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
-                "/dev/ttyACM1": {"port": "/dev/ttyACM1", "fqbn": "arduino:avr:nano", "name": "Arduino Nano"},
+                "/dev/ttyACM0": {
+                    "port": "/dev/ttyACM0",
+                    "fqbn": "arduino:avr:uno",
+                    "name": "Arduino Uno",
+                },
+                "/dev/ttyACM1": {
+                    "port": "/dev/ttyACM1",
+                    "fqbn": "arduino:avr:nano",
+                    "name": "Arduino Nano",
+                },
             }
             detector._run_once()
 
@@ -256,11 +311,13 @@ class TestRunLoop:
             )
             detector._running = True
             call_count = [0]
+
             def fake_run_once():
                 call_count[0] += 1
                 if call_count[0] >= 2:
                     detector._running = False
                 return False
+
             detector._run_once = fake_run_once
             detector._run()
             mock_sleep.assert_any_call(2.0)
@@ -274,11 +331,13 @@ class TestRunLoop:
             )
             detector._running = True
             call_count = [0]
+
             def fake_run_once():
                 call_count[0] += 1
                 if call_count[0] >= 2:
                     detector._running = False
                 return True
+
             detector._run_once = fake_run_once
             detector._run()
             mock_sleep.assert_any_call(0.01)
@@ -327,7 +386,9 @@ class TestRestartDaemon:
         mock_daemon_mgr = MagicMock()
         mock_daemon_mgr.ensure_alive.return_value = True
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector = BoardDetector(
                 callback=lambda p, m: None,
                 daemon_manager=mock_daemon_mgr,
@@ -345,7 +406,9 @@ class TestRestartDaemon:
         mock_daemon_mgr = MagicMock()
         mock_daemon_mgr.ensure_alive.return_value = True
 
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector = BoardDetector(
                 callback=lambda p, m: None,
                 daemon_manager=mock_daemon_mgr,
@@ -362,7 +425,9 @@ class TestRestartDaemon:
         mock_client = MagicMock()
         mock_client.list_boards.return_value = [
             _make_board_with_hardware_id(
-                "/dev/ttyACM0", "arduino:avr:uno", "Arduino Uno",
+                "/dev/ttyACM0",
+                "arduino:avr:uno",
+                "Arduino Uno",
                 "USB VID:PID=2341:0043 SER=12345",
             ),
         ]
@@ -373,7 +438,9 @@ class TestRestartDaemon:
             detector._running = False
 
         detector = BoardDetector(callback=stop, poll_interval=0.01, list_timeout=3)
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector._running = True
             detector._run_once()
 
@@ -388,7 +455,9 @@ class TestRestartDaemon:
         mock_client = MagicMock()
         mock_client.list_boards.return_value = [
             _make_board_with_hardware_id(
-                "/dev/ttyACM0", "arduino:avr:uno", "Arduino Uno",
+                "/dev/ttyACM0",
+                "arduino:avr:uno",
+                "Arduino Uno",
                 "USB VID:PID=2341:0043 SER=12345",
             ),
         ]
@@ -401,7 +470,9 @@ class TestRestartDaemon:
             detector._running = False
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+        with patch(
+            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
+        ):
             detector._running = True
             detector._run_once()
 
@@ -417,10 +488,12 @@ class TestRestartDaemon:
             )
             detector._running = True
             call_count = [0]
+
             def fake_run_once():
                 call_count[0] += 1
                 detector._running = False
                 return False
+
             detector._run_once = fake_run_once
             detector._run()
             assert call_count[0] == 1
@@ -429,7 +502,9 @@ class TestRestartDaemon:
 class TestBoardDetectorWatch:
     """Tests for watch-mode BoardDetector (BoardListWatch streaming)."""
 
-    def _make_watch_board(self, port: str, detected: bool, fqbn: str = "", name: str = "") -> Board:
+    def _make_watch_board(
+        self, port: str, detected: bool, fqbn: str = "", name: str = ""
+    ) -> Board:
         return Board(
             port=Port(address=port, protocol="serial"),
             fqbn=fqbn,
@@ -440,10 +515,12 @@ class TestBoardDetectorWatch:
     def _run_watch_and_stop(self, detector, mock_client, timeout=0.3):
         """Run _run_watch in a background thread and stop after timeout."""
         import threading as _t
+
         t = _t.Thread(target=detector._run_watch, daemon=True)
         detector._running = True
         t.start()
         import time as _t2
+
         _t2.sleep(timeout)
         detector._running = False
         t.join(timeout=1.0)
@@ -459,13 +536,21 @@ class TestBoardDetectorWatch:
         mock_client = MagicMock()
 
         def first_yield_then_raise(*a, **kw):
-            yield self._make_watch_board("/dev/ttyACM0", detected=True, fqbn="arduino:avr:uno", name="Arduino Uno")
+            yield self._make_watch_board(
+                "/dev/ttyACM0",
+                detected=True,
+                fqbn="arduino:avr:uno",
+                name="Arduino Uno",
+            )
             raise RuntimeError("stop")
 
         mock_client.watch_boards = first_yield_then_raise
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             self._run_watch_and_stop(detector, mock_client)
@@ -488,19 +573,31 @@ class TestBoardDetectorWatch:
 
         detector = BoardDetector(callback=callback, mode="watch")
         detector._known_boards = {
-            "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
+            "/dev/ttyACM0": {
+                "port": "/dev/ttyACM0",
+                "fqbn": "arduino:avr:uno",
+                "name": "Arduino Uno",
+            },
         }
 
         mock_client = MagicMock()
 
         def first_yield_then_raise(*a, **kw):
-            yield self._make_watch_board("/dev/ttyACM0", detected=False, fqbn="arduino:avr:uno", name="Arduino Uno")
+            yield self._make_watch_board(
+                "/dev/ttyACM0",
+                detected=False,
+                fqbn="arduino:avr:uno",
+                name="Arduino Uno",
+            )
             raise RuntimeError("stop")
 
         mock_client.watch_boards = first_yield_then_raise
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             self._run_watch_and_stop(detector, mock_client)
@@ -520,19 +617,31 @@ class TestBoardDetectorWatch:
 
         detector = BoardDetector(callback=callback, mode="watch")
         detector._known_boards = {
-            "/dev/ttyACM0": {"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "name": "Arduino Uno"},
+            "/dev/ttyACM0": {
+                "port": "/dev/ttyACM0",
+                "fqbn": "arduino:avr:uno",
+                "name": "Arduino Uno",
+            },
         }
 
         mock_client = MagicMock()
 
         def first_yield_then_raise(*a, **kw):
-            yield self._make_watch_board("/dev/ttyACM0", detected=True, fqbn="arduino:avr:uno", name="Arduino Uno")
+            yield self._make_watch_board(
+                "/dev/ttyACM0",
+                detected=True,
+                fqbn="arduino:avr:uno",
+                name="Arduino Uno",
+            )
             raise RuntimeError("stop")
 
         mock_client.watch_boards = first_yield_then_raise
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             self._run_watch_and_stop(detector, mock_client)
@@ -556,7 +665,10 @@ class TestBoardDetectorWatch:
         mock_client.watch_boards = first_yield_then_raise
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             self._run_watch_and_stop(detector, mock_client)
@@ -567,11 +679,17 @@ class TestBoardDetectorWatch:
         mock_client = MagicMock()
 
         calls = [0]
+
         def watch_boards_side_effect(*a, **kw):
             calls[0] += 1
             if calls[0] == 1:
                 raise RuntimeError("stream dropped")
-            yield self._make_watch_board("/dev/ttyACM0", detected=True, fqbn="arduino:avr:uno", name="Arduino Uno")
+            yield self._make_watch_board(
+                "/dev/ttyACM0",
+                detected=True,
+                fqbn="arduino:avr:uno",
+                name="Arduino Uno",
+            )
             raise RuntimeError("stop")
 
         mock_client.watch_boards = watch_boards_side_effect
@@ -584,7 +702,10 @@ class TestBoardDetectorWatch:
         detector = BoardDetector(callback=callback, mode="watch")
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             self._run_watch_and_stop(detector, mock_client)
@@ -600,12 +721,16 @@ class TestBoardDetectorWatch:
             pass
 
         with (
-            patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client),
+            patch(
+                "board_manager.board_detector.ArduinoGrpcClient",
+                return_value=mock_client,
+            ),
             patch("board_manager.board_detector.time.sleep"),
         ):
             detector = BoardDetector(callback=callback, mode="watch")
             detector.start()
             import time
+
             time.sleep(0.2)
             detector.stop()
             detector._thread.join(timeout=1.0)

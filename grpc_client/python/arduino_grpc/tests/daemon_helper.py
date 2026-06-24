@@ -16,7 +16,9 @@ def _find_port_pid(port: int) -> Optional[int]:
     try:
         result = subprocess.run(
             ["fuser", f"{port}/tcp"],
-            capture_output=True, text=True, timeout=3,
+            capture_output=True,
+            text=True,
+            timeout=3,
         )
         if result.returncode == 0:
             for part in result.stdout.strip().split():
@@ -27,7 +29,10 @@ def _find_port_pid(port: int) -> Optional[int]:
         pass
     try:
         result = subprocess.run(
-            ["ss", "-tlnp"], capture_output=True, text=True, timeout=3,
+            ["ss", "-tlnp"],
+            capture_output=True,
+            text=True,
+            timeout=3,
         )
         for line in result.stdout.splitlines():
             if f":{port}" in line and "LISTEN" in line:
@@ -41,7 +46,9 @@ def _find_port_pid(port: int) -> Optional[int]:
     try:
         result = subprocess.run(
             ["lsof", "-ti", f":{port}", "-s", "TCP:LISTEN"],
-            capture_output=True, text=True, timeout=3,
+            capture_output=True,
+            text=True,
+            timeout=3,
         )
         if result.returncode == 0:
             for line in result.stdout.strip().splitlines():
@@ -96,7 +103,11 @@ class DaemonCtx:
         timeout: float = 15.0,
     ):
         self.binary = binary or os.environ.get("ARDUINO_CLI_BINARY", "arduino-cli")
-        self.port = port if port is not None else int(os.environ.get("ARDUINO_CLI_PORT", "50051"))
+        self.port = (
+            port
+            if port is not None
+            else int(os.environ.get("ARDUINO_CLI_PORT", "50051"))
+        )
         self.host = host
         self._timeout = timeout
         self._started_pid: Optional[int] = None
@@ -120,12 +131,15 @@ class DaemonCtx:
 
         proc = subprocess.Popen(
             [self.binary, "daemon", "--port", str(self.port), "--daemonize"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
         deadline = time.monotonic() + self._timeout
         while time.monotonic() < deadline:
-            if _port_is_listening(self.host, self.port) and _health_check(self.host, self.port):
+            if _port_is_listening(self.host, self.port) and _health_check(
+                self.host, self.port
+            ):
                 self._started_pid = _find_port_pid(self.port)
                 break
             time.sleep(0.5)
@@ -138,7 +152,9 @@ class DaemonCtx:
                     os.kill(proc.pid, signal.SIGKILL)
                 except OSError:
                     pass
-            raise RuntimeError(f"Daemon did not become ready on {self.addr} within {self._timeout}s")
+            raise RuntimeError(
+                f"Daemon did not become ready on {self.addr} within {self._timeout}s"
+            )
 
         self._owns_daemon = True
         return self.addr

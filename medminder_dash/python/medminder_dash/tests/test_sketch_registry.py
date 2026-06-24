@@ -1,8 +1,6 @@
 """Tests for Phase 62.5 Q5: sketch_registry.py backed by _upload_registry"""
 
-import json
 import os
-import threading
 
 import pytest
 
@@ -29,12 +27,14 @@ def _make_version(path, hardware_ids=None, server_timestamp="2025-01-01T00:00:00
 def test_get_assignment_returns_none_when_empty():
     """get_assignment returns None when no hardware_ids match."""
     from medminder_dash.sketch_registry import get_assignment
+
     assert get_assignment("USB:123 SER=456") is None
 
 
 def test_set_and_get_assignment(tmp_path):
     """set_assignment stores and get_assignment retrieves."""
     from medminder_dash.sketch_registry import get_assignment, set_assignment
+
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
     state._upload_registry[("127.0.0.1", "test-agent")] = {
@@ -48,17 +48,25 @@ def test_set_and_get_assignment(tmp_path):
 def test_get_assignment_returns_none_for_nonexistent_dir(tmp_path):
     """get_assignment returns None if the path does not exist on disk."""
     from medminder_dash.sketch_registry import get_assignment
+
     sketch_dir = str(tmp_path / "nonexistent")
     state._upload_registry[("127.0.0.1", "test-agent")] = {
         "mysketch": [_make_version(sketch_dir)]
     }
-    state._upload_registry[("127.0.0.1", "test-agent")]["mysketch"][0]["hardware_ids"] = ["HW:001"]
+    state._upload_registry[("127.0.0.1", "test-agent")]["mysketch"][0][
+        "hardware_ids"
+    ] = ["HW:001"]
     assert get_assignment("HW:001") is None
 
 
 def test_clear_assignment(tmp_path):
     """clear_assignment removes hardware_id from the version entry."""
-    from medminder_dash.sketch_registry import clear_assignment, get_assignment, set_assignment
+    from medminder_dash.sketch_registry import (
+        clear_assignment,
+        get_assignment,
+        set_assignment,
+    )
+
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
     state._upload_registry[("127.0.0.1", "test-agent")] = {
@@ -73,7 +81,12 @@ def test_clear_assignment(tmp_path):
 
 def test_clear_assignment_only_removes_target(tmp_path):
     """clear_assignment only removes the specified hardware_id."""
-    from medminder_dash.sketch_registry import clear_assignment, get_assignment, set_assignment
+    from medminder_dash.sketch_registry import (
+        clear_assignment,
+        get_assignment,
+        set_assignment,
+    )
+
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
     state._upload_registry[("127.0.0.1", "test-agent")] = {
@@ -89,6 +102,7 @@ def test_clear_assignment_only_removes_target(tmp_path):
 def test_get_all_assignments(tmp_path):
     """get_all_assignments returns all hardware_id -> path mappings."""
     from medminder_dash.sketch_registry import get_all_assignments, set_assignment
+
     d1 = str(tmp_path / "sketch1")
     d2 = str(tmp_path / "sketch2")
     os.makedirs(d1)
@@ -104,12 +118,14 @@ def test_get_all_assignments(tmp_path):
 def test_get_assignment_empty_hardware_id():
     """get_assignment returns None for empty hardware_id."""
     from medminder_dash.sketch_registry import get_assignment
+
     assert get_assignment("") is None
 
 
 def test_set_assignment_empty_hardware_id_noop():
     """set_assignment is a no-op with empty hardware_id."""
     from medminder_dash.sketch_registry import get_all_assignments, set_assignment
+
     set_assignment("", "/path/1")
     assert get_all_assignments() == {}
 
@@ -117,12 +133,14 @@ def test_set_assignment_empty_hardware_id_noop():
 def test_clear_assignment_empty_hardware_id_noop():
     """clear_assignment is a no-op with empty hardware_id."""
     from medminder_dash.sketch_registry import clear_assignment
+
     clear_assignment("")  # should not raise
 
 
 def test_set_assignment_finds_correct_version(tmp_path):
     """set_assignment adds hardware_id to the version with matching path."""
     from medminder_dash.sketch_registry import get_assignment, set_assignment
+
     sd1 = str(tmp_path / "sketch1")
     sd2 = str(tmp_path / "sketch2")
     os.makedirs(sd1)
@@ -137,14 +155,19 @@ def test_set_assignment_finds_correct_version(tmp_path):
 def test_reset_for_tests_does_not_raise():
     """reset_for_tests is a no-op and should not raise."""
     from medminder_dash.sketch_registry import reset_for_tests
+
     reset_for_tests()
 
 
 def test_save_and_load_registry(tmp_path, monkeypatch):
     """_save_registry and _load_registry persist and restore state."""
-    from medminder_dash.sketch_management import _save_registry, _load_registry, REGISTRY_DIR, REGISTRY_FILE
+    from medminder_dash.sketch_management import _save_registry, _load_registry
+
     monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_DIR", tmp_path)
-    monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_FILE", str(tmp_path / "sketch_registry.json"))
+    monkeypatch.setattr(
+        "medminder_dash.sketch_management.REGISTRY_FILE",
+        str(tmp_path / "sketch_registry.json"),
+    )
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
     state._upload_registry[("127.0.0.1", "test-agent")] = {
@@ -164,14 +187,19 @@ def test_save_and_load_registry(tmp_path, monkeypatch):
 
 def test_load_registry_no_file(tmp_path, monkeypatch):
     """_load_registry is a no-op when REGISTRY_FILE does not exist."""
-    from medminder_dash.sketch_management import _load_registry, REGISTRY_FILE
-    monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_FILE", str(tmp_path / "nonexistent.json"))
+    from medminder_dash.sketch_management import _load_registry
+
+    monkeypatch.setattr(
+        "medminder_dash.sketch_management.REGISTRY_FILE",
+        str(tmp_path / "nonexistent.json"),
+    )
     _load_registry()  # should not raise
 
 
 def test_load_registry_corrupt_file(tmp_path, monkeypatch):
     """_load_registry handles corrupt JSON gracefully."""
-    from medminder_dash.sketch_management import _load_registry, REGISTRY_FILE
+    from medminder_dash.sketch_management import _load_registry
+
     reg_file = tmp_path / "sketch_registry.json"
     reg_file.write_text("not valid json")
     monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_FILE", str(reg_file))

@@ -21,6 +21,7 @@ from pathlib import Path
 
 # ── Lifecycle helpers ──────────────────────────────────────────────────────────
 
+
 def _get_default_pidfile() -> str:
     """Derive a pidfile path from the script name, e.g. /tmp/arduino_dash_server.pid."""
     return f"/tmp/{Path(__file__).stem}.pid"
@@ -64,9 +65,9 @@ def _stop_server(pidfile: str, force: bool = False) -> None:
         sys.exit(0)
 
     if not force:
-        for _ in range(50):          # poll up to 5 s (50 × 100 ms)
+        for _ in range(50):  # poll up to 5 s (50 × 100 ms)
             try:
-                os.kill(pid, 0)       # check if alive
+                os.kill(pid, 0)  # check if alive
                 time.sleep(0.1)
             except ProcessLookupError:
                 break
@@ -116,9 +117,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_PYTHON = PROJECT_ROOT / "arduino_dash" / "python"
 sys.path.insert(0, str(PACKAGE_PYTHON))
 
-import arduino_dash.state as state
-from arduino_dash.app import app
-from arduino_dash.pubsub import init_pubsub
+import arduino_dash.state as state  # noqa: E402
+from arduino_dash.app import app  # noqa: E402
+from arduino_dash.pubsub import init_pubsub  # noqa: E402
 
 
 def _start_bms() -> subprocess.Popen:
@@ -139,6 +140,7 @@ def _stop_bms(proc: subprocess.Popen | None) -> None:
     except subprocess.TimeoutExpired:
         proc.kill()
         proc.wait()
+
 
 MOCK_PORT_1 = "/dev/ttyTEST0"
 MOCK_PORT_2 = "/dev/ttyTEST1"
@@ -224,7 +226,7 @@ def main():
         "--logfile",
         default=None,
         help="Redirect stdout/stderr to this file (captures Flask logs). "
-             "Omit to send to /dev/null.",
+        "Omit to send to /dev/null.",
     )
     args = parser.parse_args()
 
@@ -238,7 +240,9 @@ def main():
 
     if args.mock:
         _inject_mock_state()
-        print(f"[arduino_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})")
+        print(
+            f"[arduino_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})"
+        )
     else:
         print("[arduino_dash_server] Starting with empty state (no --mock)")
 
@@ -262,7 +266,9 @@ def main():
 
     print(f"[arduino_dash_server] Listening on http://0.0.0.0:{args.port}")
     try:
-        app.run(host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader)
+        app.run(
+            host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader
+        )
     finally:
         _remove_pidfile(pidfile)
         _stop_bms(bms_proc)

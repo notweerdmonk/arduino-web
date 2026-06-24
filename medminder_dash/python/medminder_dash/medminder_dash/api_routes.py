@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from medminder_dash import state
 from medminder_dash.medicines_state import Medicine
-from medminder_dash.pubsub_infra import (
+from medminder_dash.pubsub import (
     ensure_sketch_dir,
     _get_alarm_hpp_path,
     broadcast_ws,
@@ -27,12 +27,10 @@ from medminder_dash.sketch_management import (
     _save_registry,
     _update_meta_hw_ids,
     _warm_upload_registry,
-    _render_sketch_path_selector,
 )
 from medminder_dash.sketch_registry import set_assignment
 from medminder_dash.utils import (
     get_known_ports,
-    get_port_info,
     validate_medicine_data,
 )
 
@@ -211,7 +209,11 @@ def init_api_routes(app: Flask, store_param):
             for name, versions in entries.items():
                 for v in versions:
                     all_versions.append(
-                        {"name": name, "path": v["path"], "timestamp": v["server_timestamp"]}
+                        {
+                            "name": name,
+                            "path": v["path"],
+                            "timestamp": v["server_timestamp"],
+                        }
                     )
         all_versions.sort(key=lambda v: v["timestamp"], reverse=True)
         all_versions.insert(
@@ -277,9 +279,15 @@ def init_api_routes(app: Flask, store_param):
                 if hardware_id and hardware_id not in existing["hardware_ids"]:
                     existing["hardware_ids"].append(hardware_id)
                     existing["board_timestamps"][hardware_id] = server_ts
-                    _update_meta_hw_ids(existing["path"], existing["hardware_ids"], existing["board_timestamps"])
+                    _update_meta_hw_ids(
+                        existing["path"],
+                        existing["hardware_ids"],
+                        existing["board_timestamps"],
+                    )
                     _save_registry()
-                    broadcast_ws('<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>')
+                    broadcast_ws(
+                        '<div class="sketch-event">Sketch deduplicated <!-- board-event --></div>'
+                    )
             else:
                 meta = {
                     "ip": ip,
@@ -294,17 +302,21 @@ def init_api_routes(app: Flask, store_param):
                 }
                 with open(os.path.join(upload_dir, ".meta"), "w") as mf:
                     json.dump(meta, mf)
-                bisect.insort(versions,
+                bisect.insort(
+                    versions,
                     {
                         "path": sketch_dir,
                         "checksum": checksum,
                         "server_timestamp": server_ts,
                         "hardware_ids": meta["hardware_ids"],
                         "board_timestamps": meta["board_timestamps"],
-                    }, key=lambda v: v["server_timestamp"]
+                    },
+                    key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
+                broadcast_ws(
+                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
+                )
 
         if hardware_id:
             set_assignment(hardware_id, sketch_dir)
@@ -315,7 +327,6 @@ def init_api_routes(app: Flask, store_param):
     def api_sketch_delete():
         """Delete an uploaded sketch via API."""
         sketch_path = request.args.get("path", "")
-        hardware_id = request.args.get("hardware_id", "")
         if not sketch_path:
             return jsonify({"error": "Missing path"}), 400
         norm_path = os.path.normpath(sketch_path)
@@ -339,7 +350,9 @@ def init_api_routes(app: Flask, store_param):
                         break
         if removed:
             _save_registry()
-            broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
+            broadcast_ws(
+                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
+            )
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             return jsonify({"status": "deleted"})
         return jsonify({"error": "Not found"}), 404
@@ -352,18 +365,20 @@ def init_api_routes(app: Flask, store_param):
     def api_medicines_list():
         """Return all medicines as JSON."""
         meds = store.all()
-        return jsonify([
-            {
-                "id": m.id,
-                "name": m.name,
-                "hour": m.hour,
-                "minute": m.minute,
-                "day_of_week": m.day_of_week,
-                "day_of_month": m.day_of_month,
-                "enabled": m.enabled,
-            }
-            for m in meds
-        ])
+        return jsonify(
+            [
+                {
+                    "id": m.id,
+                    "name": m.name,
+                    "hour": m.hour,
+                    "minute": m.minute,
+                    "day_of_week": m.day_of_week,
+                    "day_of_month": m.day_of_month,
+                    "enabled": m.enabled,
+                }
+                for m in meds
+            ]
+        )
 
     @app.route("/api/medicine", methods=["POST"])
     def api_medicine_create():
@@ -383,15 +398,17 @@ def init_api_routes(app: Flask, store_param):
         )
         store.add(med)
         _write_alarm_hpp(store.only_enabled())
-        return jsonify({
-            "id": med.id,
-            "name": med.name,
-            "hour": med.hour,
-            "minute": med.minute,
-            "day_of_week": med.day_of_week,
-            "day_of_month": med.day_of_month,
-            "enabled": med.enabled,
-        }), 201
+        return jsonify(
+            {
+                "id": med.id,
+                "name": med.name,
+                "hour": med.hour,
+                "minute": med.minute,
+                "day_of_week": med.day_of_week,
+                "day_of_month": med.day_of_month,
+                "enabled": med.enabled,
+            }
+        ), 201
 
     @app.route("/api/medicine/<med_id>", methods=["GET"])
     def api_medicine_get(med_id):
@@ -399,15 +416,17 @@ def init_api_routes(app: Flask, store_param):
         med = store.get(med_id)
         if med is None:
             return jsonify({"error": "Not found"}), 404
-        return jsonify({
-            "id": med.id,
-            "name": med.name,
-            "hour": med.hour,
-            "minute": med.minute,
-            "day_of_week": med.day_of_week,
-            "day_of_month": med.day_of_month,
-            "enabled": med.enabled,
-        })
+        return jsonify(
+            {
+                "id": med.id,
+                "name": med.name,
+                "hour": med.hour,
+                "minute": med.minute,
+                "day_of_week": med.day_of_week,
+                "day_of_month": med.day_of_month,
+                "enabled": med.enabled,
+            }
+        )
 
     @app.route("/api/medicine/<med_id>", methods=["PUT"])
     def api_medicine_update(med_id):
@@ -431,15 +450,17 @@ def init_api_routes(app: Flask, store_param):
         )
         _write_alarm_hpp(store.only_enabled())
         updated = store.get(med_id)
-        return jsonify({
-            "id": updated.id,
-            "name": updated.name,
-            "hour": updated.hour,
-            "minute": updated.minute,
-            "day_of_week": updated.day_of_week,
-            "day_of_month": updated.day_of_month,
-            "enabled": updated.enabled,
-        })
+        return jsonify(
+            {
+                "id": updated.id,
+                "name": updated.name,
+                "hour": updated.hour,
+                "minute": updated.minute,
+                "day_of_week": updated.day_of_week,
+                "day_of_month": updated.day_of_month,
+                "enabled": updated.enabled,
+            }
+        )
 
     @app.route("/api/medicine/<med_id>", methods=["DELETE"])
     def api_medicine_delete(med_id):
@@ -460,12 +481,14 @@ def init_api_routes(app: Flask, store_param):
         store.toggle(med_id)
         _write_alarm_hpp(store.only_enabled())
         toggled = store.get(med_id)
-        return jsonify({
-            "id": toggled.id,
-            "name": toggled.name,
-            "hour": toggled.hour,
-            "minute": toggled.minute,
-            "day_of_week": toggled.day_of_week,
-            "day_of_month": toggled.day_of_month,
-            "enabled": toggled.enabled,
-        })
+        return jsonify(
+            {
+                "id": toggled.id,
+                "name": toggled.name,
+                "hour": toggled.hour,
+                "minute": toggled.minute,
+                "day_of_week": toggled.day_of_week,
+                "day_of_month": toggled.day_of_month,
+                "enabled": toggled.enabled,
+            }
+        )

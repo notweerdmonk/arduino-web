@@ -3,11 +3,9 @@
 import logging
 import os
 import select
-import signal
 import socket
-import sys
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 
 from board_manager.board_detector import BoardDetector
 from board_manager.config import Config
@@ -15,7 +13,6 @@ from board_manager.daemon_manager import DaemonManager, DaemonStartError
 from board_manager.pool import BoardPool
 from board_manager.protocol import (
     FrameReader,
-    Handshake,
     detect_mode_from_handshake,
     encode_and_frame,
 )
@@ -32,6 +29,7 @@ class SysTopic(str, Enum):
 
 class ClientConn:
     """State container for a single TCP or UDS client connection."""
+
     def __init__(self, sock: socket.socket, addr: str):
         """Initialize a client connection container.
 
@@ -96,8 +94,12 @@ class BoardManagerService:
             self._daemon_mgr.start(timeout=15.0)
             self._publish_daemon_ready()
         except DaemonStartError as e:
-            logger.error("Failed to start arduino-cli daemon (binary=%s, addr=%s): %s",
-                         self.config.daemon_binary, self.config.arduino_daemon, e)
+            logger.error(
+                "Failed to start arduino-cli daemon (binary=%s, addr=%s): %s",
+                self.config.daemon_binary,
+                self.config.arduino_daemon,
+                e,
+            )
             logger.warning("BoardDetector will retry daemon connection")
 
         self._detector = BoardDetector(
@@ -145,7 +147,9 @@ class BoardManagerService:
         """
         topic = msg.get("topic", "")
         event = msg.get("data", {}).get("event", "")
-        logger.debug("_on_detector_event: port=%s topic=%s event=%s", port, topic, event)
+        logger.debug(
+            "_on_detector_event: port=%s topic=%s event=%s", port, topic, event
+        )
         if event == "connected":
             self._board_state[port] = msg.get("data", {})
         elif event == "disconnected":
@@ -288,7 +292,9 @@ class BoardManagerService:
             topics = msg.get("topics", [msg.get("topic", "")])
             for topic in topics:
                 self.router.subscribe(conn.addr, topic)
-            self._send(conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")})
+            self._send(
+                conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")}
+            )
             if not conn.initial_state_sent:
                 self._send_current_boards_to(conn)
                 self._send_daemon_state_to(conn)
@@ -298,37 +304,59 @@ class BoardManagerService:
             topics = msg.get("topics", [msg.get("topic", "")])
             for topic in topics:
                 self.router.unsubscribe(conn.addr, topic)
-            self._send(conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")})
+            self._send(
+                conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")}
+            )
 
         elif msg_type == "publish":
             topic = msg.get("topic", "")
             body = msg.get("body", {})
             method = body.get("method", "")
-            params = body.get("params", {})
+            params = body.get("params", {})  # noqa: F841
 
             if topic.startswith("board::") and topic.endswith("::cmd"):
-                port = topic[len("board::"):-len("::cmd")]
+                port = topic[len("board::") : -len("::cmd")]
                 self._handle_board_command(conn, port, msg)
             elif method == "list_all_boards":
                 self._handle_list_all_boards(conn, msg)
             elif method == "list_boards":
-                boards = list(self._detector.get_known_boards().values()) if self._detector else []
-                self._send(conn, {
-                    "type": "result", "id": msg.get("id"),
-                    "topic": msg.get("reply_to", ""),
-                    "status": "ok",
-                    "data": {"boards": boards},
-                })
+                boards = (
+                    list(self._detector.get_known_boards().values())
+                    if self._detector
+                    else []
+                )
+                self._send(
+                    conn,
+                    {
+                        "type": "result",
+                        "id": msg.get("id"),
+                        "topic": msg.get("reply_to", ""),
+                        "status": "ok",
+                        "data": {"boards": boards},
+                    },
+                )
             elif method == "health":
-                self._send(conn, {"type": "result", "id": msg.get("id"), "topic": msg.get("reply_to", ""), "status": "ok", "data": {"status": "running"}})
+                self._send(
+                    conn,
+                    {
+                        "type": "result",
+                        "id": msg.get("id"),
+                        "topic": msg.get("reply_to", ""),
+                        "status": "ok",
+                        "data": {"status": "running"},
+                    },
+                )
             else:
-                self._send(conn, {
-                    "type": "result",
-                    "id": msg.get("id"),
-                    "topic": msg.get("reply_to", ""),
-                    "status": "ok",
-                    "data": {"ports": self.pool.list_ports()},
-                })
+                self._send(
+                    conn,
+                    {
+                        "type": "result",
+                        "id": msg.get("id"),
+                        "topic": msg.get("reply_to", ""),
+                        "status": "ok",
+                        "data": {"ports": self.pool.list_ports()},
+                    },
+                )
 
         elif msg_type == "pong":
             pass
@@ -350,19 +378,52 @@ class BoardManagerService:
         if method == "spawn":
             try:
                 self.pool.spawn(port)
-                self._send(conn, {"type": "result", "id": msg.get("id"), "topic": msg.get("reply_to", ""), "status": "ok"})
+                self._send(
+                    conn,
+                    {
+                        "type": "result",
+                        "id": msg.get("id"),
+                        "topic": msg.get("reply_to", ""),
+                        "status": "ok",
+                    },
+                )
             except RuntimeError as e:
-                self._send(conn, {"type": "error", "id": msg.get("id"), "code": "spawn_failed", "message": str(e)})
+                self._send(
+                    conn,
+                    {
+                        "type": "error",
+                        "id": msg.get("id"),
+                        "code": "spawn_failed",
+                        "message": str(e),
+                    },
+                )
             return
 
         if method == "status":
             status = self.pool.get_port_status(port)
-            self._send(conn, {"type": "result", "id": msg.get("id"), "topic": msg.get("reply_to", ""), "status": "ok", "data": status})
+            self._send(
+                conn,
+                {
+                    "type": "result",
+                    "id": msg.get("id"),
+                    "topic": msg.get("reply_to", ""),
+                    "status": "ok",
+                    "data": status,
+                },
+            )
             return
 
         if method == "remove":
             self.pool.remove(port)
-            self._send(conn, {"type": "result", "id": msg.get("id"), "topic": msg.get("reply_to", ""), "status": "ok"})
+            self._send(
+                conn,
+                {
+                    "type": "result",
+                    "id": msg.get("id"),
+                    "topic": msg.get("reply_to", ""),
+                    "status": "ok",
+                },
+            )
             return
 
         bp = self.pool._boards.get(port)
@@ -370,13 +431,28 @@ class BoardManagerService:
             try:
                 self.pool.spawn(port)
             except RuntimeError:
-                self._send(conn, {"type": "error", "code": "spawn_failed", "message": f"Cannot spawn worker for {port}"})
+                self._send(
+                    conn,
+                    {
+                        "type": "error",
+                        "code": "spawn_failed",
+                        "message": f"Cannot spawn worker for {port}",
+                    },
+                )
                 return
 
         try:
             self.pool.dispatch(port, msg)
         except RuntimeError as e:
-            self._send(conn, {"type": "error", "id": msg.get("id"), "code": "dispatch_failed", "message": str(e)})
+            self._send(
+                conn,
+                {
+                    "type": "error",
+                    "id": msg.get("id"),
+                    "code": "dispatch_failed",
+                    "message": str(e),
+                },
+            )
 
     def _handle_list_all_boards(self, conn: ClientConn, msg: dict) -> None:
         """Handle a list_all_boards request.
@@ -389,13 +465,16 @@ class BoardManagerService:
         for port in self.pool.list_ports():
             status = self.pool.get_port_status(port)
             board_list.append(status)
-        self._send(conn, {
-            "type": "result",
-            "id": msg.get("id"),
-            "topic": msg.get("reply_to", ""),
-            "status": "ok",
-            "data": {"boards": board_list, "ports": self.pool.list_ports()},
-        })
+        self._send(
+            conn,
+            {
+                "type": "result",
+                "id": msg.get("id"),
+                "topic": msg.get("reply_to", ""),
+                "status": "ok",
+                "data": {"boards": board_list, "ports": self.pool.list_ports()},
+            },
+        )
 
     def _route_pool_message(self, port: str, msg: dict, topic: str) -> None:
         """Route a message from a board worker to all matching subscribers.
@@ -413,11 +492,29 @@ class BoardManagerService:
 
         is_result = not topic.endswith("::progress")
         if topic.startswith("resp::compile::") and is_result:
-            extra = f" message={msg.get('message', '')}" if msg.get("status") == "error" else ""
-            logger.info("compile result for port %s: status=%s%s", port, msg.get("status", "?"), extra)
+            extra = (
+                f" message={msg.get('message', '')}"
+                if msg.get("status") == "error"
+                else ""
+            )
+            logger.info(
+                "compile result for port %s: status=%s%s",
+                port,
+                msg.get("status", "?"),
+                extra,
+            )
         elif topic.startswith("resp::upload::") and is_result:
-            extra = f" message={msg.get('message', '')}" if msg.get("status") == "error" else ""
-            logger.info("upload result for port %s: status=%s%s", port, msg.get("status", "?"), extra)
+            extra = (
+                f" message={msg.get('message', '')}"
+                if msg.get("status") == "error"
+                else ""
+            )
+            logger.info(
+                "upload result for port %s: status=%s%s",
+                port,
+                msg.get("status", "?"),
+                extra,
+            )
 
         event_topic = f"board::{port}::event"
         status_topic = f"board::{port}::status"
@@ -426,10 +523,16 @@ class BoardManagerService:
         sub_ids.update(self.router.subscribers_for(event_topic))
         sub_ids.update(self.router.subscribers_for(status_topic))
 
-        logger.debug("_route_pool_message: port=%s topic=%s sub_ids=%s", port, topic, sub_ids)
+        logger.debug(
+            "_route_pool_message: port=%s topic=%s sub_ids=%s", port, topic, sub_ids
+        )
 
         if not sub_ids:
-            logger.debug("_route_pool_message: no subscribers for topic '%s' (patterns: %s)", topic, self.router.patterns)
+            logger.debug(
+                "_route_pool_message: no subscribers for topic '%s' (patterns: %s)",
+                topic,
+                self.router.patterns,
+            )
 
         for addr in sub_ids:
             conn = self._find_client(addr)
@@ -437,7 +540,11 @@ class BoardManagerService:
                 logger.debug("_route_pool_message: sending to %s", addr)
                 self._send(conn, msg)
             else:
-                logger.debug("_route_pool_message: subscriber '%s' not found in _clients (keys: %s)", addr, list(self._clients.keys()))
+                logger.debug(
+                    "_route_pool_message: subscriber '%s' not found in _clients (keys: %s)",
+                    addr,
+                    list(self._clients.keys()),
+                )
 
     def _send_current_boards_to(self, conn: ClientConn) -> None:
         """Send current board state as synthetic ``connected`` events to a subscriber.
@@ -465,7 +572,10 @@ class BoardManagerService:
             sub_ids.update(self.router.subscribers_for(event_topic))
             sub_ids.update(self.router.subscribers_for(status_topic))
             if conn.addr in sub_ids:
-                logger.debug("_send_current_boards_to: sending synthetic 'connected' for %s", port)
+                logger.debug(
+                    "_send_current_boards_to: sending synthetic 'connected' for %s",
+                    port,
+                )
                 self._send(conn, synthetic)
 
     def _send_daemon_state_to(self, conn: ClientConn) -> None:
@@ -478,11 +588,14 @@ class BoardManagerService:
             return
         sub_ids = self.router.subscribers_for(SysTopic.DAEMON_READY)
         if conn.addr in sub_ids:
-            self._send(conn, {
-                "type": "event",
-                "topic": SysTopic.DAEMON_READY,
-                "data": {},
-            })
+            self._send(
+                conn,
+                {
+                    "type": "event",
+                    "topic": SysTopic.DAEMON_READY,
+                    "data": {},
+                },
+            )
 
     def _find_client(self, addr: str) -> Optional[ClientConn]:
         """Find a client connection by its address string.
@@ -493,12 +606,24 @@ class BoardManagerService:
         Returns:
             The ClientConn, or None if not found.
         """
-        logger.debug("_find_client: looking for addr='%s' among %d clients", addr, len(self._clients))
+        logger.debug(
+            "_find_client: looking for addr='%s' among %d clients",
+            addr,
+            len(self._clients),
+        )
         for conn in self._clients.values():
             if conn.addr == addr:
-                logger.debug("_find_client: found conn addr='%s' fileno=%d", conn.addr, conn.fileno())
+                logger.debug(
+                    "_find_client: found conn addr='%s' fileno=%d",
+                    conn.addr,
+                    conn.fileno(),
+                )
                 return conn
-        logger.debug("_find_client: addr='%s' NOT FOUND. Known addrs: %s", addr, [c.addr for c in self._clients.values()])
+        logger.debug(
+            "_find_client: addr='%s' NOT FOUND. Known addrs: %s",
+            addr,
+            [c.addr for c in self._clients.values()],
+        )
         return None
 
     def _send(self, conn: ClientConn, msg: dict) -> None:

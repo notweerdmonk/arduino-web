@@ -29,7 +29,9 @@ class DaemonManager:
     killed and a fresh daemon is spawned.
     """
 
-    def __init__(self, binary: str = "arduino-cli", daemon_addr: str = "localhost:50051"):
+    def __init__(
+        self, binary: str = "arduino-cli", daemon_addr: str = "localhost:50051"
+    ):
         """Initialize the daemon manager.
 
         Args:
@@ -89,7 +91,9 @@ class DaemonManager:
         """
         parts = addr.rsplit(":", 1)
         if len(parts) != 2:
-            raise DaemonStartError(f"Invalid daemon address: {addr!r} (expected host:port)")
+            raise DaemonStartError(
+                f"Invalid daemon address: {addr!r} (expected host:port)"
+            )
         host = parts[0] or "127.0.0.1"
         try:
             port = int(parts[1])
@@ -116,7 +120,8 @@ class DaemonManager:
             if self._health_check():
                 logger.info(
                     "Reusing existing daemon on %s:%d (health check passed)",
-                    self._host, self._port,
+                    self._host,
+                    self._port,
                 )
                 return
             logger.warning(
@@ -125,7 +130,9 @@ class DaemonManager:
             )
             self._kill_port_owner()
 
-        logger.info("Starting daemon: %s daemon --port %d --daemonize", self._binary, self._port)
+        logger.info(
+            "Starting daemon: %s daemon --port %d --daemonize", self._binary, self._port
+        )
         try:
             self._process = subprocess.Popen(
                 [self._binary, "daemon", "--port", str(self._port), "--daemonize"],
@@ -153,7 +160,10 @@ class DaemonManager:
                         self._daemon_pid = actual_pid
                         logger.info(
                             "Daemon ready on %s:%d (pid %d, actual pid %d)",
-                            self._host, self._port, self._process.pid, self._daemon_pid,
+                            self._host,
+                            self._port,
+                            self._process.pid,
+                            self._daemon_pid,
                         )
                     else:
                         logger.warning(
@@ -261,7 +271,9 @@ class DaemonManager:
             if create_resp.HasField("instance"):
                 instance = create_resp.instance
                 try:
-                    stub.Destroy(commands_pb2.DestroyRequest(instance=instance), timeout=3)
+                    stub.Destroy(
+                        commands_pb2.DestroyRequest(instance=instance), timeout=3
+                    )
                 except Exception:
                     pass
                 return True
@@ -304,7 +316,9 @@ class DaemonManager:
         try:
             result = subprocess.run(
                 ["fuser", f"{self._port}/tcp"],
-                capture_output=True, text=True, timeout=3,
+                capture_output=True,
+                text=True,
+                timeout=3,
             )
             if result.returncode == 0:
                 for part in result.stdout.strip().split():
@@ -316,7 +330,9 @@ class DaemonManager:
         try:
             result = subprocess.run(
                 ["ss", "-tlnp"],
-                capture_output=True, text=True, timeout=3,
+                capture_output=True,
+                text=True,
+                timeout=3,
             )
             for line in result.stdout.splitlines():
                 if f":{self._port}" in line and "LISTEN" in line:
@@ -330,7 +346,9 @@ class DaemonManager:
         try:
             result = subprocess.run(
                 ["lsof", "-ti", f":{self._port}", "-s", "TCP:LISTEN"],
-                capture_output=True, text=True, timeout=3,
+                capture_output=True,
+                text=True,
+                timeout=3,
             )
             if result.returncode == 0:
                 for line in result.stdout.strip().splitlines():

@@ -1,9 +1,7 @@
 """Tests for UdevMonitor"""
 
-import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from board_manager.udev_monitor import UdevMonitor
 
@@ -53,7 +51,9 @@ class TestUdevMonitor:
         monitor = UdevMonitor(callback=callback)
         with monitor._lock:
             monitor._known_boards["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "fqbn": "", "name": "Arduino_Uno",
+                "port": "/dev/ttyACM0",
+                "fqbn": "",
+                "name": "Arduino_Uno",
             }
 
         device = _make_device(action="remove")
@@ -74,7 +74,9 @@ class TestUdevMonitor:
         monitor = UdevMonitor(callback=callback)
         with monitor._lock:
             monitor._known_boards["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "fqbn": "", "name": "Arduino_Uno",
+                "port": "/dev/ttyACM0",
+                "fqbn": "",
+                "name": "Arduino_Uno",
             }
 
         device = _make_device()

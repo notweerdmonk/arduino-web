@@ -1,47 +1,21 @@
 """Flask application factory and top-level route wiring."""
 
+from __future__ import annotations
+
 import logging
 import os
-import sys
-import uuid
-
-logger = logging.getLogger(__name__)
-
-from flask import (
-    Flask,
-    render_template,
-    request,
-    redirect,
-    url_for,
-    session,
-    jsonify,
-    make_response,
-)
 
 from arduino_sketch_tools import ArduinoSketchTools
+from flask import Flask, session
 
 from medminder_dash import state
-from medminder_dash.medicines_state import Medicine, MedicineStore
-from medminder_dash.utils import validate_medicine_data, day_name, time_display
-from medminder_dash.sketch_gen import generate_alarm_hpp, parse_alarm_hpp
-from medminder_dash.pubsub_infra import (
-    broadcast_ws,
-    add_ws_client,
-    remove_ws_client,
-    is_connected,
-    is_daemon_ready,
-    ensure_sketch_dir,
-    _get_alarm_hpp_path,
-)
-from medminder_dash.utils import (
-    get_known_ports,
-    get_port_info,
-    get_first_board,
-    find_board_info_by_fqbn,
-)
-from medminder_dash.settings import _DEFAULT_SKETCH_DIR, load_sketch_dir
-from medminder_dash.sketch_registry import get_assignment as get_board_sketch_assignment
+from medminder_dash.medicines_state import MedicineStore
+from medminder_dash.pubsub import _get_alarm_hpp_path, broadcast_ws
+from medminder_dash.settings import load_sketch_dir
 from medminder_dash.sketch_management import _save_registry, _update_meta_hw_ids
+from medminder_dash.utils import get_port_info
+
+logger = logging.getLogger(__name__)
 
 
 SKETCH_DIR = load_sketch_dir()
@@ -69,6 +43,7 @@ def _record_deploy(port: str, sketch_path: str) -> None:
         sketch_path: Path to the deployed sketch.
     """
     import datetime
+
     with state._known_ports_lock:
         board_info = state._known_ports.get(port, {})
     hardware_id = board_info.get("hardware_id", "")
@@ -83,9 +58,13 @@ def _record_deploy(port: str, sketch_path: str) -> None:
                         if hardware_id not in v["hardware_ids"]:
                             v["hardware_ids"].append(hardware_id)
                         v["board_timestamps"][hardware_id] = deploy_ts
-                        _update_meta_hw_ids(sketch_path, v["hardware_ids"], v["board_timestamps"])
+                        _update_meta_hw_ids(
+                            sketch_path, v["hardware_ids"], v["board_timestamps"]
+                        )
                         _save_registry()
-                        broadcast_ws('<div class="sketch-event">Deploy recorded <!-- board-event --></div>')
+                        broadcast_ws(
+                            '<div class="sketch-event">Deploy recorded <!-- board-event --></div>'
+                        )
                         return
 
 

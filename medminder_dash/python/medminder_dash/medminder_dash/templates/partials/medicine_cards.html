@@ -1,4 +1,5 @@
-<div id="medicine-cards-container" data-differ="{{ 'true' if diff.differ else 'false' }}">
+<div id="medicine-cards-container"
+     data-differ="{{ 'true' if diff.differ else 'false' }}">
     {% if diff.differ %}
         {% include "partials/medicine_metadata_card.html" with context %}
         {% set show_two_cards = True %}

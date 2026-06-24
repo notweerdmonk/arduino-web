@@ -30,6 +30,7 @@ def clear_caches():
     with _app_module._upload_registry_lock:
         _app_module._upload_registry.clear()
     import os as _os
+
     _os.path.isfile(_REGISTRY_FILE) and _os.remove(_REGISTRY_FILE)
     _tools = _app_module.app.extensions.get("arduino_sketch_tools")
     if _tools:
@@ -95,9 +96,13 @@ class TestOnResp:
         with _app_module._pending_responses_lock:
             _app_module._pending_responses[topic] = (None, event)
 
-        _app_module._on_resp({"topic": topic, "status": "ok", "data": {"output": "first"}})
+        _app_module._on_resp(
+            {"topic": topic, "status": "ok", "data": {"output": "first"}}
+        )
         assert event.is_set()
-        _app_module._on_resp({"topic": topic, "status": "ok", "data": {"output": "second"}})
+        _app_module._on_resp(
+            {"topic": topic, "status": "ok", "data": {"output": "second"}}
+        )
 
         with _app_module._pending_responses_lock:
             stored = _app_module._pending_responses.get(topic)
@@ -112,12 +117,16 @@ class TestWaitForResponse:
 
         def send_after_delay():
             import time
+
             time.sleep(0.05)
             with _app_module._pending_responses_lock:
                 entry = _app_module._pending_responses.get(topic)
             if entry is not None:
                 _, event = entry
-                _app_module._pending_responses[topic] = ({"status": "ok", "topic": topic}, event)
+                _app_module._pending_responses[topic] = (
+                    {"status": "ok", "topic": topic},
+                    event,
+                )
                 event.set()
 
         t = threading.Thread(target=send_after_delay, daemon=True)
@@ -143,11 +152,14 @@ class TestApiCompile:
         mock_pubsub = MagicMock()
         mock_pubsub.publish.return_value = None
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-            "verbose": "true",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+                "verbose": "true",
+            },
+        )
         assert resp.status_code == 200
         assert b"Compiling" in resp.data
         assert b"/compile/poll" in resp.data
@@ -179,11 +191,14 @@ class TestApiUpload:
         mock_pubsub = MagicMock()
         mock_pubsub.publish.return_value = None
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-            "verbose": "true",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+                "verbose": "true",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         assert b"/upload/poll" in resp.data
@@ -216,7 +231,10 @@ class TestApiUpload:
                 "status": "error",
                 "code": "upload_failed",
                 "message": "Cannot open serial port /dev/ttyACM0",
-                "data": {"code": "upload_failed", "message": "Cannot open serial port /dev/ttyACM0"},
+                "data": {
+                    "code": "upload_failed",
+                    "message": "Cannot open serial port /dev/ttyACM0",
+                },
             }
         resp = client.get("/board/dev/ttyACM0/upload/poll")
         assert resp.status_code == 200
@@ -245,8 +263,12 @@ class TestInitPubsub:
             )
 
             # subscribe and start_reader should still be called after failure
-            instance.subscribe.assert_any_call("board::+::event", _app_module._on_board_event)
-            instance.subscribe.assert_any_call("sys::daemon/ready", _app_module._on_daemon_ready)
+            instance.subscribe.assert_any_call(
+                "board::+::event", _app_module._on_board_event
+            )
+            instance.subscribe.assert_any_call(
+                "sys::daemon/ready", _app_module._on_daemon_ready
+            )
             instance.start_reader.assert_called_once()
 
             # Warning should be logged
@@ -268,8 +290,12 @@ class TestInitPubsub:
 
             assert instance.on_reconnect == _app_module._on_pubsub_reconnect
             instance.connect.assert_called_once_with(retry=True)
-            instance.subscribe.assert_any_call("board::+::event", _app_module._on_board_event)
-            instance.subscribe.assert_any_call("sys::daemon/ready", _app_module._on_daemon_ready)
+            instance.subscribe.assert_any_call(
+                "board::+::event", _app_module._on_board_event
+            )
+            instance.subscribe.assert_any_call(
+                "sys::daemon/ready", _app_module._on_daemon_ready
+            )
             instance.start_reader.assert_called_once()
 
 
@@ -281,12 +307,17 @@ class TestCompileMeta:
         tools.pubsub = mock_pubsub
         with _app_module._board_list_lock:
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         with tools._compile_meta_lock:
             meta = tools._compile_meta.get("/dev/ttyACM0")
@@ -299,7 +330,10 @@ class TestCompileMeta:
     def test_compile_meta_cleared_on_poll(self, client, tools):
         with tools._compile_meta_lock:
             tools._compile_meta["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "sketch": "/tmp/sketch",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
+                "sketch": "/tmp/sketch",
             }
         with tools._compile_results_lock:
             tools._compile_results["/dev/ttyACM0"] = {
@@ -321,12 +355,17 @@ class TestUploadMeta:
         tools.pubsub = mock_pubsub
         with _app_module._board_list_lock:
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         with tools._upload_meta_lock:
             meta = tools._upload_meta.get("/dev/ttyACM0")
@@ -339,7 +378,10 @@ class TestUploadMeta:
     def test_upload_meta_cleared_on_poll(self, client, tools):
         with tools._upload_meta_lock:
             tools._upload_meta["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "sketch": "/tmp/sketch",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
+                "sketch": "/tmp/sketch",
             }
         with tools._upload_results_lock:
             tools._upload_results["/dev/ttyACM0"] = {
@@ -356,7 +398,10 @@ class TestUploadMeta:
 class TestBoardConnectionStatus:
     def test_connected_when_port_in_board_list(self, client):
         with _app_module._board_list_lock:
-            _app_module._board_list["/dev/ttyACM0"] = {"port": "/dev/ttyACM0", "board": "Arduino Uno"}
+            _app_module._board_list["/dev/ttyACM0"] = {
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+            }
         resp = client.get("/board/dev/ttyACM0/connection-status")
         assert resp.status_code == 200
         assert b"Connected" in resp.data
@@ -383,10 +428,13 @@ class TestBmsOffline:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = False
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"offline" in resp.data
         assert b"BoardManagerService" in resp.data
@@ -396,10 +444,13 @@ class TestBmsOffline:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = False
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"offline" in resp.data
         assert b"BoardManagerService" in resp.data
@@ -409,10 +460,13 @@ class TestBmsOffline:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/compile", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/compile",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Compiling" in resp.data
         mock_pubsub.publish.assert_called_once()
@@ -421,10 +475,13 @@ class TestBmsOffline:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         mock_pubsub.publish.assert_called_once()
@@ -443,7 +500,9 @@ class TestDaemonStatus:
 
     def test_daemon_ready_handler_ignores_unknown_type(self):
         state._daemon_ready = False
-        _app_module._on_daemon_ready({"type": "heartbeat", "topic": "sys::daemon/ready"})
+        _app_module._on_daemon_ready(
+            {"type": "heartbeat", "topic": "sys::daemon/ready"}
+        )
         assert state._daemon_ready is False
 
     def test_pubsub_reconnect_resets_flag(self):
@@ -528,10 +587,13 @@ class TestUploadConfirmWarnings:
         tools.pubsub = mock_pubsub
         with tools._last_compiled_sketch_lock:
             tools._last_compiled_sketch["/dev/ttyACM0"] = "/old/sketch"
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": "/new/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": "/new/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Warnings detected" in resp.data
         assert b"Sketch path changed" in resp.data
@@ -551,10 +613,13 @@ class TestUploadConfirmWarnings:
             tools._last_compiled_sketch["/dev/ttyACM0"] = str(sketch_dir)
         with tools._last_compile_mtime_lock:
             tools._last_compile_mtime["/dev/ttyACM0"] = 1000000
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": str(sketch_dir),
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": str(sketch_dir),
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Warnings detected" in resp.data
         mock_pubsub.publish.assert_not_called()
@@ -563,10 +628,13 @@ class TestUploadConfirmWarnings:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = True
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload/confirm", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload/confirm",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         mock_pubsub.publish.assert_called_once()
@@ -581,10 +649,13 @@ class TestUploadConfirmWarnings:
         mock_pubsub = MagicMock()
         mock_pubsub.is_connected = False
         tools.pubsub = mock_pubsub
-        resp = client.post("/board/dev/ttyACM0/upload/confirm", data={
-            "sketch_path": "/tmp/sketch",
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload/confirm",
+            data={
+                "sketch_path": "/tmp/sketch",
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"offline" in resp.data
         assert b"BoardManagerService" in resp.data
@@ -604,10 +675,13 @@ class TestUploadConfirmWarnings:
         checksum = tools._compute_sketch_checksum(str(sketch_dir))
         with tools._last_compile_checksum_lock:
             tools._last_compile_checksum["/dev/ttyACM0"] = "different" + checksum[6:]
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": str(sketch_dir),
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": str(sketch_dir),
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Warnings detected" in resp.data
         mock_pubsub.publish.assert_not_called()
@@ -626,10 +700,13 @@ class TestUploadConfirmWarnings:
             tools._last_compile_mtime.pop("/dev/ttyACM0", None)
         with tools._last_compile_checksum_lock:
             tools._last_compile_checksum.pop("/dev/ttyACM0", None)
-        resp = client.post("/board/dev/ttyACM0/upload", data={
-            "sketch_path": str(sketch_dir),
-            "fqbn": "arduino:avr:uno",
-        })
+        resp = client.post(
+            "/board/dev/ttyACM0/upload",
+            data={
+                "sketch_path": str(sketch_dir),
+                "fqbn": "arduino:avr:uno",
+            },
+        )
         assert resp.status_code == 200
         assert b"Uploading" in resp.data
         with tools._last_uploaded_sketch_lock:
@@ -638,7 +715,9 @@ class TestUploadConfirmWarnings:
 
 
 class TestCompileWarning:
-    def test_poll_sets_warning_on_error_when_sketch_modified(self, client, tmp_path, tools):
+    def test_poll_sets_warning_on_error_when_sketch_modified(
+        self, client, tmp_path, tools
+    ):
         sketch_dir = tmp_path / "sketch"
         sketch_dir.mkdir()
         ino = sketch_dir / "main.ino"
@@ -753,7 +832,9 @@ class TestSketchUpload:
                     (io.BytesIO(b"int main() {}"), "blinky/src/main.cpp"),
                 ],
             }
-            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            resp = client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
         assert resp.status_code == 200
         result = resp.get_json()
         assert result is not None
@@ -774,7 +855,9 @@ class TestSketchUpload:
                     (io.BytesIO(b"void setup() {}"), "blinky/blinky.ino"),
                 ],
             }
-            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            resp = client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
         assert resp.status_code == 200
         result = resp.get_json()
         sketch_dir = result["path"]
@@ -799,7 +882,9 @@ class TestSketchUpload:
                     (io.BytesIO(b"void setup() {}"), "sketch/sketch.ino"),
                 ],
             }
-            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            resp = client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
         assert resp.status_code == 200
         result = resp.get_json()
         assert "path" in result
@@ -808,7 +893,9 @@ class TestSketchUpload:
         assert os.path.isdir(result["path"])
 
     def test_upload_rejects_empty(self, client):
-        resp = client.post("/api/sketch/upload", data={}, content_type="multipart/form-data")
+        resp = client.post(
+            "/api/sketch/upload", data={}, content_type="multipart/form-data"
+        )
         assert resp.status_code == 400
         result = resp.get_json()
         assert result is not None
@@ -818,7 +905,8 @@ class TestSketchUpload:
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
             resp = client.post(
-                "/sketch/upload", data=data,
+                "/sketch/upload",
+                data=data,
                 content_type="multipart/form-data",
                 headers={"HX-Request": "true"},
             )
@@ -830,7 +918,8 @@ class TestSketchUpload:
 
     def test_upload_htmx_empty_returns_html(self, client):
         resp = client.post(
-            "/sketch/upload", data={},
+            "/sketch/upload",
+            data={},
             content_type="multipart/form-data",
             headers={"HX-Request": "true"},
         )
@@ -843,10 +932,14 @@ class TestSketchUpload:
     def test_dedup_same_content_returns_same_path(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data1 = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            resp1 = client.post("/api/sketch/upload", data=data1, content_type="multipart/form-data")
+            resp1 = client.post(
+                "/api/sketch/upload", data=data1, content_type="multipart/form-data"
+            )
             path1 = resp1.get_json()["path"]
             data2 = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            resp2 = client.post("/api/sketch/upload", data=data2, content_type="multipart/form-data")
+            resp2 = client.post(
+                "/api/sketch/upload", data=data2, content_type="multipart/form-data"
+            )
             path2 = resp2.get_json()["path"]
         assert path1 == path2
         assert os.path.isdir(path1)
@@ -854,9 +947,20 @@ class TestSketchUpload:
     def test_dedup_new_version_on_content_change(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data1 = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            path1 = client.post("/api/sketch/upload", data=data1, content_type="multipart/form-data").get_json()["path"]
-            data2 = {"files[]": [(io.BytesIO(b"void setup() { pinMode(13, OUTPUT); }"), "blinky/blinky.ino")]}
-            path2 = client.post("/api/sketch/upload", data=data2, content_type="multipart/form-data").get_json()["path"]
+            path1 = client.post(
+                "/api/sketch/upload", data=data1, content_type="multipart/form-data"
+            ).get_json()["path"]
+            data2 = {
+                "files[]": [
+                    (
+                        io.BytesIO(b"void setup() { pinMode(13, OUTPUT); }"),
+                        "blinky/blinky.ino",
+                    )
+                ]
+            }
+            path2 = client.post(
+                "/api/sketch/upload", data=data2, content_type="multipart/form-data"
+            ).get_json()["path"]
         assert path1 != path2
         assert os.path.isdir(path1)
         assert os.path.isdir(path2)
@@ -867,8 +971,12 @@ class TestSketchUpload:
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data_a = {"files[]": [(io.BytesIO(b"// a"), "a/a.ino")]}
             data_b = {"files[]": [(io.BytesIO(b"// b"), "b/b.ino")]}
-            path_a = client.post("/api/sketch/upload", data=data_a, content_type="multipart/form-data").get_json()["path"]
-            path_b = client.post("/api/sketch/upload", data=data_b, content_type="multipart/form-data").get_json()["path"]
+            path_a = client.post(
+                "/api/sketch/upload", data=data_a, content_type="multipart/form-data"
+            ).get_json()["path"]
+            path_b = client.post(
+                "/api/sketch/upload", data=data_b, content_type="multipart/form-data"
+            ).get_json()["path"]
         assert path_a != path_b
         assert path_a.endswith("/a")
         assert path_b.endswith("/b")
@@ -892,9 +1000,13 @@ class TestLastUpload:
             upload_root = os.path.join(str(tmp_path), "20260526_120000_blinky")
             sketch_dir = os.path.join(upload_root, "blinky")
             os.makedirs(sketch_dir)
-            meta = {"ip": "127.0.0.1", "timestamp": "2026-05-26T12:00:00",
-                    "file_count": 1, "root_name": "blinky",
-                    "user_agent": "Werkzeug/3.1.8"}
+            meta = {
+                "ip": "127.0.0.1",
+                "timestamp": "2026-05-26T12:00:00",
+                "file_count": 1,
+                "root_name": "blinky",
+                "user_agent": "Werkzeug/3.1.8",
+            }
             with open(os.path.join(upload_root, ".meta"), "w") as mf:
                 json.dump(meta, mf)
             resp = client.get("/last-upload")
@@ -907,9 +1019,13 @@ class TestLastUpload:
             upload_root = os.path.join(str(tmp_path), "20260526_120000_other")
             sketch_dir = os.path.join(upload_root, "other")
             os.makedirs(sketch_dir)
-            meta = {"ip": "127.0.0.1", "timestamp": "2026-05-26T12:00:00",
-                    "file_count": 1, "root_name": "other",
-                    "user_agent": "Werkzeug/3.1.8"}
+            meta = {
+                "ip": "127.0.0.1",
+                "timestamp": "2026-05-26T12:00:00",
+                "file_count": 1,
+                "root_name": "other",
+                "user_agent": "Werkzeug/3.1.8",
+            }
             with open(os.path.join(upload_root, ".meta"), "w") as mf:
                 json.dump(meta, mf)
             resp = client.get("/last-upload")
@@ -935,14 +1051,28 @@ class TestLastUpload:
             older_sketch = os.path.join(older_root, "old")
             os.makedirs(older_sketch)
             with open(os.path.join(older_root, ".meta"), "w") as mf:
-                json.dump({"ip": "127.0.0.1", "timestamp": "2026-05-25T12:00:00",
-                           "root_name": "old", "user_agent": "Werkzeug/3.1.8"}, mf)
+                json.dump(
+                    {
+                        "ip": "127.0.0.1",
+                        "timestamp": "2026-05-25T12:00:00",
+                        "root_name": "old",
+                        "user_agent": "Werkzeug/3.1.8",
+                    },
+                    mf,
+                )
             newer_root = os.path.join(str(tmp_path), "20260526_120000_new")
             newer_sketch = os.path.join(newer_root, "new")
             os.makedirs(newer_sketch)
             with open(os.path.join(newer_root, ".meta"), "w") as mf:
-                json.dump({"ip": "127.0.0.1", "timestamp": "2026-05-26T12:00:00",
-                           "root_name": "new", "user_agent": "Werkzeug/3.1.8"}, mf)
+                json.dump(
+                    {
+                        "ip": "127.0.0.1",
+                        "timestamp": "2026-05-26T12:00:00",
+                        "root_name": "new",
+                        "user_agent": "Werkzeug/3.1.8",
+                    },
+                    mf,
+                )
             resp = client.get("/last-upload")
             html = resp.data.decode()
             assert f'value="{newer_sketch}"' in html
@@ -963,13 +1093,15 @@ class TestLastUpload:
         sketch_dir = os.path.join(str(tmp_path), "mysketch")
         os.makedirs(sketch_dir)
         _app_module._upload_registry[("127.0.0.1", "test-agent")] = {
-            "mysketch": [{
-                "path": sketch_dir,
-                "checksum": "abc123",
-                "server_timestamp": "2026-05-29T12:00:00",
-                "hardware_ids": [],
-                "board_timestamps": {},
-            }]
+            "mysketch": [
+                {
+                    "path": sketch_dir,
+                    "checksum": "abc123",
+                    "server_timestamp": "2026-05-29T12:00:00",
+                    "hardware_ids": [],
+                    "board_timestamps": {},
+                }
+            ]
         }
         resp = client.get("/last-upload", headers={"User-Agent": "test-agent"})
         assert resp.status_code == 200
@@ -981,9 +1113,13 @@ class TestApiSketches:
     def test_returns_sketches_for_ip_ua(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
             data2 = {"files[]": [(io.BytesIO(b"int x = 1;"), "other/other.ino")]}
-            client.post("/api/sketch/upload", data=data2, content_type="multipart/form-data")
+            client.post(
+                "/api/sketch/upload", data=data2, content_type="multipart/form-data"
+            )
             resp = client.get("/api/sketches")
         assert resp.status_code == 200
         sketches = resp.get_json()
@@ -1014,9 +1150,9 @@ class TestRenderSketchPathSelector:
         assert f'value="{sketch_dir}"' in html
 
     def test_escapes_html_in_path(self, req_ctx, tmp_path):
-        bad_path = '/path/<script>alert(1)</script>'
+        bad_path = "/path/<script>alert(1)</script>"
         html = _app_module._render_sketch_path_selector(bad_path)
-        assert '&lt;script&gt;alert(1)&lt;/script&gt;' in html
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
 
 
 class TestMakeMetaSketchName:
@@ -1094,8 +1230,15 @@ class TestSketchDelete:
             open(os.path.join(sketch_dir, "blinky.ino"), "w").close()
             meta_path = os.path.join(upload_root, ".meta")
             with open(meta_path, "w") as f:
-                json.dump({"ip": "127.0.0.1", "timestamp": "2026-05-29T12:00:00",
-                           "root_name": "blinky", "user_agent": "Werkzeug/3.1.8"}, f)
+                json.dump(
+                    {
+                        "ip": "127.0.0.1",
+                        "timestamp": "2026-05-29T12:00:00",
+                        "root_name": "blinky",
+                        "user_agent": "Werkzeug/3.1.8",
+                    },
+                    f,
+                )
             _app_module._warm_upload_registry()
             resp = client.delete("/api/sketch", query_string={"path": sketch_dir})
         assert resp.status_code == 200
@@ -1132,18 +1275,28 @@ class TestSketchVersionListing:
             sketch_dir = os.path.join(upload_root, "blinky")
             os.makedirs(sketch_dir)
             with open(os.path.join(upload_root, ".meta"), "w") as f:
-                json.dump({"ip": "127.0.0.1", "timestamp": "2026-05-29T12:00:00",
-                           "root_name": "blinky", "user_agent": "Werkzeug/3.1.8"}, f)
+                json.dump(
+                    {
+                        "ip": "127.0.0.1",
+                        "timestamp": "2026-05-29T12:00:00",
+                        "root_name": "blinky",
+                        "user_agent": "Werkzeug/3.1.8",
+                    },
+                    f,
+                )
             _app_module._warm_upload_registry()
             resp = client.get("/last-upload")
         html = resp.data.decode()
         import re
+
         assert re.search(r"blinky \(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\)", html)
 
     def test_api_sketches_returns_all_versions(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
             resp = client.get("/api/sketches")
         sketches = resp.get_json()
         assert isinstance(sketches, list)
@@ -1158,10 +1311,14 @@ class TestDedupAcrossVersions:
     def test_same_content_dedup_across_names(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            resp1 = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
+            resp1 = client.post(
+                "/api/sketch/upload", data=data, content_type="multipart/form-data"
+            )
             path1 = resp1.get_json()["path"]
             data2 = {"files[]": [(io.BytesIO(b"void setup() {}"), "other/other.ino")]}
-            resp2 = client.post("/api/sketch/upload", data=data2, content_type="multipart/form-data")
+            resp2 = client.post(
+                "/api/sketch/upload", data=data2, content_type="multipart/form-data"
+            )
             path2 = resp2.get_json()["path"]
         assert path1 == path2
         assert os.path.isdir(path1)
@@ -1173,7 +1330,10 @@ class TestAdminRoutes:
         with _app_module._board_list_lock:
             _app_module._board_list.clear()
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "hardware_id": "HWB-123",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
+                "hardware_id": "HWB-123",
             }
         resp = client.get("/admin")
         assert resp.status_code == 200
@@ -1182,7 +1342,10 @@ class TestAdminRoutes:
     def test_admin_active_board_swaps_fqbn_and_hardware_id(self, client):
         with _app_module._board_list_lock:
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "hardware_id": "HWB-123",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
+                "hardware_id": "HWB-123",
             }
         with client.session_transaction() as sess:
             sess["admin_active_board"] = "/dev/ttyACM0"
@@ -1199,13 +1362,19 @@ class TestAdminRoutes:
         resp = client.get("/admin/board-selector")
         assert resp.status_code == 200
         html = resp.data.decode()
-        assert 'admin-board-selector-card' in html or 'id="admin-board-selector-card"' in html
-        assert 'admin-active-board' in html or 'id="admin-active-board"' in html
+        assert (
+            "admin-board-selector-card" in html
+            or 'id="admin-board-selector-card"' in html
+        )
+        assert "admin-active-board" in html or 'id="admin-active-board"' in html
 
     def test_board_compile_upload_card_renders(self, client):
         with _app_module._board_list_lock:
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "hardware_id": "HWB-123",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
+                "hardware_id": "HWB-123",
             }
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("/dev/ttyACM0", "arduino:avr:uno", "HWB-123")
@@ -1218,10 +1387,14 @@ class TestAdminRoutes:
     def test_admin_page_auto_selects_first_board(self, client):
         with _app_module._board_list_lock:
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
             _app_module._board_list["/dev/ttyACM1"] = {
-                "port": "/dev/ttyACM1", "board": "Arduino Mega", "fqbn": "arduino:avr:mega",
+                "port": "/dev/ttyACM1",
+                "board": "Arduino Mega",
+                "fqbn": "arduino:avr:mega",
             }
         resp = client.get("/admin")
         assert resp.status_code == 200
@@ -1241,7 +1414,9 @@ class TestBoardDetail:
         with _app_module._board_list_lock:
             _app_module._board_list.clear()
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
         resp = client.get("/board/dev/ttyACM0")
         assert resp.status_code == 200
@@ -1260,7 +1435,9 @@ class TestBoardDetail:
         with _app_module._board_list_lock:
             _app_module._board_list.clear()
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
         resp = client.get("/board/dev/ttyACM0")
         assert resp.status_code == 200
@@ -1274,7 +1451,9 @@ class TestBoardDetail:
         with _app_module._board_list_lock:
             _app_module._board_list.clear()
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
         resp = client.get("/board/dev/ttyACM0")
         assert resp.status_code == 200
@@ -1301,10 +1480,14 @@ class TestBoardsGrid:
         with _app_module._board_list_lock:
             _app_module._board_list.clear()
             _app_module._board_list["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:uno",
             }
             _app_module._board_list["/dev/ttyACM1"] = {
-                "port": "/dev/ttyACM1", "board": "Arduino Mega", "fqbn": "arduino:avr:mega",
+                "port": "/dev/ttyACM1",
+                "board": "Arduino Mega",
+                "fqbn": "arduino:avr:mega",
             }
         resp = client.get("/boards/grid")
         assert resp.status_code == 200
@@ -1354,25 +1537,31 @@ class TestApiBoardList:
 class TestNormalizePort:
     def test_normalizes_with_dev_prefix(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_strips_extra_slashes(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("//dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_keeps_valid(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("/dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_rejects_empty(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("") is None
 
     def test_rejects_bare_port(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("ttyACM0") is None  # /ttyACM0 doesn't match /dev/...
 
     def test_rejects_non_dev_path(self):
         from arduino_dash.utils import normalize_port
+
         assert normalize_port("COM1") is None
         assert normalize_port("/random/path") is None

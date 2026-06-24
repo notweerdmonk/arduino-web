@@ -1,15 +1,13 @@
 """Subprocess lifecycle manager for per-board workers"""
 
-import errno
 import os
 import select
 import signal
 import socket
 import subprocess
 import sys
-import time
 from enum import IntEnum
-from typing import Any, Optional
+from typing import Optional
 
 from board_manager.protocol import FrameReader, encode_and_frame
 
@@ -22,6 +20,7 @@ class PoolLimits(IntEnum):
 
 class BoardProc:
     """State container for a single per-board worker subprocess."""
+
     def __init__(self, port: str):
         """Initialize a board process state container.
 
@@ -79,9 +78,7 @@ class BoardPool:
                 f"Worker for {port} exceeded max restarts ({PoolLimits.MAX_RESTARTS})"
             )
 
-        parent_sock, child_sock = socket.socketpair(
-            socket.AF_UNIX, socket.SOCK_STREAM
-        )
+        parent_sock, child_sock = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         child_fd = child_sock.fileno()
 
         proc = subprocess.Popen(

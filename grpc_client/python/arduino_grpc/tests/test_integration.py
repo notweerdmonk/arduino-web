@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Integration test script for arduino_grpc module with real arduino-cli daemon"""
 
-import sys
 import os
 import time
 
 import pytest
 
 from arduino_grpc.client import ArduinoGrpcClient
-from arduino_grpc.exceptions import ArduinoError
 from .daemon_helper import DaemonCtx
 
 
@@ -63,7 +61,7 @@ def test_list_all_boards(daemon_url):
             for b in boards[:3]:
                 print(f"  - {b.fqbn}: {b.name}")
             if len(boards) > 3:
-                print(f"  ... and {len(boards)-3} more")
+                print(f"  ... and {len(boards) - 3} more")
             assert len(boards) > 0
     except Exception as e:
         print(f"FAILED: {e}")
@@ -107,7 +105,9 @@ def test_watch_boards_event(daemon_url):
 def test_compile(daemon_url):
     print("\n=== Test 6: Compile Sketch ===")
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    sketch_path = os.path.normpath(os.path.join(script_dir, "..", "..", "..", "..", "sketches", "blinky"))
+    sketch_path = os.path.normpath(
+        os.path.join(script_dir, "..", "..", "..", "..", "sketches", "blinky")
+    )
     if not os.path.exists(sketch_path):
         pytest.skip(f"Sketch not found at {sketch_path}")
 
@@ -127,7 +127,9 @@ def test_compile(daemon_url):
 def test_upload(daemon_url):
     print("\n=== Test 7: Upload Sketch ===")
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    sketch_path = os.path.normpath(os.path.join(script_dir, "..", "..", "..", "..", "sketches", "blinky"))
+    sketch_path = os.path.normpath(
+        os.path.join(script_dir, "..", "..", "..", "..", "sketches", "blinky")
+    )
     if not os.path.exists(sketch_path):
         pytest.skip(f"Sketch not found at {sketch_path}")
 
@@ -144,11 +146,15 @@ def test_upload(daemon_url):
 
         print(f"Compiling {sketch_path}...")
         compile_result = client.compile(sketch_path, board.fqbn, verbose=False)
-        assert compile_result.success, f"Compilation failed before upload: {compile_result.error[:200]}"
+        assert compile_result.success, (
+            f"Compilation failed before upload: {compile_result.error[:200]}"
+        )
         print(f"Compile OK ({len(compile_result.output)} bytes of output)")
 
         print(f"Uploading to {board.port.address}...")
-        upload_result = client.upload(sketch_path, board.fqbn, board.port.address, verbose=True)
+        upload_result = client.upload(
+            sketch_path, board.fqbn, board.port.address, verbose=True
+        )
         assert upload_result.success, f"Upload failed: {upload_result.error[:300]}"
 
         print("SUCCESS: Upload completed")
@@ -186,13 +192,10 @@ def _run_all(daemon_url: str):
     for name, func in test_funcs:
         try:
             func(daemon_url)
-            status = "PASS"
             passed += 1
         except pytest.skip.Exception:
-            status = "SKIP"
             skipped += 1
         except Exception:
-            status = "FAIL"
             failed += 1
 
     print("\n" + "=" * 50)

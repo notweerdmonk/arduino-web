@@ -11,6 +11,7 @@ def app():
     app.config["TESTING"] = True
     with app.app_context():
         from medminder_dash.app import store
+
         store._board_meta.clear()
         store._lock = __import__("threading").Lock()
     yield app
@@ -25,6 +26,7 @@ def client(app):
 def seeded_store(app, client):
     """Set board and add medicines directly to its meta."""
     from medminder_dash.app import store
+
     m1 = Medicine(name="Ibup", hour=8, minute=30, day_of_week=1, day_of_month=0)
     m2 = Medicine(name="PaRa", hour=20, minute=0, day_of_week=3, day_of_month=0)
     store._board_meta["TestBoard"] = {"medicines": [m1, m2]}
@@ -74,50 +76,65 @@ class TestCreateMedicineForm:
 
 class TestCreateMedicine:
     def test_create_valid_medicine(self, client, board):
-        resp = client.post("/medicine", data={
-            "name": "Test",
-            "hour": "12",
-            "minute": "30",
-            "day_of_week": "2",
-            "day_of_month": "0",
-        })
+        resp = client.post(
+            "/medicine",
+            data={
+                "name": "Test",
+                "hour": "12",
+                "minute": "30",
+                "day_of_week": "2",
+                "day_of_month": "0",
+            },
+        )
         assert resp.status_code == 200
         assert b"Test" in resp.data
-        assert b'medicine-list' in resp.data
+        assert b"medicine-list" in resp.data
 
     def test_create_missing_name(self, client, board):
-        resp = client.post("/medicine", data={
-            "name": "",
-            "hour": "12",
-            "minute": "30",
-        })
+        resp = client.post(
+            "/medicine",
+            data={
+                "name": "",
+                "hour": "12",
+                "minute": "30",
+            },
+        )
         assert resp.status_code == 400
         assert b"Name is required" in resp.data
 
     def test_create_invalid_hour(self, client, board):
-        resp = client.post("/medicine", data={
-            "name": "Test",
-            "hour": "25",
-            "minute": "30",
-        })
+        resp = client.post(
+            "/medicine",
+            data={
+                "name": "Test",
+                "hour": "25",
+                "minute": "30",
+            },
+        )
         assert resp.status_code == 400
         assert b"Hour must be 1-24" in resp.data
 
     def test_create_invalid_minute(self, client, board):
-        resp = client.post("/medicine", data={
-            "name": "Test",
-            "hour": "8",
-            "minute": "15",
-        })
+        resp = client.post(
+            "/medicine",
+            data={
+                "name": "Test",
+                "hour": "8",
+                "minute": "15",
+            },
+        )
         assert resp.status_code == 400
         assert b"Minute must be" in resp.data
 
     def test_create_name_too_long(self, client, board):
-        resp = client.post("/medicine", data={
-            "name": "TooLongName",
-            "hour": "8",
-            "minute": "0",
-        })
+        resp = client.post(
+            "/medicine",
+            data={
+                "name": "TooLongName",
+                "hour": "8",
+                "minute": "0",
+            },
+        )
         assert resp.status_code == 400
         assert b"Name must be 10 characters" in resp.data
 
@@ -138,16 +155,20 @@ class TestEditMedicineForm:
 class TestUpdateMedicine:
     def test_update_medicine(self, client, seeded_store):
         med_id = seeded_store.id
-        resp = client.put(f"/medicine/{med_id}", data={
-            "name": "Ibup",
-            "hour": "9",
-            "minute": "0",
-            "day_of_week": "1",
-            "day_of_month": "0",
-        })
+        resp = client.put(
+            f"/medicine/{med_id}",
+            data={
+                "name": "Ibup",
+                "hour": "9",
+                "minute": "0",
+                "day_of_week": "1",
+                "day_of_month": "0",
+            },
+        )
         assert resp.status_code == 200
         assert b"Ibup" in resp.data
         from medminder_dash.app import store
+
         meds = store._board_meta.get("TestBoard", {}).get("medicines", [])
         updated = next((m for m in meds if m.id == med_id), None)
         assert updated is not None
@@ -156,15 +177,20 @@ class TestUpdateMedicine:
 
     def test_update_invalid(self, client, seeded_store):
         med_id = seeded_store.id
-        resp = client.put(f"/medicine/{med_id}", data={
-            "name": "",
-            "hour": "99",
-            "minute": "15",
-        })
+        resp = client.put(
+            f"/medicine/{med_id}",
+            data={
+                "name": "",
+                "hour": "99",
+                "minute": "15",
+            },
+        )
         assert resp.status_code == 400
 
     def test_update_404(self, client, board):
-        resp = client.put("/medicine/nonexistent", data={"name": "x", "hour": "1", "minute": "0"})
+        resp = client.put(
+            "/medicine/nonexistent", data={"name": "x", "hour": "1", "minute": "0"}
+        )
         assert resp.status_code == 404
 
 
@@ -175,6 +201,7 @@ class TestDeleteMedicine:
         assert resp.status_code == 200
         assert b"medicine-list" in resp.data
         from medminder_dash.app import store
+
         assert store.get(med_id) is None
 
     def test_delete_404(self, client, board):
@@ -190,6 +217,7 @@ class TestToggleMedicine:
         assert resp.status_code == 200
         assert b"medicine-list" in resp.data
         from medminder_dash.app import store
+
         meds = store._board_meta.get("TestBoard", {}).get("medicines", [])
         toggled = next((m for m in meds if m.id == med_id), None)
         assert toggled is not None
@@ -198,6 +226,7 @@ class TestToggleMedicine:
     def test_toggle_enables(self, client, seeded_store):
         med_id = seeded_store.id
         from medminder_dash.app import store
+
         meds = store._board_meta.get("TestBoard", {}).get("medicines", [])
         target = next((m for m in meds if m.id == med_id), None)
         assert target is not None
@@ -220,8 +249,13 @@ class TestAdminSketchDir:
 class TestBoardDetailFqbn:
     def test_fqbn_prepopulated_from_board_info(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
-            _known_ports["/dev/ttyACM0"] = {"port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:mega"}
+            _known_ports["/dev/ttyACM0"] = {
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:mega",
+            }
         try:
             resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
@@ -232,6 +266,7 @@ class TestBoardDetailFqbn:
 
     def test_fqbn_default_when_no_board_info(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
             _known_ports.pop("/dev/ttyACM0", None)
         resp = client.get("/board/dev/ttyACM0")
@@ -240,8 +275,13 @@ class TestBoardDetailFqbn:
 
     def test_heading_shows_board_name(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
-            _known_ports["/dev/ttyACM0"] = {"port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:mega"}
+            _known_ports["/dev/ttyACM0"] = {
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:mega",
+            }
         try:
             resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
@@ -253,6 +293,7 @@ class TestBoardDetailFqbn:
 
     def test_heading_falls_back_to_port(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
             _known_ports.pop("/dev/ttyACM0", None)
         resp = client.get("/board/dev/ttyACM0")
@@ -262,8 +303,13 @@ class TestBoardDetailFqbn:
 
     def test_fqbn_display_label_present(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
-            _known_ports["/dev/ttyACM0"] = {"port": "/dev/ttyACM0", "board": "Arduino Uno", "fqbn": "arduino:avr:mega"}
+            _known_ports["/dev/ttyACM0"] = {
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
+                "fqbn": "arduino:avr:mega",
+            }
         try:
             resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
@@ -282,37 +328,45 @@ class TestBoardDetailFqbn:
 
     def test_sketch_path_uses_per_board_assignment(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
             _known_ports["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Uno",
+                "port": "/dev/ttyACM0",
+                "board": "Uno",
                 "fqbn": "arduino:avr:uno",
                 "hardware_id": "USB VID:PID=2341:0043 SER=12345",
             }
         try:
             per_board_path = "/home/user/per-board-sketch"
-            with patch("medminder_dash.html_routes.get_board_sketch_assignment",
-                       return_value=per_board_path):
+            with patch(
+                "medminder_dash.html_routes.get_board_sketch_assignment",
+                return_value=per_board_path,
+            ):
                 resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
             assert b'id="sketch-path-container"' in resp.data
             assert b'hx-get="/last-upload"' in resp.data
             assert b'hx-include="#active-board-hardware-id"' in resp.data
-            assert b'USB VID:PID=2341:0043 SER=12345' in resp.data
+            assert b"USB VID:PID=2341:0043 SER=12345" in resp.data
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
 
     def test_sketch_path_falls_back_to_default(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
             _known_ports["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Uno",
+                "port": "/dev/ttyACM0",
+                "board": "Uno",
                 "fqbn": "arduino:avr:uno",
                 "hardware_id": "USB VID:PID=2341:0043 SER=12345",
             }
         try:
-            with patch("medminder_dash.html_routes.get_board_sketch_assignment",
-                       return_value=None):
+            with patch(
+                "medminder_dash.html_routes.get_board_sketch_assignment",
+                return_value=None,
+            ):
                 resp = client.get("/board/dev/ttyACM0")
             assert resp.status_code == 200
             assert b'id="sketch-path-container"' in resp.data
@@ -324,9 +378,11 @@ class TestBoardDetailFqbn:
 
     def test_sketch_path_uses_default_for_no_hardware_id(self, client):
         from medminder_dash.state import _known_ports, _known_ports_lock
+
         with _known_ports_lock:
             _known_ports["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Uno",
+                "port": "/dev/ttyACM0",
+                "board": "Uno",
                 "fqbn": "arduino:avr:uno",
                 "hardware_id": "",
             }
@@ -350,6 +406,7 @@ class TestDaemonStatus:
 
     def test_daemon_status_ready(self, client, monkeypatch):
         from medminder_dash import state
+
         monkeypatch.setattr("medminder_dash.html_routes.is_connected", lambda: True)
         state._daemon_ready = True
         try:
@@ -389,9 +446,11 @@ class TestBoardConnectionStatus:
 
     def test_connection_status_connected(self, client):
         from medminder_dash import state
+
         with state._known_ports_lock:
             state._known_ports["/dev/ttyACM0"] = {
-                "port": "/dev/ttyACM0", "board": "Test"
+                "port": "/dev/ttyACM0",
+                "board": "Test",
             }
         try:
             resp = client.get("/board/dev/ttyACM0/connection-status")
@@ -423,25 +482,31 @@ class TestBoardsGrid:
 class TestNormalizePort:
     def test_normalizes_with_dev_prefix(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_strips_extra_slashes(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("//dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_keeps_valid(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("/dev/ttyACM0") == "/dev/ttyACM0"
 
     def test_rejects_empty(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("") is None
 
     def test_rejects_bare_port(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("ttyACM0") is None  # /ttyACM0 doesn't match /dev/...
 
     def test_rejects_non_dev_path(self):
         from medminder_dash.utils import normalize_port
+
         assert normalize_port("COM1") is None
         assert normalize_port("/random/path") is None

@@ -9,6 +9,7 @@ from enum import Enum
 
 class DashEnv(str, Enum):
     """Environment variable keys for gunicorn configuration."""
+
     BIND = "GUNICORN_BIND"
     WORKERS = "GUNICORN_WORKERS"
     TIMEOUT = "GUNICORN_TIMEOUT"
@@ -30,7 +31,7 @@ def _get_bms_config():
         "uds_path": os.environ.get("BOARD_MGR_UDS_PATH", "/tmp/board_mgr.sock"),
         "tcp_host": os.environ.get("BOARD_MGR_TCP_HOST", "127.0.0.1"),
         "tcp_port": int(os.environ.get("BOARD_MGR_TCP_PORT", "9090")),
-        "use_uds": not (os.environ.get("BMS_NO_UDS", "").lower() in ("1", "true")),
+        "use_uds": os.environ.get("BMS_NO_UDS", "").lower() not in ("1", "true"),
     }
 
 
@@ -38,8 +39,13 @@ def when_ready(server):
     """Start BMS and wait for readiness on server start."""
     global _bms_proc
     from board_manager.boot import start_bms, wait_for_bms
+
     _bms_proc = start_bms()
-    fire_and_forget = os.environ.get("BMS_FIRE_AND_FORGET", "").lower() in ("1", "true", "yes")
+    fire_and_forget = os.environ.get("BMS_FIRE_AND_FORGET", "").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
     if not fire_and_forget:
         cfg = _get_bms_config()
         ready = wait_for_bms(
@@ -49,7 +55,9 @@ def when_ready(server):
             timeout=float(os.environ.get("BMS_WAIT_TIMEOUT", "10")),
         )
         if not ready:
-            server.log.warning("BMS not ready within timeout — workers will retry on connect")
+            server.log.warning(
+                "BMS not ready within timeout — workers will retry on connect"
+            )
         else:
             server.log.info("BMS ready")
     else:
@@ -61,6 +69,7 @@ def post_worker_init(worker):
     cfg = _get_bms_config()
     worker.log.info("Initializing PubSub for worker %d", worker.pid)
     from arduino_dash.pubsub import init_pubsub
+
     init_pubsub(
         use_uds=cfg["use_uds"],
         tcp_host=cfg["tcp_host"],
@@ -75,6 +84,7 @@ def on_exit(server):
     global _bms_proc
     if _bms_proc is not None:
         from board_manager.boot import stop_bms
+
         server.log.info("Stopping BMS (PID %d)", _bms_proc.pid)
         stop_bms(_bms_proc)
         _bms_proc = None

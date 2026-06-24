@@ -1,6 +1,12 @@
 <div class="card" id="metadata-medicines-card">
     <div class="section-header">
-        <h3>{% if show_two_cards %}Metadata Medicines{% else %}Medicines{% endif %}</h3>
+        <h3>
+            {% if show_two_cards %}
+                Metadata Medicines
+            {% else %}
+                Medicines
+            {% endif %}
+        </h3>
         <button class="btn btn-primary"
                 hx-get="/medicine/new"
                 hx-target="#medicine-form-container"

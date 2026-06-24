@@ -2,7 +2,7 @@
 
 import json
 import socket
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -68,7 +68,12 @@ class TestMessageHandling:
         conn = ClientConn(mock_sock, "client:1")
         mock_service._clients[conn.fileno()] = conn
 
-        msg = {"type": "publish", "topic": "some::topic", "id": "r1", "reply_to": "resp::r1"}
+        msg = {
+            "type": "publish",
+            "topic": "some::topic",
+            "id": "r1",
+            "reply_to": "resp::r1",
+        }
         mock_service._handle_client_message(conn, msg)
 
         assert mock_sock.sendall.called
@@ -173,8 +178,14 @@ class TestRoutePoolMessage:
 
         mock_service.router.subscribe(conn.addr, "board::+::event")
 
-        msg = {"type": "event", "topic": "board::/dev/ttyACM0::event", "data": {"event": "connected"}}
-        mock_service._route_pool_message("/dev/ttyACM0", msg, "board::/dev/ttyACM0::event")
+        msg = {
+            "type": "event",
+            "topic": "board::/dev/ttyACM0::event",
+            "data": {"event": "connected"},
+        }
+        mock_service._route_pool_message(
+            "/dev/ttyACM0", msg, "board::/dev/ttyACM0::event"
+        )
 
         mock_sock.sendall.assert_called_once()
 
@@ -184,7 +195,9 @@ class TestRoutePoolMessage:
         mock_service._clients[conn.fileno()] = conn
 
         msg = {"type": "event", "topic": "board:/dev/ttyACM0/event", "data": {}}
-        mock_service._route_pool_message("/dev/ttyACM0", msg, "board:/dev/ttyACM0/event")
+        mock_service._route_pool_message(
+            "/dev/ttyACM0", msg, "board:/dev/ttyACM0/event"
+        )
 
         mock_sock.sendall.assert_not_called()
 
@@ -278,9 +291,7 @@ class TestTick:
             "data": {"progress": 42},
         }
 
-        mock_service.pool.poll = MagicMock(
-            return_value=[("/dev/ttyACM0", msg_dict)]
-        )
+        mock_service.pool.poll = MagicMock(return_value=[("/dev/ttyACM0", msg_dict)])
 
         with patch.object(mock_service, "_route_pool_message") as mock_route:
             with patch("select.select", return_value=([], [], [])):
@@ -296,8 +307,18 @@ class TestTick:
         mock_service._clients[conn.fileno()] = conn
 
         msgs = [
-            ("/dev/ttyACM0", {"type": "event", "topic": "board::p1::event", "data": {"event": "connected"}}),
-            ("/dev/ttyACM0", {"type": "result", "topic": "resp::r1", "data": {"success": True}}),
+            (
+                "/dev/ttyACM0",
+                {
+                    "type": "event",
+                    "topic": "board::p1::event",
+                    "data": {"event": "connected"},
+                },
+            ),
+            (
+                "/dev/ttyACM0",
+                {"type": "result", "topic": "resp::r1", "data": {"success": True}},
+            ),
         ]
 
         mock_service.pool.poll = MagicMock(return_value=msgs)
@@ -315,17 +336,13 @@ class TestTick:
         This test ensures a single dict from pool.poll() is treated as one message."""
         msg_dict = {"type": "result", "topic": "test::topic", "data": {}}
 
-        mock_service.pool.poll = MagicMock(
-            return_value=[("/dev/ttyACM0", msg_dict)]
-        )
+        mock_service.pool.poll = MagicMock(return_value=[("/dev/ttyACM0", msg_dict)])
 
         with patch.object(mock_service, "_route_pool_message") as mock_route:
             with patch("select.select", return_value=([], [], [])):
                 mock_service._tick()
 
-            mock_route.assert_called_once_with(
-                "/dev/ttyACM0", msg_dict, "test::topic"
-            )
+            mock_route.assert_called_once_with("/dev/ttyACM0", msg_dict, "test::topic")
 
     def test_tick_empty_pool_messages(self, mock_service):
         mock_service.pool.poll = MagicMock(return_value=[])
@@ -545,7 +562,8 @@ class TestDaemonStateReEmission:
         mock_service._daemon_ready = True
         mock_service._board_state = {
             "/dev/ttyACM0": {
-                "port": "/dev/ttyACM0", "board": "Arduino Uno",
+                "port": "/dev/ttyACM0",
+                "board": "Arduino Uno",
                 "fqbn": "arduino:avr:uno",
             }
         }
@@ -557,17 +575,15 @@ class TestDaemonStateReEmission:
         mock_service._handle_client_message(conn, msg2)
 
         sendall_calls = mock_sock.sendall.call_args_list
-        parsed = [
-            json.loads(call[0][0].decode())
-            for call in sendall_calls
-        ]
+        parsed = [json.loads(call[0][0].decode()) for call in sendall_calls]
         daemon_events = [
-            m for m in parsed
-            if m.get("type") == "event"
-            and m.get("topic") == "sys::daemon/ready"
+            m
+            for m in parsed
+            if m.get("type") == "event" and m.get("topic") == "sys::daemon/ready"
         ]
         board_events = [
-            m for m in parsed
+            m
+            for m in parsed
             if m.get("type") == "event"
             and m.get("topic") == "board::/dev/ttyACM0::event"
         ]

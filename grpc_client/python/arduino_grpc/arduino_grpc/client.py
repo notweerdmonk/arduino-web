@@ -150,7 +150,9 @@ class ArduinoGrpcClient:
         instance = self._ensure_instance()
 
         try:
-            request = board_pb2.BoardListRequest(instance=instance, timeout=int(timeout))
+            request = board_pb2.BoardListRequest(
+                instance=instance, timeout=int(timeout)
+            )
             response = self.stub.BoardList(request)
 
             boards = []
@@ -345,7 +347,9 @@ class ArduinoGrpcClient:
         err_lines = []
         success = False
 
-        for out, err, done, percent in self.compile_stream(sketch_path, fqbn, verbose, quiet):
+        for out, err, done, percent in self.compile_stream(
+            sketch_path, fqbn, verbose, quiet
+        ):
             if out:
                 out_lines.append(out)
             if err:
@@ -450,7 +454,9 @@ class ArduinoGrpcClient:
         err_lines = []
         success = False
 
-        for out, err, done in self.upload_stream(sketch_path, fqbn, port, verbose, verify):
+        for out, err, done in self.upload_stream(
+            sketch_path, fqbn, port, verbose, verify
+        ):
             if out:
                 out_lines.append(out)
             if err:

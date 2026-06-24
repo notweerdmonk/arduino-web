@@ -38,7 +38,6 @@ _last_uploaded_sketch_lock = threading.Lock()
 _upload_registry: dict[tuple[str, str], dict[str, list[dict]]] = {}
 _upload_registry_lock = threading.Lock()
 
-from arduino_dash.settings import UPLOAD_BASE_DIR
 MAX_SKETCH_UPLOAD_SIZE = 10 * 1024 * 1024
 
 _fallback_scanner: threading.Thread | None = None

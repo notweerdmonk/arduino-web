@@ -33,8 +33,8 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:8413f8324894a93cd33a2029edaeb65f5b4ef556eca65a60b238abea9f0d7b6a",
-                "sha256:c2000abc26b71258fad1573a7b497a8ccff0621374143afcdf58d798d5673203"
+                "sha256:41b0f914aa5c1caaffca35859c736b55a96ea2e4f8e20f067c0267f17a80f239",
+                "sha256:446eebe06f87b4ed7487b33c12b5629b56ad198c46c7caea9cbc0324425dab6d"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"
@@ -49,16 +49,16 @@
         },
         "board-manager": {
             "hashes": [
-                "sha256:0bd578d54fb9d921b8b77ce68cae280520f65ac7851945b15e836d4c5e9d55f1",
-                "sha256:8f00a319dea32fd614bcc27d8edf88a80cbbbbd797f7d1bbf53813a98c0221fd"
+                "sha256:08b4e4ac3ad41409d4b56dd2b9361d25608b311305f892449d0f858f504bed55",
+                "sha256:886a330018dc3d4b67174034a00770c18fa4019a9263f8f46d1b751b49b0c27e"
             ],
             "index": "board-manager-local",
             "version": "==0.1.0"
         },
         "board-manager-client": {
             "hashes": [
-                "sha256:25b080736d42bde2214af70e259b4e38563902c686d1f08875df0b543b7db380",
-                "sha256:6133d9a79a2f5e1d6922d4f2e9216b822280b43b6888b4aa0a63481e46062de9"
+                "sha256:6fd39f7c7125d96efc390b42432b2fc3aa821e101ecd324bc3656166694270a8",
+                "sha256:e942fe13d7fa7257bb2768f24547809e196e208f31d48c05169b1880d678f838"
             ],
             "index": "board-manager-client-local",
             "version": "==0.1.0"

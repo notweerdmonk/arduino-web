@@ -13,7 +13,9 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "integration: integration test requiring real arduino-cli daemon")
+    config.addinivalue_line(
+        "markers", "integration: integration test requiring real arduino-cli daemon"
+    )
 
 
 def pytest_collection_modifyitems(config, items):

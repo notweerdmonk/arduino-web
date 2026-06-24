@@ -1,22 +1,27 @@
-<div id="sketch-upload-modal" class="modal-backdrop" style="display:none;">
+<div id="sketch-upload-modal" class="modal-backdrop modal-hidden">
     <div class="modal-content">
         <h3 class="modal-title">Upload Sketch to Server</h3>
         <div class="modal-details">
-            <div><strong class="value-label">Folder:</strong> <span id="modal-folder-name"></span></div>
-            <div><strong class="value-label">Files:</strong> <span id="modal-file-count"></span></div>
+            <div>
+                <strong class="value-label">Folder:</strong> <span id="modal-folder-name"></span>
+            </div>
+            <div>
+                <strong class="value-label">Files:</strong> <span id="modal-file-count"></span>
+            </div>
             <hr class="modal-hr">
             <div class="text-hint">IP: {{ request.remote_addr or 'unknown' }}</div>
-            <div class="text-hint" style="word-break:break-all;">UA: {{ request.headers.get('User-Agent', 'unknown')[:60] }}...</div>
+            <div class="text-hint word-break-all">UA: {{ request.headers.get('User-Agent', 'unknown')[:60] }}...</div>
         </div>
         <div class="flex-row">
-            <button type="button" class="btn btn-primary" id="modal-upload-btn"
-                    onclick="uploadSketch()">
-                Upload to Server
-            </button>
-            <button type="button" class="btn btn-secondary" id="modal-cancel-btn"
-                    data-action="modal:hide" data-target="sketch-upload-modal">
-                Cancel
-            </button>
+            <button type="button"
+                    class="btn btn-primary"
+                    id="modal-upload-btn"
+                    onclick="uploadSketch()">Upload to Server</button>
+            <button type="button"
+                    class="btn btn-secondary"
+                    id="modal-cancel-btn"
+                    data-action="modal:hide"
+                    data-target="sketch-upload-modal">Cancel</button>
         </div>
     </div>
 </div>

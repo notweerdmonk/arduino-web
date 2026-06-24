@@ -11,6 +11,9 @@ dynamic = ["readme", "authors", "keywords"]
 dependencies = [
     "flask>=3.0",
     "gunicorn>=20.0",
+    "flask-sock>=0.7.0",
+    "arduino-sketch-tools>=0.1.0",
+    "board-manager-client>=0.1.0",
 ]
 
 [project.scripts]

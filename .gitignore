@@ -26,6 +26,10 @@ dist-test-install/.venv/
 # --- Nox ---
 .nox/
 
+# --- Linter/build caches ---
+.ruff_cache/
+node_modules/
+
 # --- opencode agent ---
 .opencode/
 

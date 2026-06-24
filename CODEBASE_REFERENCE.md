@@ -3,7 +3,7 @@
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-06-22 (Phase 100 — Server Process Lifecycle)
+**Last updated**: 2026-06-24 (Phases 89-100 + Code Review — Linting, ESLint, Playwright, Pipfile)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -71,8 +71,8 @@ medminder/
 │       │   ├── html_routes.py # All HTML page + partial routes + WS (no /api/ prefix)
 │       │   ├── api_routes.py  # All JSON API routes (/api/ prefix) + REST CRUD
 │       │   ├── state.py       # MedicineState + MedMinder-specific state
-│       │   ├── dash_state.py  # Shared board/pubsub state
-│       │   ├── pubsub_infra.py    # PubSub lifecycle, WS broadcast, board events
+│   │   ├── dash_state.py  # (merged into state.py in Phase 68)
+│       │   ├── pubsub.py    # PubSub lifecycle, WS broadcast, board events
 │       │   ├── board_management.py  # Empty stub (helper functions moved to html_routes/api_routes)
 │       │   ├── sketch_management.py # Helper functions (no routes)
 │       │   ├── sketch_registry.py   # Per-board sketch assignment
@@ -145,7 +145,7 @@ All stubs under `cc/arduino/cli/commands/v1/` (11 services, generated from ardui
 
 | Aspect | Detail |
 |--------|--------|
-| Strategy | Per-dashboard `static/style.css` (arduino_dash & medminder_dash), identical byte-for-byte |
+| Strategy | Per-dashboard `static/style.css` (arduino_dash & medminder_dash), nearly identical with minor divergence |
 | Variables | 42 CSS custom properties in `:root` (dark theme defaults) |
 | Light mode | `@media (prefers-color-scheme: light) { :root { ... } }` overrides only color vars |
 | Card style | Flat — no border/shadow; cards distinguished from page bg by color alone |
@@ -159,8 +159,8 @@ All stubs under `cc/arduino/cli/commands/v1/` (11 services, generated from ardui
 **Key files:**
 | File | Lines | Purpose |
 |------|-------|---------|
-| `arduino_dash/.../static/style.css` | 539 | Full CSS with vars, light mode, all component classes |
-| `medminder_dash/.../static/style.css` | 539 | Identical copy (same sha256sum) |
+| `arduino_dash/.../static/style.css` | 544 | Full CSS with vars, light mode, all component classes |
+| `medminder_dash/.../static/style.css` | 550 | Near-identical copy (6-line diff — minor divergence after Phase 79) |
 | Both `base.html` | 1 | `<link>` to style.css replacing old `<style>` block |
 | `admin.html` (both) | — | `<style>` block removed → `.admin-heading`, `.admin-content` classes |
 | `dnd_overlay.html` (both) | — | `<style>` block removed → `#dnd-overlay` class |
@@ -186,8 +186,8 @@ cd arduino_dash/python/arduino_dash && pipenv run python -m arduino_dash
 cd medminder_dash/python/medminder_dash && pipenv run python -m medminder_dash
 
 # Production (gunicorn)
-cd arduino_dash/python/arduino_dash && pipenv run gunicorn -c gunicorn.conf.py arduino_dash.wsgi:app
-cd medminder_dash/python/medminder_dash && pipenv run gunicorn -c gunicorn.conf.py medminder_dash.wsgi:app
+cd arduino_dash/python/arduino_dash && pipenv run gunicorn -c gunicorn_conf.py arduino_dash.wsgi:app
+cd medminder_dash/python/medminder_dash && pipenv run gunicorn -c gunicorn_conf.py medminder_dash.wsgi:app
 
 # Standalone binary (PyOxidizer)
 ./scripts/build_standalone.sh
@@ -361,7 +361,7 @@ All 9 README refs in `index.md` resolve to `.html` (processed pages):
 - Both `base.html`: `hx-trigger="every 10s, load"` → `"load"` (one-shot initial fill)
 - Both `daemon_badge.html`: stripped `hx-get`, `hx-trigger`, `hx-target`, `hx-swap`
 - `arduino_dash/pubsub.py`: `_broadcast_daemon_badge()` added, called from `_on_daemon_ready()` and `_on_pubsub_reconnect()`
-- `medminder_dash/pubsub_infra.py`: same changes
+- `medminder_dash/pubsub.py`: same changes
 
 **Tier 1 — Board Status Badge OOB**:
 - Both `board_status_badge.html`: stripped all `hx-*` attributes
@@ -396,7 +396,7 @@ All 9 README refs in `index.md` resolve to `.html` (processed pages):
 
 | Bucket | File(s) | Change |
 |--------|---------|--------|
-| **A — Core** | `arduino_dash/.../pubsub.py`, `medminder_dash/.../pubsub_infra.py` | `_broadcast_daemon_badge()`, board badge OOB |
+| **A — Core** | `arduino_dash/.../pubsub.py`, `medminder_dash/.../pubsub.py` | `_broadcast_daemon_badge()`, board badge OOB |
 | **A — Core** | `arduino_sketch_tools/.../extension.py` | `_compile_last_pct`, `<progress>` OOB, `[N%]`, per-port OOB targeting |
 | **A — Core** | `board_manager/.../board_worker.py` | `_make_progress()` with percent, progress-only messages |
 | **A — Core** | `grpc_client/.../client.py` | `compile_stream()` 4-tuple `(out,err,done,percent)` |
@@ -412,7 +412,7 @@ All 9 README refs in `index.md` resolve to `.html` (processed pages):
 | **D — Tests** | `grpc_client test_client.py` | 4-tuple `percent` assertions |
 | **E — Docs** | `docs/ws-event-flow.md`, `docs/architecture.md`, `docs/api.md`, `docs/guide.md`, root `README.md` | WS push migration docs (tiers, signatures, architecture) |
 | **E — Docs** | `arduino_sketch_tools docs/{extension,routes}.md`, `README.md` | OOB targeting, WS push notes |
-| **E — Docs** | `arduino_dash docs/pubsub.md`, `medminder_dash docs/pubsub_infra.md` | Badge OOB docs |
+| **E — Docs** | `arduino_dash docs/pubsub.md`, `medminder_dash docs/pubsub.md` | Badge OOB docs |
 | **E — Docs** | `board_manager docs/board_worker.md`, `grpc_client docs/client.md` | `_make_progress()` percent, `compile_stream()` 4-tuple |
 | **F — Stale refs** | `CODEBASE_REFERENCE.md`, `TODOS.md`, `PLAN.md`, `_config.yml` | Stale line-refs fixed, Phase 98 in completed table, `url: ""` |
 | **G — Jekyll wrap** | `TESTING_PLAN.md`, `TESTING_TASK.md` | Added raw/endraw wrapping for Jinja2 |
@@ -1219,7 +1219,7 @@ hint as inline spans, all events in chronological order.
 
 **Change**: Added gunicorn WSGI entry points for both dashboards with BMS auto-start via gunicorn hooks (when_ready→start BMS, post_worker_init→init_pubsub, on_exit→stop BMS). Shared board_manager/boot.py module. Aligned exception handling between both dashboards.
 
-**Files**: `board_manager/boot.py`, `arduino_dash/wsgi.py`, `arduino_dash/gunicorn.conf.py`, `medminder_dash/wsgi.py`, `medminder_dash/gunicorn.conf.py`, `arduino_dash/infra.py`
+**Files**: `board_manager/boot.py`, `arduino_dash/wsgi.py`, `arduino_dash/gunicorn_conf.py`, `medminder_dash/wsgi.py`, `medminder_dash/gunicorn_conf.py`, `arduino_dash/infra.py`
 
 **Test Impact**: 96 arduino + 78 medminder
 
@@ -1597,7 +1597,7 @@ Both fixes required for WS-triggered refresh to work.
 
 **Date**: 2026-06-11
 **Type**: Frontend Performance
-**Scope**: Both dashboards' templates (base.html, dashboard.html/index.html, admin.html, admin_board_selector.html) + cleanup (pubsub.py, pubsub_infra.py, CSS)
+**Scope**: Both dashboards' templates (base.html, dashboard.html/index.html, admin.html, admin_board_selector.html) + cleanup (pubsub.py, pubsub.py, CSS)
 
 ### Goal
 
@@ -1634,7 +1634,7 @@ Board plugged in
 | `templates/admin.html` | `every 5s` removed from trigger | Both |
 | `templates/partials/admin_board_selector.html` | Removed Refresh button | Both |
 | `pubsub.py` | Deleted `refresh_boards()` | arduino_dash |
-| `pubsub_infra.py` | Deleted `refresh_boards()` | medminder_dash |
+| `pubsub.py` | Deleted `refresh_boards()` | medminder_dash |
 | `templates/base.html` | Removed `.refresh-btn` CSS | Both |
 
 ### Design Decisions
@@ -1774,7 +1774,7 @@ Phase 71c replaced `htmx:beforeSwap` handler with `htmx:wsBeforeMessage` in both
 **OOB wrapper in pubsub, not template**: `board_event.html` shared with non-WS route (`/api/boards/event`), so `hx-swap-oob` attribute would break that route. Instead, wrap rendered HTML at the broadcast call:
 
 ```python
-# arduino_dash pubsub.py:161 / medminder_dash pubsub_infra.py:203
+# arduino_dash pubsub.py:161 / medminder_dash pubsub.py:203
 event_html = '<div hx-swap-oob="afterbegin:#live-events-card">' + \
     render_template("partials/board_event.html", events=[data]) + '</div>'
 ```
@@ -1822,7 +1822,7 @@ Remove `.card` class, reduce padding `0.5rem 1rem` → `0.25rem 0.5rem`, `border
 | File | Change |
 |------|--------|
 | `arduino_dash/.../pubsub.py:161` | OOB wrapper in `_on_board_event` |
-| `medminder_dash/.../pubsub_infra.py:203` | OOB wrapper in `_on_board_event` |
+| `medminder_dash/.../pubsub.py:203` | OOB wrapper in `_on_board_event` |
 | `arduino_dash/.../templates/admin.html` | Live-events card at top + CSS |
 | `medminder_dash/.../templates/admin.html` | Same card + CSS |
 | `medminder_dash/.../templates/partials/board_event.html` | Leaner event items |
@@ -1869,7 +1869,7 @@ if self._sock and is_new:
 
 ### Fix v4 — Fallback Scanner Race (ACTUAL ROOT CAUSE)
 **Files**: 
-- `medminder_dash/pubsub_infra.py:35-78,180-213`
+- `medminder_dash/pubsub.py:35-78,180-213`
 - `arduino_dash/pubsub.py:31-67,133-164`
 
 **Root cause**: The fallback scanner (`_fallback_scan_loop`) detects boards independently of BMS PubSub. Both sources call `_on_board_event()` → `broadcast_ws()`. Result: TWO WS messages per board event.
@@ -2413,8 +2413,8 @@ hx-post="/board/{{ (active_board or '').lstrip('/') }}/upload"    <!-- was /api/
 **medminder_dash**:
 | File | Line(s) | Change |
 |------|---------|--------|
-| `pubsub_infra.py` | 36 | `_fallback_scan_loop` read: `with state._daemon_ready_lock` |
-| `pubsub_infra.py` | 215-220 | `_on_daemon_ready`: duplicate guard added inside existing lock |
+| `pubsub.py` | 36 | `_fallback_scan_loop` read: `with state._daemon_ready_lock` |
+| `pubsub.py` | 215-220 | `_on_daemon_ready`: duplicate guard added inside existing lock |
 
 ### Architecture
 
@@ -2444,8 +2444,8 @@ pubsub reconnect
 | `arduino_dash/pubsub.py:118` | write | `_on_pubsub_reconnect` — lock, reset to False |
 | `arduino_dash/pubsub.py:33` | read | `_fallback_scan_loop` — lock, check, sleep/continue |
 | `arduino_dash/html_routes.py:122` | read | `html_daemon_status` — lock, check, render badge |
-| `medminder_dash/pubsub_infra.py:36` | read | `_fallback_scan_loop` — lock, check, sleep/continue |
-| `medminder_dash/pubsub_infra.py:215-220` | write + guard | `_on_daemon_ready` — lock, check, set, log |
+| `medminder_dash/pubsub.py:36` | read | `_fallback_scan_loop` — lock, check, sleep/continue |
+| `medminder_dash/pubsub.py:215-220` | write + guard | `_on_daemon_ready` — lock, check, set, log |
 
 ### Design Decisions
 
@@ -2577,7 +2577,7 @@ After (FIXED — matches medminder_dash):
 | Location | Description |
 |----------|-------------|
 | `arduino_dash/pubsub.py:97-100` | `init_pubsub` — `connect()` wrapped in try/except `(ConnectionError, OSError)` |
-| `medminder_dash/pubsub_infra.py:134-136` | `init_pubsub` — same pattern (reference implementation) |
+| `medminder_dash/pubsub.py:134-136` | `init_pubsub` — same pattern (reference implementation) |
 
 ### Design Decision
 
@@ -2795,7 +2795,7 @@ Upload/Dedup/Delete/Deploy mutation
 | `medminder_dash/.../api_routes.py` | Mirror |
 | `medminder_dash/.../sketch_management.py` | Mirror |
 | `medminder_dash/.../sketch_registry.py` | Mirror rewrite |
-| `medminder_dash/.../pubsub_infra.py` | Mirror WS broadcast |
+| `medminder_dash/.../pubsub.py` | Mirror WS broadcast |
 | `arduino_sketch_tools/.../extension.py` | _make_meta hw_id, record_deploy callback |
 | `*/templates/base.html` | JS handler checking "board-event" in WS messages |
 | `medminder_dash/.../templates/admin.html` | `#sketch-path-container` with `board-changed from:body` |
@@ -3050,7 +3050,7 @@ User/Agent → Playwright MCP Tools → HTTP → Flask Dev Server (127.0.0.1:POR
 | 1 | `board_manager/service.py:238-246` | Moved `_send_daemon_state_to(conn)` outside `initial_state_sent` guard — now called on every subscribe |
 | 2 | `board_manager/service.py:77-79` | Added `daemon_binary` + `arduino_daemon` to `DaemonStartError` log for better debugging |
 | 3 | `arduino_dash/pubsub.py:101,129` | `sys::daemon/ready` subscribed first in both `init_pubsub()` and `_on_pubsub_reconnect()` |
-| 4 | `medminder_dash/pubsub_infra.py:138,261` | Same reorder in `init_pubsub()` and `_on_pubsub_reconnect()` |
+| 4 | `medminder_dash/pubsub.py:138,261` | Same reorder in `init_pubsub()` and `_on_pubsub_reconnect()` |
 
 **Key design**: `_send_daemon_state_to(conn)` at `service.py:246` is safe outside the guard because the method checks `self._daemon_ready` (no-op if daemon not ready) and `conn.addr in subscribers_for("sys::daemon/ready")` (no-op if client hasn't subscribed to daemon topic).
 
@@ -3108,7 +3108,7 @@ class SysTopic(str, Enum):
 | 7 | `arduino_dash/.../gunicorn_conf.py` | `DashEnv` (str, Enum) | `BIND = "GUNICORN_BIND"`, `WORKERS = "GUNICORN_WORKERS"`, `TIMEOUT = "GUNICORN_TIMEOUT"`, `LOG_LEVEL = "GUNICORN_LOG_LEVEL"` |
 | 7 | `medminder_dash/.../gunicorn_conf.py` | `GunicornEnv` (str, Enum) | Same as DashEnv |
 | 8 | `arduino_dash/.../pubsub.py` | `PubSubTopic` (str, Enum) | `DAEMON_READY = "sys::daemon/ready"`, `BOARD_EVENT = "board::+::event"`, `RESP = "resp::*"`, `HEALTH = "sys::health"`, `RESP_COMPILE = "resp::compile::*"`, `RESP_UPLOAD = "resp::upload::*"` |
-| 8 | `medminder_dash/.../pubsub_infra.py` | `PubSubTopic` (str, Enum) | Same as arduino_dash PubSubTopic |
+| 8 | `medminder_dash/.../pubsub.py` | `PubSubTopic` (str, Enum) | Same as arduino_dash PubSubTopic |
 
 ### Key Gotchas Encountered
 
@@ -3251,7 +3251,7 @@ Total: 170 tests.
 | `templates/admin.html` | Both | Delete path + file input handlers via data-action + onchange |
 | `templates/board_detail.html` | arduino_dash | Halt button + file input + inline board status badge with `hx-swap="morph"` |
 | `templates/medicine_form.html` | medminder | Cancel button via onclick |
-| `medminder_dash/.../pubsub_infra.py` | medminder | `broadcast_ws(html)` — WS broadcast function |
+| `medminder_dash/.../pubsub.py` | medminder | `broadcast_ws(html)` — WS broadcast function |
 
 ### Phase 97 Design Decisions
 
@@ -3284,7 +3284,7 @@ Total: 170 tests.
 4. **Swap Target Granularization**:
    - `board_card.html` partial (both dashboards)
    - `/boards/grid/card/<port>` endpoint (both dashboards)
-   - `data-event-port` attribute in WS broadcast (pubsub.py, pubsub_infra.py)
+   - `data-event-port` attribute in WS broadcast (pubsub.py, pubsub.py)
    - WS handler parses port and does targeted card refresh via `htmx.ajax()`
 5. **CSS Additions**:
    - `.badge-container { margin-left: auto; }`

@@ -19,7 +19,7 @@ Welcome to the MedMinder documentation. This index maps all documentation resour
 | [docs/api.md](docs/api.md) | API reference: pub/sub protocol, gRPC client, Flask routes, environment variables |
 | [docs/tests.md](docs/tests.md) | Testing methodology: framework, categories, running tests, coverage by package |
 | [scripts/](docs/scripts.md) | Scripts: CI, builds, gRPC stubs, Arduino deps, test suite → [`scripts/docs/index.md`](scripts/docs/index.md) |
-| [e2e/](docs/e2e-testing.md) | E2E browser testing: mock servers, scenarios, Playwright MCP → [`e2e/docs/index.md`](e2e/docs/index.md) |
+| [e2e/](docs/e2e-testing.md) | E2E browser testing: mock servers, scenarios, Playwright MCP → [`e2e/index.md`](e2e/index.md) |
 | [dist-test-install/](docs/dist-test-install.md) | Wheel install validation → [`dist-test-install/docs/index.md`](dist-test-install/docs/index.md) |
 | [dist-standalone-install/](docs/dist-standalone.md) | Standalone binary builds → [`dist-standalone-install/docs/index.md`](dist-standalone-install/docs/index.md) |
 
@@ -130,7 +130,7 @@ Base: `medminder_dash/python/medminder_dash/`
 | Document | Description | Full Docs |
 |----------|-------------|-----------|
 | [docs/scripts.md](docs/scripts.md) | Scripts reference (CI, builds, gRPC stubs, Arduino deps) | [`scripts/docs/index.md`](scripts/docs/index.md) — [`README.md`](scripts/README.md) |
-| [docs/e2e-testing.md](docs/e2e-testing.md) | E2E browser testing (mock servers, scenarios) | [`e2e/docs/index.md`](e2e/docs/index.md) |
+| [docs/e2e-testing.md](docs/e2e-testing.md) | E2E browser testing (mock servers, scenarios) | [`e2e/index.md`](e2e/index.md) — [`README.md`](e2e/README.md) |
 | [docs/dist-test-install.md](docs/dist-test-install.md) | Wheel install validation | [`dist-test-install/docs/index.md`](dist-test-install/docs/index.md) — [`README.md`](dist-test-install/README.md) |
 | [docs/dist-standalone.md](docs/dist-standalone.md) | Standalone binary builds | [`dist-standalone-install/docs/index.md`](dist-standalone-install/docs/index.md) |
 

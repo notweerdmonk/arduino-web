@@ -3917,4 +3917,45 @@ Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) an
 **Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
 
 **Test class naming note**: `TestApiBoardList` still tests the OLD PubSub `/api/pubsub/boards/health` (was `GET /api/boards`). The class name is now misleading but functionally correct — renaming deferred as cosmetic.
+
+---
+
+## 2026-06-25 16:10 — Phase 104: E2E Documentation Restructure ✅ COMPLETED
+
+**Goal**: Bring e2e documentation up to standard with other modules. Created `e2e/README.md`, `e2e/index.md`, `e2e/test-sketch/`; documented automated Playwright specs in `e2e/docs/index.md`; updated all agent_tools docs (COMMAND, AGENT, GUIDE, MCP_TESTING_GUIDE) with test-sketch references; synced project-level docs.
+
+**Approach**: 4 parallel task agents, no code changes — pure documentation restructure.
+
+**New files**:
+| File | Purpose |
+|------|---------|
+| `e2e/README.md` | Module overview, quick start, directory layout, requirements |
+| `e2e/index.md` | Doc entry point (quick reference table, like `scripts/docs/index.md`) |
+| `e2e/test-sketch/README.md` | Minimal Arduino compile/upload sketch documentation |
+| `e2e/test-sketch/test-sketch.ino` | Minimal `setup(){} loop(){}` sketch (moved from `.playwright-mcp/`) |
+
+**Edited files**: `e2e/docs/index.md`, `e2e/docs/servers.md`, `e2e/agent_tools/COMMAND.md`, `e2e/agent_tools/AGENT.md`, `e2e/agent_tools/GUIDE.md`, `e2e/MCP_TESTING_GUIDE.md`, `docs/e2e-testing.md`, root `index.md`.
+
+**Verification**:
+- 11 content checks (file existence + grep) ✅
+- `bundle exec jekyll build` — 0 errors, 0 warnings ✅
+- playwright-mcp-testing E2E: load skill → read guide → start server → navigate → snapshot → cleanup ✅
+
+**Notes**: Server scripts need pipenv (`pipenv run python e2e/servers/..._server.py`) because packages are installed in pipenv venv, not system Python.
+
+---
+
+## 2026-06-25 17:53 — Phase 104.1: Document e2e/fixtures/ ✅ COMPLETED
+
+**Gap fix**: Added "Test Data Fixtures" subsection to `e2e/docs/index.md` covering `fixtures/test-data.ts` — purpose (mirrors `--mock` server state), exports (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), TypeScript import path, and shelf status.
+
+**Verification**: 6 test scenarios (content checks + Jekyll build) — all pass.
+
+---
+
+## 2026-06-25 18:14 — Phase 104.2: Fix shelved-specs activation docs ✅ COMPLETED
+
+**Gap fix**: Added `npx playwright install --with-deps` to Installation section (needed to download browser binaries after `npm install`) and documented `npx playwright test --config e2e/playwright.config.ts` as a project-root run alternative.
+
+**Verification**: 3 test scenarios — all pass. Jekyll build: 0 errors, 0 warnings.
 {% endraw %}

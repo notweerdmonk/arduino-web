@@ -1,9 +1,9 @@
 ---
 ---
 {% raw %}
-# Testing Progress — Phase 99: HTML Template Homogenisation
+# Testing Progress — Phase 104: E2E Documentation Restructure
 
-**Date**: 2026-06-22 12:43
+**Date**: 2026-06-25 16:10
 
 **Status**: ✅ COMPLETED
 
@@ -11,57 +11,39 @@
 
 | # | Task | Status | Result |
 |---|------|--------|--------|
-| 1 | arduino_dash tests after Q1a | ✅ | 119 pass ✓ |
-| 2 | medminder_dash tests after Q1b+c+d | ✅ | 186 pass, 1 skip ✓ |
-| 3 | Both dash tests after Q2a+b | ✅ | 119 ✓ / 186 ✓ |
-| 4 | Both dash tests after Q3a+b | ✅ | 119 ✓ / 186 ✓ |
-| 5 | Both dash tests after Q4a+b | ✅ | 119 ✓ / 186 ✓ |
-| 6 | Both dash tests after T1-T3 | ✅ | 119 ✓ / 186 ✓ |
-| 7 | Both dash tests after Q6 | ✅ | 119 ✓ / 186 ✓ |
-| 8 | Final regression - both suites | ✅ | 119 ✓ / 186 ✓ |
-| 9 | Playwright E2E - arduino_dash board grid | ✅ | TestBoard Uno & Mega shown, Connected, Manage links ✓ |
-| 10 | Playwright E2E - arduino_dash admin | ✅ | All sections, step numbering, board selector ✓ |
-| 11 | Playwright E2E - arduino_dash board detail | ✅ | Controls, compile/upload outputs, admin link ✓ |
-| 12 | Playwright E2E - medminder_dash home | ✅ | Board Dashboard + Medicine Overview ✓ |
-| 13 | Playwright E2E - medminder_dash admin | ✅ | Medicines CRUD, alarm.hpp, sync, compile/upload ✓ |
-| 14 | Playwright E2E - medminder_dash board detail + API | ✅ | Medicines list + API returns 3 medicines ✓ |
-| 15 | Phase 100: arduino_dash survival (no shell hacks) | ✅ | HTTP 200 ✓ |
-| 16 | Phase 100: arduino_dash --stop cleanup | ✅ | "Stopped PID" ✓ |
-| 17 | Phase 100: arduino_dash --logfile capture | ✅ | 571 bytes ✓ |
-| 18 | Phase 100: medminder_dash survival (no shell hacks) | ✅ | HTTP 200 ✓ |
-| 19 | Phase 100: medminder_dash --stop cleanup | ✅ | "Stopped PID" ✓ |
-| 20 | Phase 100: medminder_dash --logfile capture | ✅ | 649 bytes ✓ |
-| 21 | Phase 100: Stale PID handling | ✅ | Cleans up pidfile ✓ |
-| 22 | Phase 100c: New idiomorph CDN resolves | ✅ | HTTP 200 ✓ |
-| 23 | Phase 100c: Old idiomorph CDN returns 404 | ✅ | HTTP 404 ✓ |
-| 24 | Phase 100c: simple-websocket dep added (arduino_dash) | ✅ | pyproject.toml:14 |
-| 25 | Phase 100c: simple-websocket dep added (medminder_dash) | ✅ | pyproject.toml:15 |
-| 26 | Phase 100c: idiomorph URL fixed (arduino_dash base.html) | ✅ | Correct URL ✓ |
-| 27 | Phase 100c: idiomorph URL fixed (medminder_dash base.html) | ✅ | Correct URL ✓ |
-| 28 | Phase 100c: No regressions — arduino_dash tests | ✅ | 111 pre-existing errors unchanged |
-| 29 | Phase 100c: No regressions — medminder_dash tests | ✅ | 1 pre-existing failure unchanged |
-| 30 | Phase 101: arduino-dash smoke (`--help`) | ✅ | Exit 0 |
-| 31 | Phase 101: medminder-dash smoke (`--help`) | ✅ | Exit 0 |
-| 32 | Phase 101: board-manager smoke (`--help`) | ✅ | Exit 0 |
-| 33 | Phase 101: arduino-dash modules (7 modules) | ✅ | All present |
-| 34 | Phase 101: medminder-dash modules (7 modules) | ✅ | All present |
-| 35 | Phase 101: templates (both dashboards) | ✅ | All templates + partials |
-| 36 | Phase 101: simple-websocket dep (arduino-dash) | ✅ | Present |
-| 37 | Phase 101: simple-websocket dep (medminder-dash) | ✅ | Present |
-| 38 | Phase 101: static files (both dashboards) | ✅ | style.css + favicons |
-| 39 | Phase 101: All 3 binaries built (51MB each) | ✅ | `.tar.gz` archives created |
-| 40 | Phase 102: arduino_dash state re-exports | ✅ | 111 errors → 119 pass |
-| 41 | Phase 102: pubsub/sketch_management re-exports | ✅ | 53 cascade failures resolved |
-| 42 | Phase 102: UPLOAD_BASE_DIR re-export (production bug) | ✅ | 9 source refs fixed |
-| 43 | Phase 102: api_routes.py wrong import fix | ✅ | Imports from correct module |
-| 44 | Phase 102: fix arduino_dash fqbn assertion | ✅ | Relaxed to `id="fqbn"` check |
-| 45 | Phase 102: fix medminder_dash hardware-id assertion | ✅ | Removed redundant check |
-| 46 | Phase 102: `nox -s all_tests` | ✅ | 8/8 sessions green, 0 failures |
-| 47 | Phase 103: Part 1 — arduino_dash events buffer | ✅ | state.py, pubsub.py, utils.py |
-| 48 | Phase 103: Part 2 — arduino_dash api_routes.py | ✅ | Move PubSub + add CRUD + enhance /api/sketches |
-| 49 | Phase 103: Part 3 — medminder_dash api_routes.py | ✅ | Add PubSub + rename + add CRUD + enhance /api/sketches |
-| 50 | Phase 103: Part 4 — medminder_dash html_routes.py | ✅ | /boards/event commented out |
-| 51 | Phase 103: Part 5 — Test URL updates | ✅ | 4 URL changes + TestBoardsEvent redirect |
-| 52 | Phase 103: Part 6 — Module docs | ✅ | 4 doc files |
-| 53 | Phase 103: Part 7 — `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures, 0 errors |
+| 1 | e2e/README.md exists and well-formed | ✅ | Front matter, quick start, layout, requirements all present |
+| 2 | e2e/index.md exists | ✅ | Quick reference + directory layout confirmed |
+| 3 | e2e/test-sketch/ files | ✅ | README.md documents purpose/usage; .ino minimal sketch |
+| 4 | e2e/docs/index.md updated | ✅ | Automated Playwright Specs + test-sketch sections added |
+| 5 | e2e/docs/servers.md updated | ✅ | webServer auto-management note present |
+| 6 | COMMAND.md updated | ✅ | test-sketch path reference added |
+| 7 | AGENT.md updated | ✅ | test-sketch step for upload scenarios |
+| 8 | GUIDE.md updated | ✅ | Full test-sketch section |
+| 9 | MCP_TESTING_GUIDE.md mirrors GUIDE.md | ✅ | Same test-sketch content |
+| 10 | docs/e2e-testing.md updated | ✅ | New entry points in quick links |
+| 11 | Root index.md updated | ✅ | e2e row points to e2e/index.md |
+| 12 | Jekyll build | ✅ | 0 errors, 0 warnings |
+| 13 | playwright-mcp-testing E2E | ✅ | All steps pass: skill→guide→server→navigate→snapshot→cleanup |
+---
+
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
+
+**Status**: 🏗️ IN PROGRESS
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | e2e/docs/index.md has "Test Data Fixtures" subsection | ✅ | Section present with export table + import path |
+| 2 | e2e/docs/index.md mentions MOCK_PORTS export | ✅ | Listed in export table with description |
+| 3 | e2e/docs/index.md shows import path | ✅ | `import { MOCK_PORTS, ... } from '../fixtures/test-data'` shown |
+| 4 | e2e/docs/index.md notes `--mock` server relation | ✅ | "mirror the mock state injected by" line present |
+| 5 | e2e/index.md, e2e/README.md mention fixtures | ✅ | Both list fixtures in directory layouts |
+| 6 | Jekyll build | ✅ | 0 errors, 0 warnings |
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14) ✅ COMPLETED
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | playwright install step in Installation | ✅ | Step added after npm install, error note included |
+| 2 | --config flag alternative in Running | ✅ | Command documented with callout box |
+| 3 | Jekyll build | ✅ | 0 errors, 0 warnings |
 {% endraw %}

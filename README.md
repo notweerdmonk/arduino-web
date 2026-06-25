@@ -291,7 +291,7 @@ medminder/
 ### Sub-Directory Documentation
 
 - [scripts/docs/index.md](scripts/docs/index.md) — scripts reference
-- [e2e/docs/index.md](e2e/docs/index.md) — E2E browser testing
+- [e2e/index.md](e2e/index.md) — E2E browser testing (doc hub) — [`README.md`](e2e/README.md) for quick start
 - [dist-test-install/docs/index.md](dist-test-install/docs/index.md) — wheel install validation
 - [dist-standalone-install/docs/index.md](dist-standalone-install/docs/index.md) — standalone binary distribution
 - [dist-standalone-install/docs/architecture.md](dist-standalone-install/docs/architecture.md) — PyOxidizer bundling design

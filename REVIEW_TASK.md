@@ -1,50 +1,21 @@
 ---
 ---
 {% raw %}
-# Review Task — Phase 102: Fix Pre-Existing Test Failures
+# Review Task — Phase 104: E2E Documentation Restructure
 
-**Date**: 2026-06-25 09:10
-
-| # | Item | Result |
-|---|------|--------|
-| 1 | Verify `app.py` re-exports are correct | ✅ |
-| 2 | Verify `state.py` UPLOAD_BASE_DIR re-export | ✅ |
-| 3 | Verify `api_routes.py` wrong import fix | ✅ |
-| 4 | Verify test assertion fixes (2 files) | ✅ |
-| 5 | Run `nox -s all_tests` | ✅ 8/8 sessions pass |
-
-## Previous: ESLint Review (2026-06-24 03:40)
+**Date**: 2026-06-25 16:10
 
 **Status**: ✅ COMPLETED
 
-## Review Items
-
 | # | Item | Result |
 |---|------|--------|
-| 1 | Create eslint config in config/ | ✅ |
-| 2 | Run eslint on inline JS (base.html) | ✅ — 22 warnings, 0 errors |
-| 3 | Run eslint on TypeScript Playwright tests | ⏸️ Skipped per user request |
-| 4 | Document eslint findings in REVIEW_JOURNAL.md | ✅ |
-
-
----
-
-## Phase 103 — API Route Restructure ✅ COMPLETED
-
-**Date**: 2026-06-25 11:57
-
-| # | Item | Result |
-|---|------|--------|
-| 1 | arduino_dash PubSub routes moved to `/api/pubsub/board/*` | ✅ |
-| 2 | arduino_dash new CRUD routes (5 endpoints) | ✅ |
-| 3 | medminder_dash PubSub routes added (4 endpoints) | ✅ |
-| 4 | medminder_dash `/api/board_list` → `/api/boards/list` | ✅ |
-| 5 | medminder_dash `/boards/event` commented out | ✅ |
-| 6 | arduino_dash events buffer added | ✅ |
-| 7 | `/api/sketches` `?hardware_id=X` filter | ✅ |
-| 8 | `/api/sketches/last-upload` null+404 handling | ✅ |
-| 9 | Test URLs updated | ✅ |
-| 10 | `nox -s all_tests` | ✅ 8/8 sessions, 0 failures |
-| 11 | Module docs | ✅ |
-| 12 | Agent-facing docs | ✅ |
+| 1 | e2e/README.md content review | ✅ Front matter, quick start, directory layout, requirements |
+| 2 | e2e/index.md content review | ✅ Quick reference table + directory layout like scripts/docs/index.md |
+| 3 | e2e/test-sketch/ content review | ✅ README documents purpose and usage; .ino has minimal sketch |
+| 4 | e2e/docs/index.md update review | ✅ Automated Playwright Specs + Test Sketch sections added, refocused as MCP sub-page |
+| 5 | e2e/docs/servers.md update review | ✅ webServer auto-management note |
+| 6 | agent_tools docs review | ✅ COMMAND.md + AGENT.md + GUIDE.md + MCP_TESTING_GUIDE.md all updated |
+| 7 | Project-level docs review | ✅ docs/e2e-testing.md + root index.md updated |
+| 8 | Jekyll build | ✅ 0 errors, 0 warnings |
+| 9 | playwright-mcp-testing E2E | ✅ All steps passed |
 {% endraw %}

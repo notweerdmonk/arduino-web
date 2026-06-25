@@ -135,3 +135,30 @@ The `--bms` flag starts the Board Management Service alongside the Flask dev ser
 ## Playwright MCP Note
 
 The Playwright MCP browser runs in a container and must reach servers on `0.0.0.0` (all interfaces), not `127.0.0.1` (loopback only). Both server scripts bind to `0.0.0.0` by default.
+
+## Automated Specs: webServer Auto-Management
+
+When running automated Playwright specs via `npx playwright test`, the
+`playwright.config.ts` configuration auto-manages server lifecycle:
+
+```typescript
+webServer: [
+  {
+    command: 'python3 e2e/servers/arduino_dash_server.py --mock --port 8765',
+    port: 8765,
+    reuseExistingServer: !process.env.CI,
+  },
+  {
+    command: 'python3 e2e/servers/medminder_dash_server.py --mock --port 8766',
+    port: 8766,
+    reuseExistingServer: !process.env.CI,
+  },
+]
+```
+
+Playwright starts both servers before the test run and shuts them down
+after all specs complete. The `reuseExistingServer` option allows using
+manually-started servers during development.
+
+Standalone spec execution requires no opencode or MCP — just Node.js
+and `@playwright/test`.

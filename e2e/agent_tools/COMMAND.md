@@ -27,6 +27,9 @@ Follow this procedure:
 3. Navigate to the app's main page with `playwright_browser_navigate`
 4. Capture snapshot to verify it loaded correctly
 5. Run 2-3 key scenarios from the guide (dashboard, admin page, API endpoint)
-6. Report results to the user
-7. Close browser with `playwright_browser_close`
-8. Shutdown all started servers with bash
+6. For compile/upload scenarios, reference the test-sketch at `e2e/test-sketch/`:
+   - Navigate to admin page, select a board, compile the test-sketch, verify success
+   - Upload the compiled sketch to the board
+7. Report results to the user
+8. Close browser with `playwright_browser_close`
+9. Shutdown all started servers with bash

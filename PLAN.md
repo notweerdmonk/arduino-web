@@ -1193,4 +1193,53 @@ Three issues found after Phase 20:
 2. Old `GET /api/board/<port>/status` (PubSub health) → `GET /api/pubsub/board/<port>/status`; freed route returns local connection status from `get_port_info()`
 3. Parallel task agents used for Parts 1-2 and Parts 3-4 — no conflicts, correct on first try
 
+---
+
+### Phase 104 — E2E Documentation Restructure (README, index, test-sketch, fixtures/specs docs) ✅ COMPLETED
+
+**Date**: 2026-06-25 16:10
+
+**Goal**: Bring e2e documentation up to the same standard as other monorepo modules. Six action items:
+
+1. **Create `e2e/README.md`** — module overview aligned with `scripts/README.md` style
+2. **Move `.playwright-mcp/test-sketch` to `e2e/test-sketch/`** — version-control the minimal Arduino compile/upload sketch
+3. **Document `e2e/fixtures/` and `e2e/specs/`** — automated Playwright spec usage, webServer auto-management, per-spec summaries
+4. **Create `e2e/index.md`** — doc entry point (quick reference table + directory layout, like `scripts/docs/index.md`)
+5. **Update project-level docs** — `docs/e2e-testing.md` and root `index.md`
+6. **Update agent_tools for test-sketch** — COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md
+7. **Verify end-to-end** — run playwright-mcp-testing command to confirm all paths resolve correctly
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/README.md | Module overview, quick start (MCP + automated), directory layout, requirements | ✅ |
+| 2 | e2e/test-sketch/ | Copy from `.playwright-mcp/`, rewrite README with purpose + usage | ✅ |
+| 3 | e2e/index.md | Quick reference table + directory layout (like `scripts/docs/index.md`) | ✅ |
+| 4 | e2e/docs/index.md | Add automated specs section + test-sketch section, refocus as MCP sub-page | ✅ |
+| 5 | e2e/docs/servers.md | Add webServer auto-management note for automated specs | ✅ |
+| 6 | agent_tools/docs | COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md — add test-sketch refs | ✅ |
+| 7 | Project-level docs | `docs/e2e-testing.md` updated, root `index.md` updated | ✅ |
+| 8 | End-to-end verification | playwright-mcp-testing command: skill load, guide read, server start, navigate, cleanup | ✅ |
+
+---
+
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
+
+**Goal**: Document `fixtures/test-data.ts` — purpose, contents (mock ports, sketch, medicines, URL helpers), import path, and relationship to server `--mock` state.
+
+**Items**:
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/docs/index.md | Add "Test Data Fixtures" subsection under Automated Playwright Specs | ✅ |
+| 2 | Verify all e2e docs consistency for fixtures | Check e2e/index.md, e2e/README.md, docs/e2e-testing.md reference it correctly | ✅ |
+
+---
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
+
+**Goal**: Add missing `npx playwright install --with-deps` to installation section and document project-root run alternative `npx playwright test --config e2e/playwright.config.ts`.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/docs/index.md Installation + Running | Add browser binary install step + project-root config flag | ✅ |
 {% endraw %}

@@ -490,6 +490,42 @@ Then verify partials re-fetched via snapshot or network activity.
 
 ---
 
+## Test Sketch for Compile/Upload Scenarios
+
+A minimal Arduino sketch lives at `e2e/test-sketch/` for end-to-end compile
+and upload verification. See [`e2e/test-sketch/README.md`](../test-sketch/README.md).
+
+### Purpose
+
+The sketch contains only `void setup() {} void loop() {}` — no board-specific
+logic. It validates that the compile pipeline accepts `.ino` files and produces
+valid binary output.
+
+### Usage in Scenarios
+
+```
+# Step 1: Navigate to admin page
+→ playwright_browser_navigate(url="http://localhost:8765/admin")
+
+# Step 2: Select a board in the Active Board selector
+# Step 3: Click Compile (sketch path is pre-filled or available via admin)
+
+# Step 4: Verify compile success via snapshot
+→ playwright_browser_snapshot()
+
+# Step 5: Click Upload to deploy to the selected board
+```
+
+### Path
+
+```
+e2e/test-sketch/
+├── README.md          # Full documentation
+└── test-sketch.ino    # Minimal Arduino sketch
+```
+
+---
+
 ## Troubleshooting
 
 | Symptom | Cause | Fix |
@@ -528,3 +564,4 @@ Then verify partials re-fetched via snapshot or network activity.
 | `e2e/fixtures/test-data.ts` | (Shelved) Shared test constants |
 | `e2e/specs/arduino_dash/` | (Shelved) 4 spec files |
 | `e2e/specs/medminder_dash/` | (Shelved) 4 spec files |
+| `e2e/test-sketch/` | Minimal Arduino sketch for compile/upload E2E tests |

@@ -256,8 +256,23 @@ Phase 98 successfully migrated all PubSub-driven frontend updates from HTMX poll
 | `noxfile.py` | 5 | `env={"PROJECT_ROOT": str(ROOT)}` |
 
 ---
-## Entry 5 — Phase 95: Git Tree Preparation Plan
 
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
+
+**Gap discovered**: During review of Phase 104, the original plan item "Document `e2e/fixtures/` and `e2e/specs/`" was partially implemented — specs got full documentation (install, run, webServer, spec summary, standalone note) but `fixtures/test-data.ts` was only listed by name in directory layouts.
+
+**What fixtures contain** (`e2e/fixtures/test-data.ts`):
+- `MOCK_PORTS` — port paths, board names, FQBNs, hardware IDs for 2 mock boards (Uno, Mega)
+- `MOCK_SKETCH` — name, path, checksum, timestamp, hardware_id
+- `MOCK_MEDICINES` — 3 medicine entries with dosage schedules
+- `daemonStatusUrl()`, `boardDetailUrl()` — URL builder helpers
+- All constants mirror the `--mock` state injected by `e2e/servers/*_server.py`
+
+**Decision**: Add "Test Data Fixtures" subsection to `e2e/docs/index.md` under Automated Playwright Specs, covering purpose, exports, import path, and relation to server mock state.
+
+**Completion**: 2026-06-25 17:53. Section added with export table (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), import path, and `--mock` relationship note. All 6 test scenarios pass. Jekyll build: 0 errors, 0 warnings.
+
+---
 **Date**: 2026-06-20 15:40
 
 **Status**: ✅ Complete
@@ -774,4 +789,61 @@ The agents were given identical route specifications and ran in parallel on sepa
 ### Verification
 
 `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
+---
+
+## Phase 104 — E2E Documentation Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 16:10
+
+**Goal**: Bring e2e documentation up to the same standard as other monorepo modules — add README.md, test-sketch, index.md, document automated specs, update agent_tools, sync project-level docs.
+
+### Approach
+
+Used 4 parallel task agents:
+- **Agent 1**: Created `e2e/README.md` + `e2e/index.md`
+- **Agent 2**: Created `e2e/test-sketch/` (README.md + test-sketch.ino)
+- **Agent 3**: Updated `e2e/docs/index.md` + `e2e/docs/servers.md`
+- **Agent 4**: Updated all 6 agent_tools + project-level docs
+
+Parallel agents completed without conflicts — each agent wrote to separate files/directories.
+
+### Key Decisions
+
+1. **`e2e/index.md` as doc entry point**: Fills the same role as `scripts/docs/index.md`. The project root `index.md` now points here instead of `e2e/docs/index.md`.
+2. **`e2e/docs/index.md` refocused as MCP sub-page**: Added Automated Playwright Specs section (install, run, webServer, spec summary) and Test Sketch section. Kept all existing MCP content.
+3. **No stale cross-refs**: `grep` confirmed zero hits for `.playwright-mcp/test-sketch` in `.md` files — no stale links from the relocation.
+
+### Files Changed (11 new + 7 edits)
+
+| Action | Files |
+|--------|-------|
+| **Created** (3) | `e2e/README.md`, `e2e/index.md`, `e2e/test-sketch/README.md` |
+| **Copied** (1) | `e2e/test-sketch/test-sketch.ino` (from `.playwright-mcp/test-sketch/`) |
+| **Edited** (7) | `e2e/docs/index.md`, `e2e/docs/servers.md`, `e2e/agent_tools/COMMAND.md`, `e2e/agent_tools/AGENT.md`, `e2e/agent_tools/GUIDE.md`, `e2e/MCP_TESTING_GUIDE.md`, `docs/e2e-testing.md`, `index.md` |
+
+### Verification
+
+| Test | Method | Result |
+|------|--------|--------|
+| Content checks (11) | File existence + grep for key sections | ✅ All pass |
+| Jekyll build | `bundle exec jekyll build` | ✅ 0 errors, 0 warnings |
+| playwright-mcp-testing E2E | Load skill → read guide → start server → navigate → snapshot → cleanup | ✅ All steps pass |
+
+### Gotchas
+
+1. **No pre-installed packages**: The server script requires `arduino_dash` package to be installed. Must run via `pipenv run python e2e/servers/...` — plain `python3` fails with `ModuleNotFoundError`.
+2. **MCP_TESTING_GUIDE.md must mirror GUIDE.md exactly**: These are aligned copies. Any section added to GUIDE.md must be duplicated in MCP_TESTING_GUIDE.md.
+
+---
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
+
+**Gap**: Two items missing from the Automated Playwright Specs documentation:
+1. `npx playwright install --with-deps` — needed after `npm install` to download browser binaries (otherwise first run fails with "No browser found")
+2. `npx playwright test --config e2e/playwright.config.ts` — running from project root without cd'ing into e2e/ directory (this is how users running from top-level scripts would invoke it)
+
+**Fix**: Update the Installation subsection in e2e/docs/index.md to include the browser install step and add a project-root run note.
+
+**Completion**: 2026-06-25 18:14. Both edits applied: `npx playwright install --with-deps` added after `npm install` with error-message callout; project-root alternative `npx playwright test --config e2e/playwright.config.ts` added as a callout under Running Specs. All 3 test scenarios pass. Jekyll build: 0 errors, 0 warnings. ✅
 {% endraw %}

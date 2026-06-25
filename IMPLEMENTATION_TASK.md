@@ -1,88 +1,121 @@
 ---
 ---
 {% raw %}
-# Implementation Task — Phase 103: API Route Restructure
+# Implementation Task — Phase 104: E2E Documentation Restructure
 
-**Date**: 2026-06-25 11:57
+**Date**: 2026-06-25 16:10
 
 ## Task Breakdown
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| Q1 | arduino_dash events buffer | ✅ | state.py, pubsub.py, utils.py |
-| Q2 | arduino_dash api_routes.py | ✅ | Move 4 PubSub routes → /api/pubsub/board/*, add 5 CRUD, enhance /api/sketches |
-| Q3 | medminder_dash api_routes.py | ✅ | Add 4 PubSub, rename /api/board_list → /api/boards/list, add 5 CRUD, enhance /api/sketches |
-| Q4 | medminder_dash html_routes.py | ✅ | Comment out /boards/event, remove get_board_events import |
-| Q5 | Update tests | ✅ | 4 URL changes in test_app.py + redirect TestBoardsEvent |
-| Q6 | Module docs | ✅ | state.md, utils.md, api_routes.md for both modules |
-| Q7 | Verification | ✅ | `nox -s all_tests` — 8/8 sessions green |
-| Q8 | Agent-facing docs sync | ✅ | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, all workflow docs |
+| Q1 | Create e2e/README.md | ✅ | Module overview, quick start, directory layout, requirements |
+| Q2 | Create e2e/test-sketch/ with README | ✅ | Copy from `.playwright-mcp/`, proper README |
+| Q3 | Create e2e/index.md (doc entry point) | ✅ | Like `scripts/docs/index.md` |
+| Q4 | Update e2e/docs/index.md | ✅ | Automated specs + test-sketch + refocus as MCP sub-page |
+| Q5 | Update e2e/docs/servers.md | ✅ | webServer auto-management note |
+| Q6 | Update agent_tools docs | ✅ | COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md |
+| Q7 | Update project-level docs | ✅ | docs/e2e-testing.md, root index.md |
+| Q8 | End-to-end verification | ✅ | playwright-mcp-testing command run |
 
 ## Detailed Tasks
 
-### Q1 — arduino_dash events buffer
+### Q1 — Create e2e/README.md
 
-- [x] `state.py`: Add `_board_events: list[dict] = []` and `_board_events_lock = threading.Lock()`
-- [x] `pubsub.py`: In `_on_board_event()`, append `data` to `state._board_events`, cap at 100
-- [x] `utils.py`: Add `get_board_events() -> list[dict]`
+- [x] Front matter `---`
+- [x] Title + brief overview of E2E testing infrastructure
+- [x] Quick Start section (two modes: MCP interactive with opencode agent, automated Playwright specs)
+- [x] Directory layout tree
+- [x] Requirements (Python 3.10+, Node.js for automated specs)
+- [x] Related links to docs/
+- [x] `Assisted-by:` acknowledgement
 
-### Q2 — arduino_dash api_routes.py
+### Q2 — Create e2e/test-sketch/
 
-- [x] Move 4 PubSub routes to `/api/pubsub/board/*`
-- [x] Add `GET /api/daemon/status`
-- [x] Add `GET /api/board/<path:port>/status` (local CRUD)
-- [x] Add `GET /api/boards/list`
-- [x] Add `GET /api/boards/events`
-- [x] Add `GET /api/sketches/last-upload` (returns null + 404 if none)
-- [x] Enhance `GET /api/sketches` with `?hardware_id=X` filter
-- [x] Import additions: `get_known_boards`, `get_board_events`, `get_port_info`, `get_assignment`, `_resolve_latest_upload`
+- [x] Create `e2e/test-sketch/` directory
+- [x] Copy `test-sketch.ino` from `.playwright-mcp/test-sketch/`
+- [x] Write `README.md` with:
+  - What it is (minimal Arduino sketch for compile/upload E2E tests)
+  - Purpose: verifies that the compile pipeline accepts `.ino` files and produces valid binary output
+  - Usage: upload via admin page or `arduino-cli compile --fqbn ... e2e/test-sketch/`
+  - Sketch content reference (`void setup() {} void loop() {}`)
 
-### Q3 — medminder_dash api_routes.py
+### Q3 — Create e2e/index.md
 
-- [x] Add imports: `get_pubsub`, `is_connected`, `is_daemon_ready`, `get_board_events`
-- [x] Add 4 PubSub endpoints
-- [x] Rename `/api/board_list` → `/api/boards/list`
-- [x] Add `GET /api/daemon/status`
-- [x] Add `GET /api/board/<path:port>/status` (local CRUD)
-- [x] Add `GET /api/boards/events`
-- [x] Add `GET /api/sketches/last-upload`
-- [x] Enhance `GET /api/sketches` with `?hardware_id=X` filter
+- [x] Front matter `---`
+- [x] Title + brief description
+- [x] Quick reference table (subdirectories/features → purpose)
+- [x] Directory layout tree (detailed)
+- [x] Related links
 
-### Q4 — medminder_dash html_routes.py
+### Q4 — Update e2e/docs/index.md
 
-- [x] Comment out `/boards/event` route (lines 774-778)
-- [x] Remove `get_board_events` from import line (line 44)
+- [x] Refocus as MCP interactive testing sub-page
+- [x] Add "Automated Playwright Specs" section:
+  - [x] Install: `cd e2e && npm install`
+  - [x] Run: `npx playwright test` / `--ui` / `--headed`
+  - [x] webServer auto-management (playwright.config.ts starts both mock servers)
+  - [x] Spec summary table (8 specs, 4 per dashboard)
+- [x] Add "Test Sketch" section documenting `e2e/test-sketch/`
+- [x] Update directory layout to include test-sketch and index.md
+- [x] Add links to `e2e/README.md` and `e2e/index.md`
 
-### Q5 — Update tests
+### Q5 — Update e2e/docs/servers.md
 
-- [x] `arduino_dash/tests/test_app.py`: 4 URL changes (lines 1505, 1514, 1523, 1532)
-- [x] Update `TestApiBoardList` test to check new CRUD behavior
-- [x] `medminder_dash/tests/test_routes.py`: Update `TestBoardsEvent` to hit `/api/boards/events`
+- [x] Add note about `playwright.config.ts` webServer integration
 
-### Q6 — Module docs
+### Q6 — Update agent_tools docs
 
-- [x] `arduino_dash/docs/state.md` — add `_board_events`, `_board_events_lock`
-- [x] `arduino_dash/docs/utils.md` — add `get_board_events()`
-- [x] `arduino_dash/docs/api_routes.md` — new route tables
-- [x] `medminder_dash/docs/api_routes.md` — new route tables
+- [x] COMMAND.md: Add test-sketch path reference for compile/upload scenarios
+- [x] AGENT.md: Add step about test-sketch for upload scenarios
+- [x] GUIDE.md: Add test-sketch section (purpose, path, usage in scenarios)
+- [x] MCP_TESTING_GUIDE.md: Mirror GUIDE.md changes
 
-### Q7 — Verification
+### Q7 — Update project-level docs
 
-- [x] `nox -s all_tests` — 8/8 sessions green
-- [x] `scripts_tests`: pass
-- [x] `tests(board_manager)`: pass
-- [x] `tests(board_manager_client)`: pass
-- [x] `tests(arduino_sketch_tools)`: pass
-- [x] `tests(arduino_dash)`: pass
-- [x] `tests(arduino_grpc)`: pass
-- [x] `tests(medminder_dash)`: pass
+- [x] `docs/e2e-testing.md`: Update quick links to include `e2e/index.md`, `e2e/README.md`, `e2e/test-sketch/`
+- [x] Root `index.md`: Update e2e row to point to `e2e/index.md` instead of `e2e/docs/index.md`
 
-### Q8 — Agent-facing docs sync
+### Q8 — End-to-end verification
 
-- [x] PLAN.md
-- [x] JOURNAL.md
-- [x] CODEBASE_REFERENCE.md
-- [x] IMPLEMENTATION_* docs
-- [x] TESTING_* docs
-- [x] REVIEW_* docs
+- [x] Load the playwright-mcp-testing skill: `skill(name="playwright-mcp-testing")`
+- [x] Read updated guide: `read(path="e2e/agent_tools/GUIDE.md")`
+- [x] Start mock server: `python3 e2e/servers/arduino_dash_server.py --mock`
+- [x] Navigate to dashboard: `playwright_browser_navigate(url="http://localhost:8765")`
+- [x] Verify dashboard loads: `playwright_browser_snapshot()`
+- [x] Clean up: close browser, stop server
+---
+
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53) ✅ COMPLETED
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1 | Add Test Data Fixtures section to e2e/docs/index.md | ✅ | Purpose, exports, import path, relation to --mock state documented |
+| Q2 | Verify fixtures consistency across all e2e docs | ✅ | All cross-doc checks pass |
+
+### Q1 — Add Test Data Fixtures to e2e/docs/index.md
+
+- [x] Add "Test Data Fixtures" subsection under Automated Playwright Specs
+- [x] Explain what fixtures contain: mock ports, sketch, medicines, URL helpers
+- [x] Show import path from specs (`import { ... } from '../fixtures/test-data'`)
+- [x] Note that fixtures mirror `--mock` server state from e2e/servers/
+- [x] Clarify shelf status (available for future/refactored specs)
+
+### Q2 — Verify fixtures consistency
+
+- [x] Check e2e/index.md quick reference has fixture entry
+- [x] Check e2e/README.md directory layout mentions fixtures
+- [x] Check docs/e2e-testing.md for stale fixture references
+---
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14) ✅ COMPLETED
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1 | Add browser binary install step + project-root run config to e2e/docs/index.md | ✅ | playwright install --with-deps added, --config flag documented |
+
+### Q1 — Update e2e/docs/index.md Installation section
+- [x] Add `npx playwright install --with-deps` after `npm install` in Installation
+- [x] Add project-root alternative: `npx playwright test --config e2e/playwright.config.ts`
+- [x] Verified: 3/3 test scenarios pass + Jekyll build 0 errors
 {% endraw %}

@@ -3821,4 +3821,96 @@ sed -i "s|@REPO_ROOT@|$PROJECT_ROOT|g" scripts/pyoxidizer/$APP/pyoxidizer.bzl
 ### Verification
 
 - `nox -s all_tests`: 8/8 sessions, 0 failures, 0 errors ✅
+
+---
+
+## Phase 104 — E2E Documentation Files
+
+**Date**: 2026-06-25 16:10
+
+### New Files
+
+| File | Location | Purpose |
+|------|----------|---------|
+| `e2e/README.md` | `e2e/` | Module overview: quick start (MCP + automated), directory layout, requirements |
+| `e2e/index.md` | `e2e/` | Doc entry point: quick reference table + directory layout (like `scripts/docs/index.md`) |
+| `e2e/test-sketch/README.md` | `e2e/test-sketch/` | Minimal Arduino sketch documentation for compile/upload E2E tests |
+| `e2e/test-sketch/test-sketch.ino` | `e2e/test-sketch/` | Minimal `void setup() {} void loop() {}` sketch (moved from `.playwright-mcp/`) |
+
+### Updated Files
+
+| File | Changes |
+|------|---------|
+| `e2e/docs/index.md` | Added Automated Playwright Specs section (install, run, webServer, spec summary) + Test Sketch section; refocused as MCP sub-page |
+| `e2e/docs/servers.md` | Added webServer auto-management note referencing `playwright.config.ts` |
+| `e2e/agent_tools/COMMAND.md` | Added test-sketch path reference for compile/upload scenarios |
+| `e2e/agent_tools/AGENT.md` | Added step 4: "Locate test-sketch" |
+| `e2e/agent_tools/GUIDE.md` | Added "Test Sketch for Compile/Upload Scenarios" section |
+| `e2e/MCP_TESTING_GUIDE.md` | Mirrored GUIDE.md test-sketch section |
+| `docs/e2e-testing.md` | Updated quick links to point to `e2e/index.md` + new entry points |
+| `index.md` | Updated e2e row to point to `e2e/index.md` + `e2e/README.md` |
+
+### E2E Directory Layout
+
+```
+e2e/
+├── README.md                    # Module overview
+├── index.md                     # Doc entry point
+├── agent_tools/                 # opencode skill/agent/command defs
+├── docs/                        # Detailed MCP testing docs
+├── fixtures/test-data.ts        # (Shelved) Playwright test constants
+├── servers/                     # Mock Flask dev server scripts
+├── specs/                       # (Shelved) Automated Playwright specs
+├── test-sketch/                 # Minimal Arduino compile/upload sketch
+├── MCP_TESTING_GUIDE.md         # Aligned copy of agent_tools/GUIDE.md
+├── package.json                 # @playwright/test dev dep
+└── playwright.config.ts         # Playwright config with webServer
+```
+
+### Verification
+
+- `bundle exec jekyll build`: 0 errors, 0 warnings ✅
+- playwright-mcp-testing E2E: skill→guide→server→navigate→snapshot→cleanup ✅
+- 11 content checks (file existence + grep) ✅
+
+---
+
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
+
+### New Documentation
+
+| File | Section | Content |
+|------|---------|---------|
+| `e2e/docs/index.md` | "Test Data Fixtures" under Automated Playwright Specs | Export table (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), import path, `--mock` relation, shelf status |
+
+### Fixtures Reference
+
+`e2e/fixtures/test-data.ts` exports that mirror `e2e/servers/*_server.py --mock` state:
+- `MOCK_PORTS.uno` — `/dev/ttyTEST0`, `TestBoard Uno`, `arduino:avr:uno`, `HW-TEST-001`
+- `MOCK_PORTS.mega` — `/dev/ttyTEST1`, `TestBoard Mega`, `arduino:avr:mega`, `HW-TEST-002`
+- `MOCK_SKETCH` — name, path, checksum, timestamp, hardware_id
+- `MOCK_MEDICINES` — 3 entries: Aspirin (08:00), VitaminD (12:30), Ibuprofen (18:00)
+- `daemonStatusUrl(baseURL)` → `${baseURL}/daemon/status`
+- `boardDetailUrl(baseURL, port)` → `${baseURL}/board/${encodeURIComponent(port)}`
+
+### Verification
+
+- 6 test scenarios: all pass ✅
+- Jekyll build: 0 errors, 0 warnings ✅
+
+---
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
+
+### Changes
+
+| File | Section | Change |
+|------|---------|--------|
+| `e2e/docs/index.md` | Installation | Added `npx playwright install --with-deps` after `npm install` with error callout |
+| `e2e/docs/index.md` | Running Specs | Added callout: `npx playwright test --config e2e/playwright.config.ts` for project-root runs |
+
+### Verification
+
+- 3 test scenarios: all pass ✅
+- Jekyll build: 0 errors, 0 warnings ✅
 {% endraw %}

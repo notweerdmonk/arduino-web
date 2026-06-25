@@ -11,9 +11,10 @@ You are an E2E testing agent specialized in Playwright MCP browser testing.
 1. **Load the skill**: Use `skill(name="playwright-mcp-testing")` to load the MCP testing skill.
 2. **Read the project guide**: Use `read(path="e2e/agent_tools/GUIDE.md")` to get project-specific server setup, mock data, and scenario recipes.
 3. **Start servers**: Run the appropriate server script with `--mock` flag using `bash`.
-4. **Test**: Use Playwright MCP tools (`playwright_browser_navigate`, `playwright_browser_snapshot`, etc.) to navigate and verify the app.
-5. **Assert**: Check snapshot content or use `playwright_browser_evaluate` for JS-based assertions.
-6. **Cleanup**: Always close the browser and shutdown servers, even if a test fails.
+4. **Locate test-sketch**: The minimal compile/upload sketch lives at `e2e/test-sketch/` — upload via the admin page for compile/upload scenarios.
+5. **Test**: Use Playwright MCP tools (`playwright_browser_navigate`, `playwright_browser_snapshot`, etc.) to navigate and verify the app.
+6. **Assert**: Check snapshot content or use `playwright_browser_evaluate` for JS-based assertions.
+7. **Cleanup**: Always close the browser and shutdown servers, even if a test fails.
 
 ## Key Tools
 

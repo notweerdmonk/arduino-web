@@ -169,4 +169,4 @@ The CI pipeline supports `--skip-tests` and `--skip-builds` flags. The `test_ci.
 | Document | Description |
 |----------|-------------|
 | [`scripts/docs/tests.md`](../scripts/docs/tests.md) | Scripts test suite (136 tests for gRPC stub generation, installers, CI pipeline) |
-| [`e2e/docs/`](../e2e/docs/index.md) | E2E browser testing with Playwright MCP (mock servers, scenario recipes) |
+| [`e2e/`](../e2e/index.md) | E2E browser testing with Playwright MCP (mock servers, scenario recipes) — [`README.md`](../e2e/README.md) |

@@ -594,4 +594,73 @@ The binary requires `prefix/` adjacent at runtime.
 2. **`TestApiBoardList` class name is now misleading**: Tests `GET /api/pubsub/boards/health` (was `GET /api/boards`), but the class name still references "ApiBoardList". Functionally correct — the URL and method are what matter for test assertions.
 3. **No new tests needed**: All new routes are thin wrappers that call existing helper functions. Existing test coverage of those helpers suffices.
 4. **Module docs needed 4 file updates**: `state.md`, `utils.md`, `api_routes.md` for both modules — straightforward additions of new symbols and route tables.
+
+---
+
+## 2026-06-25 16:10 — Phase 104: E2E Documentation Restructure ✅ COMPLETED
+
+### Test Strategy
+
+Pure documentation restructure — no code changes. Verification strategy:
+
+1. **Content existence**: 11 grep/file-existence checks across all 11 new + edited files
+2. **Cross-reference integrity**: Jekyll build validates all relative links resolve
+3. **End-to-end flow**: playwright-mcp-testing command verifies skill/guide/server/navigate work end-to-end
+
+### Test Results
+
+| # | Scenario | Method | Result |
+|---|----------|--------|--------|
+| 1 | e2e/README.md exists | `test -f e2e/README.md` | ✅ |
+| 2 | e2e/index.md exists | `test -f e2e/index.md` | ✅ |
+| 3 | e2e/test-sketch/ files | `ls e2e/test-sketch/*` | ✅ Both present |
+| 4 | specs section in docs/index.md | grep "Automated Playwright Specs" | ✅ |
+| 5 | test-sketch in docs/index.md | grep "Test Sketch" | ✅ |
+| 6 | webServer in servers.md | grep -i "webServer" | ✅ |
+| 7 | test-sketch in COMMAND.md | grep "test-sketch" | ✅ |
+| 8 | test-sketch in AGENT.md | grep "test-sketch" | ✅ |
+| 9 | test-sketch in GUIDE.md | grep "Test Sketch" | ✅ |
+| 10 | test-sketch in MCP_TESTING_GUIDE.md | grep "Test Sketch" | ✅ |
+| 11 | docs/e2e-testing.md links e2e/index.md | grep "e2e/index.md" | ✅ |
+| 12 | Root index.md links e2e/index.md | grep "e2e/index.md" | ✅ |
+| 13 | Jekyll build | `bundle exec jekyll build` | ✅ 0 errors, 0 warnings |
+| 14 | playwright-mcp-testing E2E | Skill→guide→server→navigate→snapshot→cleanup | ✅ |
+
+### Key Findings
+
+1. **Server needs pipenv**: `python3 e2e/servers/arduino_dash_server.py --mock` fails with `ModuleNotFoundError` because `arduino_dash` is installed in pipenv venv, not system Python. Must use `pipenv run python e2e/servers/...`.
+2. **No stale cross-references**: `.playwright-mcp/test-sketch` was not referenced by any existing docs — grep confirmed zero hits in `.md` files.
+3. **Jekyll passes cleanly**: All new files have front matter, all relative links resolve correctly.
+
+---
+
+## 2026-06-25 17:53 — Phase 104.1: Document e2e/fixtures/ 🏗️ IN PROGRESS
+
+**Gap**: Original Phase 104 plan item "Document e2e/fixtures/ and e2e/specs/" was only half-implemented — specs were documented but fixtures were not.
+
+**Fix**: Add "Test Data Fixtures" subsection to `e2e/docs/index.md` under Automated Playwright Specs covering: purpose (mirrors `--mock` server state), exported constants (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), import path, and shelf status.
+
+**Test scenarios** (6 checks):
+1. Section presence: `grep "Test Data Fixtures" e2e/docs/index.md`
+2. Export mention: `grep "MOCK_PORTS" e2e/docs/index.md`
+3. Import path: `grep "from.*fixtures/test-data" e2e/docs/index.md`
+4. `--mock` relation: grep for fixture+server mock relationship
+5. Cross-doc consistency: fixtures mentioned in e2e/README.md + e2e/index.md
+6. Jekyll build: 0 errors, 0 warnings
+
+**Results**: All 6 checks pass. Jekyll build: 0 errors, 0 warnings. ✅
+
+---
+
+## 2026-06-25 18:14 — Phase 104.2: Fix shelved-specs activation docs 🏗️ IN PROGRESS
+
+**Gap**: Automated Playwright Specs docs missing two critical items:
+1. `npx playwright install --with-deps` browser binary download step — without it, `npx playwright test` fails with missing browser error
+2. Project-root run alternative `npx playwright test --config e2e/playwright.config.ts` for users running from monorepo root
+
+These were caught during review of Phase 104.1 by checking against the original spec.
+
+**Fix**: Edit e2e/docs/index.md Installation and Running subsections.
+
+**Results**: All 3 test scenarios pass. Installation section now shows `npx playwright install --with-deps` with a callout explaining the error without it. Running section shows `--config e2e/playwright.config.ts` as a project-root alternative. Jekyll build: 0 errors, 0 warnings. ✅
 {% endraw %}

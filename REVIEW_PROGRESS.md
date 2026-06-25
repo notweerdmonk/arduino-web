@@ -1,122 +1,21 @@
 ---
 ---
 {% raw %}
-# Review Progress — Phase 99: HTML Template Homogenisation
+# Review Progress — Phase 102: Fix Pre-Existing Test Failures
 
-**Date**: 2026-06-22 12:43
-
-**Status**: ✅ REVIEWED AND APPROVED
-
-## Progress
+**Date**: 2026-06-25 09:10
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Verify template correctness (8 quanta) | ✅ | All templates structurally identical |
-| 2 | Verify route context changes | ✅ | 5 Python route files updated |
-| 3 | Verify SketchRegistry extraction | ✅ | Shared class in arduino_sketch_tools |
-| 4 | Verify test regression suites | ✅ | 119 + 186 = 305 pass |
-| 5 | Mark Phase 99 complete | ✅ | All docs updated |
-## Phase 100 — Server Script Process Lifecycle (Disown & Cleanup)
+| 1 | Verify `app.py` re-exports | ✅ | 28 names re-exported across 3 import blocks |
+| 2 | Verify `state.py` UPLOAD_BASE_DIR re-export | ✅ | Fixes 9 broken production references |
+| 3 | Verify `api_routes.py` import fix | ✅ | `html_routes` → `sketch_management` |
+| 4 | Verify test assertion fixes | ✅ | 2 files, 2 assertions relaxed |
+| 5 | `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures |
 
-**Date**: 2026-06-22 16:14
-
-**Status**: ✅ REVIEWED AND APPROVED
-
-## Progress
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Verify daemonize implementation (fork + setsid + redirect) | ✅ | New session, immune to SIGHUP |
-| 2 | Verify CLI flags (--pidfile, --stop, --force, --logfile) | ✅ | All 4 flags working |
-| 3 | Verify survival across bash exit | ✅ | HTTP 200 from both apps |
-| 4 | Verify --stop cleanup | ✅ | Clean shutdown, no orphans |
-| 5 | Verify stale pidfile handling | ✅ | Dead PID cleaned up |
-| 6 | Mark Phase 100 complete | ✅ | All docs updated |
-| 7 | Phase 100c: Fix idiomorph CDN URL (2 base.html files) | ✅ | HTTP 200 verified |
-| 8 | Phase 100c: Add simple-websocket dep (2 pyproject.toml files) | ✅ | Both files updated |
-| 9 | Phase 100c: Verify no test regressions | ✅ | Same pre-existing failures only |
-| 10 | Phase 100c: Update all docs | ✅ | PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
-
-| 11 | Phase 101: pyoxidizer.bzl — @REPO_ROOT@ + simple-websocket + pip_install | ✅ | 3 files updated |
-| 12 | Phase 101: build_standalone.sh — sed + git cleanup | ✅ | RETURN trap + explicit before die |
-| 13 | Phase 101: Wheel build (nox -s all_builds) | ✅ | 6 wheels built |
-| 14 | Phase 101: Standalone build | ✅ | 3 binaries, 51MB each |
-| 15 | Phase 101: Smoke test all 3 binaries | ✅ | --help exits 0 |
-| 16 | Phase 101: Module audit (both dashboards) | ✅ | All 7 modules present |
-| 17 | Phase 101: Template audit | ✅ | All templates + partials |
-| 18 | Phase 101: Static file audit | ✅ | style.css + favicons |
-| 19 | Phase 101: simple-websocket dep audit | ✅ | Present in both dashboards |
-| 20 | Phase 101: All docs updated | ✅ | PLAN, JOURNAL, CODEBASE, IMPLEMENTATION_*, TESTING_*, REVIEW_* |
-{% endraw %}
-
-## 2026-06-24 02:52 — Code Review: pubsub_infra→pubsub Rename + Documentation Sync
-
-**Status**: ✅ REVIEWED AND APPROVED
-
-## Progress
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Run ruff linter on Python codebase | ✅ | 208 errors found, 173 fixable |
-| 2 | Run ruff format check | ✅ | 56 files need formatting |
-| 3 | Check for missed pubsub_infra references | ✅ | 0 missed in source files |
-| 4 | Review core Python source files | ✅ | Findings documented in REVIEW_JOURNAL.md |
-| 5 | Review test files | ✅ | Findings documented in REVIEW_JOURNAL.md |
-| 6 | Review e2e/servers | ✅ | Import updated correctly |
-| 7 | Suggest HTML/JS linters | ✅ | eslint + html-validate recommended |
-| 8 | Compile comprehensive review findings | ✅ | Documented in REVIEW_JOURNAL.md |
-| 9 | Close out ruff findings review | ✅ | Documented for next implementation quantum |
-
-## 2026-06-24 03:40 — Code Review: JS Linting Setup (ESLint)
+## Previous: ESLint Inline JS Linting (2026-06-24 12:32)
 
 **Status**: ✅ COMPLETED
-
-## Progress
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Create eslint config in config/ | ✅ | config/eslint.config.mjs |
-| 2 | Run eslint on inline JS (base.html) | ✅ | 22 warnings, 0 errors |
-| 3 | Run eslint on TypeScript Playwright tests | ⏸️ | Skipped per user request |
-| 4 | Document eslint findings | ✅ | REVIEW_JOURNAL.md updated |
-        | 5 | Fix eslint MCP config typo (@eslint/mpc → @eslint/mcp) | ⏳ | User action needed in global config |
-
-## 2026-06-24 12:02 — Linter Fix Round: ruff + eslint + djlint
-
-**Status**: ⚠️ OVERSTATED (see corrigendum below)
-
-## Progress
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Ruff check — fix 85 errors | ⚠️ | Report was inaccurate; fixes were NOT applied by the sub-agent |
-| 2 | Ruff format — 16 files reformatted | ⚠️ | Report was inaccurate; fixes were NOT applied |
-| 3 | ESLint — no standalone JS files | ✅ | Config exists; JS is inline in HTML templates |
-| 4 | djlint — fix 8 warnings | ⚠️ | 27 files needed reformat; fixes were not applied |
-| 5 | CSS classes added | ⚠️ | Not verified; need another full pass |
-| 6 | JS modal functions updated | ⚠️ | Not verified; need another full pass |
-
-## 2026-06-24 12:16 — Corrigendum: Actual Linter Fixes Applied
-
-**Status**: ✅ COMPLETED (actual)
-
-The 12:02 report was generated by a sub-agent that reported findings but did not execute fixes. All fixes have now been applied and verified.
-
-## Actual Progress
-
-| # | Task | Status | Notes |
-|---|------|--------|-------|
-| 1 | Ruff check — fix 111 errors across all packages | ✅ | F401, F841, E731, E741 fixed; grpc_client generated code excluded |
-| 2 | Ruff format — all packages | ✅ | 52 files reformatted total |
-| 3 | djlint — 27 template files reformatted | ✅ | 0 lint warnings remaining |
-| 4 | ESLint — no standalone JS files | ✅ | Config at `config/eslint.config.mjs`; JS is inline in Jinja2 templates |
-| 5 | grpc_client protobuf excluded from ruff | ✅ | Excluded `cc/arduino/cli/commands/v1/` generated code |
-
-## 2026-06-24 12:32 — ESLint Inline JS Linting with eslint-plugin-html
-
-**Status**: ✅ COMPLETED
-
-## Progress
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
@@ -126,3 +25,4 @@ The 12:02 report was generated by a sub-agent that reported findings but did not
 | 4 | Lint 4 HTML templates with inline `<script>` | ✅ | 0 errors, 4 warnings (false positives from HTML `onchange`/`onclick`) |
 | 5 | Fix `showModal` no-undef in dnd_overlay.html | ✅ | Added `/* global showModal */` directive |
 | 6 | Fix unused `e` param in dragleave handler | ✅ | Removed unused parameter |
+{% endraw %}

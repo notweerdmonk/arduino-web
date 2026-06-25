@@ -386,3 +386,18 @@ Full pass across all project Python, JS, and HTML template files to fix linting 
 - [x] 0 remaining djlint errors across 25 template files ✅
 - [x] `showModal`/`hideModal` JS functions updated to use `classList` instead of `style.display` ✅
 - [x] `hx-on::after-request` handler updated to use `classList.add('modal-hidden')` ✅
+
+## Phase 102 — Fix Pre-Existing Test Failures ✅ COMPLETED
+
+**Date**: 2026-06-25 09:10
+
+### Review Criteria
+
+| # | Criterion | Result |
+|---|-----------|--------|
+| 1 | `app.py` re-exports are complete and correct | ✅ All 14 state vars, 9 pubsub functions, 5 sketch_management functions |
+| 2 | No circular imports from added re-exports | ✅ Verified by successful `py_compile` and test run |
+| 3 | `UPLOAD_BASE_DIR` correctly re-exported from `state.py` | ✅ `state.UPLOAD_BASE_DIR` now resolves to `settings.UPLOAD_BASE_DIR` |
+| 4 | `api_routes.py` import points to correct module | ✅ `sketch_management._warm_upload_registry` |
+| 5 | Test assertions are not brittle to HTML formatting | ✅ Changed to id-only checks; no contiguous multi-attr assertions |
+| 6 | All 8 nox sessions pass | ✅ 0 failures, 0 errors

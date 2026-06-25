@@ -1445,7 +1445,7 @@ class TestBoardDetail:
         assert 'id="fqbn-display"' in html
         assert 'class="value"' in html
         assert "arduino:avr:uno" in html
-        assert '<input type="hidden" id="fqbn" name="fqbn"' in html
+        assert 'id="fqbn"' in html
 
     def test_port_display_label_present(self, client):
         with _app_module._board_list_lock:

@@ -3,6 +3,8 @@
 import logging
 import threading
 
+from arduino_dash.settings import UPLOAD_BASE_DIR
+
 import flask
 from board_manager_client import PubSubClient
 

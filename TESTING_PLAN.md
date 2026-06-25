@@ -109,4 +109,23 @@ Verification of rebuilt PyOxidizer standalone binaries (no Python test suite —
 | 8 | simple-websocket (arduino-dash) | `ls .../site-packages/simple_websocket/` | Directory exists |
 | 9 | simple-websocket (medminder-dash) | `ls .../site-packages/simple_websocket/` | Directory exists |
 | 10 | Static files | `ls .../static/style.css` + `ls .../static/favicon/` | All files present in both dashboards |
+
+## Phase 102 — Fix Pre-Existing Test Failures
+
+**Date**: 2026-06-25 09:10
+
+**Status**: ✅ COMPLETED
+
+## Test Strategy
+
+Fix test failures by correcting source code (missing re-exports, wrong imports, brittle assertions). Verification is the existing `nox -s all_tests` suite.
+
+### Root Causes
+
+| # | Issue | Type | Verification |
+|---|-------|------|--------------|
+| 1 | `app.py` missing state/pubsub/sketch_management re-exports | Test mismatch (access via `_app_module.*`) | `tests(arduino_dash)` passes |
+| 2 | `state.py` missing `UPLOAD_BASE_DIR` re-export | Production bug (Phase 69 regression) | `tests(arduino_dash)` passes |
+| 3 | `api_routes.py` wrong import (`html_routes`→`sketch_management`) | Production bug (wrong module path) | `tests(arduino_dash)` passes |
+| 4 | 2 brittle test assertions (multi-line attrs after djlint) | Test assertion fragility | `tests(arduino_dash)` + `tests(medminder_dash)` pass |
 {% endraw %}

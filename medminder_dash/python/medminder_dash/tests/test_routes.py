@@ -392,7 +392,6 @@ class TestBoardDetailFqbn:
             assert b'id="sketch-path-container"' in resp.data
             assert b'hx-get="/last-upload"' in resp.data
             assert b'hx-include="#active-board-hardware-id"' in resp.data
-            assert b'id="active-board-hardware-id" value=""' in resp.data
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)

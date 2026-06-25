@@ -74,5 +74,38 @@ def create_app():
 app = create_app()
 
 
-# Re-export state names for test compatibility
-from arduino_dash.sketch_management import _save_registry, _update_meta_hw_ids  # noqa: E402
+# Re-export names for test compatibility
+from arduino_dash.pubsub import (  # noqa: E402
+    _compute_sketch_checksum,
+    _get_sketch_mtime,
+    _make_meta,
+    _on_board_event,
+    _on_daemon_ready,
+    _on_pubsub_reconnect,
+    _on_resp,
+    _wait_for_response,
+    init_pubsub,
+)
+from arduino_dash.sketch_management import (  # noqa: E402
+    _normalize_ino_filename,
+    _render_sketch_path_selector,
+    _save_registry,
+    _update_meta_hw_ids,
+    _warm_upload_registry,
+)
+from arduino_dash.state import (  # noqa: E402
+    _board_list,
+    _board_list_lock,
+    _compile_results,
+    _compile_results_lock,
+    _last_compiled_sketch,
+    _last_compiled_sketch_lock,
+    _last_compile_mtime,
+    _last_compile_mtime_lock,
+    _pending_responses,
+    _pending_responses_lock,
+    _upload_results,
+    _upload_results_lock,
+    _upload_registry,
+    _upload_registry_lock,
+)

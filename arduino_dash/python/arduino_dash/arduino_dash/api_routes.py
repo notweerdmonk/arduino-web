@@ -79,7 +79,7 @@ def init_api_routes(app: Flask):
         all_versions = []
         with state._upload_registry_lock:
             if key not in state._upload_registry:
-                from arduino_dash.html_routes import _warm_upload_registry
+                from arduino_dash.sketch_management import _warm_upload_registry
 
                 _warm_upload_registry()
             entries = state._upload_registry.get(key, {})

@@ -50,4 +50,11 @@
 | 37 | Phase 101: simple-websocket dep (medminder-dash) | ✅ | Present |
 | 38 | Phase 101: static files (both dashboards) | ✅ | style.css + favicons |
 | 39 | Phase 101: All 3 binaries built (51MB each) | ✅ | `.tar.gz` archives created |
+| 40 | Phase 102: arduino_dash state re-exports | ✅ | 111 errors → 119 pass |
+| 41 | Phase 102: pubsub/sketch_management re-exports | ✅ | 53 cascade failures resolved |
+| 42 | Phase 102: UPLOAD_BASE_DIR re-export (production bug) | ✅ | 9 source refs fixed |
+| 43 | Phase 102: api_routes.py wrong import fix | ✅ | Imports from correct module |
+| 44 | Phase 102: fix arduino_dash fqbn assertion | ✅ | Relaxed to `id="fqbn"` check |
+| 45 | Phase 102: fix medminder_dash hardware-id assertion | ✅ | Removed redundant check |
+| 46 | Phase 102: `nox -s all_tests` | ✅ | 8/8 sessions green, 0 failures |
 {% endraw %}

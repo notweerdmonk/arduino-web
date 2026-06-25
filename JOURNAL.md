@@ -3860,4 +3860,39 @@ Executed a comprehensive linter fix pass across the entire medminder_dash codeba
 3. **Replaced inline styles with CSS classes** — Added `.modal-hidden` and `.word-break-all` to `static/style.css`; updated JS `showModal`/`hideModal` functions
 4. **Fixed entity references** — `&#9889;` → `⚡`, `&#8230;` → `…`
 5. **Added meta tags** to `base.html`
+
+---
+
+## 2026-06-25 09:10 — Phase 102: Fix Pre-Existing Test Failures
+
+### Summary
+
+Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) and `tests(medminder_dash)` (1 failure → 186 pass, 1 skip). Total: 8/8 sessions, **0 failures, 0 errors**.
+
+### Root Causes & Fixes
+
+| # | Issue | Root Cause | Fix |
+|---|-------|------------|-----|
+| 1 | arduino_dash: 111 errors | `clear_caches` fixture accesses state variables via `_app_module.*` but `app.py` never re-exported them from `state.py` | Added `from arduino_dash.state import (...)` with 14 variables |
+| 2 | arduino_dash: 53 subsequent failures | Same pattern — test accesses 9 pubsub functions (`_on_resp`, `_wait_for_response`, `init_pubsub`, etc.) and 3 sketch_management functions via `_app_module.*` | Added re-exports from `arduino_dash.pubsub` and `arduino_dash.sketch_management` |
+| 3 | arduino_dash: UPLOAD_BASE_DIR missing | `UPLOAD_BASE_DIR` moved from `state.py` to `settings.py` in Phase 69, but 9 source references still use `state.UPLOAD_BASE_DIR` (not just tests — production bug) | Added `from arduino_dash.settings import UPLOAD_BASE_DIR` to `state.py` |
+| 4 | arduino_dash: wrong import in `api_routes.py` | Lazy import `from arduino_dash.html_routes import _warm_upload_registry` — function lives in `sketch_management.py` | Changed import to `arduino_dash.sketch_management` |
+| 5 | arduino_dash: fqbn assertion (1 failure) | djlint reformatting split `<input id="fqbn">` across 3 lines, test expected contiguous attrs | Changed to `assert 'id="fqbn"' in html` |
+| 6 | medminder_dash: active-board-hardware-id assertion (1 failure) | Same djlint multi-line attribute split | Removed redundant `value=""` assertion (3 prior assertions already cover it) |
+
+### Files Changed
+
+| File | Lines Changed | Type |
+|------|--------------|------|
+| `arduino_dash/python/arduino_dash/arduino_dash/app.py` | 78-109 | Add missing re-exports (pubsub, sketch_management, state) |
+| `arduino_dash/python/arduino_dash/arduino_dash/state.py` | 6 | Add `UPLOAD_BASE_DIR` re-import from settings |
+| `arduino_dash/python/arduino_dash/arduino_dash/api_routes.py` | 82 | Fix wrong lazy import target |
+| `arduino_dash/python/arduino_dash/tests/test_app.py` | 1448 | Fix brittle fqbn assertion |
+| `medminder_dash/python/medminder_dash/tests/test_routes.py` | 395 | Fix brittle hardware-id assertion |
+
+### Key Learnings
+
+1. **Missing re-exports cascade**: The original 111 collection errors masked 53 actual test failures. Fixing the fixture revealed deeper issues (wrong import paths, production bugs).
+2. **`UPLOAD_BASE_DIR` was a production bug**: Phase 69 moved this from `state.py` to `settings.py` but missed updating 9 source code references. The code was silently broken for all upload/sketch operations in arduino_dash.
+3. **djlint reformatting broke brittle test assertions**: 3 test assertions across 2 dashboards expected HTML attributes on the same line — all broke after the bulk linting pass.
 {% endraw %}

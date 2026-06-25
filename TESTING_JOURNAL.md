@@ -549,4 +549,23 @@ The binary requires `prefix/` adjacent at runtime.
 | E2E doc index | `e2e/docs/index.md` |
 | Scenarios doc | `e2e/docs/scenarios.md` |
 | Servers doc | `e2e/docs/servers.md` |
+
+---
+
+## 2026-06-25 09:10 — Phase 102: Fix Pre-Existing Test Failures
+
+### Results
+
+| Session | Before | After |
+|---------|--------|-------|
+| `tests(arduino_dash)` | 111 errors, 8 pass | 119 pass, 0 errors |
+| `tests(medminder_dash)` | 1 failure, 185 pass, 1 skip | 186 pass, 1 skip, 0 failures |
+| All other sessions | No change | All pass |
+
+### Findings
+
+1. **Arduino_dash**: The `clear_caches` autouse fixture in `test_app.py:17` accessed state variables via `_app_module.*` but `app.py` didn't re-export them. Fixing this uncovered 53 cascading test failures (missing re-exports for pubsub functions, wrong import path for `_warm_upload_registry`, missing `UPLOAD_BASE_DIR` in `state.py`, and a djlint-brittle assertion).
+2. **Medminder_dash**: Single assertion failure due to djlint multi-line attribute reformatting.
+3. **UPLOAD_BASE_DIR production bug**: `state.py:6` re-import fixed 8 test failures that were using `patch("arduino_dash.state.UPLOAD_BASE_DIR", ...)`, plus fixed actual broken production code in `sketch_management.py`, `api_routes.py`, and `html_routes.py` (9 references total).
+4. **Wrong import in api_routes.py**: `from arduino_dash.html_routes import _warm_upload_registry` should have been `from arduino_dash.sketch_management import ...`.
 {% endraw %}

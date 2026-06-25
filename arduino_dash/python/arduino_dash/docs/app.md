@@ -51,9 +51,9 @@ Record a deploy event linking a hardware ID to a sketch path. Called after a suc
 
 `app.py` re-exports the following symbols from other modules at module level for test compatibility:
 
-- **From `state`**: `_daemon_ready`, `_pending_responses_lock`, `_pending_responses`, `_compile_results_lock`, `_compile_results`, `_compile_meta_lock`, `_compile_meta`, `_upload_results_lock`, `_upload_results`, `_upload_meta_lock`, `_upload_meta`, `_last_compiled_sketch_lock`, `_last_compiled_sketch`, `_last_compile_mtime_lock`, `_last_compile_mtime`, `_last_compile_checksum_lock`, `_last_compile_checksum`, `_last_uploaded_sketch_lock`, `_last_uploaded_sketch`, `_upload_registry_lock`, `_upload_registry`, `_board_list_lock`, `_board_list`, `_ws_clients`, `_ws_lock`, `pubsub`, `logger`, `UPLOAD_BASE_DIR`, `MAX_SKETCH_UPLOAD_SIZE`
-- **From `html_routes`**: `_normalize_ino_filename`, `_warm_upload_registry`, `_render_sketch_path_selector`
-- **From `sketch_management`**: `_save_registry`, `_update_meta_hw_ids`
+- **From `state`**: `_board_list`, `_board_list_lock`, `_compile_results`, `_compile_results_lock`, `_last_compiled_sketch`, `_last_compiled_sketch_lock`, `_last_compile_mtime`, `_last_compile_mtime_lock`, `_pending_responses`, `_pending_responses_lock`, `_upload_results`, `_upload_results_lock`, `_upload_registry`, `_upload_registry_lock`
+- **From `pubsub`**: `_compute_sketch_checksum`, `_get_sketch_mtime`, `_make_meta`, `_on_board_event`, `_on_daemon_ready`, `_on_pubsub_reconnect`, `_on_resp`, `_wait_for_response`, `init_pubsub`
+- **From `sketch_management`**: `_normalize_ino_filename`, `_render_sketch_path_selector`, `_save_registry`, `_update_meta_hw_ids`, `_warm_upload_registry`
 
 ## Module-Level App Instance
 

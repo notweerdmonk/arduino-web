@@ -128,4 +128,27 @@ Fix test failures by correcting source code (missing re-exports, wrong imports, 
 | 2 | `state.py` missing `UPLOAD_BASE_DIR` re-export | Production bug (Phase 69 regression) | `tests(arduino_dash)` passes |
 | 3 | `api_routes.py` wrong import (`html_routes`→`sketch_management`) | Production bug (wrong module path) | `tests(arduino_dash)` passes |
 | 4 | 2 brittle test assertions (multi-line attrs after djlint) | Test assertion fragility | `tests(arduino_dash)` + `tests(medminder_dash)` pass |
+
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Test Strategy**: All changes are to route registrations and state additions — no logic changes. Strategy: run the full `nox -s all_tests` suite (8 sessions). Key risk areas:
+1. Route URL changes in arduino_dash (4 PubSub routes moved) — test assertions must match new URLs
+2. New CRUD endpoints — existing tests should not be affected (they don't hit these endpoints)
+3. medminder_dash `/boards/event` commented out — `TestBoardsEvent` must now hit `/api/boards/events`
+4. No new test coverage needed for this phase (routes are thin wrappers around existing helpers)
+
+**Test Changes**:
+| File | Change |
+|------|--------|
+| `arduino_dash/tests/test_app.py:1505` | `/api/board/dev/ttyACM0/spawn` → `/api/pubsub/board/dev/ttyACM0/spawn` |
+| `arduino_dash/tests/test_app.py:1514` | `/api/board/dev/ttyACM0/status` → `/api/pubsub/board/dev/ttyACM0/status` |
+| `arduino_dash/tests/test_app.py:1523` | `/api/board/dev/ttyACM0/remove` → `/api/pubsub/board/dev/ttyACM0/remove` |
+| `arduino_dash/tests/test_app.py:1532` | `/api/boards` → `/api/pubsub/boards/health` |
+| `medminder_dash/tests/test_routes.py:469-472` | `/boards/event` → `/api/boards/events` |
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
 {% endraw %}

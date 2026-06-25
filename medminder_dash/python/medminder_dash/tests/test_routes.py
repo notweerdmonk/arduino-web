@@ -468,8 +468,9 @@ class TestBoards:
 
 class TestBoardsEvent:
     def test_boards_event_empty(self, client):
-        resp = client.get("/boards/event")
+        resp = client.get("/api/boards/events")
         assert resp.status_code == 200
+        assert resp.get_json() == []
 
 
 class TestBoardsGrid:

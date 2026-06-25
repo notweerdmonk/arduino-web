@@ -834,4 +834,75 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 
 **Build**: 0 errors, 0 warnings, 254 HTML pages, ~46-54s build time.
 
+
+
+---
+
+### Phase 101 — Redesign & Rebuild Standalone Distributions ✅ COMPLETED
+
+**Date**: 2026-06-24 20:31
+
+**Goal**: Rebuild `dist-standalone/` PyOxidizer bundles from current source, fix hardcoded absolute paths, add `simple-websocket`.
+
+**Changes**:
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Replace `__file__` with `@REPO_ROOT@` placeholder + sed substitution in `build_standalone.sh` | ✅ |
+| 2 | Switch `pip_download()` → `pip_install()` for local wheels | ✅ |
+| 3 | Add `simple-websocket>=1.0.0` to both dashboard `.bzl` configs | ✅ |
+| 4 | Commit `e98b878` + rebuild + smoke test all 3 binaries | ✅ |
+
+**Verification**: `nox -s all_builds` — 7/7 sessions pass. All 3 standalone binaries build (~51 MB each) and pass `--help` smoke test. `simple-websocket` present in both dashboard bundles.
+
+---
+
+### Phase 102 — Fix Pre-Existing Test Failures ✅ COMPLETED
+
+**Date**: 2026-06-25 09:10
+
+**Goal**: Fix 111 arduino_dash errors + 1 medminder_dash failure.
+
+**Root causes**:
+1. `app.py` missing re-exports for 14 state vars, 9 pubsub functions, 5 sketch_management functions
+2. `UPLOAD_BASE_DIR` production bug (Phase 69 regression — 9 stale `state.UPLOAD_BASE_DIR` references)
+3. Wrong import target in `api_routes.py:82` (`html_routes` → `sketch_management`)
+4. djlint reformatting split 3 brittle test assertions across lines
+
+**Changes**:
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | `app.py` — Add 28 re-exports (state, pubsub, sketch_management) | ✅ |
+| 2 | `state.py` — Re-import `UPLOAD_BASE_DIR` from settings | ✅ |
+| 3 | `api_routes.py:82` — Fix lazy import target | ✅ |
+| 4 | `test_app.py` — Relax FQBN assertion | ✅ |
+| 5 | `test_routes.py` — Remove brittle `value=""` assertion | ✅ |
+| 6 | `nox -s all_tests` — 8/8 sessions, 0 failures | ✅ |
+
+**Verification**: 111 errors → 119 pass (arduino_dash). 1 failure → 186 pass (medminder_dash). 3 production bugs found and fixed.
+
+---
+
+### Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Goal**: Align API routes across both dashboards — PubSub commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/board/<port>/status`, `/api/daemon/status`, `/api/sketches?hardware_id=X`, `/api/sketches/last-upload`.
+
+**Parts**:
+| Part | Scope | Status |
+|------|-------|--------|
+| 1 | arduino_dash events buffer (state.py, pubsub.py, utils.py) | ✅ |
+| 2 | arduino_dash api_routes.py — move 4 PubSub + add 5 CRUD + enhance /api/sketches | ✅ |
+| 3 | medminder_dash api_routes.py — add 4 PubSub + rename /api/board_list → /api/boards/list + add CRUD | ✅ |
+| 4 | medminder_dash html_routes.py — comment out /boards/event | ✅ |
+| 5 | Test updates (4 URL changes + TestBoardsEvent redirect) | ✅ |
+| 6 | Module docs (4 files) | ✅ |
+| 7 | `nox -s all_tests` — 8/8 sessions, 0 failures | ✅ |
+| 8 | Agent-facing docs sync | ✅ |
+| 9 | User-facing docs update (docs/api.md, READMEs, html_routes.md, index.md) | ✅ |
+
+**Implementation**: Parallel task agents for Parts 1-2 and Parts 3-4. Manual Parts 5-9. Key decision: `/api/sketches/last-upload` returns `(dict, 200)` or `(null, 404)`.
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
 {% endraw %}

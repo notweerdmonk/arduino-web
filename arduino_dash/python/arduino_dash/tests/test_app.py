@@ -1502,7 +1502,7 @@ class TestApiBoardSpawn:
     def test_spawn_returns_accepted(self, client):
         mock_pubsub = MagicMock()
         with patch("arduino_dash.state.pubsub", mock_pubsub):
-            resp = client.post("/api/board/dev/ttyACM0/spawn")
+            resp = client.post("/api/pubsub/board/dev/ttyACM0/spawn")
             assert resp.status_code == 200
             assert resp.get_json() == {"status": "accepted"}
 
@@ -1511,7 +1511,7 @@ class TestApiBoardStatus:
     def test_status_returns_accepted(self, client):
         mock_pubsub = MagicMock()
         with patch("arduino_dash.state.pubsub", mock_pubsub):
-            resp = client.get("/api/board/dev/ttyACM0/status")
+            resp = client.get("/api/pubsub/board/dev/ttyACM0/status")
             assert resp.status_code == 200
             assert resp.get_json() == {"status": "accepted"}
 
@@ -1520,7 +1520,7 @@ class TestApiBoardRemove:
     def test_remove_returns_accepted(self, client):
         mock_pubsub = MagicMock()
         with patch("arduino_dash.state.pubsub", mock_pubsub):
-            resp = client.post("/api/board/dev/ttyACM0/remove")
+            resp = client.post("/api/pubsub/board/dev/ttyACM0/remove")
             assert resp.status_code == 200
             assert resp.get_json() == {"status": "accepted"}
 
@@ -1529,7 +1529,7 @@ class TestApiBoardList:
     def test_list_returns_accepted(self, client):
         mock_pubsub = MagicMock()
         with patch("arduino_dash.state.pubsub", mock_pubsub):
-            resp = client.get("/api/boards")
+            resp = client.post("/api/pubsub/boards/health")
             assert resp.status_code == 200
             assert resp.get_json() == {"status": "accepted"}
 

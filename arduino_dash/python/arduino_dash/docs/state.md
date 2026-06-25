@@ -38,6 +38,13 @@ Shared module-level state for the Arduino Dash webapp. All state is protected by
 | `_board_list` | `dict[str, dict]` | `{}` | Map of port → board info dict (port, fqbn, board, hardware_id, event) |
 | `_board_list_lock` | `Lock` | `threading.Lock()` | Lock protecting `_board_list` |
 
+### Board Events Buffer
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `_board_events` | `list[dict]` | `[]` | Recent board events buffer (capped at 100 entries, newest first). Each entry is the event data dict (port, event, board, fqbn, hardware_id) |
+| `_board_events_lock` | `Lock` | `threading.Lock()` | Lock protecting `_board_events` |
+
 ### Pending Responses
 
 | Attribute | Type | Default | Description |

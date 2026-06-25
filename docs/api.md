@@ -309,12 +309,15 @@ client.on_reconnect = lambda: print("reconnected")
 
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/` | GET | Dashboard: board list, live events, compile/upload cards |
+| `/` | GET | Dashboard: board grid, compile/upload cards |
 | `/board/<port>` | GET | Board detail: status, compile/upload, event log |
+| `/board/<port>/connection-status` | GET | Board connection status badge partial |
 | `/boards/grid` | GET | Grid view of all boards |
 | `/admin` | GET | Admin page: board selector, sketch management |
 | `/admin/board-selector` | GET | Board selector partial (HTMX) |
+| `/admin/active-board` | POST | Set active board in session |
 | `/board/compile-upload-card` | GET | Compile/upload card partial (HTMX) |
+| `/daemon/status` | GET | Daemon status badge partial |
 | `/last-upload` | GET | Last upload info partial |
 | `/sketch/upload` | POST | Upload a sketch archive |
 | `/sketch` | DELETE | Delete a sketch version |
@@ -326,12 +329,29 @@ client.on_reconnect = lambda: print("reconnected")
 |-------|--------|-------------|
 | `/` | GET | Landing page with board selector |
 | `/board` | GET | Board detail: medicine CRUD, compile/upload |
+| `/board/<port>` | GET | Board detail page for a specific port |
+| `/board/<port>/connection-status` | GET | Board connection status badge partial |
+| `/board/select/<port>` | GET | Select a board, redirects to board detail |
 | `/boards` | GET | All boards overview |
-| `/admin` | GET | Admin: board selector, sketch management |
+| `/boards/grid` | GET | Grid view of all boards |
+| `/admin` | GET | Admin page: board selector, sketch management |
 | `/admin/board-selector` | GET | Board selector partial (HTMX) |
-| `/board/<port>/compile-upload-card` | GET | Compile/upload card partial |
 | `/admin/active-board` | POST | Set active board in session |
+| `/board/compile-upload-card` | GET | Compile/upload card partial (HTMX) |
+| `/daemon/status` | GET | Daemon status badge partial |
+| `/medicines` | GET | Medicine list page |
+| `/medicine/new` | GET | Medicine creation form |
+| `/medicines/board-selector` | GET | Board selector dropdown partial |
+| `/medicines/active-board-card` | GET | Active board medicine cards partial |
+| `/medicines/confirm-modal` | GET | Confirm modal partial |
+| `/medicines/generate-hpp` | POST | Generate alarm.hpp from medicines |
+| `/medicines/sync-from-hpp` | POST | Sync medicines from alarm.hpp |
+| `/last-upload` | GET | Last upload info partial |
+| `/sketch/upload` | POST | Upload a sketch archive |
+| `/sketch` | DELETE | Delete a sketch version |
 | `/ws/board-events` | WS | WebSocket endpoint for live board events |
+
+> **Note:** The `/boards/event` HTML route was removed in Phase 103. Board events are now served via `GET /api/boards/events` and pushed via WebSocket.
 
 ---
 
@@ -339,38 +359,73 @@ client.on_reconnect = lambda: print("reconnected")
 
 ### arduino-dash (`arduino_dash.api_routes`)
 
+#### PubSub Board Commands (sent to BoardManagerService via PubSub)
+
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/boards` | GET | List all known boards |
-| `/api/board/<port>/spawn` | POST | Spawn a board worker |
-| `/api/board/<port>/status` | GET | Get board worker status |
-| `/api/board/<port>/remove` | POST | Remove a board worker |
-| `/api/sketches` | GET | List uploaded sketches |
-| `/api/sketch/upload` | POST | Upload sketch archive (multipart) |
+| `/api/pubsub/board/<port>/spawn` | POST | Publish board spawn command to PubSub |
+| `/api/pubsub/board/<port>/status` | GET | Publish board status request to PubSub |
+| `/api/pubsub/board/<port>/remove` | POST | Publish board remove command to PubSub |
+| `/api/pubsub/boards/health` | POST | Publish boards health check to PubSub |
+
+#### Local CRUD (from cached state)
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/daemon/status` | GET | Daemon ready + connected status |
+| `/api/board/<port>/status` | GET | Board connection status from local state (`get_port_info()`) |
+| `/api/boards/list` | GET | List all known boards from local state |
+| `/api/boards/events` | GET | Recent board connect/disconnect events (capped at 100) |
+
+#### Sketch Management
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/sketches` | GET | List uploaded sketches (optional `?hardware_id=X` filter) |
+| `/api/sketches/last-upload` | GET | Latest sketch upload (returns dict + 200 or null + 404) |
+| `/api/sketch/upload` | POST | Upload sketch archive (multipart, optional `?hardware_id=...`) |
 | `/api/sketch` | DELETE | Delete a sketch version |
 
 ### medminder-dash (`medminder_dash.api_routes`)
 
+#### PubSub Board Commands (sent to BoardManagerService via PubSub)
+
 | Route | Method | Description |
 |-------|--------|-------------|
-| `/api/board/ports` | GET | List all available board ports |
-| `/api/boards/table` | GET | Boards as JSON table |
-| `/api/medicines` | GET | List medicines for active board |
-| `/api/medicines` | POST | Add a medicine |
-| `/api/medicines/<id>` | PUT | Update a medicine |
-| `/api/medicines/<id>` | DELETE | Delete a medicine |
-| `/api/medicines/<id>/toggle` | POST | Toggle medicine enabled/disabled |
-| `/api/compile-and-upload` | POST | Compile and upload current sketch |
-| `/api/sketches` | GET | List uploaded sketches |
-| `/api/sketch/upload` | POST | Upload sketch archive |
+| `/api/pubsub/board/<port>/spawn` | POST | Publish board spawn command to PubSub |
+| `/api/pubsub/board/<port>/status` | GET | Publish board status request to PubSub |
+| `/api/pubsub/board/<port>/remove` | POST | Publish board remove command to PubSub |
+| `/api/pubsub/boards/health` | POST | Publish boards health check to PubSub |
+
+#### Local CRUD (from cached state)
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/daemon/status` | GET | Daemon ready + connected status |
+| `/api/board/<port>/status` | GET | Board connection status from local state (`get_port_info()`) |
+| `/api/boards/list` | GET | List all known boards from local state |
+| `/api/boards/events` | GET | Recent board connect/disconnect events |
+
+#### Medicine CRUD
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/medicines/diff` | GET | Diff between store and alarm.hpp |
+| `/api/medicines` | GET | List all medicines |
+| `/api/medicine` | POST | Create a medicine (returns 201) |
+| `/api/medicine/<id>` | GET | Get a single medicine (or 404) |
+| `/api/medicine/<id>` | PUT | Update a medicine |
+| `/api/medicine/<id>` | DELETE | Delete a medicine (or 404) |
+| `/api/medicine/<id>/toggle` | PUT | Toggle medicine enabled/disabled |
+
+#### Sketch Management
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/sketches` | GET | List uploaded sketches (optional `?hardware_id=X` filter) |
+| `/api/sketches/last-upload` | GET | Latest sketch upload (returns dict + 200 or null + 404) |
+| `/api/sketch/upload` | POST | Upload sketch archive (multipart, optional `?hardware_id=...`) |
 | `/api/sketch` | DELETE | Delete a sketch version |
-| `/api/regenerate-alarm-hpp` | POST | Regenerate `alarm.hpp` from medicines |
-| `/api/board/events` | GET | Recent board events |
-| `/api/board/<port>/status` | GET | Board worker status |
-| `/api/deploy` | POST | Deploy sketch to board (compile + upload + record) |
-| `/api/board/hardware-ids` | GET | List hardware IDs for assignment |
-| `/api/board/assign` | POST | Assign sketch to board by hardware ID |
-| `/api/sketch/path` | GET | Current sketch path for active board |
 
 ---
 

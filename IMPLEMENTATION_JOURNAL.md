@@ -734,4 +734,44 @@ The test at `test_routes.py:395` asserted `b'id="active-board-hardware-id" value
 ### Outcome
 
 Both fixes applied. `nox -s all_tests` — 8/8 sessions green, 0 failures, 0 errors.
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Goal**: Align API routes across arduino_dash and medminder_dash into a consistent pattern.
+
+### Approach
+
+Used two parallel task agents:
+- **Agent A (write-capable)**: Implemented Parts 1+2 — arduino_dash events buffer + api_routes.py restructure
+- **Agent B (write-capable)**: Implemented Parts 3+4 — medminder_dash api_routes.py + html_routes.py
+
+The agents were given identical route specifications and ran in parallel on separate directories.
+
+### Key Decisions
+
+1. **`/api/sketches/last-upload` return format**: Finalized as `(dict, 200)` or `(None, 404)`. The plan originally said `(None, 404)` but actual implementation returned `(dict, 200)`. Reconciled in the final plan to match `(dict, 200)` or `(null, 404)`.
+
+2. **Route conflict resolution**: arduino_dash had `GET /api/board/<port>/status` returning PubSub health — moved to `GET /api/pubsub/board/<port>/status`. The freed `/api/board/<port>/status` returns local connection status from `get_port_info()`.
+
+3. **Test class name outdated**: `TestApiBoardList` still tests the OLD PubSub `/api/pubsub/boards/health` (was `GET /api/boards`). Renaming would be cosmetic.
+
+4. **Parallel agents worked well**: Each agent handled its own files without conflicts. Code was correct on first try — no fixes needed after tests.
+
+### Files Changed (16)
+
+| Part | Files | Type |
+|------|-------|------|
+| 1 | arduino_dash state.py, pubsub.py, utils.py | Events buffer |
+| 2 | arduino_dash api_routes.py | Route restructure |
+| 3 | medminder_dash api_routes.py | Route restructure |
+| 4 | medminder_dash html_routes.py | Comment out /boards/event |
+| 5 | arduino_dash test_app.py + medminder_dash test_routes.py | Test updates |
+| 6 | 4 module doc files | Documentation |
+
+### Verification
+
+`nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
 {% endraw %}

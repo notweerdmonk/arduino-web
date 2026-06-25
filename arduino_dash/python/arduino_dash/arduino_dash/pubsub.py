@@ -241,6 +241,10 @@ def _on_board_event(msg: dict) -> None:
         _broadcast_ws(oob)
     except Exception:
         state.logger.exception("Failed to broadcast board event")
+    with state._board_events_lock:
+        state._board_events.insert(0, data)
+        if len(state._board_events) > 100:
+            state._board_events.pop()
 
 
 def _on_health(msg: dict) -> None:

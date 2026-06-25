@@ -25,4 +25,23 @@
 | 4 | Lint 4 HTML templates with inline `<script>` | ✅ | 0 errors, 4 warnings (false positives from HTML `onchange`/`onclick`) |
 | 5 | Fix `showModal` no-undef in dnd_overlay.html | ✅ | Added `/* global showModal */` directive |
 | 6 | Fix unused `e` param in dragleave handler | ✅ | Removed unused parameter |
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | arduino_dash PubSub routes moved to `/api/pubsub/board/*` | ✅ | 4 routes relocated, no regressions |
+| 2 | arduino_dash new CRUD routes | ✅ | 5 endpoints, all thin wrappers around existing helpers |
+| 3 | medminder_dash PubSub routes added | ✅ | 4 endpoints |
+| 4 | medminder_dash `/api/board_list` renamed | ✅ | Now `/api/boards/list` |
+| 5 | medminder_dash `/boards/event` commented out | ✅ | Import removed too |
+| 6 | `/api/sketches/last-upload` | ✅ | None + 404 handling confirmed |
+| 7 | `/api/sketches ?hardware_id=X` | ✅ | Filter applied in both dashboards |
+| 8 | arduino_dash events buffer | ✅ | `_board_events`, lock, `get_board_events()` |
+| 9 | Test updates | ✅ | 4 URL changes + TestBoardsEvent redirect |
+| 10 | `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures, 0 errors |
+| 11 | Module docs | ✅ | 4 files updated |
+| 12 | Agent-facing docs | ✅ | All synced |
 {% endraw %}

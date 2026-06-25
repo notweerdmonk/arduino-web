@@ -54,8 +54,9 @@ WebSocket.
 | Method | Route | Handler | Description |
 |--------|-------|---------|-------------|
 | GET | `/boards` | `html_boards()` | Board list partial (`partials/board_list.html`) |
-| GET | `/boards/event` | `html_boards_event()` | Board events partial (`partials/board_event.html`) |
 | GET | `/boards/grid` | `html_boards_grid()` | Board grid partial (`partials/board_grid.html`) |
+
+> **Note:** The `/boards/event` route was removed in Phase 103. Board events are now served via the JSON API at `GET /api/boards/events` and pushed via WebSocket.
 
 ### Admin
 

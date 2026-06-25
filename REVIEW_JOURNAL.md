@@ -65,4 +65,37 @@ Two failing nox sessions were fixed: `tests(arduino_dash)` (111 errors → 119 p
 ### Verdict
 
 ✅ **Phase 101 is approved and complete.** All 3 binaries rebuilt from current source. Modules, templates, static files, and `simple-websocket` dep verified. Hardcoded paths replaced with `@REPO_ROOT@` placeholder + `sed` substitution. `pip_download()` → `pip_install()` for local wheels. All documentation updated.
+
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+### Review Summary
+
+Phase 103 restructured API routes across both dashboards into a consistent pattern. 16 files changed across 8 parts. All changes verified via `nox -s all_tests` — 8/8 sessions green. Implementation used two parallel task agents that produced correct code on first try.
+
+### Key Findings
+
+1. **Route naming is now consistent**: Both dashboards use identical URL patterns for PubSub commands (`/api/pubsub/board/*`), local CRUD (`/api/boards/*`, `/api/board/<port>/status`, `/api/daemon/status`), and sketch management (`/api/sketches`, `/api/sketch/upload`, `/api/sketch/delete`).
+2. **No production bugs discovered**: Unlike Phase 102, all source changes were clean and logical.
+3. **`TestApiBoardList` name is now misleading**: Tests `POST /api/pubsub/boards/health`, class name suggests board list. Name mismatch is cosmetic, not functional.
+
+### Files Reviewed
+
+| File | Verdict | Notes |
+|------|---------|-------|
+| `arduino_dash/.../arduino_dash/state.py` | ✅ | `_board_events` + `_board_events_lock` added |
+| `arduino_dash/.../arduino_dash/pubsub.py` | ✅ | Events appended in `_on_board_event()`, cap 100 |
+| `arduino_dash/.../arduino_dash/utils.py` | ✅ | `get_board_events()` returns snapshot |
+| `arduino_dash/.../arduino_dash/api_routes.py` | ✅ | 4 PubSub moved + 5 CRUD added + `/api/sketches` enhanced |
+| `medminder_dash/.../medminder_dash/api_routes.py` | ✅ | 4 PubSub added + rename + 4 CRUD + `/api/sketches` enhanced |
+| `medminder_dash/.../medminder_dash/html_routes.py` | ✅ | `/boards/event` commented out, import cleaned |
+| `arduino_dash/.../tests/test_app.py` | ✅ | 4 URL updates |
+| `medminder_dash/.../tests/test_routes.py` | ✅ | `TestBoardsEvent` now hits `/api/boards/events` |
+| 4 module doc files | ✅ | Route tables + new symbols documented |
+| All agent-facing docs | ✅ | Synced |
+
+### Verdict
+
+✅ **Phase 103 is approved and complete.** All 16 files changed correctly. Route structure is now consistent across both dashboards. All tests pass. Documentation synced.
 {% endraw %}

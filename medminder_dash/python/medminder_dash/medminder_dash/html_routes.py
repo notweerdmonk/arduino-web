@@ -41,7 +41,6 @@ from medminder_dash.sketch_registry import (
 from medminder_dash.utils import (
     day_name,
     find_board_info_by_fqbn,
-    get_board_events,
     get_first_board,
     get_known_ports,
     get_port_info,
@@ -771,11 +770,12 @@ def init_html_routes(
         ports = get_known_ports()
         return render_template("partials/board_list.html", ports=ports)
 
-    @app.route("/boards/event")
-    def html_boards_event():
-        """Render the board events partial."""
-        events = get_board_events()
-        return render_template("partials/board_event.html", events=events)
+    # @app.route("/boards/event")
+    # def html_boards_event():
+    #     """Render the board events partial."""
+    #     # DISABLED: replaced by GET /api/boards/events (JSON API)
+    #     # events = get_board_events()
+    #     # return render_template("partials/board_event.html", events=events)
 
     @app.route("/boards/grid")
     def html_boards_grid():

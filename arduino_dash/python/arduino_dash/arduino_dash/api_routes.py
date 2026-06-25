@@ -22,8 +22,14 @@ from arduino_dash.sketch_management import (
     _save_registry,
     _update_meta_hw_ids,
 )
-from arduino_dash.sketch_registry import set_assignment
-from arduino_dash.utils import normalize_port
+from arduino_dash.sketch_registry import get_assignment, set_assignment
+from arduino_dash.sketch_management import _resolve_latest_upload
+from arduino_dash.utils import (
+    get_board_events,
+    get_known_boards,
+    get_port_info,
+    normalize_port,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +37,7 @@ logger = logging.getLogger(__name__)
 def init_api_routes(app: Flask):
     """Register all /api/ route handlers on the Flask app."""
 
-    @app.route("/api/board/<path:port>/spawn", methods=["POST"])
+    @app.route("/api/pubsub/board/<path:port>/spawn", methods=["POST"])
     def api_spawn(port: str):
         """Spawn the board monitor for the given port."""
         port = normalize_port(port)
@@ -42,7 +48,7 @@ def init_api_routes(app: Flask):
         )
         return jsonify({"status": "accepted"})
 
-    @app.route("/api/board/<path:port>/status")
+    @app.route("/api/pubsub/board/<path:port>/status")
     def api_board_status(port: str):
         """Request status for the board at the given port."""
         port = normalize_port(port)
@@ -53,7 +59,7 @@ def init_api_routes(app: Flask):
         )
         return jsonify({"status": "accepted"})
 
-    @app.route("/api/board/<path:port>/remove", methods=["POST"])
+    @app.route("/api/pubsub/board/<path:port>/remove", methods=["POST"])
     def api_remove_board(port: str):
         """Remove the board at the given port."""
         port = normalize_port(port)
@@ -64,11 +70,69 @@ def init_api_routes(app: Flask):
         )
         return jsonify({"status": "accepted"})
 
-    @app.route("/api/boards")
+    @app.route("/api/pubsub/boards/health", methods=["POST"])
     def api_list_boards():
         """List all known boards."""
         state.pubsub.publish("sys/health", {"method": "health"}, "")
         return jsonify({"status": "accepted"})
+
+    @app.route("/api/daemon/status")
+    def api_daemon_status():
+        """Return daemon status (ready + connected) as JSON."""
+        with state._daemon_ready_lock:
+            ready = state._daemon_ready
+        connected = state.pubsub.is_connected if state.pubsub else False
+        return jsonify({"ready": ready, "connected": connected})
+
+    @app.route("/api/board/<path:port>/status")
+    def api_board_connection_status(port: str):
+        """Return connection status for the board at the given port from local state."""
+        port = normalize_port(port)
+        if port is None:
+            return jsonify({"error": "Invalid port"}), 400
+        info = get_port_info(port)
+        connected = bool(info)
+        return jsonify({
+            "connected": connected,
+            "port": port,
+            "fqbn": info.get("fqbn", ""),
+            "hardware_id": info.get("hardware_id", ""),
+        })
+
+    @app.route("/api/boards/list")
+    def api_boards_list():
+        """Return the list of known boards as JSON."""
+        boards = get_known_boards()
+        return jsonify(boards)
+
+    @app.route("/api/boards/events")
+    def api_boards_events():
+        """Return the board events buffer as JSON."""
+        events = get_board_events()
+        return jsonify(events)
+
+    @app.route("/api/sketches/last-upload")
+    def api_sketches_last_upload():
+        """Return the latest uploaded sketch as JSON, or null with 404 if none."""
+        hardware_id = request.args.get("hardware_id", "").strip()
+        if hardware_id:
+            sketch_dir = get_assignment(hardware_id)
+            if sketch_dir:
+                sketch_name = os.path.basename(os.path.normpath(sketch_dir))
+                return jsonify({
+                    "path": sketch_dir,
+                    "name": sketch_name,
+                    "timestamp": "",
+                })
+        latest = _resolve_latest_upload()
+        if latest:
+            sketch_name = os.path.basename(os.path.normpath(latest))
+            return jsonify({
+                "path": latest,
+                "name": sketch_name,
+                "timestamp": "",
+            })
+        return jsonify(None), 404
 
     @app.route("/api/sketches")
     def api_sketches():
@@ -76,6 +140,7 @@ def init_api_routes(app: Flask):
         ip = request.remote_addr or "unknown"
         ua = request.headers.get("User-Agent", "unknown")
         key = (ip, ua)
+        hw_id = request.args.get("hardware_id", "").strip()
         all_versions = []
         with state._upload_registry_lock:
             if key not in state._upload_registry:
@@ -85,6 +150,8 @@ def init_api_routes(app: Flask):
             entries = state._upload_registry.get(key, {})
             for name, versions in entries.items():
                 for v in versions:
+                    if hw_id and hw_id not in v.get("hardware_ids", []):
+                        continue
                     all_versions.append(
                         {
                             "name": name,

@@ -568,4 +568,30 @@ The binary requires `prefix/` adjacent at runtime.
 2. **Medminder_dash**: Single assertion failure due to djlint multi-line attribute reformatting.
 3. **UPLOAD_BASE_DIR production bug**: `state.py:6` re-import fixed 8 test failures that were using `patch("arduino_dash.state.UPLOAD_BASE_DIR", ...)`, plus fixed actual broken production code in `sketch_management.py`, `api_routes.py`, and `html_routes.py` (9 references total).
 4. **Wrong import in api_routes.py**: `from arduino_dash.html_routes import _warm_upload_registry` should have been `from arduino_dash.sketch_management import ...`.
+
+---
+
+## 2026-06-25 11:57 — Phase 103: API Route Restructure ✅ COMPLETED
+
+### Test Results
+
+`nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
+| Session | Status |
+|---------|--------|
+| `scripts_tests` | ✅ |
+| `tests(board_manager)` | ✅ |
+| `tests(board_manager_client)` | ✅ |
+| `tests(arduino_sketch_tools)` | ✅ |
+| `tests(arduino_dash)` | ✅ (119 pass) |
+| `tests(arduino_grpc)` | ✅ |
+| `tests(medminder_dash)` | ✅ (186 pass, 1 skip) |
+| `tests(arduino_shared)` | ✅ |
+
+### Findings
+
+1. **Parallel agent implementation worked flawlessly**: Both agents produced correct code on first try. No test failures attributable to agent implementation errors.
+2. **`TestApiBoardList` class name is now misleading**: Tests `GET /api/pubsub/boards/health` (was `GET /api/boards`), but the class name still references "ApiBoardList". Functionally correct — the URL and method are what matter for test assertions.
+3. **No new tests needed**: All new routes are thin wrappers that call existing helper functions. Existing test coverage of those helpers suffices.
+4. **Module docs needed 4 file updates**: `state.md`, `utils.md`, `api_routes.md` for both modules — straightforward additions of new symbols and route tables.
 {% endraw %}

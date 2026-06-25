@@ -1,27 +1,29 @@
 ---
 ---
 {% raw %}
-# Implementation Progress — Phase 102: Fix Pre-Existing Test Failures
+# Implementation Progress — Phase 103: API Route Restructure
 
-**Date**: 2026-06-25 09:10
+**Date**: 2026-06-25 11:57
 
 ## Milestones
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| Q1 | `app.py` — add state re-exports | ✅ | 14 variables from `state.py` re-exported |
-| Q2 | `test_routes.py` — remove brittle `value=""` assertion | ✅ | Line 395 removed |
-| Q3 | Verification: `nox -s all_tests` | ✅ | 8/8 sessions green, 0 failures |
-| D1 | IMPLEMENTATION_JOURNAL.md | ✅ | |
-| D2 | JOURNAL.md | ✅ | |
-| D3 | CODEBASE_REFERENCE.md | ✅ | |
-| D4 | IMPLEMENTATION_PLAN / TASK / PROGRESS | ✅ | |
-| D5 | TESTING_* docs | ✅ | |
-| D6 | REVIEW_* docs | ✅ | |
+| Q1 | arduino_dash events buffer | ✅ | state.py, pubsub.py, utils.py |
+| Q2 | arduino_dash api_routes.py | ✅ | Move PubSub + add CRUD |
+| Q3 | medminder_dash api_routes.py | ✅ | Add PubSub + rename + add CRUD |
+| Q4 | medminder_dash html_routes.py | ✅ | Comment out /boards/event |
+| Q5 | Update tests | ✅ | 5 test file changes |
+| Q6 | Module docs | ✅ | 4 doc files |
+| Q7 | Verification | ✅ | `nox -s all_tests` — 8/8 green |
+| Q8 | Agent-facing docs sync | ✅ | All workflow + project docs |
 
 ## Key Context
 
-Two pre-existing test failures:
-1. **arduino_dash (111 errors)**: `app.py` missing state re-exports for `test_app.py` fixture
-2. **medminder_dash (1 failure)**: djlint-reformatted template split attributes across lines, test assertion too brittle
+This phase restructures API routes across both dashboards:
+1. arduino_dash gets events buffer alignment with medminder_dash
+2. Both modules get consistent PubSub/CRUD route split
+3. medminder_dash gains PubSub endpoints it was missing
+4. Tests updated for new URL structure
+5. Module docs synced
 {% endraw %}

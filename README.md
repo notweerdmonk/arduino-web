@@ -115,7 +115,7 @@ The `medminder_dash` Flask app provides a board‑centric UI for managing medici
 
 ### Board Selection
 
-1. Open the app → the landing page shows a board selector dropdown (auto‑populated via `/api/board_list`).
+1. Open the app → the landing page shows a board selector dropdown (auto‑populated via `/api/boards/list`).
 2. Select a board → the app stores it in the session and redirects to the board detail view (`/board`).
 3. The navbar shows a daemon status badge updated in real time via WebSocket push (no polling).
 4. Medicine CRUD operations are scoped to the selected board.

@@ -401,3 +401,26 @@ Full pass across all project Python, JS, and HTML template files to fix linting 
 | 4 | `api_routes.py` import points to correct module | ✅ `sketch_management._warm_upload_registry` |
 | 5 | Test assertions are not brittle to HTML formatting | ✅ Changed to id-only checks; no contiguous multi-attr assertions |
 | 6 | All 8 nox sessions pass | ✅ 0 failures, 0 errors
+
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+### Review Criteria
+
+| # | Criterion | Result |
+|---|-----------|--------|
+| 1 | PubSub routes moved to `/api/pubsub/board/*` in arduino_dash | ✅ 4 routes relocated |
+| 2 | New CRUD routes added to arduino_dash | ✅ 5 endpoints: daemon status, board connection status, boards list, boards events, last-upload |
+| 3 | PubSub routes added to medminder_dash | ✅ 4 endpoints matching arduino_dash |
+| 4 | `/api/board_list` → `/api/boards/list` renamed | ✅ Old route removed, new route registered |
+| 5 | `/boards/event` HTML route commented out | ✅ Lines 774-778 commented with explanatory note |
+| 6 | `/api/sketches` enhanced with `?hardware_id=X` filter | ✅ Both dashboards |
+| 7 | `/api/sketches/last-upload` returns `(None, 404)` when no sketch | ✅ Consistent across both dashboards |
+| 8 | arduino_dash board events buffer added | ✅ `_board_events` + `_board_events_lock` + `get_board_events()` |
+| 9 | Test URLs updated correctly | ✅ 4 changes in test_app.py + TestBoardsEvent redirect |
+| 10 | `nox -s all_tests` passes | ✅ 8/8 sessions, 0 failures, 0 errors |
+| 11 | Module docs updated | ✅ 4 doc files |
+| 12 | Agent-facing docs synced | ✅ All workflow + project docs |

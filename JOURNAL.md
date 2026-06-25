@@ -3895,4 +3895,26 @@ Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) an
 1. **Missing re-exports cascade**: The original 111 collection errors masked 53 actual test failures. Fixing the fixture revealed deeper issues (wrong import paths, production bugs).
 2. **`UPLOAD_BASE_DIR` was a production bug**: Phase 69 moved this from `state.py` to `settings.py` but missed updating 9 source code references. The code was silently broken for all upload/sketch operations in arduino_dash.
 3. **djlint reformatting broke brittle test assertions**: 3 test assertions across 2 dashboards expected HTML attributes on the same line — all broke after the bulk linting pass.
+
+---
+
+## 2026-06-25 11:57 — Phase 103: API Route Restructure ✅ COMPLETED
+
+**Goal**: Align API routes across both dashboards — PubSub commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`. medminder_dash gains PubSub endpoints, arduino_dash gains board events buffer.
+
+**Implementation**: Two parallel task agents executed:
+- Agent A: Parts 1+2 (arduino_dash events buffer + api_routes.py)
+- Agent B: Parts 3+4 (medminder_dash api_routes.py + html_routes.py)
+- Manually: Part 5 (test updates), Part 7 (verification), Part 6 (module docs), Part 8 (agent-facing docs sync)
+
+**Key decisions**:
+1. `/api/sketches/last-upload` finalized as `(dict, 200)` or `(null, 404)` — reconciled from initial plan
+2. Old `GET /api/board/<port>/status` (PubSub) → `GET /api/pubsub/board/<port>/status`; freed route uses `get_port_info()`
+3. `hw_id` spelling: `hardware_id` used consistently across both dashboards
+
+**Files changed**: 16 files (6 source, 2 test, 4 module docs, 4 agent-facing docs)
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
+**Test class naming note**: `TestApiBoardList` still tests the OLD PubSub `/api/pubsub/boards/health` (was `GET /api/boards`). The class name is now misleading but functionally correct — renaming deferred as cosmetic.
 {% endraw %}

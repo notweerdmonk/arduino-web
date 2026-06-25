@@ -117,13 +117,17 @@ arduino_dash/python/arduino_dash/
 ├── arduino_dash/
 │   ├── __init__.py
 │   ├── __main__.py          # CLI entry point
-│   ├── app.py               # Flask app factory + routes
+│   ├── api_routes.py        # JSON API routes
+│   ├── app.py               # Flask app factory
 │   ├── board_management.py  # Board detail + deploy routes
 │   ├── gunicorn_conf.py     # Gunicorn config hooks
+│   ├── html_routes.py       # HTML page + partial routes
 │   ├── pubsub.py            # PubSub init + fallback scanner
-│   ├── utils.py             # Utility functions
+│   ├── settings.py          # Application settings
 │   ├── sketch_management.py # Sketch CRUD + upload routes
+│   ├── sketch_registry.py   # Per-board sketch assignment
 │   ├── state.py             # Shared in-memory state
+│   ├── utils.py             # Utility functions
 │   ├── wsgi.py              # WSGI entry for gunicorn
 │   ├── templates/           # Jinja2 templates
 │   │   ├── base.html

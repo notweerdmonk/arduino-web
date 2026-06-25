@@ -31,6 +31,12 @@ def get_known_boards() -> list[dict]:
         return list(state._board_list.values())
 
 
+def get_board_events() -> list[dict]:
+    """Return a snapshot of recent board events."""
+    with state._board_events_lock:
+        return list(state._board_events)
+
+
 def get_first_board(boards: list[dict]) -> Tuple[str, str, str]:
     """Return the (port, fqbn, hardware_id) of the first board in the list."""
     if isinstance(boards, list) and boards:

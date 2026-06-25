@@ -14,9 +14,12 @@ from werkzeug.utils import secure_filename
 from medminder_dash import state
 from medminder_dash.medicines_state import Medicine
 from medminder_dash.pubsub import (
-    ensure_sketch_dir,
-    _get_alarm_hpp_path,
     broadcast_ws,
+    ensure_sketch_dir,
+    get_pubsub,
+    is_connected,
+    is_daemon_ready,
+    _get_alarm_hpp_path,
 )
 from medminder_dash.settings import _DEFAULT_SKETCH_DIR
 from medminder_dash.sketch_gen import generate_alarm_hpp, parse_alarm_hpp
@@ -24,13 +27,19 @@ from medminder_dash.sketch_management import (
     _compute_sketch_checksum,
     _find_existing_version,
     _normalize_ino_filename,
+    _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
     _warm_upload_registry,
 )
-from medminder_dash.sketch_registry import set_assignment
+from medminder_dash.sketch_registry import (
+    get_assignment,
+    set_assignment,
+)
 from medminder_dash.utils import (
+    get_board_events,
     get_known_ports,
+    get_port_info,
     validate_medicine_data,
 )
 
@@ -185,11 +194,88 @@ def init_api_routes(app: Flask, store_param):
     #  Existing JSON API routes from board_management.py                  #
     # ------------------------------------------------------------------ #
 
-    @app.route("/api/board_list")
+    @app.route("/api/boards/list")
     def api_board_list():
         """Return the list of known board ports as JSON."""
-        ports = get_known_ports()
-        return jsonify(ports)
+        boards = get_known_ports()
+        return jsonify(boards)
+
+    @app.route("/api/pubsub/board/<path:port>/spawn", methods=["POST"])
+    def api_pubsub_spawn(port: str):
+        """Spawn the board monitor via PubSub."""
+        from medminder_dash.utils import normalize_port
+        port = normalize_port(port)
+        if port is None:
+            return jsonify({"error": "Invalid port"}), 400
+        ps = get_pubsub()
+        if not ps:
+            return jsonify({"error": "PubSub not connected"}), 503
+        ps.publish(f"board::{port}::cmd", {"method": "spawn"}, f"resp:spawn:{port}")
+        return jsonify({"status": "accepted"})
+
+    @app.route("/api/pubsub/board/<path:port>/status")
+    def api_pubsub_board_status(port: str):
+        """Request board status via PubSub."""
+        from medminder_dash.utils import normalize_port
+        port = normalize_port(port)
+        if port is None:
+            return jsonify({"error": "Invalid port"}), 400
+        ps = get_pubsub()
+        if not ps:
+            return jsonify({"error": "PubSub not connected"}), 503
+        ps.publish(f"board::{port}::cmd", {"method": "status"}, f"resp:status:{port}")
+        return jsonify({"status": "accepted"})
+
+    @app.route("/api/pubsub/board/<path:port>/remove", methods=["POST"])
+    def api_pubsub_remove_board(port: str):
+        """Remove the board monitor via PubSub."""
+        from medminder_dash.utils import normalize_port
+        port = normalize_port(port)
+        if port is None:
+            return jsonify({"error": "Invalid port"}), 400
+        ps = get_pubsub()
+        if not ps:
+            return jsonify({"error": "PubSub not connected"}), 503
+        ps.publish(f"board::{port}::cmd", {"method": "remove"}, f"resp:remove:{port}")
+        return jsonify({"status": "accepted"})
+
+    @app.route("/api/pubsub/boards/health", methods=["POST"])
+    def api_pubsub_boards_health():
+        """Trigger health check for all boards via PubSub."""
+        ps = get_pubsub()
+        if not ps:
+            return jsonify({"error": "PubSub not connected"}), 503
+        ps.publish("sys/health", {"method": "health"}, "")
+        return jsonify({"status": "accepted"})
+
+    @app.route("/api/daemon/status")
+    def api_daemon_status():
+        """Return daemon status (ready + connected) as JSON."""
+        ready = is_daemon_ready()
+        connected = is_connected()
+        return jsonify({"ready": ready, "connected": connected})
+
+    @app.route("/api/board/<path:port>/status")
+    def api_board_connection_status(port: str):
+        """Return connection status for the board at the given port from local state."""
+        from medminder_dash.utils import normalize_port
+        port = normalize_port(port)
+        if port is None:
+            return jsonify({"error": "Invalid port"}), 400
+        info = get_port_info(port)
+        connected = bool(info)
+        return jsonify({
+            "connected": connected,
+            "port": port,
+            "fqbn": info.get("fqbn", ""),
+            "hardware_id": info.get("hardware_id", ""),
+        })
+
+    @app.route("/api/boards/events")
+    def api_boards_events():
+        """Return the board events buffer as JSON."""
+        events = get_board_events()
+        return jsonify(events)
 
     # ------------------------------------------------------------------ #
     #  JSON API versions of sketch routes (from sketch_management.py)     #
@@ -197,10 +283,11 @@ def init_api_routes(app: Flask, store_param):
 
     @app.route("/api/sketches")
     def api_sketches():
-        """Return all uploaded sketches as JSON."""
+        """Return all uploaded sketches as JSON. Supports ?hardware_id=X filter."""
         ip = request.remote_addr or "unknown"
         ua = request.headers.get("User-Agent", "unknown")
         key = (ip, ua)
+        hw_id = request.args.get("hardware_id", "").strip()
         all_versions = []
         with state._upload_registry_lock:
             if key not in state._upload_registry:
@@ -208,6 +295,8 @@ def init_api_routes(app: Flask, store_param):
             entries = state._upload_registry.get(key, {})
             for name, versions in entries.items():
                 for v in versions:
+                    if hw_id and hw_id not in v.get("hardware_ids", []):
+                        continue
                     all_versions.append(
                         {
                             "name": name,
@@ -356,6 +445,29 @@ def init_api_routes(app: Flask, store_param):
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             return jsonify({"status": "deleted"})
         return jsonify({"error": "Not found"}), 404
+
+    @app.route("/api/sketches/last-upload")
+    def api_sketches_last_upload():
+        """Return the latest uploaded sketch as JSON, or null with 404 if none."""
+        hardware_id = request.args.get("hardware_id", "").strip()
+        if hardware_id:
+            sketch_dir = get_assignment(hardware_id)
+            if sketch_dir:
+                sketch_name = os.path.basename(os.path.normpath(sketch_dir))
+                return jsonify({
+                    "path": sketch_dir,
+                    "name": sketch_name,
+                    "timestamp": "",
+                })
+        latest = _resolve_latest_upload()
+        if latest:
+            sketch_name = os.path.basename(os.path.normpath(latest))
+            return jsonify({
+                "path": latest,
+                "name": sketch_name,
+                "timestamp": "",
+            })
+        return jsonify(None), 404
 
     # ------------------------------------------------------------------ #
     #  NEW REST CRUD endpoints for medicines                              #

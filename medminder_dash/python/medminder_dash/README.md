@@ -152,17 +152,20 @@ medminder_dash/python/medminder_dash/
 ├── medminder_dash/
 │   ├── __init__.py
 │   ├── __main__.py           # CLI entry point
-│   ├── app.py                # Flask app factory + all routes
+│   ├── api_routes.py         # JSON API + PubSub routes
+│   ├── app.py                # Flask app factory
 │   ├── board_management.py   # Board detail + admin routes
 │   ├── dash_state.py         # Dashboard-level shared state
 │   ├── gunicorn_conf.py      # Gunicorn config hooks
-│   ├── utils.py              # Utilites
-│   ├── pubsub.py       # PubSub init, fallback scanner, board info resolution helpers
+│   ├── html_routes.py        # HTML page + partial routes
+│   ├── medicines_state.py    # Medicine dataclass, MedicineStore CRUD
+│   ├── pubsub.py             # PubSub init, fallback scanner, board info resolution helpers
 │   ├── settings.py           # Application settings
 │   ├── sketch_gen.py         # alarm.hpp generation from medicine DB
 │   ├── sketch_management.py  # Sketch CRUD + upload routes
 │   ├── sketch_registry.py    # Per-board sketch assignment
 │   ├── state.py              # Shared in-memory state
+│   ├── utils.py              # Utilities
 │   ├── wsgi.py               # WSGI entry for gunicorn
 │   ├── sketches/
 │   │   └── MedMinderV2/      # Packaged default sketch

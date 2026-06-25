@@ -43,6 +43,15 @@ boards = get_known_boards()
 # Returns: [{"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", ...}, ...]
 ```
 
+### `get_board_events() -> list[dict]`
+
+Return a snapshot of recent board events from `state._board_events` (capped at 100, newest first). Each event dict contains `port`, `event` ("connected"/"disconnected"), `board`, `fqbn`, `hardware_id`.
+
+```python
+events = get_board_events()
+# Returns: [{"port": "/dev/ttyACM0", "event": "connected", ...}, ...]
+```
+
 ### `get_first_board(boards: list[dict]) -> Tuple[str, str, str]`
 
 Return the `(port, fqbn, hardware_id)` of the first board in the list. Returns an empty tuple of `("", "", "")` if the list is empty or invalid.

@@ -95,4 +95,20 @@
 | 6 | Fix `test_app.py` fqbn assertion (arduino_dash) | ✅ | 1 assertion relaxed |
 | 7 | Fix `test_routes.py` hardware-id assertion (medminder_dash) | ✅ | 1 assertion removed |
 | 8 | Verify: `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures |
+
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | Part 1: arduino_dash events buffer | ✅ | state.py + pubsub.py + utils.py |
+| 2 | Part 2: arduino_dash api_routes.py | ✅ | Move PubSub + add CRUD |
+| 3 | Part 3: medminder_dash api_routes.py | ✅ | Add PubSub + rename + add CRUD |
+| 4 | Part 4: medminder_dash html_routes.py | ✅ | /boards/event commented out |
+| 5 | Part 5: Update test URLs | ✅ | 4 changes in test_app.py + TestBoardsEvent redirect |
+| 6 | Part 6: Module docs | ✅ | 4 doc files |
+| 7 | Part 7: `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures, 0 errors |
 {% endraw %}

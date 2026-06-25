@@ -10,59 +10,60 @@ JSON API routes — all under the `/api/` prefix for programmatic access.
 
 Register all `/api/` route handlers on the Flask app.
 
-## Routes
+## Route Tables
 
-### Board Management
+### PubSub Board Commands (send to BoardManagerService)
 
-#### `POST /api/board/<path:port>/spawn`
+| Method | Route | Handler | Request | Response |
+|--------|-------|---------|---------|----------|
+| POST | `/api/pubsub/board/<path:port>/spawn` | `api_spawn(port)` | URL param `port` | `{"status": "accepted"}` |
+| GET | `/api/pubsub/board/<path:port>/status` | `api_board_status(port)` | URL param `port` | `{"status": "accepted"}` |
+| POST | `/api/pubsub/board/<path:port>/remove` | `api_remove_board(port)` | URL param `port` | `{"status": "accepted"}` |
+| POST | `/api/pubsub/boards/health` | `api_list_boards()` | — | `{"status": "accepted"}` |
 
-Spawn the board monitor for the given port.
+These routes publish a command via PubSub to the BoardManagerService and return immediately. The actual operation happens asynchronously.
 
-**Response:**
+### Local CRUD — Daemon
+
+| Method | Route | Handler | Response |
+|--------|-------|---------|----------|
+| GET | `/api/daemon/status` | `api_daemon_status()` | `{"ready": bool, "connected": bool}` |
+
+### Local CRUD — Board Status
+
+| Method | Route | Handler | Request | Response |
+|--------|-------|---------|---------|----------|
+| GET | `/api/board/<path:port>/status` | `api_board_connection_status(port)` | URL param `port` | JSON `{connected, port, fqbn, hardware_id}` |
+| GET | `/api/boards/list` | `api_boards_list()` | — | JSON array of board info dicts |
+| GET | `/api/boards/events` | `api_boards_events()` | — | JSON array of recent board events |
+
+**`GET /api/board/<path:port>/status` response:**
 ```json
-{"status": "accepted"}
+{"connected": true, "port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "hardware_id": "ABC123"}
 ```
 
-**Error (invalid port):**
+**`GET /api/boards/list` response:**
 ```json
-{"error": "Invalid port"}
-```
-Status: 400
-
-#### `GET /api/board/<path:port>/status`
-
-Request status for the board at the given port.
-
-**Response:**
-```json
-{"status": "accepted"}
+[{"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno", "board": "Arduino Uno", "hardware_id": "ABC123", "event": "connected"}, ...]
 ```
 
-#### `POST /api/board/<path:port>/remove`
-
-Remove the board at the given port.
-
-**Response:**
+**`GET /api/boards/events` response:**
 ```json
-{"status": "accepted"}
+[{"port": "/dev/ttyACM0", "event": "connected", "board": "Arduino Uno", "fqbn": "arduino:avr:uno", "hardware_id": "ABC123"}, ...]
 ```
-
-#### `GET /api/boards`
-
-List all known boards. Triggers a health check via PubSub.
-
-**Response:**
-```json
-{"status": "accepted"}
-```
-
-> **Note:** Board list is returned via WebSocket events, not in this response. The actual board state is in `state._board_list`.
 
 ### Sketch Management
 
+| Method | Route | Handler | Request | Response |
+|--------|-------|---------|---------|----------|
+| GET | `/api/sketches` | `api_sketches()` | Optional `?hardware_id=X` | JSON array `[{name, path, timestamp}]` |
+| GET | `/api/sketches/last-upload` | `api_sketches_last_upload()` | Optional `?hardware_id=X` | JSON dict or `null` + 404 |
+| POST | `/api/sketch/upload` | `api_sketch_upload()` | Multipart `files[]`, query `?hardware_id=...` | `{"path": "/path/to/sketch"}` |
+| DELETE | `/api/sketch` | `api_sketch_delete()` | Query `?path=...` | `{"status": "deleted"}` or 404 |
+
 #### `GET /api/sketches`
 
-List all uploaded sketches for the requesting client (keyed by IP + User-Agent).
+List all uploaded sketches for the requesting client (keyed by IP + User-Agent). When `?hardware_id=X` is provided, only versions whose `hardware_ids` list includes X are returned.
 
 **Response:**
 ```json
@@ -77,6 +78,19 @@ List all uploaded sketches for the requesting client (keyed by IP + User-Agent).
 ```
 
 Warms the registry from disk if the client has no in-memory entries.
+
+#### `GET /api/sketches/last-upload`
+
+Return the latest uploaded sketch as JSON. Accepts optional `?hardware_id=X`:
+- If `hardware_id` provided: tries `get_assignment(hardware_id)` first, falls back to `_resolve_latest_upload()`
+- If no `hardware_id`: just `_resolve_latest_upload()`
+
+**Response (found):**
+```json
+{"path": "/path/to/sketch", "name": "sketch_name", "timestamp": ""}
+```
+
+**Response (none found):** `null` with HTTP 404.
 
 #### `POST /api/sketch/upload`
 
@@ -103,7 +117,7 @@ Upload flow:
 
 #### `DELETE /api/sketch`
 
-Delete an uploaded sketch by path. Accepts `path` and optional `hardware_id` query parameters.
+Delete an uploaded sketch by path. Accepts `path` query parameter.
 
 **Response (deleted):**
 ```json

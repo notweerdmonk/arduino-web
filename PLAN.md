@@ -1154,4 +1154,43 @@ Three issues found after Phase 20:
 | Q2 | `test_routes.py` — remove brittle `value=""` assertion | Removed line 395, verified 3 prior assertions already cover the hidden input's existence | ✅ |
 | Q3 | Verification | `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors | ✅ |
 
+
+---
+
+### Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Goal**: Align API routes across arduino_dash and medminder_dash into a consistent pattern: PubSub-backed board commands under `/api/pubsub/board/*` (spawn, status, remove, health), local CRUD endpoints under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`, and add missing PubSub endpoints to medminder_dash.
+
+**Route naming convention**:
+
+| Prefix | Purpose |
+|--------|---------|
+| `/api/pubsub/board/*` | Commands sent via PubSub to BoardManagerService |
+| `/api/board/<port>/status` | Local CRUD — connection status from cached state |
+| `/api/boards/list` | Local CRUD — board list from cached state |
+| `/api/boards/events` | Local CRUD — board events buffer |
+| `/api/daemon/status` | Local CRUD — daemon connected + ready flags |
+| `/api/sketches` | Sketch version listing with optional `?hardware_id=X` filter |
+| `/api/sketches/last-upload` | Latest upload details (null + 404 when none found) |
+
+**Parts**:
+
+| Part | Scope | Status |
+|------|-------|--------|
+| 1 | arduino_dash events buffer (state.py, pubsub.py, utils.py) | ✅ |
+| 2 | arduino_dash api_routes.py — move PubSub + add 5 CRUD + enhance /api/sketches | ✅ |
+| 3 | medminder_dash api_routes.py — add 4 PubSub + rename `/api/board_list`→`/api/boards/list` + add 5 CRUD | ✅ |
+| 4 | medminder_dash html_routes.py — comment out `/boards/event` | ✅ |
+| 5 | Test updates (4 URL changes + TestBoardsEvent redirect) | ✅ |
+| 6 | Module docs (4 files) | ✅ |
+| 7 | Verification `nox -s all_tests` — 8/8 sessions, 0 failures | ✅ |
+| 8 | Agent-facing docs sync | ✅ |
+
+**Key decisions**:
+1. `/api/sketches/last-upload` returns `(dict, 200)` or `(null, 404)` — final form after reconciliation
+2. Old `GET /api/board/<port>/status` (PubSub health) → `GET /api/pubsub/board/<port>/status`; freed route returns local connection status from `get_port_info()`
+3. Parallel task agents used for Parts 1-2 and Parts 3-4 — no conflicts, correct on first try
+
 {% endraw %}

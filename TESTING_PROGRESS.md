@@ -57,4 +57,11 @@
 | 44 | Phase 102: fix arduino_dash fqbn assertion | ✅ | Relaxed to `id="fqbn"` check |
 | 45 | Phase 102: fix medminder_dash hardware-id assertion | ✅ | Removed redundant check |
 | 46 | Phase 102: `nox -s all_tests` | ✅ | 8/8 sessions green, 0 failures |
+| 47 | Phase 103: Part 1 — arduino_dash events buffer | ✅ | state.py, pubsub.py, utils.py |
+| 48 | Phase 103: Part 2 — arduino_dash api_routes.py | ✅ | Move PubSub + add CRUD + enhance /api/sketches |
+| 49 | Phase 103: Part 3 — medminder_dash api_routes.py | ✅ | Add PubSub + rename + add CRUD + enhance /api/sketches |
+| 50 | Phase 103: Part 4 — medminder_dash html_routes.py | ✅ | /boards/event commented out |
+| 51 | Phase 103: Part 5 — Test URL updates | ✅ | 4 URL changes + TestBoardsEvent redirect |
+| 52 | Phase 103: Part 6 — Module docs | ✅ | 4 doc files |
+| 53 | Phase 103: Part 7 — `nox -s all_tests` | ✅ | 8/8 sessions, 0 failures, 0 errors |
 {% endraw %}

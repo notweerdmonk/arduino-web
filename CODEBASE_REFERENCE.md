@@ -2168,13 +2168,13 @@ Total: arduino_dash 106/106 ✅
 | File | Purpose | Routes |
 |------|---------|--------|
 | `html_routes.py` | HTML pages + partials | 13 routes: `/`, `/board/<port>`, `/boards/grid`, `/board/<port>/connection-status`, `/daemon/status`, `/admin`, `/admin/board-selector`, `/admin/active-board` (POST), `/board/compile-upload-card`, `/last-upload`, `/sketch/upload` (POST), `/sketch` (DELETE) + `/ws/board-events` (WS) |
-| `api_routes.py` | JSON API | 7 routes: `/api/board/<port>/spawn` (POST), `/api/board/<port>/status`, `/api/board/<port>/remove` (POST), `/api/boards`, `/api/sketches`, `/api/sketch/upload` (POST), `/api/sketch` (DELETE) |
+| `api_routes.py` | JSON API | 12 routes: `/api/pubsub/board/<port>/spawn` (POST), `/api/pubsub/board/<port>/status`, `/api/pubsub/board/<port>/remove` (POST), `/api/pubsub/boards/health` (POST), `/api/daemon/status`, `/api/board/<port>/status`, `/api/boards/list`, `/api/boards/events`, `/api/sketches`, `/api/sketches/last-upload`, `/api/sketch/upload` (POST), `/api/sketch` (DELETE) |
 
 #### medminder_dash
 | File | Purpose | Routes |
 |------|---------|--------|
-| `html_routes.py` | HTML pages + partials | 28 routes: `/`, `/medicines`, `/medicine/new`, `/medicine` (POST), `/medicine/<id>/edit`, `/medicine/<id>` (PUT/DELETE), `/medicine/<id>/toggle` (PUT), `/daemon/status`, `/admin`, `/medicines/board-selector`, `/board/compile-upload-card`, `/medicines/confirm-modal`, `/medicines/generate-hpp` (POST), `/medicines/sync-from-hpp` (POST), `/medicines/active-board` (POST), `/medicines/active-board-card`, `/board/select/<port>`, `/board`, `/board/<port>`, `/board/<port>/connection-status`, `/boards`, `/boards/event`, `/boards/grid`, `/last-upload`, `/sketch/upload` (POST), `/sketch` (DELETE) + `/ws/board-events` (WS) |
-| `api_routes.py` | JSON API + REST CRUD | 11 routes: `/api/medicines/diff`, `/api/board_list`, `/api/sketches`, `/api/sketch/upload` (POST), `/api/sketch` (DELETE), `/api/medicines` (GET), `/api/medicine` (POST), `/api/medicine/<id>` (GET/PUT/DELETE), `/api/medicine/<id>/toggle` (PUT) |
+| `html_routes.py` | HTML pages + partials | 27 routes (Phase 103 removed `/boards/event`): `/`, `/medicines`, `/medicine/new`, `/medicine` (POST), `/medicine/<id>/edit`, `/medicine/<id>` (PUT/DELETE), `/medicine/<id>/toggle` (PUT), `/daemon/status`, `/admin`, `/medicines/board-selector`, `/board/compile-upload-card`, `/medicines/confirm-modal`, `/medicines/generate-hpp` (POST), `/medicines/sync-from-hpp` (POST), `/medicines/active-board` (POST), `/medicines/active-board-card`, `/board/select/<port>`, `/board`, `/board/<port>`, `/board/<port>/connection-status`, `/boards`, `/boards/grid`, `/last-upload`, `/sketch/upload` (POST), `/sketch` (DELETE) + `/ws/board-events` (WS) |
+| `api_routes.py` | JSON API + REST CRUD | 16 routes (Phase 103 added PubSub + CRUD endpoints): `/api/pubsub/board/<port>/spawn` (POST), `/api/pubsub/board/<port>/status`, `/api/pubsub/board/<port>/remove` (POST), `/api/pubsub/boards/health` (POST), `/api/daemon/status`, `/api/board/<port>/status`, `/api/boards/list`, `/api/boards/events`, `/api/medicines/diff`, `/api/sketches`, `/api/sketches/last-upload`, `/api/sketch/upload` (POST), `/api/sketch` (DELETE), `/api/medicines` (GET), `/api/medicine` (POST), `/api/medicine/<id>` (GET/PUT/DELETE), `/api/medicine/<id>/toggle` (PUT) |
 
 #### arduino_sketch_tools (Blueprint)
 | Blueprint Prefix | Routes |
@@ -2207,10 +2207,10 @@ Total: arduino_dash 106/106 ✅
 **arduino_dash** (7 new tests in `test_app.py`):
 - `TestDashboard`: GET `/`
 - `TestBoardsGrid`: GET `/boards/grid` (empty + populated)
-- `TestApiBoardSpawn`: POST `/api/board/<port>/spawn`
-- `TestApiBoardStatus`: GET `/api/board/<port>/status`
-- `TestApiBoardRemove`: POST `/api/board/<port>/remove`
-- `TestApiBoardList`: GET `/api/boards`
+- `TestApiBoardSpawn`: POST `/api/pubsub/board/<port>/spawn`
+- `TestApiBoardStatus`: GET `/api/pubsub/board/<port>/status`
+- `TestApiBoardRemove`: POST `/api/pubsub/board/<port>/remove`
+- `TestApiBoardList`: POST `/api/pubsub/boards/health` (was `GET /api/boards`, renamed in Phase 103)
 
 **medminder_dash** (10 new tests in `test_routes.py`):
 - `TestDaemonStatus`: GET `/daemon/status` (ready + not ready)
@@ -2218,7 +2218,7 @@ Total: arduino_dash 106/106 ✅
 - `TestBoardRedirect`: GET `/board` (400 without session, 302 with)
 - `TestBoardConnectionStatus`: GET `/board/<port>/connection-status` (connected + disconnected)
 - `TestBoards`: GET `/boards`
-- `TestBoardsEvent`: GET `/boards/event`
+- `TestBoardsEvent`: GET `/api/boards/events` (was `GET /boards/event`, moved to API in Phase 103)
 - `TestBoardsGrid`: GET `/boards/grid`
 
 **medminder_dash REST CRUD** (14 new tests in `test_api_medicines.py`):
@@ -3756,4 +3756,69 @@ sed -i "s|@REPO_ROOT@|$PROJECT_ROOT|g" scripts/pyoxidizer/$APP/pyoxidizer.bzl
 
 - `nox -s all_tests`: 8/8 sessions, 0 failures, 0 errors ✅
 
+---
+
+## Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Goal**: Align API routes across both dashboards — PubSub commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, etc.
+
+### Route Table (Canonical)
+
+| Prefix | Namespace | Source | Type |
+|--------|-----------|--------|------|
+| `POST /api/pubsub/board/<path:port>/spawn` | arduino_dash & medminder_dash | PubSub | Publish spawn command |
+| `GET /api/pubsub/board/<path:port>/status` | arduino_dash & medminder_dash | PubSub | Publish status command |
+| `POST /api/pubsub/board/<path:port>/remove` | arduino_dash & medminder_dash | PubSub | Publish remove command |
+| `POST /api/pubsub/boards/health` | arduino_dash & medminder_dash | PubSub | Publish health check |
+| `GET /api/daemon/status` | arduino_dash & medminder_dash | Local | `{ready, connected}` |
+| `GET /api/board/<path:port>/status` | arduino_dash & medminder_dash | Local | Connection status from `get_port_info()` |
+| `GET /api/boards/list` | arduino_dash & medminder_dash | Local | Board list from cached state |
+| `GET /api/boards/events` | arduino_dash & medminder_dash | Local | Board events buffer |
+| `GET /api/sketches` | arduino_dash & medminder_dash | Local | Sketch list, `?hardware_id=X` filter |
+| `GET /api/sketches/last-upload` | arduino_dash & medminder_dash | Local | Latest upload detail or null+404 |
+| `POST /api/sketch/upload` | arduino_dash & medminder_dash | Local | Sketch file upload |
+| `DELETE /api/sketch` | arduino_dash & medminder_dash | Local | Sketch deletion |
+
+### New State / Utils
+
+| Module | Symbol | Type | Purpose |
+|--------|--------|------|---------|
+| `arduino_dash/state.py` | `_board_events` | `list[dict]` | Board events buffer (cap 100) |
+| `arduino_dash/state.py` | `_board_events_lock` | `threading.Lock()` | Lock for events buffer |
+| `arduino_dash/pubsub.py` | `_on_board_event()` | method | Appends to `_board_events`, caps at 100 |
+| `arduino_dash/utils.py` | `get_board_events()` | function | Returns snapshot of events buffer |
+
+### Renamed Routes
+
+| Module | Old Route | New Route |
+|--------|-----------|-----------|
+| `medminder_dash/api_routes.py` | `GET /api/board_list` | `GET /api/boards/list` |
+| `arduino_dash/api_routes.py` | `GET /api/boards` → `POST /api/pubsub/boards/health` | Method changed |
+
+### Relocated Routes
+
+| Module | Old Path | New Path |
+|--------|----------|----------|
+| `arduino_dash/api_routes.py` | `POST /api/board/<port>/spawn` | `POST /api/pubsub/board/<port>/spawn` |
+| `arduino_dash/api_routes.py` | `GET /api/board/<port>/status` | `GET /api/pubsub/board/<port>/status` |
+| `arduino_dash/api_routes.py` | `POST /api/board/<port>/remove` | `POST /api/pubsub/board/<port>/remove` |
+
+### Removed Routes
+
+| Module | Route | Action |
+|--------|-------|--------|
+| `medminder_dash/html_routes.py` | `GET /boards/event` | Commented out (lines 774-778) |
+
+### Key Implementation Details
+
+1. **`/api/sketches/last-upload`**: Returns `{"path", "name", "timestamp"}` (200) or `(None, 404)`. Accepts optional `?hardware_id=X`. If hardware_id provided, tries `get_assignment(hardware_id)` first, falls back to `_resolve_latest_upload()`.
+2. **`/api/sketches` filter**: When `?hardware_id=X` provided, only versions whose `hardware_ids` list includes X are returned.
+3. **arduino_dash board events**: Buffered in `state._board_events`, capped at 100 entries, protected by `_board_events_lock`. Appended in `pubsub._on_board_event()`.
+4. **medminder_dash PubSub**: Uses existing `broadcast_ws` pattern — returns immediately with `{"status": "accepted"}`, or 503 if PubSub not connected.
+
+### Verification
+
+- `nox -s all_tests`: 8/8 sessions, 0 failures, 0 errors ✅
 {% endraw %}

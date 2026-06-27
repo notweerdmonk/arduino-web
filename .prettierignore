@@ -13,3 +13,4 @@ config/eslint.config.mjs
 **/partials/admin_board_selector.html
 **/medicine_form.html
 **/medicines.html
+**/partials/sketch_path_selector.html

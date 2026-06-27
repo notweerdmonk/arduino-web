@@ -3,16 +3,7 @@
     Select a sketch...
   </option>
   {% for sketch in sketches %}
-  <option
-    value="{{ sketch.path }}"
-    {%
-    if
-    sketch.path=""
-    ="selected"
-    %}selected{%
-    endif
-    %}
-  >
+  <option value="{{ sketch.path }}"{% if sketch.path == selected %} selected{% endif %}>
     {{ sketch.name }}
   </option>
   {% endfor %}

@@ -118,4 +118,6 @@
 - [x] Add `npx playwright install --with-deps` after `npm install` in Installation
 - [x] Add project-root alternative: `npx playwright test --config e2e/playwright.config.ts`
 - [x] Verified: 3/3 test scenarios pass + Jekyll build 0 errors
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22) ✅ COMPLETED
 {% endraw %}

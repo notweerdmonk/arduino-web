@@ -1,4 +1,4 @@
-// Shelved — shared test data constants for @playwright/test specs.
+// Shared test data constants for @playwright/test specs.
 // These mirror the mock state injected by e2e/servers/*_server.py --mock.
 
 export const MOCK_PORTS = {

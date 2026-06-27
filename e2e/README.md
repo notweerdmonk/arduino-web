@@ -40,11 +40,11 @@ e2e/
 │   ├── servers.md              # Mock server reference
 │   ├── scenarios.md            # Test scenario recipes
 │   └── agent-tools.md          # Agent integration
-├── fixtures/test-data.ts       # (Shelved) Shared Playwright test constants
+├── fixtures/test-data.ts       # Shared Playwright test constants
 ├── servers/                    # Mock Flask dev server scripts
 │   ├── arduino_dash_server.py
 │   └── medminder_dash_server.py
-├── specs/                      # (Shelved) Automated Playwright specs
+├── specs/                      # Automated Playwright specs
 │   ├── arduino_dash/           # 4 spec files (12 tests)
 │   └── medminder_dash/         # 4 spec files (10 tests)
 ├── test-sketch/                # Minimal Arduino sketch for compile/upload tests

@@ -40,9 +40,10 @@ This phase adds missing documentation pieces to the `e2e/` directory:
 1. `e2e/README.md` — module overview (like `scripts/README.md`)
 2. `e2e/index.md` — doc entry point (like `scripts/docs/index.md`)
 3. `e2e/test-sketch/` — version-controlled compile/upload test sketch (was gitignored in `.playwright-mcp/`)
-4. Full documentation of shelved automated Playwright specs and fixtures
+4. Full documentation of automated Playwright specs and fixtures
 5. Updated agent_tools docs with test-sketch references
 6. Updated project-level docs with new entry points
+7. Removed "(Shelved)" labels from all docs, stripped standalone Playwright refs from agent_tools
 
 No code changes — pure documentation restructure.
 {% endraw %}

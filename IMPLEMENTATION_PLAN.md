@@ -12,7 +12,7 @@ The `e2e/` directory has accumulated substantial testing infrastructure (mock se
 
 1. **No `e2e/README.md`** — other top-level dirs (`scripts/`, `dist-test-install/`) have module-level READMEs with quick start, directory layout, and requirements
 2. **`.playwright-mcp/test-sketch/` is gitignored** — the minimal Arduino compile/upload sketch used in E2E testing is not version-controlled
-3. **`e2e/fixtures/` and `e2e/specs/`** are marked "(Shelved)" throughout docs but have no usage documentation
+3. **`e2e/fixtures/` and `e2e/specs/`** had no usage documentation in the e2e docs
 4. **No `e2e/index.md`** — unlike `scripts/docs/index.md`, there's no module-level doc entry point
 5. **agent_tools docs don't reference the test-sketch** — no path for compile/upload scenarios
 

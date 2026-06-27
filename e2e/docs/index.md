@@ -13,7 +13,7 @@ The E2E testing infrastructure provides:
 - **Test scenario recipes** — step-by-step opencode agent instructions
 - **Agent integration** — reusable skill/agent/command definitions for opencode
 
-> **Who is this for?** Developers and QA engineers running manual interactive tests via the opencode agent. Automated `@playwright/test` specs are shelved in `e2e/specs/`.
+> **Who is this for?** Developers and QA engineers running manual interactive tests via the opencode agent. Automated `@playwright/test` specs live in `e2e/specs/`.
 
 ## Quick Start
 
@@ -67,8 +67,6 @@ npx playwright test --headed  # Visible browser
 | \`specs/medminder_dash/admin.spec.ts\` | medminder_dash | 2 | Admin page sections |
 | \`specs/medminder_dash/medicines.spec.ts\` | medminder_dash | 3 | Medicine list CRUD |
 | \`specs/medminder_dash/sketch-upload.spec.ts\` | medminder_dash | 2 | Sketch upload flow |
-
-> **Note:** These specs are shelved — `npm install` has not been run. They are fully functional once dependencies are installed.
 
 > Standalone — no opencode or MCP needed.
 

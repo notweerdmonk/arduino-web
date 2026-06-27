@@ -2815,7 +2815,7 @@ Upload/Dedup/Delete/Deploy mutation
 **Date**: 2026-06-19
 **Type**: Testing/Infrastructure
 
-**Goal**: Create reusable E2E testing infrastructure for both web apps using Playwright — agent-driven interactive testing via MCP tools, and future automated spec-based testing via shelved `@playwright/test` files.
+**Goal**: Create reusable E2E testing infrastructure for both web apps using Playwright — agent-driven interactive testing via MCP tools, and automated spec-based testing via `@playwright/test` files.
 
 ### Deliverables
 
@@ -2825,11 +2825,11 @@ Upload/Dedup/Delete/Deploy mutation
 | 2 | `e2e/servers/medminder_dash_server.py` | Flask dev server with `--mock` flag (port 8766) |
 | 3 | `.opencode/skills/mcp-e2e-testing/SKILL.md` | Agent skill for interactive MCP testing |
 | 4 | `e2e/MCP_TESTING_GUIDE.md` | Human-readable testing guide |
-| 5 | `e2e/package.json` | (Shelved) `@playwright/test` dev dep |
-| 6 | `e2e/playwright.config.ts` | (Shelved) Two-project config |
-| 7 | `e2e/fixtures/test-data.ts` | (Shelved) Shared test constants |
-| 8 | `e2e/specs/arduino_dash/*.spec.ts` | (Shelved) 4 spec files, 12 tests |
-| 9 | `e2e/specs/medminder_dash/*.spec.ts` | (Shelved) 4 spec files, 10 tests |
+| 5 | `e2e/package.json` | `@playwright/test` dev dep |
+| 6 | `e2e/playwright.config.ts` | Two-project config |
+| 7 | `e2e/fixtures/test-data.ts` | Shared test constants |
+| 8 | `e2e/specs/arduino_dash/*.spec.ts` | 4 spec files, 12 tests |
+| 9 | `e2e/specs/medminder_dash/*.spec.ts` | 4 spec files, 10 tests |
 
 ### Mock Data Model
 
@@ -2868,7 +2868,7 @@ User/Agent → Playwright MCP Tools → HTTP → Flask Dev Server (127.0.0.1:POR
 
 - Servers started via `python3 e2e/servers/*_server.py [--mock] [--port N]`
 - MCP tools: `navigate`, `snapshot`, `click`, `fill_form`, `type`, `evaluate`, etc.
-- To run shelved tests: `cd e2e && npm install && npx playwright test`
+- To run tests: `cd e2e && npm install && npx playwright test`
 
 ### Key Findings
 
@@ -2905,17 +2905,17 @@ User/Agent → Playwright MCP Tools → HTTP → Flask Dev Server (127.0.0.1:POR
 | `e2e/servers/medminder_dash_server.py` | **New** — server helper with --mock |
 | `.opencode/skills/mcp-e2e-testing/SKILL.md` | **New** — MCP testing skill |
 | `e2e/MCP_TESTING_GUIDE.md` | **New** — testing guide |
-| `e2e/package.json` | **New** — shelved |
-| `e2e/playwright.config.ts` | **New** — shelved |
-| `e2e/fixtures/test-data.ts` | **New** — shelved |
-| `e2e/specs/arduino_dash/dashboard.spec.ts` | **New** — shelved |
-| `e2e/specs/arduino_dash/admin.spec.ts` | **New** — shelved |
-| `e2e/specs/arduino_dash/sketch-upload.spec.ts` | **New** — shelved |
-| `e2e/specs/arduino_dash/board-pages.spec.ts` | **New** — shelved |
-| `e2e/specs/medminder_dash/home.spec.ts` | **New** — shelved |
-| `e2e/specs/medminder_dash/admin.spec.ts` | **New** — shelved |
-| `e2e/specs/medminder_dash/medicines.spec.ts` | **New** — shelved |
-| `e2e/specs/medminder_dash/sketch-upload.spec.ts` | **New** — shelved |
+| `e2e/package.json` | **New** — playwright test dep |
+| `e2e/playwright.config.ts` | **New** — playwright config |
+| `e2e/fixtures/test-data.ts` | **New** — test constants |
+| `e2e/specs/arduino_dash/dashboard.spec.ts` | **New** — 3 tests |
+| `e2e/specs/arduino_dash/admin.spec.ts` | **New** — 3 tests |
+| `e2e/specs/arduino_dash/sketch-upload.spec.ts` | **New** — 3 tests |
+| `e2e/specs/arduino_dash/board-pages.spec.ts` | **New** — 3 tests |
+| `e2e/specs/medminder_dash/home.spec.ts` | **New** — 3 tests |
+| `e2e/specs/medminder_dash/admin.spec.ts` | **New** — 2 tests |
+| `e2e/specs/medminder_dash/medicines.spec.ts` | **New** — 3 tests |
+| `e2e/specs/medminder_dash/sketch-upload.spec.ts` | **New** — 2 tests |
 | `PLAN.md` | Phase 84 entry added |
 | `IMPLEMENTATION_PLAN.md` | **New** — Phase 84 design doc |
 | `IMPLEMENTATION_TASK.md` | **New** — Phase 84 task breakdown |
@@ -3858,9 +3858,9 @@ e2e/
 ├── index.md                     # Doc entry point
 ├── agent_tools/                 # opencode skill/agent/command defs
 ├── docs/                        # Detailed MCP testing docs
-├── fixtures/test-data.ts        # (Shelved) Playwright test constants
+├── fixtures/test-data.ts        # Playwright test constants
 ├── servers/                     # Mock Flask dev server scripts
-├── specs/                       # (Shelved) Automated Playwright specs
+├── specs/                       # Automated Playwright specs
 ├── test-sketch/                 # Minimal Arduino compile/upload sketch
 ├── MCP_TESTING_GUIDE.md         # Aligned copy of agent_tools/GUIDE.md
 ├── package.json                 # @playwright/test dev dep
@@ -3900,7 +3900,7 @@ e2e/
 
 ---
 
-## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
+## Phase 104.2 — Fix specs activation docs (2026-06-25 18:14)
 
 ### Changes
 

@@ -4,7 +4,7 @@
 
 This guide explains how to run interactive browser-based E2E tests on the MedMinder web apps using opencode's Playwright MCP tools. It covers server setup, mock data injection, and step-by-step testing recipes.
 
-> **Who is this for?** Developers and QA engineers running tests manually via the opencode agent. For automated `@playwright/test` specs, see the shelved files in `e2e/specs/`.
+> **Who is this for?** Developers and QA engineers running tests manually via the opencode agent.
 
 > **Always clean up after tests:** close the browser and shutdown servers (see [Cleanup](#cleanup)).
 
@@ -559,9 +559,4 @@ e2e/test-sketch/
 | `.opencode/skills/playwright-mcp-testing/SKILL.md` | Installed skill (copy of agent_tools/SKILL.md) |
 | `.opencode/agents/playwright-mcp-testing.md` | Installed agent (copy of agent_tools/AGENT.md) |
 | `.opencode/commands/playwright-mcp-testing.md` | Installed command (copy of agent_tools/COMMAND.md) |
-| `e2e/package.json` | (Shelved) `@playwright/test` dev dep |
-| `e2e/playwright.config.ts` | (Shelved) Playwright config |
-| `e2e/fixtures/test-data.ts` | (Shelved) Shared test constants |
-| `e2e/specs/arduino_dash/` | (Shelved) 4 spec files |
-| `e2e/specs/medminder_dash/` | (Shelved) 4 spec files |
 | `e2e/test-sketch/` | Minimal Arduino sketch for compile/upload E2E tests |

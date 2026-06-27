@@ -46,4 +46,5 @@
 | 1 | playwright install step in Installation | ✅ | Step added after npm install, error note included |
 | 2 | --config flag alternative in Running | ✅ | Command documented with callout box |
 | 3 | Jekyll build | ✅ | 0 errors, 0 warnings |
+5. All "(Shelved)" labels removed from e2e docs and CODEBASE_REFERENCE.md
 {% endraw %}

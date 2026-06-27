@@ -46,4 +46,6 @@
 | 1 | playwright install step in Installation | ✅ | `npx playwright install --with-deps` present with error note |
 | 2 | --config flag alternative in Running | ✅ | `--config e2e/playwright.config.ts` documented |
 | 3 | Jekyll build | ✅ | 0 errors, 0 warnings |
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22) ✅ COMPLETED
 {% endraw %}

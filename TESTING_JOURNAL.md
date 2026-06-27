@@ -432,7 +432,7 @@ Survey existing testing infrastructure and identify gaps for testing the 3 PyOxi
 | **scripts/ test suite** | 170 tests (128 pytest + 42 bash) via `nox -s scripts_tests` | Script behavior, not binary |
 | **Wheel installation** | `scripts/test_installs.sh` — import + `--help` smoke | Wheels only, not standalone |
 | **PyOxidizer build** | `--help` smoke in `build_standalone.sh` lines 137-145 | Binary responds to `--help` |
-| **E2E browser tests** | 10 MCP recipes + 22 shelved Playwright specs | Flask dev servers only |
+| **E2E browser tests** | 10 MCP recipes + 22 Playwright specs | Flask dev servers only |
 | **CI pipeline** | `scripts/ci.sh` — tests + builds | No standalone involvement |
 
 ### Current Testing Infrastructure
@@ -448,15 +448,15 @@ e2e/
 │   ├── servers.md            # Mock server reference
 │   ├── scenarios.md          # 10 test scenario recipes
 │   └── agent-tools.md        # Agent integration
-├── fixtures/test-data.ts     # Shelved
+├── fixtures/test-data.ts     # Shared test constants
 ├── servers/
 │   ├── arduino_dash_server.py      # Flask dev server (278 lines)
 │   └── medminder_dash_server.py    # Flask dev server (316 lines)
-├── specs/                         # Shelved @playwright/test specs
+├── specs/                         # @playwright/test specs
 │   ├── arduino_dash/              # 4 spec files, 12 tests
 │   └── medminder_dash/            # 4 spec files, 10 tests
 ├── MCP_TESTING_GUIDE.md           # 530-line testing guide
-└── playwright.config.ts           # Shelved
+└── playwright.config.ts           # Playwright config
 ```
 
 #### Server Scripts (`e2e/servers/`)
@@ -497,12 +497,12 @@ The binary requires `prefix/` adjacent at runtime.
 | 2 | **No mock data injection** | Standalone binary has no `--mock` flag. Dev servers inject mock data into in-memory state before `app.run()`. The gunicorn entry point in the binary has no injection hook. |
 | 3 | **No HTTP smoke tests** | No test verifies the binary actually serves HTTP responses — only `--help` is tested. |
 | 4 | **No port binding tests** | No test verifies the binary binds to the expected port or handles port conflicts. |
-| 5 | **No E2E recipes for standalone** | All 10 MCP recipes and 22 shelved Playwright specs target dev servers. None target standalone. |
+| 5 | **No E2E recipes for standalone** | All 10 MCP recipes and 22 Playwright specs target dev servers. None target standalone. |
 | 6 | **No `test_standalone` nox session** | `noxfile.py` has `build_standalone` (build only). No `test_standalone`. |
 | 7 | **No CI integration** | `scripts/ci.sh` excludes standalone build/test. |
 | 8 | **No missing `prefix/` handling** | No test verifies graceful error when `prefix/` is absent. |
 | 9 | **No daemonization for standalone** | The binary uses gunicorn's daemon model. No MCP guide covers starting/stopping standalone instances. |
-| 10 | **No `webServer` in Playwright config** | Shelved `playwright.config.ts` points to dev server scripts, not standalone binaries. |
+| 10 | **No `webServer` in Playwright config** | `playwright.config.ts` points to dev server scripts, not standalone binaries. |
 
 ### Specific Gaps per Application
 
@@ -521,7 +521,7 @@ The binary requires `prefix/` adjacent at runtime.
 | Mock data | `--mock` flag | Not available |
 | Shutdown | `--stop` flag | None |
 | MCP recipes | 10 recipes | Zero |
-| Playwright specs | 22 specs (shelved) | Zero |
+| Playwright specs | 22 specs | Zero |
 | Port config | 8765/8766 `--port` | Gunicorn bind config |
 | CI integration | `nox -s all_tests` | Not in CI |
 | PID file | Built-in | None |
@@ -663,4 +663,8 @@ These were caught during review of Phase 104.1 by checking against the original 
 **Fix**: Edit e2e/docs/index.md Installation and Running subsections.
 
 **Results**: All 3 test scenarios pass. Installation section now shows `npx playwright install --with-deps` with a callout explaining the error without it. Running section shows `--config e2e/playwright.config.ts` as a project-root alternative. Jekyll build: 0 errors, 0 warnings. ✅
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+Removed "(Shelved)" from e2e/docs/index.md, e2e/README.md, e2e/index.md, CODEBASE_REFERENCE.md, and all Phase 100 references. Stripped standalone Playwright file refs from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md. Jekyll build passes.
 {% endraw %}

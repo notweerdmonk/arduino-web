@@ -456,13 +456,13 @@ Before (broken):                          After (works):
 
 **Date**: 2026-06-19
 
-**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright. Deliverables: Python server helpers with `--mock` flag, MCP Testing Skill for agent-driven interactive testing, MCP Testing Guide, and shelved TypeScript `@playwright/test` spec files.
+**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright. Deliverables: Python server helpers with `--mock` flag, MCP Testing Skill for agent-driven interactive testing, MCP Testing Guide, and TypeScript `@playwright/test` spec files.
 
 **Design** (see IMPLEMENTATION_PLAN.md for full details):
 1. **Server helpers** — `e2e/servers/arduino_dash_server.py` + `medminder_dash_server.py` — start Flask dev servers with optional mock board state injection (`--mock` flag populates `_board_list`/`_known_ports`/`_upload_registry`)
 2. **MCP Testing Skill** — `.opencode/skills/mcp-e2e-testing/SKILL.md` — agent-referenceable skill doc for browser-based interactive testing via Playwright MCP tools
 3. **MCP Testing Guide** — `e2e/MCP_TESTING_GUIDE.md` — human-readable step-by-step for manual/interactive testing
-4. **Shelved TypeScript files** — `e2e/package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 `spec/*.spec.ts` files — written now, executable when `npm install` is run
+4. **TypeScript files** — `e2e/package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 `spec/*.spec.ts` files — written now, executable when `npm install` is run
 
 | Q | Scope | Status |
 |---|-------|--------|
@@ -471,7 +471,7 @@ Before (broken):                          After (works):
 | 3 | Test server helpers — curl/HTTP verification of mock state | ✅ |
 | 4 | MCP Testing Skill (.opencode/skills/mcp-e2e-testing/SKILL.md) | ✅ |
 | 5 | MCP Testing Guide (e2e/MCP_TESTING_GUIDE.md) | ✅ |
-| 6 | Shelved TypeScript spec files (config, fixtures, 8 specs) | ✅ |
+| 6 | TypeScript spec files (config, fixtures, 8 specs) | ✅ |
 | 7 | Final review — all docs synced, servers verified | ✅ |
 
 ---
@@ -1242,4 +1242,12 @@ Three issues found after Phase 20:
 | Q | Scope | Key Changes | Status |
 |---|-------|-------------|--------|
 | 1 | e2e/docs/index.md Installation + Running | Add browser binary install step + project-root config flag | ✅ |
+
+---
+
+### Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+**Status**: ✅ COMPLETED
+
+Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools docs.
 {% endraw %}

@@ -13,8 +13,8 @@ End-to-end browser testing infrastructure for the MedMinder web apps. Supports i
 | [`docs/servers.md`](docs/servers.md) | Mock server CLI reference, daemonization, mock data details |
 | [`docs/scenarios.md`](docs/scenarios.md) | 10 test scenario recipes with step-by-step instructions |
 | [`docs/agent-tools.md`](docs/agent-tools.md) | opencode skill/agent/command integration |
-| [`fixtures/test-data.ts`](fixtures/test-data.ts) | Shared Playwright test constants (shelved) |
-| [`specs/`](specs/) | Automated Playwright spec files (shelved, 8 specs, 22 tests) |
+| [`fixtures/test-data.ts`](fixtures/test-data.ts) | Shared Playwright test constants |
+| [`specs/`](specs/) | Automated Playwright spec files (8 specs, 22 tests) |
 | [`test-sketch/`](test-sketch/) | Minimal Arduino sketch for compile/upload E2E tests |
 | [`MCP_TESTING_GUIDE.md`](MCP_TESTING_GUIDE.md) | Aligned copy of agent_tools/GUIDE.md |
 
@@ -31,11 +31,11 @@ e2e/
 │   ├── servers.md              # Mock server reference
 │   ├── scenarios.md            # Test scenario recipes
 │   └── agent-tools.md          # Agent integration
-├── fixtures/test-data.ts       # (Shelved) Shared Playwright test constants
+├── fixtures/test-data.ts       # Shared Playwright test constants
 ├── servers/                    # Mock Flask dev server scripts
 │   ├── arduino_dash_server.py
 │   └── medminder_dash_server.py
-├── specs/                      # (Shelved) Automated Playwright specs
+├── specs/                      # Automated Playwright specs
 │   ├── arduino_dash/           # 4 spec files (12 tests)
 │   └── medminder_dash/         # 4 spec files (10 tests)
 ├── test-sketch/                # Minimal Arduino sketch for compile/upload tests

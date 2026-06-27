@@ -3387,7 +3387,7 @@ Dead `clear_assignment()` calls removed from all 4 delete routes (version is rem
 
 ## 2026-06-19 — Phase 84: Playwright E2E Testing Infrastructure ✅ COMPLETED
 
-**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright — agent-driven interactive tests via MCP tools, with future automated `@playwright/test` specs shelved.
+**Goal**: Create reusable E2E testing infrastructure for both web apps (arduino_dash, medminder_dash) using Playwright — agent-driven interactive tests via MCP tools, and automated `@playwright/test` spec files.
 
 ### Deliverables (16 files)
 
@@ -3396,14 +3396,14 @@ Dead `clear_assignment()` calls removed from all 4 delete routes (version is rem
 | Server helpers | `e2e/servers/arduino_dash_server.py`, `medminder_dash_server.py` | ✅ Tested |
 | MCP Skill | `.opencode/skills/mcp-e2e-testing/SKILL.md` | ✅ |
 | Testing Guide | `e2e/MCP_TESTING_GUIDE.md` | ✅ |
-| Shelved TypeScript | `package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 spec files (22 tests) | ✅ Written |
+| TypeScript specs | `package.json`, `playwright.config.ts`, `fixtures/test-data.ts`, 8 spec files (22 tests) | ✅ Written |
 
 ### Architecture
 
 - Server helpers start Flask dev servers (ports 8765/8766) with optional `--mock` flag
 - `--mock` injects: 2 mock boards (Uno + Mega), 1 sketch entry, 3 medicines (medminder_dash only)
 - MCP tools (`playwright_browser_navigate`, `snapshot`, `click`, `fill_form`, etc.) drive interactive testing
-- Shelved `@playwright/test` files provide automated spec suite (run with `npx playwright test` after `npm install`)
+- `@playwright/test` files provide automated spec suite (run with `npx playwright test` after `npm install`)
 
 ### Key Decisions
 
@@ -3958,4 +3958,8 @@ Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) an
 **Gap fix**: Added `npx playwright install --with-deps` to Installation section (needed to download browser binaries after `npm install`) and documented `npx playwright test --config e2e/playwright.config.ts` as a project-root run alternative.
 
 **Verification**: 3 test scenarios — all pass. Jekyll build: 0 errors, 0 warnings.
+
+## 2026-06-27 19:22 — Phase 104.3: Remove shelved labels + strip agent_tools Playwright refs ✅ COMPLETED
+
+Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references (package.json, playwright.config.ts, fixtures/test-data.ts, specs/) from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md.
 {% endraw %}

@@ -67,4 +67,6 @@ This phase makes no code changes — it's a pure documentation restructure. Test
 | 1 | Installation section has playwright install step | `grep "playwright install" e2e/docs/index.md` | Step present |
 | 2 | Running section has --config flag alternative | `grep "config e2e/playwright.config.ts" e2e/docs/index.md` | Flag present |
 | 3 | Jekyll build | `bundle exec jekyll build` | 0 errors, 0 warnings |
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
 {% endraw %}

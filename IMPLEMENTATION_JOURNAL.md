@@ -846,4 +846,8 @@ Parallel agents completed without conflicts — each agent wrote to separate fil
 **Fix**: Update the Installation subsection in e2e/docs/index.md to include the browser install step and add a project-root run note.
 
 **Completion**: 2026-06-25 18:14. Both edits applied: `npx playwright install --with-deps` added after `npm install` with error-message callout; project-root alternative `npx playwright test --config e2e/playwright.config.ts` added as a callout under Running Specs. All 3 test scenarios pass. Jekyll build: 0 errors, 0 warnings. ✅
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+Removed "(Shelved)" labels from all user-facing e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md. Updated historical Phase 100 entries in PLAN.md, JOURNAL.md, IMPLEMENTATION_PLAN.md, IMPLEMENTATION_PROGRESS.md, and TESTING_JOURNAL.md.
 {% endraw %}

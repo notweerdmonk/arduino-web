@@ -3,16 +3,16 @@
 # User Guide
 
 > **Per-package docs:** For detailed module-level guides, see:
-> - [`board_manager/docs/boot.md`](../board_manager/python/board_manager/board_manager/docs/boot.md) — BMS start/stop/wait lifecycle
-> - [`board_manager/docs/config.md`](../board_manager/python/board_manager/board_manager/docs/config.md) — configuration loading
+> - [`board_manager/docs/boot.md`](../board_manager/python/board_manager/docs/boot.md) — BMS start/stop/wait lifecycle
+> - [`board_manager/docs/config.md`](../board_manager/python/board_manager/docs/config.md) — configuration loading
 > - [`arduino_dash/docs/gunicorn_conf.md`](../arduino_dash/python/arduino_dash/docs/gunicorn_conf.md) — arduino-dash gunicorn config
 > - [`arduino_dash/docs/sketch_management.md`](../arduino_dash/python/arduino_dash/docs/sketch_management.md) — sketch upload/management
 > - [`arduino_dash/docs/sketch_registry.md`](../arduino_dash/python/arduino_dash/docs/sketch_registry.md) — sketch assignment
-> - [`medminder_dash/docs/gunicorn_conf.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/gunicorn_conf.md) — medminder-dash gunicorn config
-> - [`medminder_dash/docs/medicines_state.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/medicines_state.md) — medicine CRUD
-> - [`medminder_dash/docs/sketch_gen.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_gen.md) — alarm.hpp generation
-> - [`medminder_dash/docs/sketch_management.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_management.md) — sketch management
-> - [`medminder_dash/docs/settings.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/settings.md) — sketch directory config
+> - [`medminder_dash/docs/gunicorn_conf.md`](../medminder_dash/python/medminder_dash/docs/gunicorn_conf.md) — medminder-dash gunicorn config
+> - [`medminder_dash/docs/medicines_state.md`](../medminder_dash/python/medminder_dash/docs/medicines_state.md) — medicine CRUD
+> - [`medminder_dash/docs/sketch_gen.md`](../medminder_dash/python/medminder_dash/docs/sketch_gen.md) — alarm.hpp generation
+> - [`medminder_dash/docs/sketch_management.md`](../medminder_dash/python/medminder_dash/docs/sketch_management.md) — sketch management
+> - [`medminder_dash/docs/settings.md`](../medminder_dash/python/medminder_dash/docs/settings.md) — sketch directory config
 
 ## Quick Start
 

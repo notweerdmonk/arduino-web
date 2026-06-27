@@ -3,10 +3,10 @@
 # Testing Methodology
 
 > **Per-package docs:** For detailed per-module testing, see:
-> - [`board_manager/docs/index.md`](../board_manager/python/board_manager/board_manager/docs/index.md) — board_manager test structure
+> - [`board_manager/docs/index.md`](../board_manager/python/board_manager/docs/index.md) — board_manager test structure
 > - [`arduino_grpc/docs/index.md`](../grpc_client/python/arduino_grpc/docs/index.md) — arduino_grpc test structure
 > - [`arduino_dash/docs/index.md`](../arduino_dash/python/arduino_dash/docs/index.md) — arduino_dash test structure
-> - [`medminder_dash/docs/index.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/index.md) — medminder_dash test structure
+> - [`medminder_dash/docs/index.md`](../medminder_dash/python/medminder_dash/docs/index.md) — medminder_dash test structure
 
 ## Framework
 

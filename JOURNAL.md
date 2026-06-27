@@ -3962,4 +3962,8 @@ Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) an
 ## 2026-06-27 19:22 — Phase 104.3: Remove shelved labels + strip agent_tools Playwright refs ✅ COMPLETED
 
 Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references (package.json, playwright.config.ts, fixtures/test-data.ts, specs/) from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md.
+
+## 2026-06-27 19:22 — Phase 105: Relocate medminder_dash and board_manager docs alongside setup.py ✅ COMPLETED
+
+Moved medminder_dash and board_manager docs/ directories from inside the importable Python package to alongside setup.py, preventing them from being installed as package data. Updated all cross-references in user-facing docs (docs/api.md, guide.md, tests.md, architecture.md, index.md) and CODEBASE_REFERENCE.md.
 {% endraw %}

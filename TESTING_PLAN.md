@@ -69,4 +69,6 @@ This phase makes no code changes — it's a pure documentation restructure. Test
 | 3 | Jekyll build | `bundle exec jekyll build` | 0 errors, 0 warnings |
 
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
 {% endraw %}

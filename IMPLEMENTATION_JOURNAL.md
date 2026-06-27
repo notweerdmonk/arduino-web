@@ -850,4 +850,8 @@ Parallel agents completed without conflicts — each agent wrote to separate fil
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
 
 Removed "(Shelved)" labels from all user-facing e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md. Updated historical Phase 100 entries in PLAN.md, JOURNAL.md, IMPLEMENTATION_PLAN.md, IMPLEMENTATION_PROGRESS.md, and TESTING_JOURNAL.md.
+
+## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+Moved docs/ from inside the importable Python package to alongside setup.py for medminder_dash and board_manager. Updated all path references in docs/api.md, docs/guide.md, docs/tests.md, docs/architecture.md, index.md, and CODEBASE_REFERENCE.md. Removed old "broken link fix" note in CODEBASE_REFERENCE.md.
 {% endraw %}

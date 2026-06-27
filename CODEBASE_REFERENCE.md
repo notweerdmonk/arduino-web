@@ -285,8 +285,8 @@ bundle exec jekyll doctor
 ```
 _site/
 ├── index.html                          # Documentation hub
-├── board_manager/python/board_manager/board_manager/docs/   # 11 doc pages
-├── medminder_dash/python/medminder_dash/medminder_dash/docs/ # 15 doc pages
+├── board_manager/python/board_manager/docs/   # 11 doc pages
+├── medminder_dash/python/medminder_dash/docs/ # 15 doc pages
 ├── arduino_dash/python/arduino_dash/docs/                    # Doc pages
 ├── arduino_sketch_tools/python/arduino_sketch_tools/docs/    # Doc pages
 ├── board_manager_client/python/board_manager_client/docs/   # Doc pages
@@ -334,8 +334,8 @@ Two packages have the same-name subpackage pattern requiring corrected link path
 
 | Package | Doc path (correct) | Links fixed |
 |---------|-------------------|-------------|
-| `board_manager` | `board_manager/python/board_manager/board_manager/docs/` | 24 in 5 files |
-| `medminder_dash` | `medminder_dash/python/medminder_dash/medminder_dash/docs/` | 27 in 5 files |
+| `board_manager` | `board_manager/python/board_manager/docs/` | 24 in 5 files |
+| `medminder_dash` | `medminder_dash/python/medminder_dash/docs/` | 27 in 5 files |
 
 **Files modified**: `index.md`, `docs/architecture.md`, `docs/guide.md`, `docs/tests.md`, `docs/api.md`
 
@@ -3148,9 +3148,9 @@ defaults:
 
 **raw/endraw handling**: Files containing Jinja2 template syntax (like `block`, `include`) must wrap content in raw/endraw blocks to prevent Liquid errors. Affected files: `JOURNAL.md`, `PLAN.md`, `TODOS.md`, `docs/ws-event-flow.md`, `CODEBASE_REFERENCE.md`.
 
-**Broken link fix**: Two packages (`board_manager`, `medminder_dash`) have nested subpackages with the same name, creating an extra directory level in doc paths. Links must use:
-- `board_manager/python/board_manager/board_manager/docs/` (not `.../board_manager/docs/`)
-- `medminder_dash/python/medminder_dash/medminder_dash/docs/` (not `.../medminder_dash/docs/`)
+**Docs location**: Two packages (`board_manager`, `medminder_dash`) previously had their `docs/` nested inside the importable Python package. As of Phase 105, both have been moved alongside `setup.py`:
+- `board_manager/python/board_manager/docs/`
+- `medminder_dash/python/medminder_dash/docs/`
 
 **Build command**: `bundle exec jekyll build` → 246 HTML pages in `_site/`.
 

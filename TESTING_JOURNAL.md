@@ -667,4 +667,8 @@ These were caught during review of Phase 104.1 by checking against the original 
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
 
 Removed "(Shelved)" from e2e/docs/index.md, e2e/README.md, e2e/index.md, CODEBASE_REFERENCE.md, and all Phase 100 references. Stripped standalone Playwright file refs from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md. Jekyll build passes.
+
+## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+Moved both docs/ directories out of importable Python packages. Updated all cross-references. Jekyll build passes.
 {% endraw %}

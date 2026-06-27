@@ -1250,4 +1250,10 @@ Three issues found after Phase 20:
 **Status**: ✅ COMPLETED
 
 Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools docs.
+
+### Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+**Status**: ✅ COMPLETED
+
+Moved both docs/ directories alongside setup.py so they are no longer inside the importable Python package. Updated all cross-references in user-facing and agent-facing docs.
 {% endraw %}

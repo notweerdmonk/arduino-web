@@ -46,17 +46,17 @@ Base: `board_manager/python/board_manager/`
 | Doc | Description |
 |-----|-------------|
 | [README.md](board_manager/python/board_manager/README.md) | Package overview, install, usage |
-| [docs/index.md](board_manager/python/board_manager/board_manager/docs/index.md) | Package overview, module summary, config, env vars |
-| [docs/service.md](board_manager/python/board_manager/board_manager/docs/service.md) | `BoardManagerService` — event loop, client lifecycle, message handling |
-| [docs/protocol.md](board_manager/python/board_manager/board_manager/docs/protocol.md) | Framing, `FrameReader`, `Handshake`, encode/decode |
-| [docs/router.md](board_manager/python/board_manager/board_manager/docs/router.md) | `TopicRouter` — MQTT-style wildcards, subscribe/publish |
-| [docs/pool.md](board_manager/python/board_manager/board_manager/docs/pool.md) | `BoardPool` — subprocess lifecycle, socketpair IPC, restart limits |
-| [docs/board_detector.md](board_manager/python/board_manager/board_manager/docs/board_detector.md) | `BoardDetector` — watch/poll modes, auto-recovery |
-| [docs/board_worker.md](board_manager/python/board_manager/board_manager/docs/board_worker.md) | Worker subprocess entrypoint — all supported methods |
-| [docs/daemon_manager.md](board_manager/python/board_manager/board_manager/docs/daemon_manager.md) | `DaemonManager` — arduino-cli daemon lifecycle, health check |
-| [docs/boot.md](board_manager/python/board_manager/board_manager/docs/boot.md) | WSGI lifecycle helpers — `start_bms`, `stop_bms`, `wait_for_bms` |
-| [docs/config.md](board_manager/python/board_manager/board_manager/docs/config.md) | `Config` dataclass, `load_config` — 3-tier priority |
-| [docs/udev_monitor.md](board_manager/python/board_manager/board_manager/docs/udev_monitor.md) | `UdevMonitor` — USB hotplug via pyudev |
+| [docs/index.md](board_manager/python/board_manager/docs/index.md) | Package overview, module summary, config, env vars |
+| [docs/service.md](board_manager/python/board_manager/docs/service.md) | `BoardManagerService` — event loop, client lifecycle, message handling |
+| [docs/protocol.md](board_manager/python/board_manager/docs/protocol.md) | Framing, `FrameReader`, `Handshake`, encode/decode |
+| [docs/router.md](board_manager/python/board_manager/docs/router.md) | `TopicRouter` — MQTT-style wildcards, subscribe/publish |
+| [docs/pool.md](board_manager/python/board_manager/docs/pool.md) | `BoardPool` — subprocess lifecycle, socketpair IPC, restart limits |
+| [docs/board_detector.md](board_manager/python/board_manager/docs/board_detector.md) | `BoardDetector` — watch/poll modes, auto-recovery |
+| [docs/board_worker.md](board_manager/python/board_manager/docs/board_worker.md) | Worker subprocess entrypoint — all supported methods |
+| [docs/daemon_manager.md](board_manager/python/board_manager/docs/daemon_manager.md) | `DaemonManager` — arduino-cli daemon lifecycle, health check |
+| [docs/boot.md](board_manager/python/board_manager/docs/boot.md) | WSGI lifecycle helpers — `start_bms`, `stop_bms`, `wait_for_bms` |
+| [docs/config.md](board_manager/python/board_manager/docs/config.md) | `Config` dataclass, `load_config` — 3-tier priority |
+| [docs/udev_monitor.md](board_manager/python/board_manager/docs/udev_monitor.md) | `UdevMonitor` — USB hotplug via pyudev |
 
 ### `board-manager-client` — PubSubClient
 
@@ -107,21 +107,21 @@ Base: `medminder_dash/python/medminder_dash/`
 | Doc | Description |
 |-----|-------------|
 | [README.md](medminder_dash/python/medminder_dash/README.md) | Package overview, install, usage |
-| [docs/index.md](medminder_dash/python/medminder_dash/medminder_dash/docs/index.md) | Package overview, module summary, env vars |
-| [docs/app.md](medminder_dash/python/medminder_dash/medminder_dash/docs/app.md) | Flask app factory `create_app()`, `_migrate_default_board` |
-| [docs/pubsub.md](medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub.md) | PubSub infrastructure, event handlers, WS broadcast |
-| [docs/html_routes.md](medminder_dash/python/medminder_dash/medminder_dash/docs/html_routes.md) | All HTML routes with method + description |
-| [docs/api_routes.md](medminder_dash/python/medminder_dash/medminder_dash/docs/api_routes.md) | JSON API endpoints, medicine CRUD, deploy |
-| [docs/medicines_state.md](medminder_dash/python/medminder_dash/medminder_dash/docs/medicines_state.md) | `Medicine` dataclass, `MedicineStore` CRUD, persistence |
-| [docs/sketch_gen.md](medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_gen.md) | `generate_alarm_hpp`, `parse_alarm_hpp` |
-| [docs/state.md](medminder_dash/python/medminder_dash/medminder_dash/docs/state.md) | Shared module state |
-| [docs/utils.md](medminder_dash/python/medminder_dash/medminder_dash/docs/utils.md) | Utility functions |
-| [docs/settings.md](medminder_dash/python/medminder_dash/medminder_dash/docs/settings.md) | Sketch directory configuration |
-| [docs/wsgi.md](medminder_dash/python/medminder_dash/medminder_dash/docs/wsgi.md) | WSGI entry point for gunicorn |
-| [docs/gunicorn_conf.md](medminder_dash/python/medminder_dash/medminder_dash/docs/gunicorn_conf.md) | Gunicorn configuration hooks |
-| [docs/sketch_management.md](medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_management.md) | Sketch upload/management functions |
-| [docs/sketch_registry.md](medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_registry.md) | Hardware ID → sketch assignment registry |
-| [docs/board_management.md](medminder_dash/python/medminder_dash/medminder_dash/docs/board_management.md) | Board management (placeholder) |
+| [docs/index.md](medminder_dash/python/medminder_dash/docs/index.md) | Package overview, module summary, env vars |
+| [docs/app.md](medminder_dash/python/medminder_dash/docs/app.md) | Flask app factory `create_app()`, `_migrate_default_board` |
+| [docs/pubsub.md](medminder_dash/python/medminder_dash/docs/pubsub.md) | PubSub infrastructure, event handlers, WS broadcast |
+| [docs/html_routes.md](medminder_dash/python/medminder_dash/docs/html_routes.md) | All HTML routes with method + description |
+| [docs/api_routes.md](medminder_dash/python/medminder_dash/docs/api_routes.md) | JSON API endpoints, medicine CRUD, deploy |
+| [docs/medicines_state.md](medminder_dash/python/medminder_dash/docs/medicines_state.md) | `Medicine` dataclass, `MedicineStore` CRUD, persistence |
+| [docs/sketch_gen.md](medminder_dash/python/medminder_dash/docs/sketch_gen.md) | `generate_alarm_hpp`, `parse_alarm_hpp` |
+| [docs/state.md](medminder_dash/python/medminder_dash/docs/state.md) | Shared module state |
+| [docs/utils.md](medminder_dash/python/medminder_dash/docs/utils.md) | Utility functions |
+| [docs/settings.md](medminder_dash/python/medminder_dash/docs/settings.md) | Sketch directory configuration |
+| [docs/wsgi.md](medminder_dash/python/medminder_dash/docs/wsgi.md) | WSGI entry point for gunicorn |
+| [docs/gunicorn_conf.md](medminder_dash/python/medminder_dash/docs/gunicorn_conf.md) | Gunicorn configuration hooks |
+| [docs/sketch_management.md](medminder_dash/python/medminder_dash/docs/sketch_management.md) | Sketch upload/management functions |
+| [docs/sketch_registry.md](medminder_dash/python/medminder_dash/docs/sketch_registry.md) | Hardware ID → sketch assignment registry |
+| [docs/board_management.md](medminder_dash/python/medminder_dash/docs/board_management.md) | Board management (placeholder) |
 
 ---
 

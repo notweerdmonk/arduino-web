@@ -3,16 +3,16 @@
 # API Reference
 
 > **Per-package docs:** For detailed module-level API documentation, see:
-> - [`board_manager/docs/protocol.md`](../board_manager/python/board_manager/board_manager/docs/protocol.md) — framing, handshake, encode/decode
-> - [`board_manager/docs/router.md`](../board_manager/python/board_manager/board_manager/docs/router.md) — pub/sub topic routing
-> - [`board_manager/docs/service.md`](../board_manager/python/board_manager/board_manager/docs/service.md) — BoardManagerService event loop
+> - [`board_manager/docs/protocol.md`](../board_manager/python/board_manager/docs/protocol.md) — framing, handshake, encode/decode
+> - [`board_manager/docs/router.md`](../board_manager/python/board_manager/docs/router.md) — pub/sub topic routing
+> - [`board_manager/docs/service.md`](../board_manager/python/board_manager/docs/service.md) — BoardManagerService event loop
 > - [`arduino_grpc/docs/client.md`](../grpc_client/python/arduino_grpc/docs/client.md) — ArduinoGrpcClient full API
 > - [`arduino_grpc/docs/models.md`](../grpc_client/python/arduino_grpc/docs/models.md) — data models
 > - [`board_manager_client/docs/pubsub_client.md`](../board_manager_client/python/board_manager_client/docs/pubsub_client.md) — PubSubClient full API
 > - [`arduino_dash/docs/html_routes.md`](../arduino_dash/python/arduino_dash/docs/html_routes.md) — arduino-dash routes
 > - [`arduino_dash/docs/api_routes.md`](../arduino_dash/python/arduino_dash/docs/api_routes.md) — arduino-dash JSON API
-> - [`medminder_dash/docs/html_routes.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/html_routes.md) — medminder-dash routes
-> - [`medminder_dash/docs/api_routes.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/api_routes.md) — medminder-dash JSON API
+> - [`medminder_dash/docs/html_routes.md`](../medminder_dash/python/medminder_dash/docs/html_routes.md) — medminder-dash routes
+> - [`medminder_dash/docs/api_routes.md`](../medminder_dash/python/medminder_dash/docs/api_routes.md) — medminder-dash JSON API
 
 ## Pub/Sub Protocol (BoardManager Service)
 

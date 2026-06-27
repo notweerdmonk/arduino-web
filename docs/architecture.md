@@ -3,20 +3,20 @@
 # Architecture
 
 > **Per-package docs:** For detailed module-level architecture and design, see:
-> - [`board_manager/docs/index.md`](../board_manager/python/board_manager/board_manager/docs/index.md) — BoardManagerService package overview
-> - [`board_manager/docs/service.md`](../board_manager/python/board_manager/board_manager/docs/service.md) — event loop, client lifecycle
-> - [`board_manager/docs/pool.md`](../board_manager/python/board_manager/board_manager/docs/pool.md) — subprocess pool design
-> - [`board_manager/docs/board_detector.md`](../board_manager/python/board_manager/board_manager/docs/board_detector.md) — detection modes
-> - [`board_manager/docs/board_worker.md`](../board_manager/python/board_manager/board_manager/docs/board_worker.md) — worker IPC protocol
-> - [`board_manager/docs/daemon_manager.md`](../board_manager/python/board_manager/board_manager/docs/daemon_manager.md) — daemon lifecycle
-> - [`board_manager/docs/udev_monitor.md`](../board_manager/python/board_manager/board_manager/docs/udev_monitor.md) — USB hotplug monitoring
+> - [`board_manager/docs/index.md`](../board_manager/python/board_manager/docs/index.md) — BoardManagerService package overview
+> - [`board_manager/docs/service.md`](../board_manager/python/board_manager/docs/service.md) — event loop, client lifecycle
+> - [`board_manager/docs/pool.md`](../board_manager/python/board_manager/docs/pool.md) — subprocess pool design
+> - [`board_manager/docs/board_detector.md`](../board_manager/python/board_manager/docs/board_detector.md) — detection modes
+> - [`board_manager/docs/board_worker.md`](../board_manager/python/board_manager/docs/board_worker.md) — worker IPC protocol
+> - [`board_manager/docs/daemon_manager.md`](../board_manager/python/board_manager/docs/daemon_manager.md) — daemon lifecycle
+> - [`board_manager/docs/udev_monitor.md`](../board_manager/python/board_manager/docs/udev_monitor.md) — USB hotplug monitoring
 > - [`arduino_grpc/docs/index.md`](../grpc_client/python/arduino_grpc/docs/index.md) — gRPC client package overview
 > - [`arduino_dash/docs/index.md`](../arduino_dash/python/arduino_dash/docs/index.md) — arduino-dash package overview
 > - [`arduino_dash/docs/pubsub.md`](../arduino_dash/python/arduino_dash/docs/pubsub.md) — PubSub event handlers
-> - [`medminder_dash/docs/index.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/index.md) — medminder-dash package overview
-> - [`medminder_dash/docs/pubsub.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/pubsub.md) — PubSub infrastructure
-> - [`medminder_dash/docs/medicines_state.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/medicines_state.md) — Medicine data model
-> - [`medminder_dash/docs/sketch_gen.md`](../medminder_dash/python/medminder_dash/medminder_dash/docs/sketch_gen.md) — alarm.hpp generation
+> - [`medminder_dash/docs/index.md`](../medminder_dash/python/medminder_dash/docs/index.md) — medminder-dash package overview
+> - [`medminder_dash/docs/pubsub.md`](../medminder_dash/python/medminder_dash/docs/pubsub.md) — PubSub infrastructure
+> - [`medminder_dash/docs/medicines_state.md`](../medminder_dash/python/medminder_dash/docs/medicines_state.md) — Medicine data model
+> - [`medminder_dash/docs/sketch_gen.md`](../medminder_dash/python/medminder_dash/docs/sketch_gen.md) — alarm.hpp generation
 
 ## System Overview
 

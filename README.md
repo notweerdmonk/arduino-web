@@ -101,6 +101,24 @@ nox -s 'tests(medminder_dash)'
 
 **Note:** Nox sessions auto-regenerate `Pipfile.lock` (Phase 94) — no manual lock management after wheel rebuilds.
 
+## Linting & Formatting
+
+```bash
+# Python (root pipenv venv)
+pipenv run ruff check .       # lint
+pipenv run ruff format .      # format
+
+# Jinja2 templates (root pipenv venv)
+pipenv run djlint . --check   # lint
+pipenv run djlint . --reformat  # auto-fix
+
+# JavaScript in HTML templates (requires npm install)
+npx prettier --check "**/*.html"   # check
+npx prettier --write "**/*.html"   # format
+npx eslint .                        # lint (includes prettier rules)
+npx eslint . --fix                  # auto-fix
+```
+
 ## Editable dev mode
 
 After `pipenv install`, run once for live code reloading:

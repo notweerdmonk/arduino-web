@@ -92,6 +92,7 @@ medminder/
 │   └── Pipfile
 ├── dist-test-install/          # Wheel install smoke test
 ├── dist-standalone/            # Built standalone binaries
+├── Pipfile                     # Root venv: all 6 packages + djlint + ruff (interactive dev)
 ├── noxfile.py
 ├── .prettierrc                # Prettier config (singleQuote false, semi, tabWidth 2)
 ├── .prettierignore            # Prettier ignore patterns (excludes _site, node_modules, Jinja2-unparseable files)
@@ -3634,14 +3635,17 @@ Both dashboards tested via MCP browser tools — all 10 recipes pass:
 | idiomorph.js 404 | CDN path `htmx.org@2.0.10/dist/ext/idiomorph.js` doesn't exist for unpkg |
 | WS connection failure | No BMS daemon running (expected for `--mock` without `--bms`) |
 
-### Package Management
+### Pipenv Environments
 
-| State | Action |
-|-------|--------|
-| Before | `arduino-dash`, `medminder-dash` installed as editable (`pip install -e`) at system level |
-| After | Uninstalled from system pip; installed from pre-built wheels into pipenv venv (`pipenv run pip install .whl`) |
+There are three Pipenv environments serving different purposes:
 
-**Top-level Pipfile** updated with local index sources for all 6 packages:
+| Pipfile | Location | Purpose | Used by |
+|---------|----------|---------|---------|
+| Root `Pipfile` | Project root | **Interactive dev venv** — all 6 monorepo wheels installed via local `dist/` sources, plus `click`, `djlint`, and `ruff`. Run linters across all templates/files, import any package, test CLI commands manually. | User's interactive workflow |
+| `scripts/Pipfile` | `scripts/` | **Scripts test venv** — `grpcio-tools` + `googleapis-common-protos` + pytest for compiling gRPC bindings and running scripts test suite. | `nox -s scripts_tests` |
+| `dist-test-install/Pipfile` | `dist-test-install/` | **CI install validation venv** — all 6 wheels installed via `{path = ...}` deps. Validates dependency resolution, imports, and CLI smoke in a clean environment. | `scripts/test_installs.sh` |
+
+**Root Pipfile** has local index sources for all 6 packages:
 ```ini
 [[source]]
 url = "file://${PROJECT_ROOT}/grpc_client/python/arduino_grpc/dist"
@@ -3655,6 +3659,13 @@ name = "arduino-dash"
 url = "file://${PROJECT_ROOT}/medminder_dash/python/medminder_dash/dist"
 name = "medminder-dash"
 ```
+
+The per-package Pipfiles (one per sub-package under each module's `python/` dir) are used by `nox -s tests(<name>)` for isolated test runs. Nox calls `pipenv lock --dev` + `pipenv sync --dev` inside each package directory.
+
+| State | Action |
+|-------|--------|
+| Before | `arduino-dash`, `medminder-dash` installed as editable (`pip install -e`) at system level |
+| After | Uninstalled from system pip; installed from pre-built wheels into pipenv venv (`pipenv run pip install .whl`) |
 
 ### Server Commands (pipenv)
 
@@ -3675,7 +3686,7 @@ pipenv run python e2e/servers/medminder_dash_server.py --mock --port 8766 --prod
 | `dnd_overlay.html` (both) | top | `/* global showModal */`, removed unused `e` |
 | `e2e/servers/arduino_dash_server.py:260` | — | `debug_mode = not (args.bms or args.production)` |
 | `e2e/servers/medminder_dash_server.py:296` | — | Same pattern |
-| `Pipfile` | 6-34 | Local index sources for all 6 packages |
+| `Pipfile` | 6-44 | Interactive dev venv — all 6 packages + djlint + ruff via local `dist/` sources |
 
 ```
 ## Phase 101 — Redesign & Rebuild Standalone Distributions ✅ COMPLETED (2026-06-24)

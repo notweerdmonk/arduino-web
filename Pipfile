@@ -1,0 +1,44 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/grpc_client/python/arduino_grpc/dist"
+verify_ssl = false
+name = "arduino-grpc-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/board_manager/python/board_manager/dist"
+verify_ssl = false
+name = "board-manager-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/board_manager_client/python/board_manager_client/dist"
+verify_ssl = false
+name = "board-manager-client-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/arduino_sketch_tools/python/arduino_sketch_tools/dist"
+verify_ssl = false
+name = "arduino-sketch-tools-local"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/arduino_dash/python/arduino_dash/dist"
+verify_ssl = false
+name = "arduino-dash"
+
+[[source]]
+url = "file://${PROJECT_ROOT}/medminder_dash/python/medminder_dash/dist"
+verify_ssl = false
+name = "medminder-dash"
+
+[packages]
+click = ">=8.2"
+
+[dev-packages]
+djlint = "*"
+ruff = "*"
+
+[requires]
+python_version = "3.10"

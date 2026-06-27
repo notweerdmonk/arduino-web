@@ -164,6 +164,52 @@ The CI pipeline supports `--skip-tests` and `--skip-builds` flags. The `test_ci.
 5. **Cleanup** — all tests clean up mocks and state (`_known_ports`, `_known_boards`, etc.) to avoid cross-test pollution.
 6. **Edge cases** — cover empty topic, duplicate add, remove unknown, timeout, connection error, malformed data.
 
+## Code Quality
+
+Four tools enforce code style across the monorepo. All commands run from the project root.
+
+### ruff (Python)
+
+Ruff lints and formats all Python source. Uses the root `pipenv` venv:
+
+```bash
+pipenv run ruff check .       # lint (F401, F841, E731, E741, E713, etc.)
+pipenv run ruff format .      # format (108 files, 0 diffs when clean)
+```
+
+Config is in each package's `pyproject.toml` under `[tool.ruff]`. Generated protobuf stubs are excluded.
+
+### djlint (Jinja2 templates)
+
+Djlint checks HTML/Jinja2 template syntax across all 190+ template files. Uses the root `pipenv` venv:
+
+```bash
+pipenv run djlint . --check      # lint only (no file modifications)
+pipenv run djlint . --reformat   # auto-fix formatting
+```
+
+### prettier (JavaScript in HTML templates)
+
+Prettier formats inline JavaScript inside HTML template files. Requires Node.js:
+
+```bash
+npx prettier --check "**/*.html"   # check formatting
+npx prettier --write "**/*.html"  # auto-format
+```
+
+Config is in `.prettierrc` — double quotes, semicolons, 2-space indent, es5 trailing commas. Four templates with Jinja2 syntax in HTML tag attributes are excluded via `.prettierignore`.
+
+### ESLint (JavaScript linting)
+
+ESLint enforces JS best practices and prettier formatting rules via `eslint-plugin-prettier`:
+
+```bash
+npx eslint .            # check (includes prettier/prettier errors)
+npx eslint . --fix      # auto-fix (prettier + JS corrections)
+```
+
+Config is in `config/eslint.config.mjs`. See `CODEBASE_REFERENCE.md` for known edge cases (two `base.html` files cycle between standalone prettier and eslint-plugin-prettier on long-line wrapping).
+
 ## Related Documentation
 
 | Document | Description |

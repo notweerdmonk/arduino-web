@@ -352,3 +352,14 @@ Medicine data is stored in `board_meta.json`. Check:
 - The file is writable by the Flask process.
 - The sketch directory is configured correctly.
 - Board is selected (operations are scoped to active board).
+
+## Code Quality
+
+All commands run from the project root. See [`docs/tests.md`](tests.md#code-quality) for full documentation.
+
+| Tool | Scope | Command |
+|------|-------|---------|
+| ruff | Python sources | `pipenv run ruff check .` / `ruff format .` |
+| djlint | Jinja2 templates | `pipenv run djlint . --check` / `--reformat` |
+| prettier | JS in HTML templates | `npx prettier --check "**/*.html"` / `--write` |
+| ESLint | JS linting + prettier enforcement | `npx eslint .` / `--fix` |

@@ -854,4 +854,60 @@ Removed "(Shelved)" labels from all user-facing e2e docs and CODEBASE_REFERENCE.
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
 
 Moved docs/ from inside the importable Python package to alongside setup.py for medminder_dash and board_manager. Updated all path references in docs/api.md, docs/guide.md, docs/tests.md, docs/architecture.md, index.md, and CODEBASE_REFERENCE.md. Removed old "broken link fix" note in CODEBASE_REFERENCE.md.
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+### Motivation
+Standardize JavaScript formatting across all HTML template files (inline `<script>` blocks) using Prettier, with enforcement via ESLint through `eslint-plugin-prettier/recommended`. The project already had ESLint with `eslint-plugin-html` for linting inline JS — adding prettier brings consistent formatting (quotes, semicolons, indentation).
+
+### Dependencies Added
+The user added these to `package.json` (root project):
+- `prettier@^3.9.0` — JavaScript formatter
+- `eslint-config-prettier@^10.1.8` — Disables ESLint rules that conflict with prettier
+- `eslint-plugin-prettier@^5.5.6` — Runs prettier as an ESLint rule
+
+### ESLint Config Update (already in place)
+`config/eslint.config.mjs` already had:
+- Line 3: `import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";`
+- Line 72: `eslintPluginPrettierRecommended,`
+
+### Configuration Files Created
+
+**`.prettierrc`**:
+```json
+{
+  "singleQuote": false,
+  "semi": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 80,
+  "trailingComma": "es5"
+}
+```
+
+**`.prettierignore`**:
+```
+_site/
+node_modules/
+.nox/
+__pycache__/
+.opencode/
+build/
+dist/
+dist-standalone/
+*.ts
+*.tsx
+config/eslint.config.mjs
+```
+
+### Key Finding — `trailingComma` setting for Jinja2 compatibility
+Prettier has no native Jinja2 template parser. It treats `{{ }}` expressions as plain text. With `trailingComma: "all"`, prettier adds trailing commas to function call arguments — including inside Jinja2 expressions like `{{ url_for('route', arg=val,) }}`. This produces invalid Jinja2 syntax.
+
+**Solution**: Use `trailingComma: "es5"` instead of `"all"`. ES5 mode only adds trailing commas in object literals and arrays, not function calls, avoiding the Jinja2 incompatibility.
+
+### Formatting Results
+- 190 HTML files processed via `npx prettier --write "**/*.html"`
+- Zero errors
+- Verified with `npx prettier --check "**/*.html"` — all clean
+- Verified with `npx eslint .` — no new violations introduced
 {% endraw %}

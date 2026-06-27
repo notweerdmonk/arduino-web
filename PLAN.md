@@ -1256,4 +1256,12 @@ Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped
 **Status**: ✅ COMPLETED
 
 Moved both docs/ directories alongside setup.py so they are no longer inside the importable Python package. Updated all cross-references in user-facing and agent-facing docs.
+
+### Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+**Status**: ✅ COMPLETED
+
+Created `.prettierrc` and `.prettierignore` configuration files. Integrated `eslint-plugin-prettier/recommended` into the ESLint flat config. Formatted all 190 HTML template files with prettier (inline JS). Updated CODEBASE_REFERENCE.md with prettier documentation.
+
+**Usage**: `npx prettier --write "**/*.html"` to format, `npx prettier --check "**/*.html"` to verify, `npx eslint .` to lint including prettier rules.
 {% endraw %}

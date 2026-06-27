@@ -1,0 +1,15 @@
+_site/
+node_modules/
+.nox/
+__pycache__/
+.opencode/
+build/
+dist/
+dist-standalone/
+*.ts
+*.tsx
+config/eslint.config.mjs
+# Jinja2 syntax in HTML attributes — prettier's HTML parser can't handle {{ }} inside tag attrs
+**/partials/admin_board_selector.html
+**/medicine_form.html
+**/medicines.html

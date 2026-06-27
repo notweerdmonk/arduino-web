@@ -122,4 +122,21 @@
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22) ✅ COMPLETED
 
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22) ✅ COMPLETED
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+**Goal**: Standardize JS formatting with prettier across all HTML templates, enforce via ESLint.
+
+**Quanta**:
+
+1. **Config** — Create `.prettierrc` (singleQuote: false, semi: true, tabWidth: 2, useTabs: false, trailingComma: "es5") and `.prettierignore` (exclude _site, node_modules, .nox, __pycache__, .opencode, build artifacts, *.ts, *.tsx, config/eslint.config.mjs)
+   - [x] Done
+2. **Format** — Run `npx prettier --write "**/*.html"` across 190 HTML template files
+   - [x] Done
+3. **Verify** — Run `npx prettier --check "**/*.html"` to confirm all files formatted; run `npx eslint .` to confirm no new lint violations
+   - [x] Done
+4. **Docs** — Update CODEBASE_REFERENCE.md: directory layout, ESLint section → ESLint + Prettier, key files table with .prettierrc/.prettierignore
+   - [x] Done
+5. **Sync** — Update all agent-facing docs (JOURNAL.md, IMPLEMENTATION_JOURNAL.md, TESTING_*, etc.)
+   - [x] Done
 {% endraw %}

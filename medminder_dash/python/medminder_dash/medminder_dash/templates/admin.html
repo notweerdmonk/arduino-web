@@ -1,80 +1,111 @@
-{% extends "base.html" %}
-{% block title %}MedMinder — Admin{% endblock %}
-{% block extra_head %}
-    <link rel="icon"
-          type="image/png"
-          href="/static/favicon/favicon-96x96.png"
-          sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/static/favicon/favicon.ico" />
-    <link rel="apple-touch-icon"
-          sizes="180x180"
-          href="/static/favicon/apple-touch-icon.png" />
-    <link rel="manifest" href="/static/favicon/site.webmanifest" />
-{% endblock %}
-{% block content %}
-    <h2 class="admin-heading">Admin</h2>
-    <div class="admin-content">
-        <details class="card live-events-card" id="live-events-card">
-            <summary>Live Events</summary>
-            <div id="live-events">
-                <p class="hint live-events-empty live-events-empty-center">Waiting for board events...</p>
-            </div>
-        </details>
-        <div id="admin-board-selector-container"
-             hx-get="/medicines/board-selector"
-             hx-trigger="load, board-changed from:body"
-             hx-target="this"
-             hx-swap="innerHTML"></div>
-        <div class="card">
-            <h3 class="card-section-title">Sketch Path</h3>
-            <p class="hint hint-mb">Drag a sketch folder anywhere on the page to upload, or browse to select one.</p>
-            <div class="flex-row mb-075">
-                <div id="sketch-path-container"
-                     class="container-grow"
-                     hx-get="/last-upload"
-                     hx-trigger="load, board-changed from:body"
-                     hx-target="this"
-                     hx-swap="innerHTML"
-                     hx-include="#active-board-hardware-id"></div>
-                <input type="hidden"
-                       id="active-board-hardware-id"
-                       name="hardware_id"
-                       value="{{ active_board_hardware_id }}">
-                <input type="hidden"
-                       id="fqbn"
-                       name="fqbn"
-                       value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
-                <button class="btn btn-danger btn-fixed-size nowrap"
-                        type="button"
-                        id="delete-sketch-btn"
-                        data-action="delete-sketch">Delete</button>
-                <label for="folder-input" class="btn btn-secondary btn-fixed-size btn-label">Browse...</label>
-            </div>
-            <input type="file"
-                   id="folder-input"
-                   webkitdirectory
-                   name="files[]"
-                   class="sr-only"
-                   onchange="handleFolderInput(this)">
-            <button id="modal-reset-input"
-                    class="sr-only"
-                    onclick="document.getElementById('folder-input').value=''"></button>
-            <span class="hint hint-block">Select an Arduino sketch folder (.ino file) or drag & drop anywhere on the page</span>
-            {% if active_board_hardware_id and active_board_sketch %}
-                <div class="assigned-sketch-info">
-                    ⚡ Assigned to selected board: <code>{{ active_board_sketch }}</code>
-                </div>
-            {% endif %}
-        </div>
-        {% include "partials/admin_medicine_section.html" %}
-        <div id="compile-upload-card"
-             hx-get="/board/compile-upload-card"
-             hx-trigger="load, board-changed from:body"
-             hx-target="this"
-             hx-swap="innerHTML"></div>
+{% extends "base.html" %} {% block title %}MedMinder — Admin{% endblock %} {%
+block extra_head %}
+<link
+  rel="icon"
+  type="image/png"
+  href="/static/favicon/favicon-96x96.png"
+  sizes="96x96"
+/>
+<link rel="icon" type="image/svg+xml" href="/static/favicon/favicon.svg" />
+<link rel="shortcut icon" href="/static/favicon/favicon.ico" />
+<link
+  rel="apple-touch-icon"
+  sizes="180x180"
+  href="/static/favicon/apple-touch-icon.png"
+/>
+<link rel="manifest" href="/static/favicon/site.webmanifest" />
+{% endblock %} {% block content %}
+<h2 class="admin-heading">Admin</h2>
+<div class="admin-content">
+  <details class="card live-events-card" id="live-events-card">
+    <summary>Live Events</summary>
+    <div id="live-events">
+      <p class="hint live-events-empty live-events-empty-center">
+        Waiting for board events...
+      </p>
     </div>
-    {% include "partials/sketch_upload_modal.html" %}
-    {% include "partials/delete_confirm_modal.html" %}
-    {% include "partials/dnd_overlay.html" %}
-{% endblock %}
+  </details>
+  <div
+    id="admin-board-selector-container"
+    hx-get="/medicines/board-selector"
+    hx-trigger="load, board-changed from:body"
+    hx-target="this"
+    hx-swap="innerHTML"
+  ></div>
+  <div class="card">
+    <h3 class="card-section-title">Sketch Path</h3>
+    <p class="hint hint-mb">
+      Drag a sketch folder anywhere on the page to upload, or browse to select
+      one.
+    </p>
+    <div class="flex-row mb-075">
+      <div
+        id="sketch-path-container"
+        class="container-grow"
+        hx-get="/last-upload"
+        hx-trigger="load, board-changed from:body"
+        hx-target="this"
+        hx-swap="innerHTML"
+        hx-include="#active-board-hardware-id"
+      ></div>
+      <input
+        type="hidden"
+        id="active-board-hardware-id"
+        name="hardware_id"
+        value="{{ active_board_hardware_id }}"
+      />
+      <input
+        type="hidden"
+        id="fqbn"
+        name="fqbn"
+        value="{{ active_board_fqbn or 'arduino:avr:uno' }}"
+      />
+      <button
+        class="btn btn-danger btn-fixed-size nowrap"
+        type="button"
+        id="delete-sketch-btn"
+        data-action="delete-sketch"
+      >
+        Delete
+      </button>
+      <label
+        for="folder-input"
+        class="btn btn-secondary btn-fixed-size btn-label"
+        >Browse...</label
+      >
+    </div>
+    <input
+      type="file"
+      id="folder-input"
+      webkitdirectory
+      name="files[]"
+      class="sr-only"
+      onchange="handleFolderInput(this)"
+    />
+    <button
+      id="modal-reset-input"
+      class="sr-only"
+      onclick="document.getElementById('folder-input').value = ''"
+    ></button>
+    <span class="hint hint-block"
+      >Select an Arduino sketch folder (.ino file) or drag & drop anywhere on
+      the page</span
+    >
+    {% if active_board_hardware_id and active_board_sketch %}
+    <div class="assigned-sketch-info">
+      ⚡ Assigned to selected board: <code>{{ active_board_sketch }}</code>
+    </div>
+    {% endif %}
+  </div>
+  {% include "partials/admin_medicine_section.html" %}
+  <div
+    id="compile-upload-card"
+    hx-get="/board/compile-upload-card"
+    hx-trigger="load, board-changed from:body"
+    hx-target="this"
+    hx-swap="innerHTML"
+  ></div>
+</div>
+{% include "partials/sketch_upload_modal.html" %} {% include
+"partials/delete_confirm_modal.html" %} {% include "partials/dnd_overlay.html"
+%} {% endblock %}

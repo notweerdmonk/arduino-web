@@ -46,5 +46,14 @@ This phase adds missing documentation pieces to the `e2e/` directory:
 7. Removed "(Shelved)" labels from all docs, stripped standalone Playwright refs from agent_tools
 8. Relocated medminder_dash and board_manager docs/ alongside setup.py, outside importable package
 
-No code changes — pure documentation restructure.
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+### Milestones
+1. Config files created (.prettierrc, .prettierignore)
+2. All 190 HTML files formatted with prettier
+3. Formatting verified (prettier --check, eslint)
+4. CODEBASE_REFERENCE.md updated with prettier documentation
+5. All agent-facing workflow docs synced with Phase 106 entries
+
+No code changes — pure configuration and formatting.
 {% endraw %}

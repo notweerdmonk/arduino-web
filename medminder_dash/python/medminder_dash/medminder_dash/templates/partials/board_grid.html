@@ -1,10 +1,9 @@
-{% if boards %}
-    {% for b in boards %}
-        {% include "partials/board_card.html" %}
-    {% endfor %}
-{% else %}
-    <div class="card empty-state-card">
-        <p>No boards detected.</p>
-        <p class="hint">Connect a board via USB and the BoardManagerService will auto-detect it.</p>
-    </div>
+{% if boards %} {% for b in boards %} {% include "partials/board_card.html" %}
+{% endfor %} {% else %}
+<div class="card empty-state-card">
+  <p>No boards detected.</p>
+  <p class="hint">
+    Connect a board via USB and the BoardManagerService will auto-detect it.
+  </p>
+</div>
 {% endif %}

@@ -3966,4 +3966,14 @@ Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped
 ## 2026-06-27 19:22 — Phase 105: Relocate medminder_dash and board_manager docs alongside setup.py ✅ COMPLETED
 
 Moved medminder_dash and board_manager docs/ directories from inside the importable Python package to alongside setup.py, preventing them from being installed as package data. Updated all cross-references in user-facing docs (docs/api.md, guide.md, tests.md, architecture.md, index.md) and CODEBASE_REFERENCE.md.
+
+## 2026-06-28 00:54 — Phase 106: Set up Prettier + eslint-plugin-prettier for JS formatting ✅ COMPLETED
+
+Set up prettier (v3.9.0) with eslint-plugin-prettier integration across the project. Created `.prettierrc` (double quotes, semicolons, 2-space indent, es5 trailing commas) and `.prettierignore`. Formatted 190 HTML template files — prettier --check passes on all parseable files. Added `eslintPluginPrettierRecommended` to the ESLint flat config.
+
+**Key finding — trailingComma**: `trailingComma: "all"` adds trailing commas to function call arguments, which prettier applies even inside Jinja2 `{{ }}` expressions (e.g., `{{ url_for('route', arg=val,) }}`), producing invalid Jinja2. Using `"es5"` avoids this.
+
+**Caveat**: 4 HTML files with Jinja2 `{{ }}` inside tag attributes are skipped by prettier's HTML parser (excluded via `.prettierignore`). 2 `base.html` files have a formatting ping-pong between standalone prettier and eslint-plugin-prettier on a long-line wrapping edge case — documented in CODEBASE_REFERENCE.md.
+
+**Usage**: `npx prettier --write "**/*.html"` to format inline JS; `npx prettier --check "**/*.html"` to verify; `npx eslint .` to lint including prettier enforcement.
 {% endraw %}

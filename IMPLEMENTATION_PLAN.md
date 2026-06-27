@@ -64,4 +64,30 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 | Q | Scope | Key Changes | Status |
 |---|-------|-------------|--------|
 | 1 | e2e/docs/index.md Installation + Running | Add `npx playwright install --with-deps` after `npm install`; add footnote for `npx playwright test --config e2e/playwright.config.ts` | ✅ |
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+**Status**: ✅ COMPLETED
+
+**Motivation**: Standardize JavaScript formatting across all HTML templates (inline JS) and standalone JS files. Prettier provides consistent formatting (quotes, semicolons, indentation) enforced via ESLint.
+
+**Design decisions**:
+- Double quotes (not single) — easier to embed single quotes in strings; double quotes need escaping but are rarer
+- Semicolons required (`semi: true`)
+- Tab width 2 spaces with `useTabs: false`
+- `trailingComma: "es5"` — trailing commas where valid in ES5
+- All formatting applied to inline JS in HTML templates via `npx prettier --write "**/*.html"` (190 files)
+- `.prettierignore` excludes `_site/`, `node_modules/`, `.nox/`, `__pycache__/`, `.opencode/`, build artifacts, TypeScript files, and `config/eslint.config.mjs`
+
+**Integration**: `eslint-plugin-prettier/recommended` added to `config/eslint.config.mjs`. This runs prettier as an ESLint rule, flagging formatting violations via `eslint_lint-files` MCP tool. `eslint-config-prettier` disables conflicting ESLint rules.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | Config files | Create `.prettierrc`, `.prettierignore` | ✅ |
+| 2 | ESLint config | Add `eslintPluginPrettierRecommended` to `config/eslint.config.mjs` (already done) | ✅ |
+| 3 | Format | Run `npx prettier --write "**/*.html"` on 190 files | ✅ |
+| 4 | Docs | Update CODEBASE_REFERENCE.md with prettier section | ✅ |
+| 5 | Sync | Update all agent-facing workflow docs with Phase 106 entries | ✅ |
+
+**Key finding — `trailingComma: "all"` vs `"es5"`**: `trailingComma: "all"` adds trailing commas to function parameters and calls, which prettier applies even inside Jinja2 `{{ }}` expressions in HTML templates. This can produce invalid Jinja2 syntax (e.g., `{{ url_for('route', arg=val,) }}`). Prettier has no native Jinja2 parser — it treats `{{ }}` as text, so trailing commas in function call args inside template expressions are silently added but not flagged. Using `trailingComma: "es5"` avoids this entirely since it only adds trailing commas in object literals and arrays, not function calls.
 {% endraw %}

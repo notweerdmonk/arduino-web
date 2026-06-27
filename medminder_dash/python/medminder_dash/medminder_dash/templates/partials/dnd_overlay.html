@@ -1,133 +1,139 @@
 <div id="dnd-overlay">
-    <span>Drop sketch folder anywhere to upload</span>
+  <span>Drop sketch folder anywhere to upload</span>
 </div>
 <script>
-(function() {
+  (function () {
     /* global showModal */
-    var overlay = document.getElementById('dnd-overlay');
+    var overlay = document.getElementById("dnd-overlay");
     var dragCounter = 0;
     var dndActive = false;
     var dragWasActive = false;
 
     function hasFiles(types) {
-        if (!types) return false;
-        return Array.from(types).indexOf('Files') !== -1;
+      if (!types) return false;
+      return Array.from(types).indexOf("Files") !== -1;
     }
 
     function hideOverlay() {
-        overlay.style.opacity = '0';
-        overlay.style.pointerEvents = 'none';
-        dndActive = false;
+      overlay.style.opacity = "0";
+      overlay.style.pointerEvents = "none";
+      dndActive = false;
     }
 
     function showOverlay() {
-        overlay.style.opacity = '1';
-        overlay.style.pointerEvents = 'auto';
-        dndActive = true;
+      overlay.style.opacity = "1";
+      overlay.style.pointerEvents = "auto";
+      dndActive = true;
     }
 
-    document.addEventListener('dragenter', function(e) {
-        if (hasFiles(e.dataTransfer.types)) {
-            dragCounter++;
-            dragWasActive = true;
-            if (dragCounter === 1) showOverlay();
-        }
+    document.addEventListener("dragenter", function (e) {
+      if (hasFiles(e.dataTransfer.types)) {
+        dragCounter++;
+        dragWasActive = true;
+        if (dragCounter === 1) showOverlay();
+      }
     });
 
-    document.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'copy';
-        if (!dndActive && dragWasActive) {
-            showOverlay();
-            dragCounter = 1;
-        }
+    document.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      if (!dndActive && dragWasActive) {
+        showOverlay();
+        dragCounter = 1;
+      }
     });
 
-    document.addEventListener('dragleave', function() {
-        if (dragCounter > 0) {
-            dragCounter--;
-            if (dragCounter === 0) hideOverlay();
-        }
+    document.addEventListener("dragleave", function () {
+      if (dragCounter > 0) {
+        dragCounter--;
+        if (dragCounter === 0) hideOverlay();
+      }
     });
 
-    document.addEventListener('drop', function(e) {
-        e.preventDefault();
-        if (!e.dataTransfer.items || e.dataTransfer.items.length === 0) return;
-        dragWasActive = false;
-        dragCounter = 0;
-        hideOverlay();
+    document.addEventListener("drop", function (e) {
+      e.preventDefault();
+      if (!e.dataTransfer.items || e.dataTransfer.items.length === 0) return;
+      dragWasActive = false;
+      dragCounter = 0;
+      hideOverlay();
 
-        var items = e.dataTransfer.items;
-        var collected = [];
-        var rootDirName = '';
+      var items = e.dataTransfer.items;
+      var collected = [];
+      var rootDirName = "";
 
-        function traverseEntry(entry, path) {
-            if (entry.isFile) {
-                entry.file(function(file) {
-                    file.__relativePath = path ? path + '/' + file.name : file.name;
-                    collected.push(file);
-                });
-            } else if (entry.isDirectory) {
-                var reader = entry.createReader();
-                (function readBatch() {
-                    reader.readEntries(function(entries) {
-                        if (entries.length === 0) return;
-                        for (var i = 0; i < entries.length; i++) {
-                            traverseEntry(entries[i], path ? path + '/' + entry.name : entry.name);
-                        }
-                        readBatch();
-                    });
-                })();
-            }
+      function traverseEntry(entry, path) {
+        if (entry.isFile) {
+          entry.file(function (file) {
+            file.__relativePath = path ? path + "/" + file.name : file.name;
+            collected.push(file);
+          });
+        } else if (entry.isDirectory) {
+          var reader = entry.createReader();
+          (function readBatch() {
+            reader.readEntries(function (entries) {
+              if (entries.length === 0) return;
+              for (var i = 0; i < entries.length; i++) {
+                traverseEntry(
+                  entries[i],
+                  path ? path + "/" + entry.name : entry.name
+                );
+              }
+              readBatch();
+            });
+          })();
         }
+      }
 
-        for (var i = 0; i < items.length; i++) {
-            var entry = items[i].webkitGetAsEntry();
-            if (entry) {
-                if (!rootDirName) rootDirName = entry.name;
-                traverseEntry(entry, '');
-            }
+      for (var i = 0; i < items.length; i++) {
+        var entry = items[i].webkitGetAsEntry();
+        if (entry) {
+          if (!rootDirName) rootDirName = entry.name;
+          traverseEntry(entry, "");
         }
+      }
 
-        (function waitForFiles() {
-            if (collected.length === 0 && items.length > 0) {
-                setTimeout(waitForFiles, 50);
-                return;
-            }
-            document.getElementById('modal-folder-name').textContent = rootDirName || 'folder';
-            document.getElementById('modal-file-count').textContent = String(collected.length);
-            document.getElementById('sketch-upload-modal').__dndFiles = collected;
-            showModal('sketch-upload-modal');
-        })();
+      (function waitForFiles() {
+        if (collected.length === 0 && items.length > 0) {
+          setTimeout(waitForFiles, 50);
+          return;
+        }
+        document.getElementById("modal-folder-name").textContent =
+          rootDirName || "folder";
+        document.getElementById("modal-file-count").textContent = String(
+          collected.length
+        );
+        document.getElementById("sketch-upload-modal").__dndFiles = collected;
+        showModal("sketch-upload-modal");
+      })();
     });
 
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            if (dragCounter > 0) dragCounter = 0;
-            hideOverlay();
-        } else if (dragWasActive) {
-            showOverlay();
-            dragCounter = 1;
-        }
-    });
-
-    window.addEventListener('blur', function() {
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
         if (dragCounter > 0) dragCounter = 0;
         hideOverlay();
+      } else if (dragWasActive) {
+        showOverlay();
+        dragCounter = 1;
+      }
     });
 
-    document.addEventListener('mouseenter', function() {
-        if (dragWasActive) {
-            dragWasActive = false;
-            hideOverlay();
-        }
+    window.addEventListener("blur", function () {
+      if (dragCounter > 0) dragCounter = 0;
+      hideOverlay();
     });
 
-    document.addEventListener('mousemove', function() {
-        if (dragWasActive) {
-            dragWasActive = false;
-            hideOverlay();
-        }
+    document.addEventListener("mouseenter", function () {
+      if (dragWasActive) {
+        dragWasActive = false;
+        hideOverlay();
+      }
     });
-})();
+
+    document.addEventListener("mousemove", function () {
+      if (dragWasActive) {
+        dragWasActive = false;
+        hideOverlay();
+      }
+    });
+  })();
 </script>

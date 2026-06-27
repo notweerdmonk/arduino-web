@@ -50,4 +50,6 @@
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22) ✅ COMPLETED
 
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22) ✅ COMPLETED
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54) ✅ COMPLETED
 {% endraw %}

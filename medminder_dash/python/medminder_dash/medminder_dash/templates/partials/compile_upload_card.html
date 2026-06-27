@@ -1,49 +1,83 @@
 <div class="card" id="compile-section">
-    <h3 class="card-section-title">Step 2: Compile Sketch</h3>
-    <p class="hint hint-mb">Compile the selected sketch for the board selected above.</p>
-    <div class="flex-row-wide mb-075">
-        <div class="form-group flex-1 mb-0">
-            <label>Board Port</label>
-            <span class="value" id="compile-port-display">{{ active_board or '—' }}</span>
-        </div>
-        <div class="form-group flex-1 mb-0">
-            <label>FQBN</label>
-            <span class="value" id="compile-fqbn-display">{{ active_board_fqbn or 'arduino:avr:uno' }}</span>
-        </div>
+  <h3 class="card-section-title">Step 2: Compile Sketch</h3>
+  <p class="hint hint-mb">
+    Compile the selected sketch for the board selected above.
+  </p>
+  <div class="flex-row-wide mb-075">
+    <div class="form-group flex-1 mb-0">
+      <label>Board Port</label>
+      <span class="value" id="compile-port-display"
+        >{{ active_board or '—' }}</span
+      >
     </div>
-    <button class="btn btn-primary"
-            hx-post="/board/{{ active_board_path or '' }}/compile"
-            hx-target="#compile-output"
-            hx-swap="innerHTML"
-            hx-include="#sketch_path, #fqbn"
-            {% if not active_board %}disabled{% endif %}>Compile</button>
-    <div id="compile-output" class="output-section"></div>
+    <div class="form-group flex-1 mb-0">
+      <label>FQBN</label>
+      <span class="value" id="compile-fqbn-display"
+        >{{ active_board_fqbn or 'arduino:avr:uno' }}</span
+      >
+    </div>
+  </div>
+  <button
+    class="btn btn-primary"
+    hx-post="/board/{{ active_board_path or '' }}/compile"
+    hx-target="#compile-output"
+    hx-swap="innerHTML"
+    hx-include="#sketch_path, #fqbn"
+    {%
+    if
+    not
+    active_board
+    %}disabled{%
+    endif
+    %}
+  >
+    Compile
+  </button>
+  <div id="compile-output" class="output-section"></div>
 </div>
-<div class="card {% if not active_board %}card-disabled{% endif %}"
-     id="upload-section">
-    <h3 class="card-section-title">Step 3: Upload to Board</h3>
-    <p class="hint hint-mb">Upload the compiled sketch to the board selected above.</p>
-    <div class="flex-row-wide mb-075">
-        <div class="form-group flex-1 mb-0">
-            <label>Board Port</label>
-            <span class="value" id="upload-port-display">{{ active_board or '—' }}</span>
-        </div>
-        <div class="form-group flex-1 mb-0">
-            <label>FQBN</label>
-            <span class="value" id="upload-fqbn-display">{{ active_board_fqbn or 'arduino:avr:uno' }}</span>
-        </div>
+<div
+  class="card {% if not active_board %}card-disabled{% endif %}"
+  id="upload-section"
+>
+  <h3 class="card-section-title">Step 3: Upload to Board</h3>
+  <p class="hint hint-mb">
+    Upload the compiled sketch to the board selected above.
+  </p>
+  <div class="flex-row-wide mb-075">
+    <div class="form-group flex-1 mb-0">
+      <label>Board Port</label>
+      <span class="value" id="upload-port-display"
+        >{{ active_board or '—' }}</span
+      >
     </div>
-    <button class="btn btn-success"
-            hx-post="/board/{{ active_board_path or '' }}/upload"
-            hx-target="#upload-output"
-            hx-swap="innerHTML"
-            hx-include="#sketch_path, #fqbn"
-            {% if not active_board %}disabled{% endif %}>Upload</button>
-    <div id="upload-output" class="output-section">
-        {% if not active_board %}
-            <div class="log-viewer">Waiting for board connection…</div>
-        {% else %}
-            <div class="log-viewer">Ready</div>
-        {% endif %}
+    <div class="form-group flex-1 mb-0">
+      <label>FQBN</label>
+      <span class="value" id="upload-fqbn-display"
+        >{{ active_board_fqbn or 'arduino:avr:uno' }}</span
+      >
     </div>
+  </div>
+  <button
+    class="btn btn-success"
+    hx-post="/board/{{ active_board_path or '' }}/upload"
+    hx-target="#upload-output"
+    hx-swap="innerHTML"
+    hx-include="#sketch_path, #fqbn"
+    {%
+    if
+    not
+    active_board
+    %}disabled{%
+    endif
+    %}
+  >
+    Upload
+  </button>
+  <div id="upload-output" class="output-section">
+    {% if not active_board %}
+    <div class="log-viewer">Waiting for board connection…</div>
+    {% else %}
+    <div class="log-viewer">Ready</div>
+    {% endif %}
+  </div>
 </div>

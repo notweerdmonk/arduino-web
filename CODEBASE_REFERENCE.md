@@ -93,10 +93,12 @@ medminder/
 ├── dist-test-install/          # Wheel install smoke test
 ├── dist-standalone/            # Built standalone binaries
 ├── noxfile.py
+├── .prettierrc                # Prettier config (singleQuote false, semi, tabWidth 2)
+├── .prettierignore            # Prettier ignore patterns (excludes _site, node_modules, Jinja2-unparseable files)
 ├── eslint.config.mjs          # ESLint proxy config (imports config/)
 ├── config/
-│   └── eslint.config.mjs      # ESLint flat config (JS + HTML sections)
-├── package.json                # ESLint dev dependencies
+│   └── eslint.config.mjs      # ESLint flat config (JS + HTML sections) with eslintPluginPrettierRecommended
+├── package.json                # ESLint + Prettier dev dependencies
 ├── PLAN.md
 ├── JOURNAL.md
 ├── CODEBASE_REFERENCE.md
@@ -3568,13 +3570,14 @@ exclude = ["cc/arduino/cli/commands/v1/"]
 | `medminder_dash/.../templates/` | (same set) | 0 |
 | `arduino_sketch_tools/.../templates/` | (same set) | 0 |
 
-### ESLint — JavaScript Lint
+### ESLint + Prettier — JavaScript Lint & Format
 
 | Item | Detail |
 |------|--------|
 | Config | `eslint.config.mjs` (root proxy → `config/eslint.config.mjs`) |
-| Plugin | `eslint-plugin-html` v8.1.4 (CJS monkey-patch, no `processor` export) |
-| Errors | **0** |
+| Plugins | `eslint-plugin-html` v8.1.4 (CJS monkey-patch, no `processor` export) + `eslint-plugin-prettier/recommended` |
+| Prettier | v3.9.0, config at `.prettierrc` (singleQuote false, semi true, tabWidth 2, trailingComma "es5") |
+| Errors | **0** (pre-existing: 2 parsing errors in `eslint.config.mjs` proxy — import/export with sourceType:script) |
 | Warnings | 4 (false positives — `handleFolderInput`/`uploadSketch` called via HTML `onchange`/`onclick` in `base.html`) |
 
 **Key files**:
@@ -3582,12 +3585,22 @@ exclude = ["cc/arduino/cli/commands/v1/"]
 | File | Role |
 |------|------|
 | `eslint.config.mjs` (root) | Proxy that imports from `config/eslint.config.mjs` (MCP reads only root config) |
-| `config/eslint.config.mjs` | Full flat config with `.js`/`.mjs` + `.html` (inline JS) sections, browser globals for HTML section |
+| `config/eslint.config.mjs` | Full flat config with `.js`/`.mjs` + `.html` (inline JS) sections, browser globals for HTML section, `eslintPluginPrettierRecommended` appended |
+| `.prettierrc` | Prettier config — double quotes, semicolons, 2-space indent, es5 trailing commas |
+| `.prettierignore` | Excludes `_site/`, `node_modules/`, `.nox/`, `__pycache__/`, `.opencode/`, build artifacts, TypeScript files, config/eslint.config.mjs, and 3 Jinja2 files unparseable by prettier's HTML parser |
 | `dnd_overlay.html` (both dashboards) | Added `/* global showModal */`, removed unused `e` param in `dragleave` handler |
 
 **Architecture**: Root proxy pattern required because `eslint_lint-files` MCP tool reads config only from agent working directory root. The proxy re-exports the real config from `config/`.
 
-**Dependency**: `eslint-plugin-html` v8.1.4 installed via npm (`npm init -y` + `npm install eslint-plugin-html@8.1.4 --save-dev` in project root).
+**Dependencies**: Listed in root `package.json`:
+- `eslint-plugin-html` v8.1.4 — lint inline JS in HTML templates
+- `eslint-plugin-prettier` v5.5.6 — run prettier as ESLint rule
+- `eslint-config-prettier` v10.1.8 — disable conflicting ESLint rules
+- `prettier` v3.9.0 — JavaScript formatter
+
+**Prettier + Jinja2 compatibility note**: Prettier's HTML parser does not understand Jinja2 template syntax. Four template files with `{{ }}` expressions inside HTML tag attributes cannot be parsed by prettier and are excluded via `.prettierignore`. Additionally, `trailingComma: "all"` would add trailing commas to function call arguments even inside Jinja2 `{{ }}` expressions (e.g., `{{ url_for('route', arg=val,) }}`), producing invalid Jinja2. Using `trailingComma: "es5"` avoids this since it only adds trailing commas in object literals and arrays.
+
+**Known limitation**: Standalone `prettier --check` and `eslint-plugin-prettier` may disagree on edge cases (specifically line wrapping of long `var` declarations). Two `base.html` files cycle between formats — format with prettier, then eslint --fix, then prettier again. The canonical formatter is standalone prettier (run `npx prettier --write "**/*.html"`).
 
 ### Flask Debug Mode + Daemonize (Critical Finding)
 
@@ -3655,7 +3668,9 @@ pipenv run python e2e/servers/medminder_dash_server.py --mock --port 8766 --prod
 | File | Line(s) | Purpose |
 |------|---------|---------|
 | `eslint.config.mjs` (root) | 1-2 | Proxy config for MCP |
-| `config/eslint.config.mjs` | 1-47 | Full ESLint flat config |
+| `config/eslint.config.mjs` | 1-73 | Full ESLint flat config with prettier integration |
+| `.prettierrc` | 1-8 | Prettier formatting config (singleQuote false, semi, tabWidth 2) |
+| `.prettierignore` | 1-14 | Prettier ignore patterns (excludes build artifacts, Jinja2-unparseable files) |
 | `grpc_client/python/.../pyproject.toml` | `[tool.ruff]` | Ruff exclusion for generated protobuf stubs |
 | `dnd_overlay.html` (both) | top | `/* global showModal */`, removed unused `e` |
 | `e2e/servers/arduino_dash_server.py:260` | — | `debug_mode = not (args.bms or args.production)` |

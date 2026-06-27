@@ -71,4 +71,35 @@ This phase makes no code changes — it's a pure documentation restructure. Test
 ## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
 
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+### Prettier Usage
+
+Prettier formats inline JavaScript inside HTML template files. Four files with Jinja2 syntax in tag attributes are excluded via `.prettierignore`.
+
+**Format all HTML files:**
+```bash
+npx prettier --write "**/*.html"
+```
+
+**Check formatting (CI/verify):**
+```bash
+npx prettier --check "**/*.html"
+```
+
+**Lint via ESLint (enforces prettier rules):**
+```bash
+npx eslint .                          # check
+npx eslint . --fix                    # auto-fix
+```
+
+**Config**: `.prettierrc` — double quotes, semicolons, 2-space indent, es5 trailing commas. `.prettierignore` excludes build artifacts, TypeScript, and Jinja2-unparseable files.
+
+### Test Scenarios
+
+| # | Scenario | Command | Expected |
+|---|----------|---------|----------|
+| 1 | Prettier formatting check | `npx prettier --check "**/*.html"` | All matched files use Prettier code style |
+| 2 | ESLint prettier enforcement | `npx eslint .` | 0 prettier/prettier errors |
 {% endraw %}

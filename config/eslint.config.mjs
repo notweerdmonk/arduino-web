@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import html from "eslint-plugin-html";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 
 export default [
   js.configs.recommended,
@@ -68,4 +69,5 @@ export default [
       "config/eslint.config.mjs",
     ],
   },
+  eslintPluginPrettierRecommended,
 ];

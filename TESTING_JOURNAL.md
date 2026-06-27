@@ -671,4 +671,28 @@ Removed "(Shelved)" from e2e/docs/index.md, e2e/README.md, e2e/index.md, CODEBAS
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
 
 Moved both docs/ directories out of importable Python packages. Updated all cross-references. Jekyll build passes.
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+Set up prettier with eslint-plugin-prettier integration. Created .prettierrc (double quotes, semicolons, 2-space indent, es5 trailing commas) and .prettierignore. Formatted 190 HTML template files — all clean. Key finding: trailingComma "all" is incompatible with Jinja2 templates (adds trailing commas inside {{ }} expressions); "es5" avoids this. 4 files with Jinja2 in HTML attributes skipped by prettier's HTML parser.
+
+### Prettier Usage
+
+**Format inline JS in all HTML templates:**
+```bash
+npx prettier --write "**/*.html"
+```
+
+**Check formatting:**
+```bash
+npx prettier --check "**/*.html"
+```
+
+**ESLint integration** — formatting violations appear as `prettier/prettier` errors:
+```bash
+npx eslint .              # check (includes prettier rules)
+npx eslint . --fix         # auto-fix prettier violations
+```
+
+**Known edge case**: standalone `prettier --check` and `eslint-plugin-prettier` disagree on line wrapping of a `var sourceFiles = ...` declaration in both `base.html` files. Canonical formatter is standalone prettier.
 {% endraw %}

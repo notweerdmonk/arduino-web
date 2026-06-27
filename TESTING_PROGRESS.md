@@ -48,4 +48,7 @@
 | 3 | Jekyll build | ✅ | 0 errors, 0 warnings |
 5. All "(Shelved)" labels removed from e2e docs and CODEBASE_REFERENCE.md
 6. Relocated medminder_dash and board_manager docs alongside setup.py, verified Jekyll build
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54) ✅ COMPLETED
+
+7. prettier --check passes on all HTML files; eslint shows 0 prettier/prettier errors
 {% endraw %}

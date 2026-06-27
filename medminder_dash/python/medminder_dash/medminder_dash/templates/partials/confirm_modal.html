@@ -1,20 +1,30 @@
 <div id="confirm-modal" class="modal-backdrop modal-hidden">
-    <div class="modal-content">
-        <h3 class="modal-title">{{ title }}</h3>
-        <p>{{ warning }}</p>
-        <form method="post"
-              action="{{ post_url }}"
-              hx-post="{{ post_url }}"
-              hx-target="#medicine-result"
-              hx-swap="innerHTML"
-              hx-on::after-request="document.getElementById('confirm-modal').classList.add('modal-hidden')">
-            <input type="hidden" name="confirm_token" value="{{ confirm_token }}">
-            <div class="flex-row">
-                <button type="submit" class="btn btn-danger">{{ confirm_label }}</button>
-                <button type="button"
-                        class="btn btn-secondary"
-                        onclick="document.getElementById('confirm-modal').style.display='none'">Cancel</button>
-            </div>
-        </form>
-    </div>
+  <div class="modal-content">
+    <h3 class="modal-title">{{ title }}</h3>
+    <p>{{ warning }}</p>
+    <form
+      method="post"
+      action="{{ post_url }}"
+      hx-post="{{ post_url }}"
+      hx-target="#medicine-result"
+      hx-swap="innerHTML"
+      hx-on::after-request="document.getElementById('confirm-modal').classList.add('modal-hidden')"
+    >
+      <input type="hidden" name="confirm_token" value="{{ confirm_token }}" />
+      <div class="flex-row">
+        <button type="submit" class="btn btn-danger">
+          {{ confirm_label }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="
+            document.getElementById('confirm-modal').style.display = 'none'
+          "
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

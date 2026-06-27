@@ -1,37 +1,62 @@
 <div class="card">
-    <h3 class="card-section-title">Step 1: Set Medicines</h3>
-    <p class="hint hint-mb">
-        Manage the medicine schedule. The metadata card is editable; the <code>alarm.hpp</code> card shows the on-device file (read-only).
-        Edit metadata to auto-sync <code>alarm.hpp</code>, or use the sync buttons below when the two diverge.
-    </p>
-    <div id="medicine-cards-container"
-         hx-get="/medicines/active-board-card"
-         hx-trigger="load"
-         hx-target="this"
-         hx-swap="innerHTML">
-        {% with diff = initial_diff %}
-            {% include "partials/medicine_cards.html" %}
-        {% endwith %}
-    </div>
-    <div class="flex-row mt-075">
-        <button class="btn btn-primary"
-                id="generate-hpp-btn"
-                hx-get="/medicines/confirm-modal?action=generate"
-                hx-target="#confirm-modal-container"
-                hx-swap="innerHTML"
-                hx-on::after-request="showModal('confirm-modal')"
-                {% if not initial_diff.differ %}disabled{% endif %}>Generate alarm.hpp FROM metadata</button>
-        <button class="btn btn-secondary"
-                id="sync-hpp-btn"
-                hx-get="/medicines/confirm-modal?action=sync"
-                hx-target="#confirm-modal-container"
-                hx-swap="innerHTML"
-                hx-on::after-request="showModal('confirm-modal')"
-                {% if not initial_diff.differ %}disabled{% endif %}>Sync FROM alarm.hpp → metadata</button>
-        {% if not initial_diff.differ %}
-            <span class="hint ml-05" id="sync-buttons-help">✓ metadata and alarm.hpp are in sync</span>
-        {% endif %}
-    </div>
-    <div id="confirm-modal-container"></div>
-    <div id="medicine-result" class="mt-05"></div>
+  <h3 class="card-section-title">Step 1: Set Medicines</h3>
+  <p class="hint hint-mb">
+    Manage the medicine schedule. The metadata card is editable; the
+    <code>alarm.hpp</code> card shows the on-device file (read-only). Edit
+    metadata to auto-sync <code>alarm.hpp</code>, or use the sync buttons below
+    when the two diverge.
+  </p>
+  <div
+    id="medicine-cards-container"
+    hx-get="/medicines/active-board-card"
+    hx-trigger="load"
+    hx-target="this"
+    hx-swap="innerHTML"
+  >
+    {% with diff = initial_diff %} {% include "partials/medicine_cards.html" %}
+    {% endwith %}
+  </div>
+  <div class="flex-row mt-075">
+    <button
+      class="btn btn-primary"
+      id="generate-hpp-btn"
+      hx-get="/medicines/confirm-modal?action=generate"
+      hx-target="#confirm-modal-container"
+      hx-swap="innerHTML"
+      hx-on::after-request="showModal('confirm-modal')"
+      {%
+      if
+      not
+      initial_diff.differ
+      %}disabled{%
+      endif
+      %}
+    >
+      Generate alarm.hpp FROM metadata
+    </button>
+    <button
+      class="btn btn-secondary"
+      id="sync-hpp-btn"
+      hx-get="/medicines/confirm-modal?action=sync"
+      hx-target="#confirm-modal-container"
+      hx-swap="innerHTML"
+      hx-on::after-request="showModal('confirm-modal')"
+      {%
+      if
+      not
+      initial_diff.differ
+      %}disabled{%
+      endif
+      %}
+    >
+      Sync FROM alarm.hpp → metadata
+    </button>
+    {% if not initial_diff.differ %}
+    <span class="hint ml-05" id="sync-buttons-help"
+      >✓ metadata and alarm.hpp are in sync</span
+    >
+    {% endif %}
+  </div>
+  <div id="confirm-modal-container"></div>
+  <div id="medicine-result" class="mt-05"></div>
 </div>

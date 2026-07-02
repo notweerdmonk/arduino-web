@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# @file check_venv.bash
+# @brief Recursively verify pipenv venvs in the project tree.
+# @description Walk the directory tree and run pipenv --venv in each
+# subdirectory containing a Pipfile.
+# @arg $1 string Starting directory (default: current dir).
+# @exitcode 0 Success.
+
 # scripts/check_venv.bash
 #
 # Recursively verify pipenv venvs in the project tree.

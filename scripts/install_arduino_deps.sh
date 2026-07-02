@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# @file install_arduino_deps.sh
+# @brief Install Arduino libraries required by sketches.
+# @description Refresh the Arduino library index, then install RTClib
+# and TM1637TinyDisplay via arduino-cli.
+# @exitcode 0 All libraries installed successfully.
+# @exitcode 1 arduino-cli not found on PATH.
+# @exitcode 2 A library installation failed.
+
 # scripts/install_arduino_deps.sh
 #
 # Install Arduino libraries required by sketches.

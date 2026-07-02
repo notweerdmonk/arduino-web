@@ -1,4 +1,19 @@
 #!/usr/bin/env bash
+# @file test_installs.sh
+# @brief Install monorepo wheels and run smoke tests.
+# @description Create a clean pipenv venv, sync all 6 monorepo wheels
+# from Pipfile, and run import + --help smoke tests on each package.
+# @option --dry-run        Print what would be done without making changes.
+# @option --skip-install   Skip pipenv sync, re-run smoke tests only.
+# @option --help           Show usage and exit.
+# @env TEST_INSTALLS_DIR  Working directory (default: dist-test-install).
+# @env PIP_INDEX_URL      Passed through to pipenv (default: pypi.org).
+# @exitcode 0 All smoke tests passed.
+# @exitcode 1 pipenv not found or Pipfile missing.
+# @exitcode 2 One or more wheels missing (run nox -s all_builds).
+# @exitcode 3 One or more smoke tests failed.
+# @exitcode 4 Invalid CLI argument.
+
 # scripts/test_installs.sh
 #
 # Install wheels into clean venv + smoke test.

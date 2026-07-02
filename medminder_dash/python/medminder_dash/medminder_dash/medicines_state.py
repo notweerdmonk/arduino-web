@@ -60,6 +60,7 @@ class MedicineStore:
     """Thread-safe persistent store for medicine data per board port."""
 
     def __init__(self):
+        """Init the store with empty board meta and medicine list."""
         self._lock = threading.Lock()
         self._data_file = _compute_data_path()
         self._board_meta: dict = {}

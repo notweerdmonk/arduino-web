@@ -72,6 +72,7 @@ def _run(cmd: Sequence[str], **kw) -> subprocess.CompletedProcess:
 
 
 def _which_or_none(name: str) -> Optional[str]:
+    """Return the path to an executable, or None if not found."""
     return shutil.which(name)
 
 
@@ -522,6 +523,7 @@ def ensure_init_chain(out_dir: Path) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    """Build and return the argparse argument parser."""
     p = argparse.ArgumentParser(
         prog="gen_grpc_bindings",
         description=(
@@ -583,6 +585,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Entry point: generate gRPC Python bindings from arduino-cli proto files."""
     args = _build_parser().parse_args(argv)
 
     if not args.proto_src and not args.proto_url:

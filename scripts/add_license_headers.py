@@ -213,6 +213,7 @@ DESCRIPTIONS: dict[str, str] = {
 # -- File discovery -----------------------------------------------------
 
 def is_excluded(path: Path) -> bool:
+    """Check if a file path matches any excluded directory suffix."""
     for part in path.parts:
         if part in EXCLUDE_SUFFIXES:
             return True
@@ -220,6 +221,7 @@ def is_excluded(path: Path) -> bool:
 
 
 def discover_files() -> list[Path]:
+    """Walk the repo roots and yield all source files eligible for headers."""
     files: list[Path] = []
     roots = [REPO_ROOT / r for r in PACKAGE_ROOTS]
     for r in EXTRA_ROOTS:
@@ -252,6 +254,7 @@ def discover_files() -> list[Path]:
 
 
 def relative_path(path: Path) -> str:
+    """Return the path relative to the repo root."""
     return str(path.relative_to(REPO_ROOT))
 
 
@@ -288,6 +291,7 @@ def _git_original_docstring(rel: str) -> str | None:
 
 
 def describe(path: Path) -> str:
+    """Produce a human-readable description for a source file."""
     rel = relative_path(path)
     if rel in DESCRIPTIONS:
         return DESCRIPTIONS[rel]
@@ -313,6 +317,7 @@ def describe(path: Path) -> str:
 # -- Header generation --------------------------------------------------
 
 def py_header(rel: str, desc: str) -> str:
+    """Build the Apache 2.0 header block for a .py file."""
     return (f'"""{rel}\n'
             f'\n'
             f'{desc}\n'
@@ -325,6 +330,7 @@ def py_header(rel: str, desc: str) -> str:
 
 
 def sh_header(rel: str, desc: str) -> str:
+    """Build the Apache 2.0 header block for a .sh/.bash file."""
     lines = [f"# {rel}", "#", f"# {desc}", "#",
              "# Author: notweerdmonk",
              "# SPDX-License-Identifier: Apache-2.0", "#"]
@@ -337,6 +343,7 @@ def sh_header(rel: str, desc: str) -> str:
 
 
 def html_header(rel: str, desc: str) -> str:
+    """Build the Apache 2.0 header block for an .html file."""
     lines = [f"<!--", f"    {rel}", "", f"    {desc}", "",
              "    Author: notweerdmonk",
              "    SPDX-License-Identifier: Apache-2.0", ""]
@@ -350,6 +357,7 @@ def html_header(rel: str, desc: str) -> str:
 
 
 def css_header(rel: str, desc: str) -> str:
+    """Build the Apache 2.0 header block for a .css file."""
     lines = [f"/*", f" * {rel}", " *", f" * {desc}", " *",
              " * Author: notweerdmonk",
              " * SPDX-License-Identifier: Apache-2.0", " *"]
@@ -373,6 +381,7 @@ def strip_shebang(content: str) -> tuple[str, str]:
 
 
 def patch_file(path: Path) -> bool:
+    """Patch a single file with its license header. Returns True if changed."""
     rel = relative_path(path)
     desc = describe(path)
     content = path.read_text(encoding="utf-8")
@@ -466,6 +475,7 @@ def _strip_shell_header(content: str) -> str:
 # -- Main ----------------------------------------------------------------
 
 def main():
+    """Entry point: discover, patch, and report on all source files."""
     files = discover_files()
     changed = []
     skipped = []

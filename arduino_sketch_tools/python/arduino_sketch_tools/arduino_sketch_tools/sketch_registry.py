@@ -38,11 +38,22 @@ class SketchRegistry:
     """
 
     def __init__(self, registry: dict, lock: threading.Lock) -> None:
+        """Init the registry with a shared upload dict and locks.
+
+        Args:
+            registry: Shared upload registry dict.
+            lock: External lock guarding the registry.
+        """
         self._registry = registry
         self._lock = lock
         self._op_lock = threading.Lock()
 
     def get_assignment(self, hardware_id: str) -> Optional[str]:
+        """Return the sketch directory assigned to a hardware ID, or None.
+
+        Args:
+            hardware_id: The board hardware ID to look up.
+        """
         if not hardware_id:
             return None
         with self._op_lock:
@@ -57,6 +68,12 @@ class SketchRegistry:
         return None
 
     def set_assignment(self, hardware_id: str, sketch_dir: str) -> None:
+        """Assign a sketch directory to a hardware ID.
+
+        Args:
+            hardware_id: The board hardware ID to assign.
+            sketch_dir: The sketch directory path to assign.
+        """
         if not hardware_id:
             return
         with self._op_lock:
@@ -70,6 +87,11 @@ class SketchRegistry:
                                 return
 
     def clear_assignment(self, hardware_id: str) -> None:
+        """Remove the assignment for a given hardware ID.
+
+        Args:
+            hardware_id: The board hardware ID to clear.
+        """
         if not hardware_id:
             return
         with self._op_lock:
@@ -82,6 +104,7 @@ class SketchRegistry:
                                 return
 
     def get_all_assignments(self) -> dict[str, str]:
+        """Return a copy of all hardware ID to sketch path mappings."""
         result = {}
         with self._op_lock:
             with self._lock:
@@ -94,5 +117,5 @@ class SketchRegistry:
         return result
 
     def reset_for_tests(self) -> None:
-        pass
+        """Clear all assignments (test helper)."""
 

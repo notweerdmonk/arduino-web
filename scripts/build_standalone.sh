@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+# @file build_standalone.sh
+# @brief Build standalone binaries via PyOxidizer.
+# @description Build all or selected apps via PyOxidizer and package
+# into .tar.gz or .zip archives with a smoke test for each binary.
+# @option --dry-run  Print what would be done without building.
+# @option --zip      Package as .zip instead of .tar.gz.
+# @option --help     Show usage and exit.
+# @description APP is one or more app names: board-manager, arduino-dash,
+# medminder-dash (default: all 3). Pass --help for full usage.
+# @exitcode 0 All builds succeeded.
+# @exitcode 2 At least one build failed.
+# @exitcode 4 Invalid CLI argument.
+
 # scripts/build_standalone.sh
 #
 # Build standalone binaries via PyOxidizer.

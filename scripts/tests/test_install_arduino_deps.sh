@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# @file test_install_arduino_deps.sh
+# @brief Tests for the install_arduino_deps.sh script.
+# @description Verify file checks, bash syntax, missing arduino-cli
+# handling, and successful execution with a fake arduino-cli shim.
+
 # scripts/tests/test_install_arduino_deps.sh
 #
 # Tests for the install_arduino_deps.sh script.

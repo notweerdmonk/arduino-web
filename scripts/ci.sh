@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
+# @file ci.sh
+# @brief Full CI pipeline — tests + builds in one command.
+# @description Run all test suites via nox -s all_tests, then build all
+# packages via nox -s all_builds.
+# @option --skip-tests  Skip the test phase, build only.
+# @option --skip-builds Skip the build phase, test only.
+# @option --help        Show usage and exit.
+# @exitcode 0 Pipeline succeeded.
+# @exitcode 1 nox not found on PATH.
+# @exitcode 2 At least one test session failed.
+# @exitcode 3 At least one build session failed.
+# @exitcode 4 Invalid CLI argument.
+
 # scripts/ci.sh
 #
 # Full CI pipeline — tests + builds in one command.

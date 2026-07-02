@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# @file test_ci.sh
+# @brief Tests for the ci.sh script.
+# @description Verify --help, unknown flags, nox-missing handling,
+# --skip-builds, --skip-tests, both flags, test failure propagation,
+# build failure propagation.
+
 # scripts/tests/test_ci.sh
 #
 # Tests for the ci.sh script.

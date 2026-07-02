@@ -34,11 +34,13 @@ verify_ssl = false
 name = "medminder-dash"
 
 [packages]
-click = ">=8.2"
 
 [dev-packages]
+click = ">=8.2"
 djlint = "*"
 ruff = "*"
+pdoc = "*"
+nox = "*"
 
 [requires]
 python_version = "3.10"

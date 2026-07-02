@@ -1,14 +1,23 @@
-"""BMS lifecycle helpers for WSGI entry points.
+"""board_manager/python/board_manager/board_manager/boot.py
 
-Provides start_bms(), stop_bms(), and wait_for_bms() for use in
-gunicorn.conf.py hooks and other WSGI bootstrap scripts.
+BMS lifecycle helpers for WSGI entry points.
 
-Usage:
-    from board_manager.boot import start_bms, stop_bms, wait_for_bms
-    proc = start_bms()
-    wait_for_bms()
-    # ... serve requests ...
-    stop_bms(proc)
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import logging
@@ -206,3 +215,4 @@ def wait_for_bms(
         tcp_port,
     )
     return False
+

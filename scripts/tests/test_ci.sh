@@ -1,17 +1,24 @@
 #!/usr/bin/env bash
+# scripts/tests/test_ci.sh
 #
-# test_ci.sh — tests for scripts/ci.sh.
+# Tests for the ci.sh script.
 #
-# Q18 verification: file exists, is executable, has valid bash syntax,
-# parses CLI flags, has the nox-not-found guard, and forwards the right
-# arguments to `nox` in each mode.
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Strategy: write a fake `nox` shim into a private temp dir, prepend that
-# dir to PATH, and run ci.sh. The shim records the call args + exit codes
-# and emits a marker on stdout that the test asserts on.
+# Copyright 2026 notweerdmonk
 #
-# Usage:  bash scripts/tests/test_ci.sh
-# Exit:   0 on all-pass, 1 on any failure.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -uo pipefail
 
@@ -302,3 +309,4 @@ if [[ "${FAIL}" -ne 0 ]]; then
     exit 1
 fi
 exit 0
+

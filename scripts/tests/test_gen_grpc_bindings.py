@@ -1,14 +1,23 @@
-"""
-test_gen_grpc_bindings.py — pytest tests for scripts/gen_grpc_bindings.py.
+"""scripts/tests/test_gen_grpc_bindings.py
 
-Covers Q3 (skeleton) through Q7 (real run). All tests use the
-``gen_grpc_module`` fixture which imports the script as a module.
+Tests for gen_grpc_bindings script.
 
-Q3: skeleton — module imports, has main(), argparse works
-Q4: venv detection — detect_venv returns (kind, python, pip)
-Q5: proto source resolution — local resolves, nonexistent errors
-Q6: __init__.py chain — ensure_init_chain creates files, idempotent
-Q7: end-to-end — real run regenerates 33 stub files + 5 __init__.py
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from __future__ import annotations
@@ -692,3 +701,4 @@ class TestEdgeCasesMissingDeps:
         ):
             with pytest.raises(RuntimeError, match="failed to download"):
                 gen_grpc_module.resolve_proto_src(args)
+

@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
+# scripts/install_arduino_deps.sh
 #
-# install_arduino_deps.sh — Install Arduino libraries required by the
-# MedMinder project (RTClib for the DS3231 RTC, TM1637TinyDisplay for the
-# 7-segment display).
+# Install Arduino libraries required by sketches.
 #
-# Assumes `arduino-cli` is already installed and on PATH. Does NOT install
-# ESP32 core — only the libraries the MedMinder sketches actually use.
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Usage:
-#   ./scripts/install_arduino_deps.sh
+# Copyright 2026 notweerdmonk
 #
-# Exit codes:
-#   0 — all libraries installed (or already present)
-#   1 — arduino-cli not found
-#   2 — a library failed to install
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -euo pipefail
 
@@ -63,3 +67,4 @@ log "Installed libraries:"
 arduino-cli lib list | grep -E "^(RTClib|TM1637TinyDisplay)" || true
 
 log "Done."
+

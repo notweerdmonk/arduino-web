@@ -1,7 +1,23 @@
-"""Nox session definitions for the medminder monorepo.
+"""noxfile.py
 
-Provides build, test, install, and standalone-binary sessions for all 6
-Python sub-packages.  Run ``nox --list`` to see available sessions.
+Nox session definitions for the Arduino Web monorepo.
+
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import nox
@@ -176,3 +192,4 @@ def _write_index_html(pkg_outdir: Path, pip_name: str):
 
     root_html = f'<!DOCTYPE html>\n<html><body>\n<a href="{pip_name}/">{pip_name}</a><br>\n</body></html>\n'
     dist_root.joinpath("index.html").write_text(root_html)
+

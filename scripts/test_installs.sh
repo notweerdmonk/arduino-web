@@ -1,26 +1,24 @@
 #!/usr/bin/env bash
+# scripts/test_installs.sh
 #
-# test_installs.sh — Create a reproducible venv via pipenv, install all monorepo
-# wheels from Pipfile, and smoke-test each package (import check, --help for CLI
-# packages).
+# Install wheels into clean venv + smoke test.
 #
-# Usage:
-#   ./scripts/test_installs.sh              # run full pipeline
-#   ./scripts/test_installs.sh --dry-run    # show what would be done
-#   ./scripts/test_installs.sh --help       # show help
-#   ./scripts/test_installs.sh --skip-install  # skip pipenv sync (re-test only)
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Exit codes:
-#   0 — all packages installed and smoke-tested successfully
-#   1 — pipenv not found or Pipfile missing
-#   2 — pipenv sync failed
-#   3 — smoke test(s) failed
-#   4 — invalid CLI argument
+# Copyright 2026 notweerdmonk
 #
-# Environment:
-#   TEST_INSTALLS_DIR — override the working directory (default: REPO_ROOT/test_installs)
-#   PIP_INDEX_URL     — passed through to pipenv (default: https://pypi.org/simple)
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -euo pipefail
 
@@ -256,3 +254,4 @@ main() {
 }
 
 main "$@"
+

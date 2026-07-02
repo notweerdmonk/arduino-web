@@ -1,20 +1,23 @@
-"""
+"""board_manager/python/board_manager/setup.py
+
 board-manager — Board Manager Service for the arduino-cli gRPC API.
 
-The service speaks the arduino-cli gRPC protocol, owns the lifecycle of
-the ``arduino-cli`` daemon, and forwards compile/upload/board-list
-requests from the local dashboard to it. It can also be embedded in
-tests via the in-process ``BoardManagerService`` class.
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-Local-source convention
------------------------
-The dependencies declared in ``pyproject.toml`` (``arduino-grpc``,
-``grpcio``, ``protobuf``) use the standard PyPI package names so the
-package also works with a normal ``pip install board-manager`` from a
-remote index. In this monorepo the ``arduino-grpc`` dependency is
-resolved through the local ``file://`` index declared in this
-package's Pipfile (and the noxfile builds the matching wheel into
-``<repo>/grpc_client/python/arduino_grpc/dist/``).
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from setuptools import setup, find_packages
@@ -42,3 +45,4 @@ setup(
     },
     keywords=["arduino", "grpc", "service", "board-detection"],
 )
+

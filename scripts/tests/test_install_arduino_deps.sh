@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
+# scripts/tests/test_install_arduino_deps.sh
 #
-# test_install_arduino_deps.sh — tests for scripts/install_arduino_deps.sh.
+# Tests for the install_arduino_deps.sh script.
 #
-# Q1-Q2 verification: file exists, is executable, has valid bash syntax,
-# and exits with the right code when arduino-cli is / isn't on PATH.
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Strategy: write a tiny `arduino-cli` shim into a private temp dir, prepend
-# that dir to PATH, and run the script under test. No need to actually call
-# the real arduino-cli.
+# Copyright 2026 notweerdmonk
 #
-# Usage:  bash scripts/tests/test_install_arduino_deps.sh
-# Exit:   0 on all-pass, 1 on any failure.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -uo pipefail
 
@@ -207,3 +215,4 @@ if [[ "${FAIL}" -ne 0 ]]; then
     exit 1
 fi
 exit 0
+

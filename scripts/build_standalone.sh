@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
+# scripts/build_standalone.sh
 #
-# build_standalone.sh — Build all 3 monorepo apps into standalone binaries
-# via PyOxidizer, then copy the results to dist-standalone/.
+# Build standalone binaries via PyOxidizer.
 #
-# Usage:
-#   ./scripts/build_standalone.sh                    # build all 3 apps, .tar.gz
-#   ./scripts/build_standalone.sh board-manager      # build a single app
-#   ./scripts/build_standalone.sh --zip              # build + .zip archives
-#   ./scripts/build_standalone.sh --dry-run          # show what would be done
-#   ./scripts/build_standalone.sh --help             # show help
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Exit codes:
-#   0 — all builds succeeded
-#   1 — pyoxidizer not found on PATH
-#   2 — a build failed
-#   4 — invalid CLI argument
+# Copyright 2026 notweerdmonk
 #
-# Environment:
-#   PYOXIDIZER  — pyoxidizer binary path (default: pyoxidizer from PATH)
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -euo pipefail
 
@@ -244,3 +244,4 @@ main() {
 }
 
 main "$@"
+

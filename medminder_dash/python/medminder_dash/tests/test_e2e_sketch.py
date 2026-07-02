@@ -1,4 +1,24 @@
-"""Tests for the modified MedMinderV2.ino — verifies it includes alarm.hpp"""
+"""medminder_dash/python/medminder_dash/tests/test_e2e_sketch.py
+
+End-to-end tests for sketch generation.
+
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 
 import os
 import tempfile
@@ -102,3 +122,4 @@ class TestEndToEndGenerateAndSketch:
         content = generate_alarm_hpp([])
         assert "const Medicine medicines[] = {};" in content
         assert "N_MED  (sizeof(medicines) / sizeof(medicines[0]))" in content
+

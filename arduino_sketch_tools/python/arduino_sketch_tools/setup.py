@@ -1,24 +1,23 @@
-"""
+"""arduino_sketch_tools/python/arduino_sketch_tools/setup.py
+
 arduino-sketch-tools — Flask extension for compile/upload to the
-arduino-cli daemon via the BoardManagerService.
 
-Provides ``ArduinoSketchTools``, a Flask extension that registers the
-compile, upload, board-list, port-list and related routes, and exposes
-helpers for the dashboard front-ends. It is consumed by both
-``arduino_dash`` (board + compile dashboard) and ``medminder_dash``
-(medicine reminder dashboard).
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-Local-source convention
------------------------
-The dependencies declared in ``pyproject.toml`` (``flask``,
-``arduino-grpc``, ``board-manager``, ``board-manager-client``) use the
-standard PyPI package names so the package also works with a normal
-``pip install arduino-sketch-tools`` from a remote index. In this
-monorepo the ``arduino-grpc`` / ``board-manager`` /
-``board-manager-client`` dependencies are resolved through the local
-``file://`` index declared in this package's Pipfile (and the noxfile
-builds the matching wheels into the ``dist/`` subdirectories of the
-relevant packages).
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from setuptools import setup, find_packages
@@ -49,3 +48,4 @@ setup(
     include_package_data=True,
     keywords=["arduino", "flask-extension", "compile", "upload"],
 )
+

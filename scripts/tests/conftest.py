@@ -1,10 +1,23 @@
-"""
-conftest.py — shared fixtures for the scripts/tests/ pytest suite.
+"""scripts/tests/conftest.py
 
-The tests exercise scripts/install_arduino_deps.sh and
-scripts/gen_grpc_bindings.py (both at the repo's scripts/ root), and
-the populated setup.py files under each of the 6 Python packages
-(each at <pkg>/python/<pkg>/setup.py).
+Pytest fixtures and configuration for scripts tests.
+
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from __future__ import annotations
@@ -78,3 +91,4 @@ def gen_grpc_module():
 @pytest.fixture
 def packages() -> list[tuple[str, Path]]:
     return list(PACKAGES)
+

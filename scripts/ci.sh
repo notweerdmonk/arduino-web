@@ -1,29 +1,24 @@
 #!/usr/bin/env bash
+# scripts/ci.sh
 #
-# ci.sh — Run the full Phase 56 CI pipeline for the MedMinder monorepo.
+# Full CI pipeline — tests + builds in one command.
 #
-# Pipeline:
-#   1. Run all test suites (scripts/ bash + pytest, plus all 6 per-package
-#      pytest suites) via `nox -s all_tests`. Exits 1 on any failure.
-#   2. Build all 6 packages via `nox -s all_builds`. Exits 2 on any failure.
+# Author: notweerdmonk
+# SPDX-License-Identifier: Apache-2.0
 #
-# Usage:
-#   ./scripts/ci.sh              # run full pipeline
-#   ./scripts/ci.sh --skip-tests # build only
-#   ./scripts/ci.sh --skip-builds # test only
-#   ./scripts/ci.sh --help       # show help
+# Copyright 2026 notweerdmonk
 #
-# Exit codes:
-#   0  — pipeline succeeded
-#   1  — nox not found on PATH
-#   2  — at least one test failed
-#   3  — at least one build failed
-#   4  — invalid CLI argument
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Note: this script does NOT call `install_arduino_deps.sh` — that step
-# downloads and installs Arduino libraries (RTClib, TM1637TinyDisplay) and
-# is unrelated to the Python test/build pipeline. Run it manually if you
-# need to flash the MedMinder sketches to a board.
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 set -euo pipefail
 
@@ -97,3 +92,4 @@ else
 fi
 
 echo "==> CI pipeline complete"
+

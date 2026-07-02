@@ -1,3 +1,26 @@
+<!--
+    medminder_dash/python/medminder_dash/medminder_dash/templates/partials/admin_board_selector.html
+
+    Admin Board Selector template.
+
+    Author: notweerdmonk
+    SPDX-License-Identifier: Apache-2.0
+
+    Copyright 2026 notweerdmonk
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
 <div class="card" id="admin-board-selector-card">
     <div class="form-group mb-0">
         <label for="admin-active-board">{{ board_selector_label }}</label>
@@ -28,3 +51,4 @@
                value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
     </div>
 </div>
+

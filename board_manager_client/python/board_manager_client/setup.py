@@ -1,21 +1,23 @@
-"""
+"""board_manager_client/python/board_manager_client/setup.py
+
 board-manager-client — PubSub client for the BoardManagerService.
 
-This package wraps the ``PubSub`` gRPC stream exposed by
-``board-manager`` with a friendlier Python API. Consumers (notably
-``arduino_dash`` and ``medminder_dash``) instantiate a
-``PubSubClient`` to subscribe to command responses and board/port
-events without having to deal with the raw gRPC stubs directly.
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-Local-source convention
------------------------
-The dependencies declared in ``pyproject.toml`` (``arduino-grpc``,
-``board-manager``) use the standard PyPI package names so the package
-also works with a normal ``pip install board-manager-client`` from a
-remote index. In this monorepo the ``*-grpc`` and ``board-manager``
-dependencies are resolved through the local ``file://`` index declared
-in this package's Pipfile (and the noxfile builds the matching wheels
-into the ``dist/`` subdirectories of the relevant packages).
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from setuptools import setup, find_packages
@@ -36,3 +38,4 @@ setup(
     ],
     keywords=["arduino", "pubsub", "client"],
 )
+

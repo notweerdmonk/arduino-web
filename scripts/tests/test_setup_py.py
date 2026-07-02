@@ -1,20 +1,23 @@
-"""
-test_setup_py.py — pytest tests for the 6 populated setup.py files.
+"""scripts/tests/test_setup_py.py
 
-Covers Q8 through Q14. For each of the 6 packages we verify:
+Tests for setup.py helper utilities.
 
-  Q8: arduino_grpc — packages list + package_dir map (cross-source cc/)
-  Q9-Q13: All 6 packages have proper setup() arguments
-  Q14: all 6 setup.py --name --version return the correct value, and
-       each pyproject.toml has the expected console_scripts and
-       package_data declarations.
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-Note: ``setup.py --name/--version`` invokes setuptools' dist metadata
-introspection, which for PEP 621 packages requires setuptools >= 61.
-The system /usr/bin/python3 ships setuptools 59.6.0, which fails to
-parse the pyproject.toml. Each per-package venv ships setuptools
-82.0.1, so the tests shell out to ``pipenv run python setup.py ...``
-in the appropriate venv.
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from __future__ import annotations
@@ -449,3 +452,4 @@ class TestQ14Metadata:
             )
             assert "name" in text
             assert "version" in text
+

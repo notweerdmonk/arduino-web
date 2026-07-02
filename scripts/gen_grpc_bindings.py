@@ -1,40 +1,24 @@
 #!/usr/bin/env python3
-"""
-gen_grpc_bindings.py — Regenerate Python gRPC stubs for the
-arduino-cli gRPC service.
+"""scripts/gen_grpc_bindings.py
 
-This script walks the arduino-cli `.proto` files and emits the corresponding
-`*_pb2.py`, `*_pb2_grpc.py`, and `*_pb2.pyi` files into
-``<repo>/grpc_client/python/arduino_grpc/cc/arduino/cli/commands/v1``.
+Regenerate Python gRPC stubs from proto files.
 
-The proto source can come from a local checkout (passed via ``--proto-src``)
-or a GitHub release zip (passed via ``--proto-url``).
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-The script is intentionally venv-aware: it will use the pipenv / poetry / uv
-virtualenv that owns the ``arduino_grpc`` package when one is detected,
-falling back to the system Python otherwise. ``grpcio-tools`` and
-``googleapis-common-protos`` are installed into the chosen environment on
-demand (with confirmation unless ``--no-prompt`` or ``--install-deps`` is
-supplied).
+Copyright 2026 notweerdmonk
 
-Examples
---------
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Use a local checkout of arduino-cli::
+    http://www.apache.org/licenses/LICENSE-2.0
 
-    python3 scripts/gen_grpc_bindings.py \\
-        --proto-src /home/weerdmonk/Projects/arduino-cli/rpc
-
-Download the protos from a release zip and prompt before installing deps::
-
-    python3 scripts/gen_grpc_bindings.py \\
-        --proto-url https://github.com/arduino/arduino-cli/releases/download/0.35.0/arduino-cli_0.35.0_Linux_64bit.zip
-
-CI usage (no prompts, auto-install)::
-
-    python3 scripts/gen_grpc_bindings.py \\
-        --proto-src /opt/arduino-cli/rpc \\
-        --install-deps --no-prompt
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from __future__ import annotations
@@ -666,3 +650,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

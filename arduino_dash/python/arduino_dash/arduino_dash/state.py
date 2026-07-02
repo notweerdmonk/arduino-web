@@ -1,4 +1,24 @@
-"""Shared module-level state for the Arduino Dash webapp"""
+"""arduino_dash/python/arduino_dash/arduino_dash/state.py
+
+Shared module-level state for the Arduino Dash webapp
+
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
+
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 
 import logging
 import threading
@@ -48,3 +68,4 @@ _fallback_scanner: threading.Thread | None = None
 _stop_fallback_scan: bool = False
 _fallback_patterns = ["/dev/ttyACM*", "/dev/ttyUSB*"]
 _fallback_scan_interval = 5.0
+

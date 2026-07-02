@@ -1,21 +1,23 @@
-"""
+"""medminder_dash/python/medminder_dash/setup.py
+
 medminder-dash — Medicine reminder web app for the Arduino MedMinderV2.
 
-A small Flask dashboard that shows the medicine schedule, the next
-reminder, and a live WebSocket feed of board/port events from the
-BoardManagerService. It is the dashboard that
-``python -m medminder_dash`` starts.
+Author: notweerdmonk
+SPDX-License-Identifier: Apache-2.0
 
-Local-source convention
------------------------
-The dependencies declared in ``pyproject.toml`` (``flask``,
-``gunicorn``) use the standard PyPI package names so the package also
-works with a normal ``pip install medminder-dash`` from a remote
-index. In this monorepo the sibling ``*-grpc``, ``board-manager``,
-``board-manager-client`` and ``arduino-sketch-tools`` packages are
-installed separately (e.g. from local wheels in the Pipfile) and
-therefore intentionally do **not** appear in ``pyproject.toml``'s
-``dependencies`` list.
+Copyright 2026 notweerdmonk
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from setuptools import setup, find_packages
@@ -49,3 +51,4 @@ setup(
     include_package_data=True,
     keywords=["arduino", "medicine", "reminder", "dashboard", "flask"],
 )
+

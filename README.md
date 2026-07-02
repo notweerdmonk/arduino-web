@@ -202,7 +202,8 @@ medminder/
 │   ├── scripts.md                           # → scripts/docs/ (link)
 │   ├── e2e-testing.md                       # → e2e/docs/ (link)
 │   ├── dist-test-install.md                 # → dist-test-install/docs/ (link)
-│   └── dist-standalone.md                   # → dist-standalone-install/docs/ (link)
+│   ├── dist-standalone.md                   # → dist-standalone-install/docs/ (link)
+│   └── reference/                           # Generated API reference (pdoc)
 │
 ├── scripts/
 │   └── docs/                                # Scripts documentation (7 files)
@@ -212,7 +213,8 @@ medminder/
 │       ├── test-installs.md                 # Wheel install validation
 │       ├── install-arduino-deps.md          # Arduino library installer
 │       ├── gen-grpc-bindings.md             # gRPC stub generator
-│       └── tests.md                         # Scripts test suite
+│       ├── tests.md                         # Scripts test suite
+│       └── reference/                       # Generated API reference (pdoc + shdoc)
 │
 ├── e2e/
 │   └── docs/                                # E2E testing documentation (4 files)
@@ -245,26 +247,30 @@ medminder/
 │       ├── daemon_manager.md
 │       ├── boot.md
 │       ├── config.md
-│       └── udev_monitor.md
+│       ├── udev_monitor.md
+│       └── reference/                       # Generated API reference (pdoc)
 │
 ├── board_manager_client/python/board_manager_client/
 │   └── docs/                                # Per-package docs (1 module)
 │       ├── index.md
-│       └── pubsub_client.md
+│       ├── pubsub_client.md
+│       └── reference/                       # Generated API reference (pdoc)
 │
 ├── arduino_sketch_tools/python/arduino_sketch_tools/
 │   └── docs/                                # Per-package docs (3 modules)
 │       ├── index.md
 │       ├── extension.md
 │       ├── routes.md
-│       └── sketch_registry.md
+│       ├── sketch_registry.md
+│       └── reference/                       # Generated API reference (pdoc)
 │
 ├── grpc_client/python/arduino_grpc/
 │   └── docs/                                # Per-package docs (3 modules)
 │       ├── index.md
 │       ├── client.md
 │       ├── models.md
-│       └── exceptions.md
+│       ├── exceptions.md
+│       └── reference/                       # Generated API reference (pdoc)
 │
 ├── arduino_dash/python/arduino_dash/
 │   └── docs/                                # Per-package docs (12 modules)
@@ -279,7 +285,8 @@ medminder/
 │       ├── utils.md
 │       ├── settings.md
 │       ├── wsgi.md
-│       └── gunicorn_conf.md
+│       ├── gunicorn_conf.md
+│       └── reference/                       # Generated API reference (pdoc)
 │
 └── medminder_dash/python/medminder_dash/
     └── docs/                                # Per-package docs (14 modules)
@@ -296,7 +303,8 @@ medminder/
         ├── utils.md
         ├── settings.md
         ├── wsgi.md
-        └── gunicorn_conf.md
+        ├── gunicorn_conf.md
+        └── reference/                       # Generated API reference (pdoc)
 ```
 
 ### Reference
@@ -305,6 +313,28 @@ medminder/
 - [JOURNAL.md](JOURNAL.md) — development log
 - [CODEBASE_REFERENCE.md](CODEBASE_REFERENCE.md) — technical reference
 - [index.md](index.md) — full documentation hub (all docs across the monorepo)
+
+### API Reference
+
+- [grpc_client/python/arduino_grpc/docs/reference/](grpc_client/python/arduino_grpc/docs/reference/) — Arduino gRPC API reference
+- [board_manager/python/board_manager/docs/reference/](board_manager/python/board_manager/docs/reference/) — Board Manager API reference
+- [board_manager_client/python/board_manager_client/docs/reference/](board_manager_client/python/board_manager_client/docs/reference/) — Board Manager Client API reference
+- [arduino_sketch_tools/python/arduino_sketch_tools/docs/reference/](arduino_sketch_tools/python/arduino_sketch_tools/docs/reference/) — Arduino Sketch Tools API reference
+- [arduino_dash/python/arduino_dash/docs/reference/](arduino_dash/python/arduino_dash/docs/reference/) — Arduino Dash API reference
+- [medminder_dash/python/medminder_dash/docs/reference/](medminder_dash/python/medminder_dash/docs/reference/) — MedMinder Dash API reference
+- [e2e/docs/reference/](e2e/docs/reference/) — E2E server API reference
+- [scripts/docs/reference/gen_grpc_bindings/](scripts/docs/reference/gen_grpc_bindings/) — gen_grpc_bindings.py API reference
+- [scripts/tests/docs/reference/test_install_arduino_deps.md](scripts/tests/docs/reference/test_install_arduino_deps.md) — test_install_arduino_deps.sh reference
+- [scripts/docs/reference/install_arduino_deps.md](scripts/docs/reference/install_arduino_deps.md) — install_arduino_deps.sh reference
+- [scripts/docs/reference/test_installs.md](scripts/docs/reference/test_installs.md) — test_installs.sh reference
+- [scripts/tests/docs/reference/test_ci.md](scripts/tests/docs/reference/test_ci.md) — test_ci.sh reference
+- [scripts/docs/reference/ci.md](scripts/docs/reference/ci.md) — ci.sh reference
+- [scripts/docs/reference/build_standalone.md](scripts/docs/reference/build_standalone.md) — build_standalone.sh reference
+- [scripts/docs/reference/check_venv.md](scripts/docs/reference/check_venv.md) — check_venv.bash reference
+- [scripts/docs/reference/add_license_headers/](scripts/docs/reference/add_license_headers/) — add_license_headers.py API reference
+- [docs/reference/noxfile/](docs/reference/noxfile/) — noxfile.py API reference
+
+### Sub-Directory Documentation
 
 ## Acknowledgements
 

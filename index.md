@@ -38,6 +38,7 @@ Base: `grpc_client/python/arduino_grpc/`
 | [docs/client.md](grpc_client/python/arduino_grpc/docs/client.md) | `ArduinoGrpcClient` — all methods with signatures |
 | [docs/models.md](grpc_client/python/arduino_grpc/docs/models.md) | `Port`, `Board`, `CompileResult`, `UploadResult` data models |
 | [docs/exceptions.md](grpc_client/python/arduino_grpc/docs/exceptions.md) | Exception hierarchy: `ArduinoError` → typed subclasses |
+| [docs/reference](grpc_client/python/arduino_grpc/docs/reference) | Arduino gRPC API reference |
 
 ### `board-manager` — Pub/sub BoardManagerService
 
@@ -57,6 +58,7 @@ Base: `board_manager/python/board_manager/`
 | [docs/boot.md](board_manager/python/board_manager/docs/boot.md) | WSGI lifecycle helpers — `start_bms`, `stop_bms`, `wait_for_bms` |
 | [docs/config.md](board_manager/python/board_manager/docs/config.md) | `Config` dataclass, `load_config` — 3-tier priority |
 | [docs/udev_monitor.md](board_manager/python/board_manager/docs/udev_monitor.md) | `UdevMonitor` — USB hotplug via pyudev |
+| [docs/reference](board_manager/python/board_manager/docs/reference/) | Board Manager API reference |
 
 ### `board-manager-client` — PubSubClient
 
@@ -67,6 +69,7 @@ Base: `board_manager_client/python/board_manager_client/`
 | [README.md](board_manager_client/python/board_manager_client/README.md) | Package overview, install, usage |
 | [docs/index.md](board_manager_client/python/board_manager_client/docs/index.md) | Package overview, exports, dependencies |
 | [docs/pubsub_client.md](board_manager_client/python/board_manager_client/docs/pubsub_client.md) | `PubSubClient` — connect, subscribe, publish, reconnect, callbacks |
+| [docs/reference](board_manager_client/python/board_manager_client/docs/reference) | Board Manager Client API reference |
 
 ### `arduino-sketch-tools` — Flask extension for compile/upload
 
@@ -79,6 +82,7 @@ Base: `arduino_sketch_tools/python/arduino_sketch_tools/`
 | [docs/extension.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/extension.md) | `ArduinoSketchTools` — `init_app`, blueprint registration, state management |
 | [docs/routes.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/routes.md) | Compile/upload Flask routes, request/response formats |
 | [docs/sketch_registry.md](arduino_sketch_tools/python/arduino_sketch_tools/docs/sketch_registry.md) | `SketchRegistry` — hardware ID → sketch assignment, thread safety |
+| [docs/reference](arduino_sketch_tools/python/arduino_sketch_tools/docs/reference) | Arduino Sketch Tools API reference |
 
 ### `arduino-dash` — Board + compile web dashboard
 
@@ -99,6 +103,7 @@ Base: `arduino_dash/python/arduino_dash/`
 | [docs/gunicorn_conf.md](arduino_dash/python/arduino_dash/docs/gunicorn_conf.md) | Gunicorn configuration hooks |
 | [docs/sketch_management.md](arduino_dash/python/arduino_dash/docs/sketch_management.md) | Sketch upload/management functions |
 | [docs/sketch_registry.md](arduino_dash/python/arduino_dash/docs/sketch_registry.md) | Hardware ID → sketch assignment registry |
+| [docs/reference](arduino_dash/python/arduino_dash/docs/reference) | Arduino Dash API reference |
 
 ### `medminder-dash` — Medicine reminder web dashboard
 
@@ -122,6 +127,7 @@ Base: `medminder_dash/python/medminder_dash/`
 | [docs/sketch_management.md](medminder_dash/python/medminder_dash/docs/sketch_management.md) | Sketch upload/management functions |
 | [docs/sketch_registry.md](medminder_dash/python/medminder_dash/docs/sketch_registry.md) | Hardware ID → sketch assignment registry |
 | [docs/board_management.md](medminder_dash/python/medminder_dash/docs/board_management.md) | Board management (placeholder) |
+| [docs/reference](medminder_dash/python/medminder_dash/docs/reference) | MedMinder Dash API reference |
 
 ---
 

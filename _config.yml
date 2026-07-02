@@ -3,7 +3,7 @@ description: >-
   Arduino board monitoring and management via gRPC — pub/sub BoardManagerService
   with Flask+HTMX+WebSocket web dashboards.
 
-theme: jekyll-theme-cayman
+theme: minima
 url: ""
 
 plugins:

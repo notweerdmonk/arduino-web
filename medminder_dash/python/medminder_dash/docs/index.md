@@ -3,7 +3,7 @@
 # medminder_dash — Package Overview
 
 `medminder_dash` is a Flask web dashboard for managing medicine reminders on
-Arduino MedMinderV2 boards. It is part of the **MedMinder monorepo**.
+Arduino MedMinderV2 boards. It is part of the **Arduino Web monorepo**.
 
 ## Console Script
 
@@ -28,7 +28,7 @@ python -m medminder_dash [--host 0.0.0.0] [--port 8080] ...
 
 ## Architecture within the Monorepo
 
-The MedMinder monorepo contains several sibling packages:
+The Arduino Web monorepo contains several sibling packages:
 
 | Package | Role |
 |---------|------|

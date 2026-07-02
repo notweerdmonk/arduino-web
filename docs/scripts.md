@@ -2,7 +2,7 @@
 ---
 # Scripts
 
-Utility scripts for building, testing, and deploying the MedMinder monorepo.
+Utility scripts for building, testing, and deploying the Arduino Web monorepo.
 
 Full documentation lives in [`scripts/docs/`](../scripts/docs/index.md).
 

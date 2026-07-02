@@ -11,7 +11,7 @@
 `arduino-sketch-tools` is a Flask extension that provides compile and upload
 routes for Arduino sketches via a pub/sub-based BoardManagerService daemon. It
 is consumed by both `arduino_dash` (board + compile dashboard) and
-`medminder_dash` (medicine reminder dashboard) in the MedMinder monorepo.
+`medminder_dash` (medicine reminder dashboard) in the Arduino Web monorepo.
 
 The extension wraps an `ArduinoSketchTools` class that registers a Flask
 blueprint, subscribes to pub/sub response topics for compile/upload progress

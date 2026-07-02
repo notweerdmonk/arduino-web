@@ -4,7 +4,7 @@
 
 **Version:** 0.1.0
 
-A Flask web dashboard for board management, compile/upload UI, and live WebSocket events. Part of the MedMinder monorepo. It connects to `BoardManagerService` via PubSub and provides HTML routes, JSON API routes, sketch management, and WebSocket live events.
+A Flask web dashboard for board management, compile/upload UI, and live WebSocket events. Part of the Arduino Web monorepo. It connects to `BoardManagerService` via PubSub and provides HTML routes, JSON API routes, sketch management, and WebSocket live events.
 
 ## Console Script
 
@@ -19,7 +19,7 @@ Also invocable via `python -m arduino_dash` (see `__main__.py`).
 ## Architecture (Monorepo Context)
 
 ```
-MedMinder Monorepo
+Arduino Web Monorepo
 ├── arduino_dash/python/arduino_dash    ← this package
 │   ├── arduino_dash/                    (Python source)
 │   └── docs/                            (this documentation)

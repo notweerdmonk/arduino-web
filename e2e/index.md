@@ -2,7 +2,7 @@
 ---
 # E2E Testing
 
-End-to-end browser testing infrastructure for the MedMinder web apps. Supports interactive MCP-driven testing via opencode and automated Playwright spec execution.
+End-to-end browser testing infrastructure for the Arduino Web web apps. Supports interactive MCP-driven testing via opencode and automated Playwright spec execution.
 
 ## Quick Reference
 

@@ -3,7 +3,7 @@
 {% raw %}
 # WebSocket Message Flow
 
-This document describes all WebSocket push mechanisms in MedMinder, organized into three tiers:
+This document describes all WebSocket push mechanisms in Arduino Web, organized into three tiers:
 
 | Tier | Category | Mechanism | Introduced |
 |------|----------|-----------|------------|

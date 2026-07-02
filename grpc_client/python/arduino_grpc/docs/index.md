@@ -10,7 +10,7 @@ Python gRPC client for the [Arduino CLI](https://github.com/arduino/arduino-cli)
 
 ## Monorepo Context
 
-`arduino-grpc` lives in the **MedMinder monorepo** at `grpc_client/python/arduino_grpc/`. It is consumed as a local wheel by sibling packages:
+`arduino-grpc` lives in the **Arduino Web monorepo** at `grpc_client/python/arduino_grpc/`. It is consumed as a local wheel by sibling packages:
 
 - `board_manager`
 - `board_manager_client`

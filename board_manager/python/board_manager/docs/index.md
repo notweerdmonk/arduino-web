@@ -4,7 +4,7 @@
 
 ## Purpose
 
-`board_manager` is the core pub/sub service within the MedMinder monorepo responsible for managing Arduino board detection, per-board worker subprocesses, and message routing between web apps and the Arduino CLI daemon.
+`board_manager` is the core pub/sub service within the Arduino Web monorepo responsible for managing Arduino board detection, per-board worker subprocesses, and message routing between web apps and the Arduino CLI daemon.
 
 It acts as a central hub that:
 - Detects Arduino board connect/disconnect events (via gRPC streaming or udev hotplug)

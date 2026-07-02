@@ -2,7 +2,7 @@
 ---
 # Arduino Library Installer — `install_arduino_deps.sh`
 
-Install Arduino libraries required by the MedMinder sketches.
+Install Arduino libraries required by the MedMinderV2 sketches.
 
 ```bash
 ./scripts/install_arduino_deps.sh

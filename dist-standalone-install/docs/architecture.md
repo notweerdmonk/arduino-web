@@ -16,8 +16,8 @@ Three PyOxidizer config files live under `scripts/pyoxidizer/`:
 ```
 scripts/pyoxidizer/
 ├── board-manager/pyoxidizer.bzl     # Board Manager Service (gRPC daemon)
-├── arduino-dash/pyoxidizer.bzl      # Arduino Dashboard (Flask + gunicorn)
-└── medminder-dash/pyoxidizer.bzl    # MedMinder Dashboard (Flask + gunicorn)
+├── arduino-dash/pyoxidizer.bzl      # Arduino Dash (Flask + gunicorn)
+└── medminder-dash/pyoxidizer.bzl    # MedMinder Dash (Flask + gunicorn)
 ```
 
 Each config defines:

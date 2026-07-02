@@ -1,9 +1,9 @@
 ---
 ---
 
-# MedMinder Documentation
+# Arduino Web Documentation
 
-Welcome to the MedMinder documentation. This index maps all documentation resources across the monorepo.
+Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
 > **Last updated**: 2026-06-25 — Phase 103 complete (API route restructure: PubSub board commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/boards/events`, `/api/board/<port>/status`, `/api/daemon/status`). See [PLAN.md](PLAN.md) for full phase history.
 

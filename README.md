@@ -306,17 +306,6 @@ medminder/
 - [CODEBASE_REFERENCE.md](CODEBASE_REFERENCE.md) — technical reference
 - [index.md](index.md) — full documentation hub (all docs across the monorepo)
 
-### Sub-Directory Documentation
-
-- [scripts/docs/index.md](scripts/docs/index.md) — scripts reference
-- [e2e/index.md](e2e/index.md) — E2E browser testing (doc hub) — [`README.md`](e2e/README.md) for quick start
-- [dist-test-install/docs/index.md](dist-test-install/docs/index.md) — wheel install validation
-- [dist-standalone-install/docs/index.md](dist-standalone-install/docs/index.md) — standalone binary distribution
-- [dist-standalone-install/docs/architecture.md](dist-standalone-install/docs/architecture.md) — PyOxidizer bundling design
-- [dist-standalone-install/docs/api.md](dist-standalone-install/docs/api.md) — CLI flags reference
-- [dist-standalone-install/docs/guide.md](dist-standalone-install/docs/guide.md) — user guide + deployment
-- [dist-standalone-install/docs/tests.md](dist-standalone-install/docs/tests.md) — testing methodology
-
 ## Acknowledgements
 
-Assisted-by: OpenCode:minimax-m2.5-free OpenCode:deepseek-v4-flash-free
+Assisted by OpenCode:minimax-m2.5-free and OpenCode:deepseek-v4-flash-free

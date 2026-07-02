@@ -9,7 +9,7 @@ or more dashboard consumers.
 
 ## Overview
 
-`board-manager` is the central service in the MedMinder architecture.
+`board-manager` is the central service in the Arduino Web architecture.
 It owns the lifecycle of the `arduino-cli daemon` process and
 coordinates all interaction with it:
 

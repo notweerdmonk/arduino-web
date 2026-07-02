@@ -97,7 +97,7 @@ dist-standalone/arduino-dash/arduino-dash \
 
 **Binary:** `dist-standalone/medminder-dash/medminder-dash`
 
-Entry point: `medminder_dash.__main__` — runs the MedMinder Dashboard (Flask web app).
+Entry point: `medminder_dash.__main__` — runs MedMinder Dash (Flask web app).
 
 ```
 usage: medminder-dash [-h] [--host HOST] [--port PORT] [--uds UDS]

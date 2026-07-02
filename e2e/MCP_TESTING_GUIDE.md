@@ -1,8 +1,8 @@
 ---
 ---
-# MCP E2E Testing Guide — MedMinder Interactive Browser Tests
+# MCP E2E Testing Guide — Arduino Web Interactive Browser Tests
 
-This guide explains how to run interactive browser-based E2E tests on the MedMinder web apps using opencode's Playwright MCP tools. It covers server setup, mock data injection, and step-by-step testing recipes.
+This guide explains how to run interactive browser-based E2E tests on the Arduino Web web apps using opencode's Playwright MCP tools. It covers server setup, mock data injection, and step-by-step testing recipes.
 
 > **Who is this for?** Developers and QA engineers running tests manually via the opencode agent.
 

@@ -83,11 +83,11 @@ nohup arduino-cli daemon --port 50051 --daemonize > /dev/null 2>&1
 dist-standalone/board-manager/board-manager &
 # Listens on /tmp/board_mgr.sock (UDS) and 127.0.0.1:9090 (TCP)
 
-# Step 3: Start Dashboard
+# Step 3: Start Arduino Dash
 dist-standalone/arduino-dash/arduino-dash &
 # Opens http://localhost:8080
 
-# Step 4 (optional): Start MedMinder Dashboard
+# Step 4 (optional): Start MedMinder Dash
 dist-standalone/medminder-dash/medminder-dash --port 8081 &
 ```
 
@@ -124,7 +124,7 @@ tar xzf dist-standalone/medminder-dash.tar.gz
 ```ini
 # /etc/systemd/system/board-manager.service
 [Unit]
-Description=MedMinder Board Manager Service
+Description=Arduino Board Manager Service
 After=network.target
 
 [Service]
@@ -140,7 +140,7 @@ WantedBy=multi-user.target
 ```ini
 # /etc/systemd/system/arduino-dash.service
 [Unit]
-Description=MedMinder Arduino Dashboard
+Description=Arduino Dash
 After=board-manager.service
 Requires=board-manager.service
 

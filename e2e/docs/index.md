@@ -2,7 +2,7 @@
 ---
 # E2E Testing — Interactive Browser Tests
 
-End-to-end browser tests for the MedMinder web apps using opencode's Playwright MCP tools.
+End-to-end browser tests for the Arduino Web web apps using opencode's Playwright MCP tools.
 
 > **Note:** This page covers interactive MCP-driven testing via the opencode agent. For automated Playwright spec execution, see the sections below.
 

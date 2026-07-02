@@ -9,10 +9,11 @@ sketch.
 
 ## Overview
 
-`medminder-dash` is the primary user-facing dashboard in the MedMinder
-ecosystem. It integrates with the BoardManagerService for live board
-detection and with the arduino-cli daemon (via `arduino-sketch-tools`)
-for sketch compilation and firmware upload.
+`medminder-dash` is an user-facing dashboard facilitating the programming of
+MedMinder devices. It integrates with the BoardManagerService for live board
+detection and with the arduino-cli daemon (via `arduino-sketch-tools`) for
+sketch compilation and firmware upload. Users can program the devices with
+medicine intake schedules using the web interface.
 
 ### Key Features
 
@@ -26,7 +27,8 @@ for sketch compilation and firmware upload.
 - **Sketch compile/upload** — compile the MedMinderV2 sketch and upload
   to a connected board, with live progress streaming via WS push. Compile
   output shows a real-time `<progress>` bar and per-line `[N%]` prefix.
-  Upload output streams line-by-line (no progress bar — gRPC `UploadResponse` has no `TaskProgress`).
+  Upload output streams line-by-line (no progress bar — gRPC `UploadResponse`
+  has no `TaskProgress`).
 - **Sketch management** — upload new sketches via drag-and-drop or file
   browser, per-board sketch assignment via USB hardware_id, version
   history.

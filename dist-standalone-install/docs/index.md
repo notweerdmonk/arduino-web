@@ -14,10 +14,10 @@ Standalone binary builds for the 3 CLI apps via [PyOxidizer](https://pyoxidizer.
 # Run the Board Manager Service (gRPC)
 dist-standalone/board-manager/board-manager
 
-# Run Arduino Dashboard (Flask :8080)
+# Run Arduino Dash (Flask :8080)
 dist-standalone/arduino-dash/arduino-dash
 
-# Run MedMinder Dashboard (Flask :8080)
+# Run MedMinder Dash (Flask :8080)
 dist-standalone/medminder-dash/medminder-dash
 ```
 

@@ -6,7 +6,7 @@ Persistent PubSub client for BoardManagerService — connects over Unix Domain S
 
 ## Package
 
-`board_manager_client` (namespace package under the MedMinder monorepo).
+`board_manager_client` (namespace package under the Arduino Web monorepo).
 
 ### Exports
 

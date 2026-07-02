@@ -2,7 +2,7 @@
 ---
 # Scripts
 
-Utility scripts for building, testing, and deploying the MedMinder monorepo. Located under `scripts/`.
+Utility scripts for building, testing, and deploying the Arduino Web monorepo. Located under `scripts/`.
 
 ## Quick Reference
 
@@ -11,7 +11,7 @@ Utility scripts for building, testing, and deploying the MedMinder monorepo. Loc
 | [`ci.sh`](ci.md) | Full CI pipeline — tests + builds in one command |
 | [`build_standalone.sh`](build-standalone.md) | Build standalone binaries via PyOxidizer |
 | [`test_installs.sh`](test-installs.md) | Install wheels into clean venv + smoke test |
-| [`install_arduino_deps.sh`](install-arduino-deps.md) | Install Arduino libraries for MedMinder sketches |
+| [`install_arduino_deps.sh`](install-arduino-deps.md) | Install Arduino libraries for MedMinderV2 sketches |
 | [`gen_grpc_bindings.py`](gen-grpc-bindings.md) | Regenerate Python gRPC stubs from proto files |
 | [`check_venv.bash`](check-venv.md) | Recursively verify pipenv venvs in the project tree |
 | [Tests](tests.md) | Scripts test suite (170 tests) |

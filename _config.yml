@@ -1,10 +1,9 @@
-title: MedMinder
+title: Arduino Web
 description: >-
-  Arduino board monitoring and management via gRPC — pub/sub BoardManagerService
-  with Flask+HTMX+WebSocket web dashboards.
+  Arduino boards monitoring and management interface via gRPC, with a pub-sub
+  manager daemon and a web dashboards.
 
 theme: minima
-url: ""
 
 plugins:
   - jekyll-relative-links

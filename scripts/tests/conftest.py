@@ -92,3 +92,20 @@ def gen_grpc_module():
 def packages() -> list[tuple[str, Path]]:
     return list(PACKAGES)
 
+
+@pytest.fixture
+def gen_e2e_spec_docs_module():
+    """Import the gen_e2e_spec_docs module.
+
+    sys.path is mutated to make the script importable. The mutation is
+    scoped to the test and reverted on teardown.
+    """
+    saved = list(sys.path)
+    sys.path.insert(0, str(SCRIPTS_DIR))
+    try:
+        import gen_e2e_spec_docs  # type: ignore[import-not-found]
+
+        return gen_e2e_spec_docs
+    finally:
+        sys.path[:] = saved
+

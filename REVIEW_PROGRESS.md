@@ -36,4 +36,23 @@
 | 8 | e2e/index.md + e2e/README.md + e2e/docs/index.md | ✅ |
 | 9 | nox -s all_tests — 8/8 sessions pass | ✅ |
 | 10 | Stale ./docs/ cleanup | ✅ |
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | arduino_dash — Document Reference table | ✅ |
+| 2 | arduino_sketch_tools — Document Reference table | ✅ |
+| 3 | board_manager — Document Reference table | ✅ |
+| 4 | board_manager_client — Document Reference table | ✅ |
+| 5 | grpc_client — Document Reference table | ✅ |
+| 6 | medminder_dash — Document Reference table | ✅ |
+| 7 | dist-test-install — Document Reference + Related | ✅ |
+| 8 | dist-standalone-install/README.md | ✅ |
+| 9 | dist-standalone-install — Related links | ✅ |
+| 10 | scripts — Related links | ✅ |
+| 11 | nox -s all_tests | ✅ |
+| 12 | bundle exec jekyll build | ✅ |
 {% endraw %}

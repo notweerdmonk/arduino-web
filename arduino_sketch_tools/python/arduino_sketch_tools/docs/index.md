@@ -71,3 +71,12 @@ from arduino_sketch_tools import ArduinoSketchTools, SketchRegistry
 
 - `ArduinoSketchTools` — Flask extension for compile/upload routes, WS broadcast, state management
 - `SketchRegistry` — Thread-safe registry mapping hardware IDs to assigned sketch paths, operating on a shared upload registry dict
+
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Package overview, install, usage |
+| [extension.md](extension.md) | `ArduinoSketchTools` — `init_app`, blueprint registration, state management |
+| [routes.md](routes.md) | Compile/upload Flask routes, request/response formats |
+| [sketch_registry.md](sketch_registry.md) | `SketchRegistry` — hardware ID → sketch assignment, thread safety |

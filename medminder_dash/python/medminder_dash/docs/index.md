@@ -78,6 +78,26 @@ PubSub protocol over Unix domain sockets (default `/tmp/board_mgr.sock`) or TCP
 | `BMS_FIRE_AND_FORGET` | `""` | `gunicorn_conf.py` | Skip wait-for-BMS when `"1"`/`"true"`/`"yes"` |
 | `BMS_WAIT_TIMEOUT` | `10` | `gunicorn_conf.py` | BMS ready wait timeout (seconds) |
 
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Package overview, install, usage |
+| [app.md](app.md) | Flask app factory `create_app()`, `_migrate_default_board` |
+| [pubsub.md](pubsub.md) | PubSub infrastructure, event handlers, WS broadcast |
+| [html_routes.md](html_routes.md) | All HTML routes with method + description |
+| [api_routes.md](api_routes.md) | JSON API endpoints, medicine CRUD, deploy |
+| [medicines_state.md](medicines_state.md) | `Medicine` dataclass, `MedicineStore` CRUD, persistence |
+| [sketch_gen.md](sketch_gen.md) | `generate_alarm_hpp`, `parse_alarm_hpp` |
+| [state.md](state.md) | Shared module state |
+| [utils.md](utils.md) | Utility functions |
+| [settings.md](settings.md) | Sketch directory configuration |
+| [wsgi.md](wsgi.md) | WSGI entry point for gunicorn |
+| [gunicorn_conf.md](gunicorn_conf.md) | Gunicorn configuration hooks |
+| [sketch_management.md](sketch_management.md) | Sketch upload/management functions |
+| [sketch_registry.md](sketch_registry.md) | Hardware ID → sketch assignment registry |
+| [board_management.md](board_management.md) | Board management (placeholder) |
+
 ## Key Dependencies (runtime)
 
 - `flask >= 3.0` — Web framework

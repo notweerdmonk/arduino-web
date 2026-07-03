@@ -93,6 +93,7 @@ Base: `arduino_dash/python/arduino_dash/`
 | [README.md](arduino_dash/python/arduino_dash/README.md) | Package overview, install, usage |
 | [docs/index.md](arduino_dash/python/arduino_dash/docs/index.md) | Package overview, module summary, env vars |
 | [docs/app.md](arduino_dash/python/arduino_dash/docs/app.md) | Flask app factory `create_app()` |
+| [docs/board_management.md](arduino_dash/python/arduino_dash/docs/board_management.md) | Board helpers for session-based active board |
 | [docs/pubsub.md](arduino_dash/python/arduino_dash/docs/pubsub.md) | PubSub event handlers, `PubSubTopic` enum |
 | [docs/html_routes.md](arduino_dash/python/arduino_dash/docs/html_routes.md) | All HTML routes with method + description |
 | [docs/api_routes.md](arduino_dash/python/arduino_dash/docs/api_routes.md) | JSON API endpoints and request/response formats |

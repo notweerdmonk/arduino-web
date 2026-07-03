@@ -1299,4 +1299,36 @@ Created `.prettierrc` and `.prettierignore` configuration files. Integrated `esl
 | `e2e/index.md`, `e2e/README.md` | Added `reference/` to directory layout + links |
 
 **Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors.
+
+---
+
+### Phase 108 — Document Reference Tables + Broken Related Links Fix (2026-07-03 17:32)
+
+**Status**: ✅ COMPLETED
+
+**Goal**: Add `## Document Reference` tables to all per-module `docs/index.md` files linking sibling `.md` files + `../README.md`. Fix 11 broken "Related" links. Create `dist-standalone-install/README.md` (copied from `dist-standalone/`).
+
+**Files changed** (14 files across 9 modules):
+
+| Module | File | Change |
+|--------|------|--------|
+| arduino_dash | `docs/index.md` | Added Document Reference table (13 rows) |
+| arduino_sketch_tools | `docs/index.md` | Added Document Reference table (4 rows) |
+| board_manager | `docs/index.md` | Added Document Reference table (11 rows) |
+| board_manager_client | `docs/index.md` | Added Document Reference table (2 rows) |
+| grpc_client | `docs/index.md` | Added Document Reference table (4 rows) |
+| medminder_dash | `docs/index.md` | Added Document Reference table (15 rows) |
+| dist-test-install | `docs/index.md` | Added Document Reference + Related links |
+| dist-standalone-install | `README.md` | **New** — copied from `dist-standalone/` |
+| dist-standalone-install | `docs/index.md` | Added Related links |
+| scripts | `docs/index.md` | Added Related links |
+| e2e | `docs/index.md` | Already had Document Reference (Phase 107) — verified |
+| root | `index.md` | Links synced |
+| root | `README.md` | Links synced |
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors. `bundle exec jekyll build` — 0 errors, 0 warnings.
+
+---
+
+
 {% endraw %}

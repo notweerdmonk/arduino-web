@@ -77,4 +77,26 @@ No code changes — pure configuration and formatting.
 - **typedoc** for `test-data.ts` (5 exports with inferred types) and `playwright.config.ts` (1 default export)
 - **Python extraction** (`scripts/gen_e2e_spec_docs.py`) for `.spec.ts` files — parses `test.describe()`/`test()` labels via regex, outputs Markdown to `e2e/docs/reference/specs.md`
 - **typedoc --skipErrorChecking** used because `@playwright/test` types aren't installed at root level (only in `e2e/`)
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+
+### Milestones
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | arduino_dash docs/index.md — Document Reference table (13 rows) | ✅ |
+| 2 | arduino_sketch_tools docs/index.md — Document Reference table (4 rows) | ✅ |
+| 3 | board_manager docs/index.md — Document Reference table (11 rows) | ✅ |
+| 4 | board_manager_client docs/index.md — Document Reference table (2 rows) | ✅ |
+| 5 | grpc_client docs/index.md — Document Reference table (4 rows) | ✅ |
+| 6 | medminder_dash docs/index.md — Document Reference table (15 rows) | ✅ |
+| 7 | dist-test-install docs/index.md — Document Reference + Related links | ✅ |
+| 8 | dist-standalone-install/README.md — New file (copy) | ✅ |
+| 9 | dist-standalone-install/docs/index.md — Related links | ✅ |
+| 10 | scripts/docs/index.md — Related links | ✅ |
+| 11 | nox -s all_tests — 8/8 sessions pass | ✅ |
+| 12 | bundle exec jekyll build — 0 errors, 0 warnings | ✅ |
+| 13 | All agent-facing docs sync'd | ✅ |
 {% endraw %}

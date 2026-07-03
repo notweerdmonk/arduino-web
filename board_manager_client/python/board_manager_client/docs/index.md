@@ -54,3 +54,10 @@ Core Python dependencies (stdlib only): `socket`, `threading`, `select`, `json`,
 ```
 
 The client maintains a persistent connection to BoardManagerService. All messages are framed JSON with newline delimiters. A single background reader thread runs a `select()`-based read loop; when the socket breaks it automatically reconnects and re-sends all active subscriptions.
+
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Package overview, install, usage |
+| [pubsub_client.md](pubsub_client.md) | `PubSubClient` — connect, subscribe, publish, reconnect, callbacks |

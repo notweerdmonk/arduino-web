@@ -964,4 +964,33 @@ gen_api_docs.sh
 ### Verification
 
 `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
+---
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix (2026-07-03 17:32)
+
+### Summary
+
+Doc-only phase: Added `## Document Reference` tables to 6 per-module `docs/index.md` files, fixing a discoverability gap where users entering a module's doc index had no quick-reference table of sibling documents. Fixed 11 broken "Related" links across scripts, dist-standalone-install, and dist-test-install docs. Created `dist-standalone-install/README.md` (missing copy of `dist-standalone/README.md`).
+
+### Gotchas
+
+1. **Existing Document Reference tables**: `e2e/docs/index.md` and `dist-test-install/docs/index.md` already had Document Reference tables from Phase 107. Only needed Related links fix for e2e, and both table + links for dist-test-install.
+2. **README.md linking**: Every Document Reference table links `../README.md` — this path is correct for Jekyll (jekyll-relative-links converts to `../README.html`). Verified with `bundle exec jekyll build`.
+3. **dist-standalone-install is untracked**: `dist-standalone-install/README.md` is a new untracked file under `dist-standalone-install/` which already existed with its docs/ directory. The README was missing — copied from `dist-standalone/README.md`.
+
+### Files Created
+
+| File | Source |
+|------|--------|
+| `dist-standalone-install/README.md` | Copied from `dist-standalone/README.md` |
+
+### Files Modified
+
+arduino_dash/docs/index.md, arduino_sketch_tools/docs/index.md, board_manager/docs/index.md, board_manager_client/docs/index.md, grpc_client/docs/index.md, medminder_dash/docs/index.md, dist-test-install/docs/index.md, dist-standalone-install/docs/index.md, scripts/docs/index.md
+
+### Verification
+
+- `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
+- `bundle exec jekyll build` — 0 errors, 0 warnings
 {% endraw %}

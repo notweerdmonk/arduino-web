@@ -110,4 +110,34 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 | Q4 | Generate + verify | Run full generation, check output, nox test | 🔲 |
 | Q5 | User-facing docs | README.md + docs/index.md reference links | 🔲 |
 | Q6 | Agent-facing docs | Sync PLAN, JOURNAL, REVIEW_*, TESTING_*, CODEBASE_REFERENCE | 🔲 |
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+**Goal**: Add `## Document Reference` tables to all per-module `docs/index.md` files linking sibling `.md` files + `../README.md`. Fix 11 broken "Related" links. Create `dist-standalone-install/README.md`.
+
+### Design
+
+- Per-module `docs/index.md` gets a `## Document Reference` table with 2 columns: Document (link), Description (one-line summary)
+- Modules with a "Related" section (scripts, dist-*) get links added to existing Related sections
+- dist-standalone-install/README.md is an exact copy of dist-standalone/README.md
+- No structural changes to any source code — doc-only phase
+
+### Action Items
+
+| # | Task | Scope | Status |
+|---|------|-------|--------|
+| 1 | arduino_dash docs/index.md | Document Reference table (13 rows) | ✅ |
+| 2 | arduino_sketch_tools docs/index.md | Document Reference table (4 rows) | ✅ |
+| 3 | board_manager docs/index.md | Document Reference table (11 rows) | ✅ |
+| 4 | board_manager_client docs/index.md | Document Reference table (2 rows) | ✅ |
+| 5 | grpc_client docs/index.md | Document Reference table (4 rows) | ✅ |
+| 6 | medminder_dash docs/index.md | Document Reference table (15 rows) | ✅ |
+| 7 | dist-test-install docs/index.md | Document Reference + Related links | ✅ |
+| 8 | dist-standalone-install README.md | New file (copy from dist-standalone/) | ✅ |
+| 9 | dist-standalone-install docs/index.md | Related links | ✅ |
+| 10 | scripts docs/index.md | Related links | ✅ |
+| 11 | All agent-facing docs sync'd | REVIEW_*, TESTING_*, PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md | ✅ |
 {% endraw %}

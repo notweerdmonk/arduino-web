@@ -198,4 +198,27 @@
 - [ ] TESTING_PLAN.md: New test scenarios
 - [ ] TESTING_PROGRESS.md: Track test results
 - [ ] CODEBASE_REFERENCE.md: Add typedoc + gen_e2e_spec_docs.py entries
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+### Task Items
+
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Document Reference table | arduino_dash docs/index.md — 13 rows | ✅ |
+| 2 | Document Reference table | arduino_sketch_tools docs/index.md — 4 rows | ✅ |
+| 3 | Document Reference table | board_manager docs/index.md — 11 rows | ✅ |
+| 4 | Document Reference table | board_manager_client docs/index.md — 2 rows | ✅ |
+| 5 | Document Reference table | grpc_client docs/index.md — 4 rows | ✅ |
+| 6 | Document Reference table | medminder_dash docs/index.md — 15 rows | ✅ |
+| 7 | Document Reference + Related links | dist-test-install docs/index.md | ✅ |
+| 8 | Create README.md | dist-standalone-install/README.md (copy) | ✅ |
+| 9 | Related links | dist-standalone-install docs/index.md | ✅ |
+| 10 | Related links | scripts/docs/index.md | ✅ |
+| 11 | Verify nox | `nox -s all_tests` — 8/8 sessions pass | ✅ |
+| 12 | Verify jekyll | `bundle exec jekyll build` — 0 errors | ✅ |
+| 13 | Agent-facing docs sync | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, REVIEW_*, TESTING_* | ✅ |
 {% endraw %}

@@ -54,4 +54,24 @@ Pure documentation restructure for the `e2e/` directory. No code changes. Key de
 - No `@module` tags added to spec files — would pollute 8 files for marginal gain. Python regex extraction handles it cleanly.
 - `npx --yes typedoc` to avoid interactive installation prompts.
 - Stale typedoc default output (`./docs/`) must be removed because it conflicts with the project's existing `docs/` directory.
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+
+**Findings**:
+1. Modules with sibling `.md` files: arduino_dash (12), arduino_sketch_tools (3), board_manager (10), board_manager_client (1), grpc_client (3), medminder_dash (14). All now linked from Document Reference tables in their respective `docs/index.md`.
+2. `dist-standalone-install/README.md` was missing entirely — existed for `dist-standalone/` but not `dist-standalone-install/`. Simple copy.
+3. 3 "Related" sections had broken or missing links (scripts, dist-standalone-install, dist-test-install) — all fixed.
+4. `e2e/docs/index.md` already had Document Reference table (added in Phase 107) — only needed Related link verification.
+
+**Decisions**:
+- No structural changes to any source code or templates — purely documentation.
+- `dist-standalone-install/README.md` is a direct copy (not a symlink) to keep install builds self-contained.
+- Document Reference tables use Markdown link syntax (not HTML) for Jekyll `jekyll-relative-links` automatic `.md` → `.html` conversion.
+
+**Verification**:
+- `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
+- `bundle exec jekyll build` — 0 errors, 0 warnings
+- `./scripts/gen_api_docs.sh` — clean run
 {% endraw %}

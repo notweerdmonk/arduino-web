@@ -66,5 +66,4 @@ The build pipeline (`scripts/ci.sh`) runs `nox -s all_tests` and `nox -s all_bui
 ## Related
 
 - [scripts/docs/tests.md](../../scripts/docs/tests.md) — Scripts test suite
-- [docs/tests.md](../../docs/tests.md) — Project-wide testing methodology
 - [e2e/docs/scenarios.md](../../e2e/docs/scenarios.md) — E2E MCP test scenarios

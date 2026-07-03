@@ -75,4 +75,30 @@
 
 #### Verification
 - [x] `nox -s all_tests` — 8/8 sessions pass, 0 failures
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+### Review Criteria
+
+#### Document Reference Tables
+- [x] Every module with sibling `.md` docs has a `## Document Reference` table in its `docs/index.md`
+- [x] Table has 2 columns: Document (link) and Description (one-line summary)
+- [x] First row is always `README -> ../README.md`
+- [x] All sibling `.md` files are listed
+- [x] All links resolve correctly in Jekyll build
+
+#### Related Links
+- [x] `scripts/docs/index.md` — links to tests.md, dist-test-install, dist-standalone-install
+- [x] `dist-standalone-install/docs/index.md` — links to build-standalone.md + README
+- [x] `dist-test-install/docs/index.md` — links to test-installs.md + tests.md
+
+#### New Files
+- [x] `dist-standalone-install/README.md` — identical to `dist-standalone/README.md`
+
+#### Verification
+- [x] `nox -s all_tests` — 8/8 sessions pass, 0 failures
+- [x] `bundle exec jekyll build` — 0 errors, 0 warnings
+- [x] `./scripts/gen_api_docs.sh` — clean run
 {% endraw %}

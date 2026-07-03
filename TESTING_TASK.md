@@ -75,4 +75,26 @@
 | 8 | cross-reference links — e2e/index.md, e2e/README.md, e2e/docs/index.md | ✅ | reference/ dir + link rows added |
 | 9 | nox -s all_tests | ✅ | 8/8 sessions, 186 passed, 1 skipped, 0 failures |
 | 10 | Stale ./docs/ cleanup | ✅ | No leftover typedoc artifacts in root docs/ |
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+### Testing Tasks
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | arduino_dash docs/index.md — Document Reference table | ✅ | 13 rows, all links resolve |
+| 2 | arduino_sketch_tools docs/index.md — Document Reference table | ✅ | 4 rows, all links resolve |
+| 3 | board_manager docs/index.md — Document Reference table | ✅ | 11 rows, all links resolve |
+| 4 | board_manager_client docs/index.md — Document Reference table | ✅ | 2 rows, all links resolve |
+| 5 | grpc_client docs/index.md — Document Reference table | ✅ | 4 rows, all links resolve |
+| 6 | medminder_dash docs/index.md — Document Reference table | ✅ | 15 rows, all links resolve |
+| 7 | dist-test-install docs/index.md — Document Reference + Related | ✅ | Links resolve correctly |
+| 8 | dist-standalone-install/README.md — New file | ✅ | Copy matches source |
+| 9 | dist-standalone-install/docs/index.md — Related links | ✅ | Links resolve correctly |
+| 10 | scripts/docs/index.md — Related links | ✅ | Links resolve correctly |
+| 11 | nox -s all_tests | ✅ | 8/8 sessions, 0 failures |
+| 12 | bundle exec jekyll build | ✅ | 0 errors, 0 warnings |
 {% endraw %}

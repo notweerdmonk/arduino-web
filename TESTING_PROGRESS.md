@@ -72,4 +72,24 @@
 | 8 | e2e docs cross-refs | ✅ | All 3 e2e doc files updated |
 | 9 | nox -s all_tests | ✅ | 8/8 sessions, 186 passed, 1 skipped |
 | 10 | Stale cleanup | ✅ | root docs/ directory cleaned |
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | Document Reference table — arduino_dash | ✅ | 13 rows verified |
+| 2 | Document Reference table — arduino_sketch_tools | ✅ | 4 rows verified |
+| 3 | Document Reference table — board_manager | ✅ | 11 rows verified |
+| 4 | Document Reference table — board_manager_client | ✅ | 2 rows verified |
+| 5 | Document Reference table — grpc_client | ✅ | 4 rows verified |
+| 6 | Document Reference table — medminder_dash | ✅ | 15 rows verified |
+| 7 | dist-test-install — Document Reference + Related | ✅ | Links verified |
+| 8 | dist-standalone-install/README.md | ✅ | Copy verified |
+| 9 | dist-standalone-install — Related links | ✅ | Links verified |
+| 10 | scripts — Related links | ✅ | Links verified |
+| 11 | nox -s all_tests | ✅ | 8/8 sessions, 0 failures |
+| 12 | bundle exec jekyll build | ✅ | 0 errors, 0 warnings |
 {% endraw %}

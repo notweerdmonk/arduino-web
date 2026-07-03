@@ -3995,4 +3995,37 @@ python3 scripts/gen_e2e_spec_docs.py
 ### Verification
 
 `nox -s all_tests` — 8/8 sessions, 186 passed, 1 skipped, 0 failures ✅
+
+---
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix (2026-07-03 17:32)
+
+### Files Changed
+
+| Module | File | Change |
+|--------|------|--------|
+| arduino_dash | `arduino_dash/python/arduino_dash/docs/index.md` | Document Reference table (13 rows — README + 12 sibling .md) |
+| arduino_sketch_tools | `arduino_sketch_tools/python/arduino_sketch_tools/docs/index.md` | Document Reference table (4 rows) |
+| board_manager | `board_manager/python/board_manager/docs/index.md` | Document Reference table (11 rows) |
+| board_manager_client | `board_manager_client/python/board_manager_client/docs/index.md` | Document Reference table (2 rows) |
+| grpc_client | `grpc_client/python/arduino_grpc/docs/index.md` | Document Reference table (4 rows) |
+| medminder_dash | `medminder_dash/python/medminder_dash/docs/index.md` | Document Reference table (15 rows) |
+| dist-test-install | `dist-test-install/index.md` | Entry point + Document Reference table |
+| dist-standalone-install | `dist-standalone-install/README.md` | **New** — copied from `dist-standalone/` |
+| dist-standalone-install | `dist-standalone-install/index.md` | Moved from docs/; entry point + Related links |
+| scripts | `scripts/docs/index.md` | Related links added |
+| e2e | `e2e/docs/index.md` | Already had Document Reference (Phase 107) — verified |
+
+### Broken Links Fixed
+
+| File | Fix |
+|------|-----|
+| `scripts/docs/index.md` | Added Related section linking tests.md, dist-test-install, dist-standalone-install |
+| `dist-standalone-install/index.md` | Added Related section linking build-standalone.md + README |
+| `dist-test-install/docs/index.md` | Added Related section linking test-installs.md + tests.md |
+
+### Verification
+
+- `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
+- `bundle exec jekyll build` — 0 errors, 0 warnings
 {% endraw %}

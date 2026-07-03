@@ -83,6 +83,15 @@ with ArduinoGrpcClient() as client:
 
 ---
 
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Package overview, install, usage |
+| [client.md](client.md) | `ArduinoGrpcClient` — all methods with signatures |
+| [models.md](models.md) | `Port`, `Board`, `CompileResult`, `UploadResult` data models |
+| [exceptions.md](exceptions.md) | Exception hierarchy: `ArduinoError` → typed subclasses |
+
 ## Daemon Setup
 
 ```bash

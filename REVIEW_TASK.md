@@ -38,4 +38,24 @@
 | 8 | e2e/docs/index.md + e2e/index.md + e2e/README.md | ✅ reference/ dir + links updated |
 | 9 | nox -s all_tests | ✅ 8/8 sessions, 0 failures |
 | 10 | stale ./docs/ cleanup | ✅ No artifacts left in root docs/ |
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+| # | Item | Result |
+|---|------|--------|
+| 1 | arduino_dash — Document Reference table (13 rows) | ✅ All sibling .md + README linked |
+| 2 | arduino_sketch_tools — Document Reference table (4 rows) | ✅ All sibling .md + README linked |
+| 3 | board_manager — Document Reference table (11 rows) | ✅ All sibling .md + README linked |
+| 4 | board_manager_client — Document Reference table (2 rows) | ✅ All sibling .md + README linked |
+| 5 | grpc_client — Document Reference table (4 rows) | ✅ All sibling .md + README linked |
+| 6 | medminder_dash — Document Reference table (15 rows) | ✅ All sibling .md + README linked |
+| 7 | dist-test-install — Document Reference + Related | ✅ Links verified |
+| 8 | dist-standalone-install/README.md | ✅ Copy verified |
+| 9 | dist-standalone-install — Related links | ✅ Links verified |
+| 10 | scripts — Related links | ✅ Links verified |
+| 11 | nox -s all_tests | ✅ 8/8 sessions |
+| 12 | bundle exec jekyll build | ✅ 0 errors |
 {% endraw %}

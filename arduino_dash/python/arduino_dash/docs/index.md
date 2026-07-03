@@ -73,6 +73,24 @@ The dashboard is a Flask webapp that:
 | `GUNICORN_TIMEOUT` | `120` | `gunicorn_conf.py` | Gunicorn worker timeout |
 | `GUNICORN_LOG_LEVEL` | `info` | `gunicorn_conf.py` | Gunicorn log level |
 
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Package overview, install, usage |
+| [app.md](app.md) | Flask app factory `create_app()` |
+| [pubsub.md](pubsub.md) | PubSub event handlers, `PubSubTopic` enum |
+| [html_routes.md](html_routes.md) | All HTML routes with method + description |
+| [api_routes.md](api_routes.md) | JSON API endpoints and request/response formats |
+| [state.md](state.md) | Shared module state |
+| [utils.md](utils.md) | Utility functions |
+| [settings.md](settings.md) | Configuration paths |
+| [wsgi.md](wsgi.md) | WSGI entry point for gunicorn |
+| [gunicorn_conf.md](gunicorn_conf.md) | Gunicorn configuration hooks |
+| [sketch_management.md](sketch_management.md) | Sketch upload/management functions |
+| [sketch_registry.md](sketch_registry.md) | Hardware ID → sketch assignment registry |
+| [board_management.md](board_management.md) | Board helpers for session-based active board |
+
 ## Key Dependencies (runtime)
 
 - `flask >= 3.0` — Web framework

@@ -123,4 +123,23 @@ npx eslint . --fix                    # auto-fix
 - JSDoc annotations are comments only — no runtime effect.
 - `scripts/gen_e2e_spec_docs.py` is stdlib Python — no new package dependencies.
 - `scripts/gen_api_docs.sh` updates follow existing shdoc template pattern.
+
+## Phase 108 — Document Reference Tables + Broken Related Links Fix
+
+**Date**: 2026-07-03 17:32
+**Status**: ✅ COMPLETED
+
+**Test Strategy**: Doc-only phase — verify no regressions from adding Document Reference tables and fixing Related links. No source code changes.
+
+**Tests executed**:
+| Test | Result |
+|------|--------|
+| `nox -s all_tests` | ✅ 8/8 sessions, 0 failures, 0 errors |
+| `bundle exec jekyll build` | ✅ 0 errors, 0 warnings |
+| `./scripts/gen_api_docs.sh` | ✅ Clean run |
+
+**Verification Notes**:
+- Document Reference tables are Markdown-only — no runtime effect.
+- Related links are Markdown link fixes — no build or runtime effect.
+- `dist-standalone-install/README.md` is a pure copy — identical to source.
 {% endraw %}

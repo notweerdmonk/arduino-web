@@ -20,6 +20,14 @@
 
 ---
 
+## 2026-07-03 17:32 — Phase 108: Document Reference Tables + Broken Related Links Fix ✅ COMPLETED
+
+Added `## Document Reference` tables to 6 per-module `docs/index.md` files linking sibling `.md` files + `../README.md`. Created `dist-standalone-install/README.md` (copied from `dist-standalone/`). Fixed Related links across `scripts/docs/index.md`, `dist-standalone-install/docs/index.md`, `dist-test-install/docs/index.md`. 14 files changed across 9 modules.
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures. `bundle exec jekyll build` — 0 errors, 0 warnings.
+
+---
+
 ## 2026-06-28 00:54 — Phase 106: Set up Prettier + eslint-plugin-prettier for JS formatting ✅ COMPLETED
 
 Set up prettier (v3.9.0) with eslint-plugin-prettier integration across the project. Created `.prettierrc` (double quotes, semicolons, 2-space indent, es5 trailing commas) and `.prettierignore`. Formatted 190 HTML template files — prettier --check passes on all parseable files. Added `eslintPluginPrettierRecommended` to the ESLint flat config.

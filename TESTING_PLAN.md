@@ -102,4 +102,25 @@ npx eslint . --fix                    # auto-fix
 |---|----------|---------|----------|
 | 1 | Prettier formatting check | `npx prettier --check "**/*.html"` | All matched files use Prettier code style |
 | 2 | ESLint prettier enforcement | `npx eslint .` | 0 prettier/prettier errors |
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Status**: ✅ COMPLETED
+
+**Test Strategy**: Verify no regressions from new/modified files (JSDoc annotations, Python extraction script, shell script update).
+
+**Tests executed**: `nox -s all_tests`
+
+**Test Scenarios**:
+| Scenario | What it covers | Result |
+|----------|---------------|--------|
+| `nox -s all_tests` | 8 sessions: all_tests, scripts_tests, board_manager, board_manager_client, arduino_sketch_tools, arduino_dash, arduino_grpc, medminder_dash | ✅ 186 passed, 1 skipped, 0 failures |
+
+**Verification Notes**:
+- JSDoc annotations are comments only — no runtime effect.
+- `scripts/gen_e2e_spec_docs.py` is stdlib Python — no new package dependencies.
+- `scripts/gen_api_docs.sh` updates follow existing shdoc template pattern.
 {% endraw %}

@@ -2,7 +2,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.5.0",
-    "eslint-plugin-html": "^8.1.4"
+    "eslint-plugin-html": "^8.1.4",
+    "typedoc": "^0.28.19"
   },
   "dependencies": {
     "eslint-config-prettier": "^10.1.8",

@@ -51,4 +51,25 @@
 ## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54) ✅ COMPLETED
 
 7. prettier --check passes on all HTML files; eslint shows 0 prettier/prettier errors
+
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Status**: ✅ COMPLETED
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | test-data.ts JSDoc annotations | ✅ | 5 exports annotated |
+| 2 | playwright.config.ts JSDoc header | ✅ | @module added |
+| 3 | scripts/gen_e2e_spec_docs.py | ✅ | 50 lines, stdlib only, 22 tests parsed |
+| 4 | scripts/gen_api_docs.sh updated | ✅ | typedoc + spec extraction + cleanup |
+| 5 | typedoc HTML output | ✅ | 11 pages, 0 warnings |
+| 6 | specs.md output | ✅ | 77 lines, 22 tests, 8 files |
+| 7 | README.md + index.md cross-refs | ✅ | typedoc + specs.md linked |
+| 8 | e2e docs cross-refs | ✅ | All 3 e2e doc files updated |
+| 9 | nox -s all_tests | ✅ | 8/8 sessions, 186 passed, 1 skipped |
+| 10 | Stale cleanup | ✅ | root docs/ directory cleaned |
 {% endraw %}

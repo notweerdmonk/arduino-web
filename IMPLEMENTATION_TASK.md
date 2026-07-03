@@ -139,4 +139,63 @@
    - [x] Done
 5. **Sync** — Update all agent-facing docs (JOURNAL.md, IMPLEMENTATION_JOURNAL.md, TESTING_*, etc.)
    - [x] Done
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1 | Add JSDoc annotations to test-data.ts + playwright.config.ts | 🔲 | @param, @returns, @module comments |
+| Q2 | Write scripts/gen_e2e_spec_docs.py | 🔲 | Parse .spec.ts → specs.md |
+| Q3 | Update scripts/gen_api_docs.sh | 🔲 | Add typedoc + spec extraction targets |
+| Q4 | Run gen + verify output | 🔲 | Check e2e/docs/reference/ |
+| Q5 | Update README.md + docs/index.md links | 🔲 | Add reference entries |
+| Q6 | Sync all agent-facing docs | 🔲 | PLAN, JOURNAL, REVIEW_*, TESTING_*, CODEBASE_REFERENCE |
+
+### Q1 — Add JSDoc annotations
+
+- [ ] `fixtures/test-data.ts`: `/** @description */` on `MOCK_PORTS`, `MOCK_SKETCH`, `MOCK_MEDICINES`, `daemonStatusUrl()`, `boardDetailUrl()` with `@param`/`@returns`
+- [ ] `playwright.config.ts`: `/** @module e2e/playwright.config */` file header with `@description`
+
+### Q2 — Write gen_e2e_spec_docs.py
+
+- [ ] Parse all `.spec.ts` under `e2e/specs/` using regex (stdlib `re`)
+- [ ] Extract `test.describe('...', ...)` and `test('...', ...)` labels
+- [ ] Output Markdown at `e2e/docs/reference/specs.md`
+- [ ] Include file path, test count, describe block, test list
+
+### Q3 — Update gen_api_docs.sh
+
+- [ ] Add typedoc section: `npx typedoc --skipErrorChecking --out e2e/docs/reference/typedoc ...`
+- [ ] Add spec extraction section: `python3 scripts/gen_e2e_spec_docs.py`
+- [ ] Remove stale test output in `./docs/` (clean up typedoc's default output)
+
+### Q4 — Generate + verify
+
+- [ ] Run `pipenv run python3 scripts/gen_e2e_spec_docs.py` — check specs.md content
+- [ ] Run typedoc target — check typedoc/ output
+- [ ] Run `scripts/gen_api_docs.sh` end-to-end — clean output
+- [ ] Verify `e2e/docs/reference/specs.md` lists all 22 tests across 8 spec files
+- [ ] Verify typedoc picks up all 5 exports from fixtures
+
+### Q5 — README/docs/index.md
+
+- [ ] Add `e2e/docs/reference/specs.md` link to README.md API Reference section
+- [ ] Add `e2e/docs/reference/typedoc/` link to README.md API Reference section
+- [ ] Sync docs/index.md with same links
+
+### Q6 — Agent-facing docs
+
+- [ ] PLAN.md: Add Phase 107 entry
+- [ ] JOURNAL.md: Append Phase 107 summary
+- [ ] REVIEW_PLAN.md: New review checklist
+- [ ] REVIEW_TASK.md: New review task items
+- [ ] REVIEW_PROGRESS.md: Track review items
+- [ ] REVIEW_JOURNAL.md: Record review findings
+- [ ] TESTING_PLAN.md: New test scenarios
+- [ ] TESTING_PROGRESS.md: Track test results
+- [ ] CODEBASE_REFERENCE.md: Add typedoc + gen_e2e_spec_docs.py entries
 {% endraw %}

@@ -910,4 +910,58 @@ Prettier has no native Jinja2 template parser. It treats `{{ }}` expressions as 
 - Zero errors
 - Verified with `npx prettier --check "**/*.html"` — all clean
 - Verified with `npx eslint .` — no new violations introduced
+---
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Status**: ✅ Complete
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+### Background
+
+The `e2e/` directory has TypeScript sources (8 `.spec.ts` files, `test-data.ts`, `playwright.config.ts`) with no API reference documentation. Python mock servers (`e2e/servers/`) were already covered by pdoc in `e2e/docs/reference/`. Two tools were added to the root `package.json`: `typedoc@^0.28.19`.
+
+### Key Findings
+
+1. **typedoc alone insufficient for spec files**: Spec files have no exported declarations — all `test()` and `test.describe()` calls are internal closures. typedoc produces blank module pages for them. The `--skipErrorChecking` flag is required because `@playwright/test` and `@types/node` types aren't installed at the project root.
+
+2. **Python extraction matches project pattern**: Rather than forcing specs into typedoc-friendly patterns (wrapping in exports), a Python extraction script follows the same philosophy as pdoc (AST-based) and shdoc (awk-based): minimal tooling, zero new runtime dependencies, focus on extracting what's already there.
+
+3. **JSDoc annotations add value for typedoc**: Adding `/** */` block comments to `test-data.ts` exports and `@module` to `playwright.config.ts` makes typedoc output meaningful — showing descriptions alongside inferred types.
+
+### Changes Made
+
+| Q | File | Change |
+|---|------|--------|
+| Q1 | `e2e/fixtures/test-data.ts` | JSDoc on `MOCK_PORTS`, `MOCK_SKETCH`, `MOCK_MEDICINES`, `daemonStatusUrl()`, `boardDetailUrl()` |
+| Q1 | `e2e/playwright.config.ts` | `@module e2e/playwright.config` + description block |
+| Q2 | `scripts/gen_e2e_spec_docs.py` | **New file** — 50-line Python stdlib script that parses `.spec.ts` files via `re` + `pathlib` |
+| Q3 | `scripts/gen_api_docs.sh` | Added typedoc section (`--skipErrorChecking`, `--out e2e/docs/reference/typedoc`), spec extraction (`python3 scripts/gen_e2e_spec_docs.py`), stale output cleanup |
+| Q4 | Generated output | typedoc: 11 HTML pages. specs.md: 77 lines, 22 tests across 8 files |
+| Q5 | `README.md`, `index.md` | Added `e2e/docs/reference/typedoc/` and `e2e/docs/reference/specs.md` to API Reference sections |
+| Q5 | `e2e/docs/index.md`, `e2e/index.md`, `e2e/README.md` | Added reference/ directory entries and link rows |
+
+### Architecture
+
+```
+gen_api_docs.sh
+├── pdoc ──▶ servedocs/*/docs/reference/   (Python — 10 targets)
+├── shdoc ──▶ scripts/docs/reference/*.md  (shell — 7 targets)
+├── typedoc ──▶ e2e/docs/reference/typedoc/ (TypeScript — 2 entry points)
+│   ├── fixtures_test-data.html ──▶ MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, daemonStatusUrl, boardDetailUrl
+│   └── playwright.config.html ──▶ default config
+└── gen_e2e_spec_docs.py ──▶ e2e/docs/reference/specs.md (8 spec files, 22 tests)
+```
+
+### Gotchas
+
+1. **typedoc `--skipErrorChecking` is the correct flag name** (not `--skipLibCheck`). typedoc 0.28 renamed it.
+2. **Stale output cleanup needed**: typedoc defaults to `./docs/` output when `--out` is omitted. The `gen_api_docs.sh` now has a cleanup section that removes any stale typedoc output from `./docs/`.
+3. **npx prompt suppressed**: The script pipes `> /dev/null 2>&1` but `npx` may still prompt about installing packages. Using `--yes` ensures no interactive prompt.
+
+### Verification
+
+`nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
 {% endraw %}

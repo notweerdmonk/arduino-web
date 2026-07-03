@@ -1,5 +1,14 @@
 import { defineConfig } from '@playwright/test';
 
+/**
+ * Playwright E2E test configuration for Arduino Web dashboards.
+ *
+ * Defines two projects (arduino-dash, medminder-dash) with auto-managed
+ * mock Flask servers via webServer entries.
+ *
+ * @module e2e/playwright.config
+ */
+
 export default defineConfig({
   testDir: './specs',
   fullyParallel: true,

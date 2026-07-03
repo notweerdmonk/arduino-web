@@ -3,6 +3,145 @@
 {% raw %}
 # MedMinder Project Journal
 
+## 2026-07-03 00:30 — Phase 107: E2E TypeScript API Reference (typedoc + spec extraction) ✅ COMPLETED
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+**Tools added**: `typedoc@^0.28.19` (root `package.json` devDependency).
+
+**Key findings**:
+1. **typedoc alone insufficient for specs**: No exported declarations in `.spec.ts` files — all `test()`/`test.describe()` are internal closures. typedoc produces blank pages.
+2. **`--skipErrorChecking` needed**: `@playwright/test` types aren't installed at root level.
+3. **Python extraction for specs**: `scripts/gen_e2e_spec_docs.py` (50 lines, stdlib only) extracts 22 tests across 8 spec files → `e2e/docs/reference/specs.md`.
+
+**Files changed**: 10 files (2 annotated, 2 new scripts, 5 docs updated).
+**Output**: typedoc: 11 HTML pages. specs.md: 77 lines.
+**Tests**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors.
+
+---
+
+## 2026-06-28 00:54 — Phase 106: Set up Prettier + eslint-plugin-prettier for JS formatting ✅ COMPLETED
+
+Set up prettier (v3.9.0) with eslint-plugin-prettier integration across the project. Created `.prettierrc` (double quotes, semicolons, 2-space indent, es5 trailing commas) and `.prettierignore`. Formatted 190 HTML template files — prettier --check passes on all parseable files. Added `eslintPluginPrettierRecommended` to the ESLint flat config.
+
+**Key finding — trailingComma**: `trailingComma: "all"` adds trailing commas to function call arguments, which prettier applies even inside Jinja2 `{{ }}` expressions (e.g., `{{ url_for('route', arg=val,) }}`), producing invalid Jinja2. Using `"es5"` avoids this.
+
+**Caveat**: 4 HTML files with Jinja2 `{{ }}` inside tag attributes are skipped by prettier's HTML parser (excluded via `.prettierignore`). 2 `base.html` files have a formatting ping-pong between standalone prettier and eslint-plugin-prettier on a long-line wrapping edge case — documented in CODEBASE_REFERENCE.md.
+
+**Usage**: `npx prettier --write "**/*.html"` to format inline JS; `npx prettier --check "**/*.html"` to verify; `npx eslint .` to lint including prettier enforcement.
+
+---
+
+## 2026-06-27 19:22 — Phase 105: Relocate medminder_dash and board_manager docs alongside setup.py ✅ COMPLETED
+
+Moved medminder_dash and board_manager docs/ directories from inside the importable Python package to alongside setup.py, preventing them from being installed as package data. Updated all cross-references in user-facing docs (docs/api.md, guide.md, tests.md, architecture.md, index.md) and CODEBASE_REFERENCE.md.
+
+---
+
+## 2026-06-27 19:22 — Phase 104.3: Remove shelved labels + strip agent_tools Playwright refs ✅ COMPLETED
+
+Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references (package.json, playwright.config.ts, fixtures/test-data.ts, specs/) from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md.
+
+---
+
+## 2026-06-25 18:14 — Phase 104.2: Fix shelved-specs activation docs ✅ COMPLETED
+
+**Gap fix**: Added `npx playwright install --with-deps` to Installation section (needed to download browser binaries after `npm install`) and documented `npx playwright test --config e2e/playwright.config.ts` as a project-root run alternative.
+
+**Verification**: 3 test scenarios — all pass. Jekyll build: 0 errors, 0 warnings.
+
+---
+
+## 2026-06-25 17:53 — Phase 104.1: Document e2e/fixtures/ ✅ COMPLETED
+
+**Gap fix**: Added "Test Data Fixtures" subsection to `e2e/docs/index.md` covering `fixtures/test-data.ts` — purpose (mirrors `--mock` server state), exports (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), TypeScript import path, and shelf status.
+
+**Verification**: 6 test scenarios (content checks + Jekyll build) — all pass.
+
+---
+
+## 2026-06-25 16:10 — Phase 104: E2E Documentation Restructure ✅ COMPLETED
+
+**Goal**: Bring e2e documentation up to standard with other modules. Created `e2e/README.md`, `e2e/index.md`, `e2e/test-sketch/`; documented automated Playwright specs in `e2e/docs/index.md`; updated all agent_tools docs (COMMAND, AGENT, GUIDE, MCP_TESTING_GUIDE) with test-sketch references; synced project-level docs.
+
+**Approach**: 4 parallel task agents, no code changes — pure documentation restructure.
+
+**New files**:
+| File | Purpose |
+|------|---------|
+| `e2e/README.md` | Module overview, quick start, directory layout, requirements |
+| `e2e/index.md` | Doc entry point (quick reference table, like `scripts/docs/index.md`) |
+| `e2e/test-sketch/README.md` | Minimal Arduino compile/upload sketch documentation |
+| `e2e/test-sketch/test-sketch.ino` | Minimal `setup(){} loop(){}` sketch (moved from `.playwright-mcp/`) |
+
+**Edited files**: `e2e/docs/index.md`, `e2e/docs/servers.md`, `e2e/agent_tools/COMMAND.md`, `e2e/agent_tools/AGENT.md`, `e2e/agent_tools/GUIDE.md`, `e2e/MCP_TESTING_GUIDE.md`, `docs/e2e-testing.md`, root `index.md`.
+
+**Verification**:
+- 11 content checks (file existence + grep) ✅
+- `bundle exec jekyll build` — 0 errors, 0 warnings ✅
+- playwright-mcp-testing E2E: load skill → read guide → start server → navigate → snapshot → cleanup ✅
+
+**Notes**: Server scripts need pipenv (`pipenv run python e2e/servers/..._server.py`) because packages are installed in pipenv venv, not system Python.
+
+---
+
+## 2026-06-25 11:57 — Phase 103: API Route Restructure ✅ COMPLETED
+
+**Goal**: Align API routes across both dashboards — PubSub commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`. medminder_dash gains PubSub endpoints, arduino_dash gains board events buffer.
+
+**Implementation**: Two parallel task agents executed:
+- Agent A: Parts 1+2 (arduino_dash events buffer + api_routes.py)
+- Agent B: Parts 3+4 (medminder_dash api_routes.py + html_routes.py)
+- Manually: Part 5 (test updates), Part 7 (verification), Part 6 (module docs), Part 8 (agent-facing docs sync)
+
+**Key decisions**:
+1. `/api/sketches/last-upload` finalized as `(dict, 200)` or `(null, 404)` — reconciled from initial plan
+2. Old `GET /api/board/<port>/status` (PubSub) → `GET /api/pubsub/board/<port>/status`; freed route uses `get_port_info()`
+3. `hw_id` spelling: `hardware_id` used consistently across both dashboards
+
+**Files changed**: 16 files (6 source, 2 test, 4 module docs, 4 agent-facing docs)
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
+
+**Test class naming note**: `TestApiBoardList` still tests the OLD PubSub `/api/pubsub/boards/health` (was `GET /api/boards`). The class name is now misleading but functionally correct — renaming deferred as cosmetic.
+
+---
+
+## 2026-06-25 09:10 — Phase 102: Fix Pre-Existing Test Failures
+
+### Summary
+
+Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) and `tests(medminder_dash)` (1 failure → 186 pass, 1 skip). Total: 8/8 sessions, **0 failures, 0 errors**.
+
+### Root Causes & Fixes
+
+| # | Issue | Root Cause | Fix |
+|---|-------|------------|-----|
+| 1 | arduino_dash: 111 errors | `clear_caches` fixture accesses state variables via `_app_module.*` but `app.py` never re-exported them from `state.py` | Added `from arduino_dash.state import (...)` with 14 variables |
+| 2 | arduino_dash: 53 subsequent failures | Same pattern — test accesses 9 pubsub functions (`_on_resp`, `_wait_for_response`, `init_pubsub`, etc.) and 3 sketch_management functions via `_app_module.*` | Added re-exports from `arduino_dash.pubsub` and `arduino_dash.sketch_management` |
+| 3 | arduino_dash: UPLOAD_BASE_DIR missing | `UPLOAD_BASE_DIR` moved from `state.py` to `settings.py` in Phase 69, but 9 source references still use `state.UPLOAD_BASE_DIR` (not just tests — production bug) | Added `from arduino_dash.settings import UPLOAD_BASE_DIR` to `state.py` |
+| 4 | arduino_dash: wrong import in `api_routes.py` | Lazy import `from arduino_dash.html_routes import _warm_upload_registry` — function lives in `sketch_management.py` | Changed import to `arduino_dash.sketch_management` |
+| 5 | arduino_dash: fqbn assertion (1 failure) | djlint reformatting split `<input id="fqbn">` across 3 lines, test expected contiguous attrs | Changed to `assert 'id="fqbn"' in html` |
+| 6 | medminder_dash: active-board-hardware-id assertion (1 failure) | Same djlint multi-line attribute split | Removed redundant `value=""` assertion (3 prior assertions already cover it) |
+
+### Files Changed
+
+| File | Lines Changed | Type |
+|------|--------------|------|
+| `arduino_dash/python/arduino_dash/arduino_dash/app.py` | 78-109 | Add missing re-exports (pubsub, sketch_management, state) |
+| `arduino_dash/python/arduino_dash/arduino_dash/state.py` | 6 | Add `UPLOAD_BASE_DIR` re-import from settings |
+| `arduino_dash/python/arduino_dash/arduino_dash/api_routes.py` | 82 | Fix wrong lazy import target |
+| `arduino_dash/python/arduino_dash/tests/test_app.py` | 1448 | Fix brittle fqbn assertion |
+| `medminder_dash/python/medminder_dash/tests/test_routes.py` | 395 | Fix brittle hardware-id assertion |
+
+### Key Learnings
+
+1. **Missing re-exports cascade**: The original 111 collection errors masked 53 actual test failures. Fixing the fixture revealed deeper issues (wrong import paths, production bugs).
+2. **`UPLOAD_BASE_DIR` was a production bug**: Phase 69 moved this from `state.py` to `settings.py` but missed updating 9 source code references. The code was silently broken for all upload/sketch operations in arduino_dash.
+3. **djlint reformatting broke brittle test assertions**: 3 test assertions across 2 dashboards expected HTML attributes on the same line — all broke after the bulk linting pass.
+
+---
+
 ## 2026-06-25 09:06 — Phase 101 Continuation: Commit + Rebuild + Reverify ✅ COMPLETED
 
 **Goal**: Phase 101's `.bzl` changes were never committed — `git checkout` restored hardcoded paths. Commit them, rebuild, reverify.
@@ -3860,120 +3999,4 @@ Executed a comprehensive linter fix pass across the entire medminder_dash codeba
 3. **Replaced inline styles with CSS classes** — Added `.modal-hidden` and `.word-break-all` to `static/style.css`; updated JS `showModal`/`hideModal` functions
 4. **Fixed entity references** — `&#9889;` → `⚡`, `&#8230;` → `…`
 5. **Added meta tags** to `base.html`
-
----
-
-## 2026-06-25 09:10 — Phase 102: Fix Pre-Existing Test Failures
-
-### Summary
-
-Fixed 2 failing nox sessions: `tests(arduino_dash)` (111 errors → 119 pass) and `tests(medminder_dash)` (1 failure → 186 pass, 1 skip). Total: 8/8 sessions, **0 failures, 0 errors**.
-
-### Root Causes & Fixes
-
-| # | Issue | Root Cause | Fix |
-|---|-------|------------|-----|
-| 1 | arduino_dash: 111 errors | `clear_caches` fixture accesses state variables via `_app_module.*` but `app.py` never re-exported them from `state.py` | Added `from arduino_dash.state import (...)` with 14 variables |
-| 2 | arduino_dash: 53 subsequent failures | Same pattern — test accesses 9 pubsub functions (`_on_resp`, `_wait_for_response`, `init_pubsub`, etc.) and 3 sketch_management functions via `_app_module.*` | Added re-exports from `arduino_dash.pubsub` and `arduino_dash.sketch_management` |
-| 3 | arduino_dash: UPLOAD_BASE_DIR missing | `UPLOAD_BASE_DIR` moved from `state.py` to `settings.py` in Phase 69, but 9 source references still use `state.UPLOAD_BASE_DIR` (not just tests — production bug) | Added `from arduino_dash.settings import UPLOAD_BASE_DIR` to `state.py` |
-| 4 | arduino_dash: wrong import in `api_routes.py` | Lazy import `from arduino_dash.html_routes import _warm_upload_registry` — function lives in `sketch_management.py` | Changed import to `arduino_dash.sketch_management` |
-| 5 | arduino_dash: fqbn assertion (1 failure) | djlint reformatting split `<input id="fqbn">` across 3 lines, test expected contiguous attrs | Changed to `assert 'id="fqbn"' in html` |
-| 6 | medminder_dash: active-board-hardware-id assertion (1 failure) | Same djlint multi-line attribute split | Removed redundant `value=""` assertion (3 prior assertions already cover it) |
-
-### Files Changed
-
-| File | Lines Changed | Type |
-|------|--------------|------|
-| `arduino_dash/python/arduino_dash/arduino_dash/app.py` | 78-109 | Add missing re-exports (pubsub, sketch_management, state) |
-| `arduino_dash/python/arduino_dash/arduino_dash/state.py` | 6 | Add `UPLOAD_BASE_DIR` re-import from settings |
-| `arduino_dash/python/arduino_dash/arduino_dash/api_routes.py` | 82 | Fix wrong lazy import target |
-| `arduino_dash/python/arduino_dash/tests/test_app.py` | 1448 | Fix brittle fqbn assertion |
-| `medminder_dash/python/medminder_dash/tests/test_routes.py` | 395 | Fix brittle hardware-id assertion |
-
-### Key Learnings
-
-1. **Missing re-exports cascade**: The original 111 collection errors masked 53 actual test failures. Fixing the fixture revealed deeper issues (wrong import paths, production bugs).
-2. **`UPLOAD_BASE_DIR` was a production bug**: Phase 69 moved this from `state.py` to `settings.py` but missed updating 9 source code references. The code was silently broken for all upload/sketch operations in arduino_dash.
-3. **djlint reformatting broke brittle test assertions**: 3 test assertions across 2 dashboards expected HTML attributes on the same line — all broke after the bulk linting pass.
-
----
-
-## 2026-06-25 11:57 — Phase 103: API Route Restructure ✅ COMPLETED
-
-**Goal**: Align API routes across both dashboards — PubSub commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`. medminder_dash gains PubSub endpoints, arduino_dash gains board events buffer.
-
-**Implementation**: Two parallel task agents executed:
-- Agent A: Parts 1+2 (arduino_dash events buffer + api_routes.py)
-- Agent B: Parts 3+4 (medminder_dash api_routes.py + html_routes.py)
-- Manually: Part 5 (test updates), Part 7 (verification), Part 6 (module docs), Part 8 (agent-facing docs sync)
-
-**Key decisions**:
-1. `/api/sketches/last-upload` finalized as `(dict, 200)` or `(null, 404)` — reconciled from initial plan
-2. Old `GET /api/board/<port>/status` (PubSub) → `GET /api/pubsub/board/<port>/status`; freed route uses `get_port_info()`
-3. `hw_id` spelling: `hardware_id` used consistently across both dashboards
-
-**Files changed**: 16 files (6 source, 2 test, 4 module docs, 4 agent-facing docs)
-
-**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
-
-**Test class naming note**: `TestApiBoardList` still tests the OLD PubSub `/api/pubsub/boards/health` (was `GET /api/boards`). The class name is now misleading but functionally correct — renaming deferred as cosmetic.
-
----
-
-## 2026-06-25 16:10 — Phase 104: E2E Documentation Restructure ✅ COMPLETED
-
-**Goal**: Bring e2e documentation up to standard with other modules. Created `e2e/README.md`, `e2e/index.md`, `e2e/test-sketch/`; documented automated Playwright specs in `e2e/docs/index.md`; updated all agent_tools docs (COMMAND, AGENT, GUIDE, MCP_TESTING_GUIDE) with test-sketch references; synced project-level docs.
-
-**Approach**: 4 parallel task agents, no code changes — pure documentation restructure.
-
-**New files**:
-| File | Purpose |
-|------|---------|
-| `e2e/README.md` | Module overview, quick start, directory layout, requirements |
-| `e2e/index.md` | Doc entry point (quick reference table, like `scripts/docs/index.md`) |
-| `e2e/test-sketch/README.md` | Minimal Arduino compile/upload sketch documentation |
-| `e2e/test-sketch/test-sketch.ino` | Minimal `setup(){} loop(){}` sketch (moved from `.playwright-mcp/`) |
-
-**Edited files**: `e2e/docs/index.md`, `e2e/docs/servers.md`, `e2e/agent_tools/COMMAND.md`, `e2e/agent_tools/AGENT.md`, `e2e/agent_tools/GUIDE.md`, `e2e/MCP_TESTING_GUIDE.md`, `docs/e2e-testing.md`, root `index.md`.
-
-**Verification**:
-- 11 content checks (file existence + grep) ✅
-- `bundle exec jekyll build` — 0 errors, 0 warnings ✅
-- playwright-mcp-testing E2E: load skill → read guide → start server → navigate → snapshot → cleanup ✅
-
-**Notes**: Server scripts need pipenv (`pipenv run python e2e/servers/..._server.py`) because packages are installed in pipenv venv, not system Python.
-
----
-
-## 2026-06-25 17:53 — Phase 104.1: Document e2e/fixtures/ ✅ COMPLETED
-
-**Gap fix**: Added "Test Data Fixtures" subsection to `e2e/docs/index.md` covering `fixtures/test-data.ts` — purpose (mirrors `--mock` server state), exports (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), TypeScript import path, and shelf status.
-
-**Verification**: 6 test scenarios (content checks + Jekyll build) — all pass.
-
----
-
-## 2026-06-25 18:14 — Phase 104.2: Fix shelved-specs activation docs ✅ COMPLETED
-
-**Gap fix**: Added `npx playwright install --with-deps` to Installation section (needed to download browser binaries after `npm install`) and documented `npx playwright test --config e2e/playwright.config.ts` as a project-root run alternative.
-
-**Verification**: 3 test scenarios — all pass. Jekyll build: 0 errors, 0 warnings.
-
-## 2026-06-27 19:22 — Phase 104.3: Remove shelved labels + strip agent_tools Playwright refs ✅ COMPLETED
-
-Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references (package.json, playwright.config.ts, fixtures/test-data.ts, specs/) from agent_tools/GUIDE.md and MCP_TESTING_GUIDE.md.
-
-## 2026-06-27 19:22 — Phase 105: Relocate medminder_dash and board_manager docs alongside setup.py ✅ COMPLETED
-
-Moved medminder_dash and board_manager docs/ directories from inside the importable Python package to alongside setup.py, preventing them from being installed as package data. Updated all cross-references in user-facing docs (docs/api.md, guide.md, tests.md, architecture.md, index.md) and CODEBASE_REFERENCE.md.
-
-## 2026-06-28 00:54 — Phase 106: Set up Prettier + eslint-plugin-prettier for JS formatting ✅ COMPLETED
-
-Set up prettier (v3.9.0) with eslint-plugin-prettier integration across the project. Created `.prettierrc` (double quotes, semicolons, 2-space indent, es5 trailing commas) and `.prettierignore`. Formatted 190 HTML template files — prettier --check passes on all parseable files. Added `eslintPluginPrettierRecommended` to the ESLint flat config.
-
-**Key finding — trailingComma**: `trailingComma: "all"` adds trailing commas to function call arguments, which prettier applies even inside Jinja2 `{{ }}` expressions (e.g., `{{ url_for('route', arg=val,) }}`), producing invalid Jinja2. Using `"es5"` avoids this.
-
-**Caveat**: 4 HTML files with Jinja2 `{{ }}` inside tag attributes are skipped by prettier's HTML parser (excluded via `.prettierignore`). 2 `base.html` files have a formatting ping-pong between standalone prettier and eslint-plugin-prettier on a long-line wrapping edge case — documented in CODEBASE_REFERENCE.md.
-
-**Usage**: `npx prettier --write "**/*.html"` to format inline JS; `npx prettier --check "**/*.html"` to verify; `npx eslint .` to lint including prettier enforcement.
 {% endraw %}

@@ -56,4 +56,25 @@ This phase adds missing documentation pieces to the `e2e/` directory:
 5. All agent-facing workflow docs synced with Phase 106 entries
 
 No code changes — pure configuration and formatting.
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+### Milestones
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1 | JSDoc annotations on test-data.ts + playwright.config.ts | ✅ | 5 exports + @module annotated |
+| Q2 | scripts/gen_e2e_spec_docs.py written | ✅ | Extracts 8 specs, 22 tests → specs.md |
+| Q3 | scripts/gen_api_docs.sh updated | ✅ | typedoc + spec extraction + cleanup |
+| Q4 | Full gen + verify | ✅ | Clean run, zero warnings |
+| Q5 | README.md + docs/index.md links | ✅ | 2 new links in README, index.md, e2e/index.md, e2e/README.md |
+| Q6 | All agent-facing docs sync'd | ✅ | REVIEW_*, TESTING_*, PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, IMPLEMENTATION_JOURNAL.md all updated |
+
+### Key Architecture
+
+- **typedoc** for `test-data.ts` (5 exports with inferred types) and `playwright.config.ts` (1 default export)
+- **Python extraction** (`scripts/gen_e2e_spec_docs.py`) for `.spec.ts` files — parses `test.describe()`/`test()` labels via regex, outputs Markdown to `e2e/docs/reference/specs.md`
+- **typedoc --skipErrorChecking** used because `@playwright/test` types aren't installed at root level (only in `e2e/`)
 {% endraw %}

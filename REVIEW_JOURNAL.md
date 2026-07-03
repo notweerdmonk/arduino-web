@@ -38,4 +38,20 @@ Pure documentation restructure for the `e2e/` directory. No code changes. Key de
 | `e2e/MCP_TESTING_GUIDE.md` | ✅ | Mirrors GUIDE.md |
 | `docs/e2e-testing.md` | ✅ | Quick links updated |
 | `index.md` | ✅ | e2e row updated |
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Findings**:
+1. Spec files have zero exported declarations — all `test()`/`test.describe()` calls are closures inside `import` scope. typedoc correctly skips them.
+2. `--skipErrorChecking` is required because `@playwright/test` and `@types/node` are not installed at root. typedoc 0.28.x expects this flag (renamed from `--skipLibCheck`).
+3. Python extraction (`re` + `pathlib`) is the right fit — follows the existing project pattern of Python-based doc tooling (pdoc AST, shdoc awk).
+4. The `re.DOTALL` flag is critical for multiline describe/test block parsing.
+
+**Decisions**:
+- No `@module` tags added to spec files — would pollute 8 files for marginal gain. Python regex extraction handles it cleanly.
+- `npx --yes typedoc` to avoid interactive installation prompts.
+- Stale typedoc default output (`./docs/`) must be removed because it conflicts with the project's existing `docs/` directory.
 {% endraw %}

@@ -36,4 +36,43 @@
 ### Verification
 - [x] Jekyll build — 0 errors, 0 warnings
 - [x] playwright-mcp-testing command — all steps succeed
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Status**: ✅ COMPLETED
+
+### Review Criteria
+
+#### File Existence
+- [x] `scripts/gen_e2e_spec_docs.py` exists and is executable
+- [x] `e2e/docs/reference/specs.md` exists and is well-formed
+- [x] `e2e/docs/reference/typedoc/index.html` exists
+
+#### JSDoc Annotations
+- [x] `e2e/fixtures/test-data.ts`: All 5 exports have `/** */` block comments
+- [x] `e2e/playwright.config.ts`: Has `@module` file-level JSDoc block
+
+#### Script Correctness
+- [x] `scripts/gen_e2e_spec_docs.py` parses all 8 spec files correctly
+- [x] `scripts/gen_e2e_spec_docs.py` outputs correct test counts (22 total)
+- [x] `scripts/gen_api_docs.sh` runs cleanly end-to-end (pdoc + shdoc + typedoc + specs)
+
+#### Output Verification
+- [x] typedoc output has pages for all 5 fixtures exports (3 vars + 2 functions)
+- [x] typedoc output has page for playwright config default export
+- [x] specs.md lists all 22 tests across 8 files
+- [x] No stale typedoc output in root `./docs/`
+
+#### Cross-Reference Integrity
+- [x] README.md: "API Reference" section has links to typedoc/ and specs.md
+- [x] `index.md`: "Reference Documents" table has typedoc + specs.md entries
+- [x] `e2e/docs/index.md`: Document Reference includes typedoc + specs.md
+- [x] `e2e/index.md`: Quick reference + directory layout updated
+- [x] `e2e/README.md`: Related links + directory layout updated
+
+#### Verification
+- [x] `nox -s all_tests` — 8/8 sessions pass, 0 failures
 {% endraw %}

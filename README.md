@@ -336,8 +336,6 @@ medminder/
 - [e2e/docs/reference/specs.md](e2e/docs/reference/specs.md) — E2E Playwright spec reference (22 tests across 8 files)
 - [docs/reference/noxfile/](docs/reference/noxfile/) — noxfile.py API reference
 
-### Sub-Directory Documentation
-
 ## Acknowledgements
 
 Assisted by OpenCode:minimax-m2.5-free and OpenCode:deepseek-v4-flash-free

@@ -3939,4 +3939,60 @@ e2e/
 
 - 3 test scenarios: all pass ✅
 - Jekyll build: 0 errors, 0 warnings ✅
+
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+### Tooling Architecture
+
+| Tool | Source | Output | Entry |
+|------|--------|--------|-------|
+| typedoc | `fixtures/test-data.ts`, `playwright.config.ts` | `e2e/docs/reference/typedoc/` (11 HTML pages) | `npx --yes typedoc --skipErrorChecking --out ...` |
+| Python extraction | 8 `.spec.ts` files | `e2e/docs/reference/specs.md` (77 lines, 22 tests) | `python3 scripts/gen_e2e_spec_docs.py` |
+
+### Key Files
+
+**New**:
+| File | Purpose |
+|------|---------|
+| `scripts/gen_e2e_spec_docs.py` | Python stdlib script — parses `test.describe('...')` / `test('...')` via regex, outputs Markdown. Uses `pathlib` + `re` only. |
+
+**Modified**:
+| File | Change |
+|------|--------|
+| `e2e/fixtures/test-data.ts` | JSDoc `/** */` annotations on all 5 exports: `MOCK_PORTS`, `MOCK_SKETCH`, `MOCK_MEDICINES`, `daemonStatusUrl()`, `boardDetailUrl()` |
+| `e2e/playwright.config.ts` | Added `@module e2e/playwright.config` file-level JSDoc block |
+| `scripts/gen_api_docs.sh` | Added typedoc section + spec extraction + stale `./docs/` cleanup |
+| `README.md` | API Reference section: typedoc + specs.md links added |
+| `index.md` | Reference Documents table: typedoc + specs.md entries added |
+| `e2e/index.md`, `e2e/README.md`, `e2e/docs/index.md` | `reference/` dir in directory layout + link rows |
+
+### Key Decisions
+
+1. **Hybrid approach**: typedoc works for exported declarations (5 in `test-data.ts`, 1 in `playwright.config.ts`) but produces blank pages for `.spec.ts` files (no exports). Python regex extraction handles specs cleanly.
+2. **`--skipErrorChecking`**: Required because `@playwright/test` and `@types/node` are devDependencies in `e2e/package.json` (not installed at project root). typedoc would fail on unresolvable type imports.
+3. **No `@module` tags on spec files**: Would pollute 8 files for marginal gain. Python extraction is self-contained and doesn't require parsing JSDoc.
+4. **Stale output cleanup**: typedoc defaults to `./docs/` which conflicts with project's existing `docs/` directory.
+
+### Generation Script Invocation
+
+```bash
+# Full doc generation (pdoc + shdoc + typedoc + spec extraction)
+./scripts/gen_api_docs.sh
+
+# Typedoc only
+npx --yes typedoc --skipErrorChecking --out e2e/docs/reference/typedoc e2e/fixtures/test-data.ts e2e/playwright.config.ts
+
+# Spec extraction only
+python3 scripts/gen_e2e_spec_docs.py
+```
+
+### Verification
+
+`nox -s all_tests` — 8/8 sessions, 186 passed, 1 skipped, 0 failures ✅
 {% endraw %}

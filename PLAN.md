@@ -1264,4 +1264,39 @@ Moved both docs/ directories alongside setup.py so they are no longer inside the
 Created `.prettierrc` and `.prettierignore` configuration files. Integrated `eslint-plugin-prettier/recommended` into the ESLint flat config. Formatted all 190 HTML template files with prettier (inline JS). Updated CODEBASE_REFERENCE.md with prettier documentation.
 
 **Usage**: `npx prettier --write "**/*.html"` to format, `npx prettier --check "**/*.html"` to verify, `npx eslint .` to lint including prettier rules.
+
+---
+
+### Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction) (2026-07-03 00:30)
+
+**Date**: 2026-07-03 00:30
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+| Tool | Target | Output |
+|------|--------|--------|
+| typedoc | `fixtures/test-data.ts` (5 exports), `playwright.config.ts` (1 export) | `e2e/docs/reference/typedoc/` — 11 HTML pages |
+| Python extraction | 8 `.spec.ts` files (22 tests) | `e2e/docs/reference/specs.md` — Markdown reference |
+
+**Key decisions**:
+1. **typedoc alone insufficient for specs**: Spec files have no exported declarations — all `test()`/`test.describe()` are internal closures. typedoc produces blank pages for them.
+2. **`--skipErrorChecking`**: Required because `@playwright/test` and `@types/node` types aren't installed at root level.
+3. **Python extraction script** (`scripts/gen_e2e_spec_docs.py`): Uses stdlib `re` + `pathlib` — zero new dependencies. Matches project pattern of Python-based doc tooling (pdoc, shdoc, gen_grpc_bindings.py).
+4. **JSDoc annotations**: Added `/** */` comments to `test-data.ts` exports and `@module` header to `playwright.config.ts` so typedoc output is meaningful.
+
+**Files changed** (10 files):
+| File | Change |
+|------|--------|
+| `e2e/fixtures/test-data.ts` | JSDoc on 5 exports |
+| `e2e/playwright.config.ts` | `@module` file header |
+| `scripts/gen_e2e_spec_docs.py` | **New** — 50-line Python stdlib script |
+| `scripts/gen_api_docs.sh` | Added typedoc + spec extraction targets + cleanup |
+| `e2e/docs/reference/specs.md` | **New** — auto-generated spec reference |
+| `e2e/docs/reference/typedoc/` | **New** — 11 typedoc HTML pages |
+| `README.md` | Added typedoc + specs.md to API Reference section |
+| `index.md` | Added typedoc + specs.md to Reference Documents table |
+| `e2e/docs/index.md` | Added typedoc + specs.md to Document Reference table |
+| `e2e/index.md`, `e2e/README.md` | Added `reference/` to directory layout + links |
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors.
 {% endraw %}

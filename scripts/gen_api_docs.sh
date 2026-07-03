@@ -34,6 +34,11 @@ pdoc HTML is generated for all Python sources:
 
 shdoc Markdown is generated for all shell scripts under scripts/.
 
+typedoc HTML is generated for e2e TypeScript sources (fixtures, config).
+
+A Python extraction script generates a spec reference Markdown file
+from Playwright .spec.ts files.
+
 Output: docs/reference/ under each module's own docs/ directory.
 EOF
 }
@@ -157,4 +162,49 @@ shdoc_gen "test_install_arduino_deps.sh" \
 echo
 echo "--- shdoc: done ---"
 echo
+
+# ---------------------------------------------------------------------------
+# typedoc — TypeScript sources (e2e fixtures + config)
+# ---------------------------------------------------------------------------
+echo "--- typedoc: e2e TypeScript sources ---"
+
+echo "  [typedoc] e2e fixtures + config"
+mkdir -p e2e/docs/reference/typedoc
+# --skipErrorChecking needed because @playwright/test and @types/node
+# aren't installed at the project root level (only in e2e/).
+npx --yes typedoc --skipErrorChecking \
+    --name "Arduino Web E2E" \
+    --out e2e/docs/reference/typedoc \
+    --entryPointStrategy expand \
+    --entryPoints e2e/fixtures/test-data.ts \
+    --entryPoints e2e/playwright.config.ts \
+    > /dev/null 2>&1
+
+echo "  [typedoc] done"
+
+echo
+echo "--- typedoc: done ---"
+echo
+
+# ---------------------------------------------------------------------------
+# e2e spec reference (Python extraction)
+# ---------------------------------------------------------------------------
+echo "--- e2e spec reference: Playwright .spec.ts files ---"
+
+python3 scripts/gen_e2e_spec_docs.py
+
+echo
+echo "--- e2e spec reference: done ---"
+echo
+
+# ---------------------------------------------------------------------------
+# Cleanup — remove stale typedoc output from ./docs/ (default output dir)
+# ---------------------------------------------------------------------------
+if [[ -d docs/assets ]] && [[ -f docs/modules.html ]]; then
+    rm -rf docs/assets docs/functions docs/hierarchy.html docs/index.html \
+           docs/media docs/modules docs/modules.html docs/variables \
+           2>/dev/null || true
+    echo "  [cleanup] removed stale typedoc output from ./docs/"
+fi
+
 echo "==> ${SCRIPT_NAME}: all API docs generated successfully"

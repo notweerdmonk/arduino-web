@@ -90,4 +90,24 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 | 5 | Sync | Update all agent-facing workflow docs with Phase 106 entries | ✅ |
 
 **Key finding — `trailingComma: "all"` vs `"es5"`**: `trailingComma: "all"` adds trailing commas to function parameters and calls, which prettier applies even inside Jinja2 `{{ }}` expressions in HTML templates. This can produce invalid Jinja2 syntax (e.g., `{{ url_for('route', arg=val,) }}`). Prettier has no native Jinja2 parser — it treats `{{ }}` as text, so trailing commas in function call args inside template expressions are silently added but not flagged. Using `trailingComma: "es5"` avoids this entirely since it only adds trailing commas in object literals and arrays, not function calls.
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+**Status**: 🏗️ IN PROGRESS
+
+**Motivation**: The `e2e/` directory has TypeScript sources (specs, fixtures, config) with no API reference documentation. Python mock servers are already covered by pdoc, but the `.ts` files have no doc tooling. Two tools now available:
+- **typedoc** (root `package.json`) — picks up exported symbols from `test-data.ts` and `playwright.config.ts`
+- **Python extraction** (new `scripts/gen_e2e_spec_docs.py`) — parses `.spec.ts` files for `test.describe()` and `test()` labels, generates Markdown
+
+**Design decision**: typedoc alone produces nothing useful for spec files (no exported declarations — all `test()`/`test.describe()` are internal closures). A Python extraction script is the pragmatic solution.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | JSDoc annotations | Add `/** */` to `test-data.ts` exports + `playwright.config.ts` module header | 🔲 |
+| Q2 | gen_e2e_spec_docs.py | Write Python stdlib-only script to parse `.spec.ts` files → specs.md | 🔲 |
+| Q3 | gen_api_docs.sh | Add typedoc + spec extraction targets | 🔲 |
+| Q4 | Generate + verify | Run full generation, check output, nox test | 🔲 |
+| Q5 | User-facing docs | README.md + docs/index.md reference links | 🔲 |
+| Q6 | Agent-facing docs | Sync PLAN, JOURNAL, REVIEW_*, TESTING_*, CODEBASE_REFERENCE | 🔲 |
 {% endraw %}

@@ -148,3 +148,5 @@ Base: `medminder_dash/python/medminder_dash/`
 | [BUGS.md](BUGS.md) | Known issues and regressions |
 | [TODOS.md](TODOS.md) | Active task checklist |
 | [docs/ws-event-flow.md](docs/ws-event-flow.md) | WebSocket event flow documentation |
+| [e2e/docs/reference/typedoc/](e2e/docs/reference/typedoc/) | E2E fixtures + config API reference (typedoc) |
+| [e2e/docs/reference/specs.md](e2e/docs/reference/specs.md) | E2E Playwright spec reference (22 tests across 8 files) |

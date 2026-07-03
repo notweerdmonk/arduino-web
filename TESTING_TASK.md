@@ -52,4 +52,27 @@
 ## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22) ✅ COMPLETED
 
 ## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54) ✅ COMPLETED
+
+---
+
+## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
+
+**Date**: 2026-07-03 00:30
+
+**Status**: ✅ COMPLETED
+
+### Testing Tasks
+
+| # | Task | Status | Result |
+|---|------|--------|--------|
+| 1 | JSDoc annotations: test-data.ts (5 exports) | ✅ | All 5 exports have `/** */` block comments |
+| 2 | JSDoc annotations: playwright.config.ts (@module) | ✅ | File-level JSDoc block added |
+| 3 | scripts/gen_e2e_spec_docs.py — correctness | ✅ | Parses all 8 spec files (22 tests) via regex |
+| 4 | scripts/gen_api_docs.sh — end-to-end run | ✅ | typedoc + spec extraction + cleanup — 0 warnings |
+| 5 | typedoc HTML output — 11 pages | ✅ | fixtures + config covered |
+| 6 | specs.md output — 22 tests | ✅ | 77 lines across 8 spec files |
+| 7 | cross-reference links — README.md, index.md | ✅ | Both reference typedoc/ and specs.md |
+| 8 | cross-reference links — e2e/index.md, e2e/README.md, e2e/docs/index.md | ✅ | reference/ dir + link rows added |
+| 9 | nox -s all_tests | ✅ | 8/8 sessions, 186 passed, 1 skipped, 0 failures |
+| 10 | Stale ./docs/ cleanup | ✅ | No leftover typedoc artifacts in root docs/ |
 {% endraw %}

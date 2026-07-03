@@ -15,6 +15,7 @@ Utility scripts for building, testing, and deploying the Arduino Web monorepo. L
 | [`gen_grpc_bindings.py`](gen-grpc-bindings.md) | Regenerate Python gRPC stubs from proto files |
 | [`check_venv.bash`](check-venv.md) | Recursively verify pipenv venvs in the project tree |
 | [Tests](tests.md) | Scripts test suite (170 tests) |
+| [README](../README.md) | Scripts overview, CI pipeline, dependencies |
 
 Most scripts support `--help` for detailed usage.
 
@@ -52,7 +53,5 @@ scripts/
 ## Related
 
 - [docs/tests.md](tests.md) — scripts test suite reference
-- [dist-test-install/docs/index.md](../dist-test-install/docs/index.md) — wheel install validation environment
-- [dist-standalone-install/docs/index.md](../dist-standalone-install/docs/index.md) — standalone binary deployment
-- [docs/guide.md  (top-level)](../docs/guide.md) — full user guide
-- [docs/api.md (top-level)](../docs/api.md) — API reference
+- [dist-test-install/index.md](../dist-test-install/index.md) — wheel install validation environment
+- [dist-standalone-install/index.md](../dist-standalone-install/index.md) — standalone binary deployment

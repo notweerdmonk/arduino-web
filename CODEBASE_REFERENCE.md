@@ -227,7 +227,7 @@ nox -s all_builds                                       # all wheels
 | `docs/guide.md` | User guide |
 | `docs/tests.md` | Test documentation |
 | `docs/api.md` | API reference |
-| `docs/scripts.md` | Scripts reference |
+| `scripts/docs/index.md` | Scripts reference |
 
 #### Environment
 
@@ -3873,7 +3873,7 @@ sed -i "s|@REPO_ROOT@|$PROJECT_ROOT|g" scripts/pyoxidizer/$APP/pyoxidizer.bzl
 | `e2e/agent_tools/AGENT.md` | Added step 4: "Locate test-sketch" |
 | `e2e/agent_tools/GUIDE.md` | Added "Test Sketch for Compile/Upload Scenarios" section |
 | `e2e/MCP_TESTING_GUIDE.md` | Mirrored GUIDE.md test-sketch section |
-| `docs/e2e-testing.md` | Updated quick links to point to `e2e/index.md` + new entry points |
+| `e2e/index.md` | E2E documentation hub — quick reference + directory layout |
 | `index.md` | Updated e2e row to point to `e2e/index.md` + `e2e/README.md` |
 
 ### E2E Directory Layout

@@ -1,6 +1,6 @@
 ---
 ---
-# MedMinder
+# Arduino Web
 
 Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerService and a Flask+HTMX+WebSocket web dashboard. All frontend updates use WebSocket push (no periodic HTMX polling). The frontend stack uses vanilla JS event delegation (no Hyperscript) with Idiomorph for scroll-preserving morphing swaps.
 
@@ -35,12 +35,12 @@ Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerSer
 
 Six Python packages in this repo:
 
-- **[arduino-grpc](grpc_client/python/arduino_grpc/)** — Python gRPC client for arduino-cli daemon (board detection, compile, upload)
-- **[board-manager](board_manager/python/board_manager/)** — Pub/sub service that manages one subprocess per Arduino board (console script: `board-manager`)
-- **[board-manager-client](board_manager_client/python/board_manager_client/)** — `PubSubClient` (TCP+UDS wrapper)
-- **[arduino-sketch-tools](arduino_sketch_tools/python/arduino_sketch_tools/)** — Flask extension with shared compile/upload/board routes
-- **[arduino-dash](arduino_dash/python/arduino_dash/)** — Web GUI #1: board + compile dashboard (console script: `arduino-dash`)
-- **[medminder-dash](medminder_dash/python/medminder_dash/)** — Web GUI #2: medicine reminder (console script: `medminder-dash`)
+- **[arduino-grpc](grpc_client/python/arduino_grpc/docs/)** — Python gRPC client for arduino-cli daemon (board detection, compile, upload)
+- **[board-manager](board_manager/python/board_manager/docs/)** — Pub/sub service that manages one subprocess per Arduino board (console script: `board-manager`)
+- **[board-manager-client](board_manager_client/python/board_manager_client/docs/)** — `PubSubClient` (TCP+UDS wrapper)
+- **[arduino-sketch-tools](arduino_sketch_tools/python/arduino_sketch_tools/docs/)** — Flask extension with shared compile/upload/board routes
+- **[arduino-dash](arduino_dash/python/arduino_dash/docs/)** — Web GUI #1: board + compile dashboard (console script: `arduino-dash`)
+- **[medminder-dash](medminder_dash/python/medminder_dash/docs/)** — Web GUI #2: medicine reminder (console script: `medminder-dash`)
 
 ## How to run
 
@@ -332,6 +332,8 @@ medminder/
 - [scripts/docs/reference/build_standalone.md](scripts/docs/reference/build_standalone.md) — build_standalone.sh reference
 - [scripts/docs/reference/check_venv.md](scripts/docs/reference/check_venv.md) — check_venv.bash reference
 - [scripts/docs/reference/add_license_headers/](scripts/docs/reference/add_license_headers/) — add_license_headers.py API reference
+- [e2e/docs/reference/typedoc/](e2e/docs/reference/typedoc/) — E2E fixtures + config API reference (typedoc)
+- [e2e/docs/reference/specs.md](e2e/docs/reference/specs.md) — E2E Playwright spec reference (22 tests across 8 files)
 - [docs/reference/noxfile/](docs/reference/noxfile/) — noxfile.py API reference
 
 ### Sub-Directory Documentation

@@ -5,7 +5,7 @@
 
 Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-06-25 — Phase 103 complete (API route restructure: PubSub board commands under `/api/pubsub/board/*`, local CRUD under `/api/boards/*`, `/api/boards/events`, `/api/board/<port>/status`, `/api/daemon/status`). See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-07-03 — Phase 108 complete (Document Reference tables + broken link fixes) + User-facing docs sweep (consolidated entry points). See [PLAN.md](PLAN.md) for full phase history.
 
 ---
 
@@ -18,10 +18,10 @@ Welcome to the Arduino Web documentation. This index maps all documentation reso
 | [docs/guide.md](docs/guide.md) | User guide: setup, board selection, medicine management, compile/upload, gunicorn deployment, troubleshooting |
 | [docs/api.md](docs/api.md) | API reference: pub/sub protocol, gRPC client, Flask routes, environment variables |
 | [docs/tests.md](docs/tests.md) | Testing methodology: framework, categories, running tests, coverage by package |
-| [scripts/](docs/scripts.md) | Scripts: CI, builds, gRPC stubs, Arduino deps, test suite → [`scripts/docs/index.md`](scripts/docs/index.md) |
-| [e2e/](docs/e2e-testing.md) | E2E browser testing: mock servers, scenarios, Playwright MCP → [`e2e/index.md`](e2e/index.md) |
-| [dist-test-install/](docs/dist-test-install.md) | Wheel install validation → [`dist-test-install/docs/index.md`](dist-test-install/docs/index.md) |
-| [dist-standalone-install/](docs/dist-standalone.md) | Standalone binary builds → [`dist-standalone-install/docs/index.md`](dist-standalone-install/docs/index.md) |
+| [scripts/](scripts/docs/index.md) | Scripts: CI, builds, gRPC stubs, Arduino deps, test suite |
+| [e2e/](e2e/index.md) | E2E browser testing: mock servers, scenarios, Playwright MCP |
+| [dist-test-install/](dist-test-install/index.md) | Wheel install validation |
+| [dist-standalone-install/](dist-standalone/index.md) | Standalone binary builds |
 
 ---
 
@@ -135,10 +135,8 @@ Base: `medminder_dash/python/medminder_dash/`
 
 | Document | Description | Full Docs |
 |----------|-------------|-----------|
-| [docs/scripts.md](docs/scripts.md) | Scripts reference (CI, builds, gRPC stubs, Arduino deps) | [`scripts/docs/index.md`](scripts/docs/index.md) — [`README.md`](scripts/README.md) |
-| [docs/e2e-testing.md](docs/e2e-testing.md) | E2E browser testing (mock servers, scenarios) | [`e2e/index.md`](e2e/index.md) — [`README.md`](e2e/README.md) |
-| [docs/dist-test-install.md](docs/dist-test-install.md) | Wheel install validation | [`dist-test-install/docs/index.md`](dist-test-install/docs/index.md) — [`README.md`](dist-test-install/README.md) |
-| [docs/dist-standalone.md](docs/dist-standalone.md) | Standalone binary builds | [`dist-standalone-install/docs/index.md`](dist-standalone-install/docs/index.md) |
+| [dist-test-install/index.md](dist-test-install/index.md) | Wheel install validation | [`README.md`](dist-test-install/README.md) |
+| [dist-standalone/index.md](dist-standalone/index.md) | Standalone binary builds | [`dist-standalone-install/index.md`](dist-standalone-install/index.md) |
 
 ## Reference Documents
 

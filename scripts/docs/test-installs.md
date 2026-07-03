@@ -45,4 +45,4 @@ Create a reproducible pipenv venv from `dist-test-install/Pipfile`, install all 
 
 ## Related
 
-- [dist-test-install/docs/index.md](../dist-test-install/docs/index.md) — validation environment details
+- [dist-test-install/index.md](../dist-test-install/index.md) — validation environment details

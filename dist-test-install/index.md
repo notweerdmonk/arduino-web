@@ -60,6 +60,12 @@ dist-test-install/
 | `arduino-dash` | ✅ | ✅ |
 | `medminder-dash` | ✅ | ✅ |
 
+## Document Reference
+
+| Document | Description |
+|----------|-------------|
+| [README](../README.md) | Quick instructions, Pipfile usage, smoke test command |
+
 ## Related
 
 - [scripts/docs/test-installs.md](../scripts/docs/test-installs.md) — smoke test script

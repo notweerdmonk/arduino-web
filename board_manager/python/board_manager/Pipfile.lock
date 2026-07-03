@@ -23,8 +23,8 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:6dff660282caad8fc944a01c14ebbdfed42b6263f9b8b0f09e904a8af5093c79",
-                "sha256:9f7bef8367032500bff86feb66f88b06a97073ca895c6112834f51eef9dbdebf"
+                "sha256:894b4c63483ea7c163f1fe02cb34249888917e4d7778c05c19feb3d07f4515c9",
+                "sha256:aa0f8b7ac17b851d80dcb203a81748230ea8b93b37e0474acec35c2f21db9df7"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"
@@ -110,11 +110,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466",
-                "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+                "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+                "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.15.0"
+            "version": "==4.16.0"
         }
     },
     "develop": {
@@ -223,11 +223,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466",
-                "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+                "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+                "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.15.0"
+            "version": "==4.16.0"
         }
     }
 }

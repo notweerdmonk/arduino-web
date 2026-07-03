@@ -38,16 +38,16 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:6dff660282caad8fc944a01c14ebbdfed42b6263f9b8b0f09e904a8af5093c79",
-                "sha256:9f7bef8367032500bff86feb66f88b06a97073ca895c6112834f51eef9dbdebf"
+                "sha256:894b4c63483ea7c163f1fe02cb34249888917e4d7778c05c19feb3d07f4515c9",
+                "sha256:aa0f8b7ac17b851d80dcb203a81748230ea8b93b37e0474acec35c2f21db9df7"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"
         },
         "arduino-sketch-tools": {
             "hashes": [
-                "sha256:66919ac6aa742d7c265b695d78c9dbb786971abf6a4d110d36a98410cb0965f1",
-                "sha256:b4e0f0d9bf3d83788a151949e5e590a8f2bb023b0eed0d8669bfce5c73ddb2ae"
+                "sha256:c5537ef0949619853e8d1ce7f2854f0dc15e02d47b4f40964e0149ad7f6a7b66",
+                "sha256:f8af8f5d8696fae10148c01880fddb6970908c2d9e054774d1b11532e638c9a3"
             ],
             "index": "arduino-sketch-tools-local",
             "version": "==0.1.0"
@@ -62,16 +62,16 @@
         },
         "board-manager": {
             "hashes": [
-                "sha256:76fd23959d6c13744ed71a4430bd97a241618c5c5488a646eb0d58c03d36a729",
-                "sha256:ab9ada70122e089dfc777b0dbcf218b38c0ab917fe0269fd14eddf25ad2c6d78"
+                "sha256:1a8cc0f9ff1f7f5e60eeb2362274675dc014d1db818c90cfa6e082bad130cf1c",
+                "sha256:5fb8c5aefc5836fdc082d4968641af25bb2e6fca8343b6e90314e99327233fd7"
             ],
             "index": "board-manager-local",
             "version": "==0.1.0"
         },
         "board-manager-client": {
             "hashes": [
-                "sha256:2484a52113c74efa68ee7fec8e355e6d2b84fb6f448aca2073035b0a7307207d",
-                "sha256:60d0f688bd5420d5128febf2f9fbe60135c8a507800cfea87c09723941bd0c51"
+                "sha256:122181145b4316a8e276fdc9f3fd13dc68139869f74fb235b92602dabf44835e",
+                "sha256:67b520bcd1dc8257fe18e0c9c9b13ad84a9685e87ed74ffe59538034a8659015"
             ],
             "index": "board-manager-client-local",
             "version": "==0.1.0"
@@ -363,11 +363,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466",
-                "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+                "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+                "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.15.0"
+            "version": "==4.16.0"
         },
         "werkzeug": {
             "hashes": [
@@ -491,11 +491,11 @@
         },
         "typing-extensions": {
             "hashes": [
-                "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466",
-                "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"
+                "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8",
+                "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==4.15.0"
+            "version": "==4.16.0"
         }
     }
 }

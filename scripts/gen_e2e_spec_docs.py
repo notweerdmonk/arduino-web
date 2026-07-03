@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SPECS_DIR = REPO_ROOT / "e2e" / "specs"
 OUTPUT = REPO_ROOT / "e2e" / "docs" / "reference" / "specs.md"
 
-DESCRIBE_RE = re.compile(r"test\.describe\(['\"]([^'\"]+)['\"]")
+DESCRIBE_RE = re.compile(r"test\.describe(?:\.\w+)?\(['\"]([^'\"]+)['\"]")
 TEST_RE = re.compile(r"\btest(?:\.(?!describe)\w+)?\(['\"]([^'\"]+)['\"]")
 
 
@@ -81,7 +81,7 @@ def generate() -> int:
         fname = parts[-1]  # dashboard.spec.ts
         count = sum(len(tests) for _, tests in suites)
 
-        lines.append(f"## {group} / [{fname}]({fname})")
+        lines.append(f"## {group} / [{fname}](../../specs/{group}/{fname})")
         lines.append("")
         lines.append(f"*{count} tests*")
         lines.append("")

@@ -55,4 +55,22 @@
 | 10 | scripts — Related links | ✅ |
 | 11 | nox -s all_tests | ✅ |
 | 12 | bundle exec jekyll build | ✅ |
+
+---
+
+## Phase 109 — Code Review: E2E TypeScript API Ref + Spec Extraction + Pipeline
+
+**Date**: 2026-07-04 03:10
+
+**Reviewed changes**: `origin/master..HEAD` (5 commits) — JSDoc annotations, gen_e2e_spec_docs.py, gen_api_docs.sh, package.json.
+
+| # | File | Status | Notes |
+|---|------|--------|-------|
+| 1 | `e2e/fixtures/test-data.ts` | ✅  (nit) | JSDoc annotations for 5 exports; single-line style inconsistent with rest |
+| 2 | `e2e/playwright.config.ts` | ✅  (nit) | @module header added |
+| 3 | `scripts/gen_e2e_spec_docs.py` | ⚠️  (2 warnings) | Broken Markdown links (line 84); nested-describe latent bug (lines 35-37) |
+| 4 | `scripts/gen_api_docs.sh` | ⚠️  (suggestion) | typedoc stderr silenced (line 181); missing error check |
+| 5 | `package.json` | ✅ | typedoc in devDependencies correct |
+
+**Overall Verdict**: ✅ Good to merge after 2 warnings addressed (broken links + silenced stderr).
 {% endraw %}

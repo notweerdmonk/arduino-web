@@ -6,7 +6,7 @@ import { defineConfig } from '@playwright/test';
  * Defines two projects (arduino-dash, medminder-dash) with auto-managed
  * mock Flask servers via webServer entries.
  *
- * @module e2e/playwright.config
+ * @module Playwright E2E Configuration
  */
 
 export default defineConfig({

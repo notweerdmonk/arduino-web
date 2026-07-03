@@ -1,7 +1,10 @@
 // Shared test data constants for @playwright/test specs.
 // These mirror the mock state injected by e2e/servers/*_server.py --mock.
 
-/** Mock board ports mirroring e2e/servers/*_server.py --mock state. Two boards: Uno (/dev/ttyTEST0) and Mega (/dev/ttyTEST1). */
+/**
+ * Mock board ports mirroring e2e/servers/*_server.py --mock state.
+ * Two boards: Uno (/dev/ttyTEST0) and Mega (/dev/ttyTEST1).
+ */
 export const MOCK_PORTS = {
   uno: {
     port: '/dev/ttyTEST0',

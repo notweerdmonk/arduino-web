@@ -178,7 +178,7 @@ npx --yes typedoc --skipErrorChecking \
     --entryPointStrategy expand \
     --entryPoints e2e/fixtures/test-data.ts \
     --entryPoints e2e/playwright.config.ts \
-    > /dev/null 2>&1
+    > /dev/null 2>e2e/docs/reference/typedoc/typedoc-errors.log
 
 echo "  [typedoc] done"
 

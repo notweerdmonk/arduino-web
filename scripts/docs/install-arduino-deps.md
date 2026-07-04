@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # Arduino Library Installer — `install_arduino_deps.sh`
 

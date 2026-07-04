@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # sketch_management (sketch_management.py)
 

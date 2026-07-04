@@ -1,5 +1,3 @@
----
----
 # arduino-sketch-tools
 
 Flask extension that provides compile, upload, board-list, and port-list

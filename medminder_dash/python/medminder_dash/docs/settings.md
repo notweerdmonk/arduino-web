@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `settings.py` — Sketch Directory Configuration
 

@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # CI Pipeline — `ci.sh`
 

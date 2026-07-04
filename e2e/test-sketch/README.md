@@ -1,7 +1,3 @@
-
----
----
-
 # Test Sketch — Minimal Arduino Compile/Upload Sketch
 
 A minimal valid Arduino sketch used for end-to-end compile and upload testing.

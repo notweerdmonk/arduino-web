@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # Scripts Test Suite
 

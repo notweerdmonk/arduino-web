@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # MCP E2E Testing Guide — Arduino Web Interactive Browser Tests
 

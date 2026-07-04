@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Testing Plan — Phase 111: Semantic Versioning v0.1.0

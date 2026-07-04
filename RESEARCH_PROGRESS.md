@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # Research Progress — Phase 97: Frontend Stack Optimization
 

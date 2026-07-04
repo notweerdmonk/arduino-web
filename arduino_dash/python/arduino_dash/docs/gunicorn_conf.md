@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # gunicorn_conf (gunicorn_conf.py)
 

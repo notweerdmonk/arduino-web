@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # medminder_dash — Package Overview
 

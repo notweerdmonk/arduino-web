@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Review Journal — Phase 104: E2E Documentation Restructure

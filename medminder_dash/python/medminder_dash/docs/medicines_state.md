@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `medicines_state.py` — Medicine Data Model and Store
 

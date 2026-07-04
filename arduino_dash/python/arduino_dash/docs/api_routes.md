@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # api_routes (api_routes.py)
 

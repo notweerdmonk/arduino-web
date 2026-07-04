@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # sketch_registry (sketch_registry.py)
 

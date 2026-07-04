@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 
 # dist-standalone — Standalone Binary Distributions

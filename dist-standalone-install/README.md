@@ -1,5 +1,3 @@
----
----
 
 # dist-standalone — Standalone Binary Distributions
 

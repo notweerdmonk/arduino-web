@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Research Journal — Phase 98: WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar)

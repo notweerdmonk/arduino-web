@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # settings (settings.py)
 

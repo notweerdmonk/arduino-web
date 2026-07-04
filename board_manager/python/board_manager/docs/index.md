@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # board_manager Package Overview
 

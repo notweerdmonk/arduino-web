@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `html_routes.py` — HTML Routes
 

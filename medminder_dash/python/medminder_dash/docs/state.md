@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `state.py` — Shared Mutable State
 

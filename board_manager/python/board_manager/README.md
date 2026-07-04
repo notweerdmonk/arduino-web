@@ -1,5 +1,3 @@
----
----
 # board-manager
 
 Board Manager Service for arduino-cli. A standalone gRPC service that

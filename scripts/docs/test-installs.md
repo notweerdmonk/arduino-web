@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # Wheel Install Validation — `test_installs.sh`
 

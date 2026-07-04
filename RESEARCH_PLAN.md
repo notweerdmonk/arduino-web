@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Research Plan — Phase 97: Frontend Stack Optimization

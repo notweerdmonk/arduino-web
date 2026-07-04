@@ -1,5 +1,3 @@
----
----
 # dist-test-install
 
 Wheel install validation environment for the medminder monorepo.

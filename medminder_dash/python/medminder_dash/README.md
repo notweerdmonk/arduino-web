@@ -1,5 +1,3 @@
----
----
 # medminder-dash
 
 Medicine reminder web app for the Arduino MedMinderV2. A Flask dashboard

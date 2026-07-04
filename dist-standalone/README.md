@@ -1,6 +1,3 @@
----
----
-
 # dist-standalone — Standalone Binary Distributions
 
 Standalone binary builds for the 3 CLI apps via [PyOxidizer](https://pyoxidizer.readthedocs.io/). Each binary bundles the Python interpreter, the application code, and all dependencies into a single executable with a `prefix/` sidecar for C extensions.

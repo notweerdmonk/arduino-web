@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `app.py` — Flask Application Factory
 

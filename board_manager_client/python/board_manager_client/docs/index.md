@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # board-manager-client
 

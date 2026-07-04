@@ -1,5 +1,3 @@
----
----
 # arduino-grpc
 
 Python gRPC client for [arduino-cli](https://github.com/arduino/arduino-cli). Detects boards, compiles sketches, and uploads to Arduino boards via the arduino-cli daemon.

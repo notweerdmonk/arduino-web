@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Security Audit Findings — MedMinder

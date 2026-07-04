@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # board_management (board_management.py)
 

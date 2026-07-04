@@ -1,5 +1,3 @@
----
----
 # arduino-dash
 
 Web GUI dashboard for the arduino-cli Board Manager. Displays connected

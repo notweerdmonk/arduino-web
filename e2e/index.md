@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # E2E Testing — Interactive Browser Tests
 

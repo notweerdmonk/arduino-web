@@ -1,5 +1,3 @@
----
----
 # Scripts
 
 Utility scripts for building, testing, and deploying the medminder monorepo.

@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # pubsub (pubsub.py)
 

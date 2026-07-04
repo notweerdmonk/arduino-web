@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Testing Journal — Phase 93: GitHub Pages Jekyll Documentation Site

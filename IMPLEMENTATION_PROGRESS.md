@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Implementation Progress — Phase 111: Semantic Versioning v0.1.0

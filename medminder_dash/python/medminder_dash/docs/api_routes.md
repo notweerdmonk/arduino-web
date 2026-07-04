@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `api_routes.py` — JSON API Routes
 

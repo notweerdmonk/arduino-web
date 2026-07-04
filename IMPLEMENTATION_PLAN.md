@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 {% raw %}
 # Implementation Plan — Phase 104: E2E Documentation Restructure

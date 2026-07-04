@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 
 # Pipenv Venv Checker — `check_venv.bash`

@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # `sketch_gen.py` — Sketch Generation
 

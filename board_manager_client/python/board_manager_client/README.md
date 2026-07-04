@@ -1,5 +1,3 @@
----
----
 # board-manager-client
 
 PubSub client library for the BoardManagerService. Wraps the raw

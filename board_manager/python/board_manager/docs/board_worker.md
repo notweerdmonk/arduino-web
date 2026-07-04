@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # Board Worker (Subprocess Entrypoint)
 

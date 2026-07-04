@@ -1,4 +1,5 @@
 ---
+layout: default
 ---
 # gRPC Stub Generator — `gen_grpc_bindings.py`
 

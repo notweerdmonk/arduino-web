@@ -1337,4 +1337,34 @@ Created `.prettierrc` and `.prettierignore` configuration files. Integrated `esl
 
 **Outcome**: All 7 actionable items fixed. 32 unit tests added for `gen_e2e_spec_docs.py`. All tests pass — 160 scripts tests, nox 8/8 sessions, Jekyll 0 errors.
 
+---
+
+## 2026-07-04 04:12 — Phase 110: Authentication, Authorization, CSRF, Rate Limiting
+
+**Priority**: Immediate (security)
+**Scope**: medminder_dash, arduino_dash, arduino_sketch_tools, board_manager, grpc_client
+**Source**: Security audit — 5 Critical + 2 High findings addressing auth, CSRF, rate-limiting
+
+### Plan Items
+
+1. **Authentication (CWE-306)** — Implement Flask-Login with session-based auth. Add login page, logout, `@login_required` decorator to all routes in medminder_dash, arduino_dash, arduino_sketch_tools. Supports single-user mode (auto-login on localhost?) with configurable multi-user via env var.
+
+2. **Strong secret key (CWE-798)** — Remove `"dev-secret"` fallback. Fail hard if `FLASK_SECRET_KEY` is unset. Generate key via `secrets.token_hex(32)`. Document in `.env.example`.
+
+3. **CSRF protection (CWE-352)** — Add Flask-WTF `CSRFProtect`. Include CSRF tokens in all HTMX requests via `hx-headers`. Validate `X-CSRF-Token` for JSON API. Set `SESSION_COOKIE_SAMESITE="Lax"`.
+
+4. **Rate limiting (CWE-400)** — Add Flask-Limiter. Per-endpoint limits: 30 req/min for POST/PUT/DELETE, 60 req/min for GET. Higher limits for WebSocket. Set `MAX_CONTENT_LENGTH = 50 MB`.
+
+5. **Session hardening (CWE-1004)** — Configure `SESSION_COOKIE_HTTPONLY=True`, `SESSION_COOKIE_SECURE=True` (when HTTPS), `SESSION_COOKIE_SAMESITE="Lax"`, `PERMANENT_SESSION_LIFETIME=8h`.
+
+6. **Authorization model (CWE-862)** — (Future, after auth is stable) Add user roles and board ownership validation.
+
+### Verification
+
+- All existing tests must pass
+- Unauthenticated requests to any route return 401/403
+- CSRF-missing POST requests return 400
+- Rate-limited endpoints return 429 after threshold
+- Session cookies have security flags set
+- `nox -s all_tests` — 8/8 sessions, 0 failures
 {% endraw %}

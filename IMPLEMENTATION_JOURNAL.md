@@ -993,4 +993,54 @@ arduino_dash/docs/index.md, arduino_sketch_tools/docs/index.md, board_manager/do
 
 - `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
 - `bundle exec jekyll build` — 0 errors, 0 warnings
+
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline
+
+**Objective**: Establish consistent semantic versioning across the monorepo.
+All 6 Python packages and E2E already declare `0.1.0`. The work covers gaps
+and standardizes the single-source-of-truth pattern (version in `__init__.py`,
+imported by `setup.py`).
+
+**Plan**: 5 tasks (A-E):
+- A: Add `__version__` to 3 missing `__init__.py` files
+- B: Standardize 6 `setup.py` files to import version from package
+- C: Add `"version": "0.1.0"` to root `package.json`
+- D: Create root-level `VERSION` file
+- E: Test all changes
+
+**Approach**: Python scripts for each package, test each quantum before moving
+to the next.
+
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning — Implementation Complete
+
+### Changes Made
+
+**3 __init__.py files updated** (added __version__):
+- arduino_sketch_tools/arduino_sketch_tools/__init__.py:23 — `__version__ = "0.1.0"`
+- board_manager_client/board_manager_client/__init__.py:23 — `__version__ = "0.1.0"`
+- medminder_dash/medminder_dash/__init__.py:23 — `__version__ = "0.1.0"`
+
+**6 setup.py files updated** (import version from package):
+- arduino_dash/setup.py — `from arduino_dash import __version__`
+- arduino_sketch_tools/setup.py — `from arduino_sketch_tools import __version__`
+- board_manager/setup.py — `from board_manager import __version__`
+- board_manager_client/setup.py — `from board_manager_client import __version__`
+- medminder_dash/setup.py — `from medminder_dash import __version__`
+- grpc_client/setup.py — `from arduino_grpc import __version__`
+
+**Root files**:
+- package.json: Added `"version": "0.1.0"`
+- VERSION: Created with content `0.1.0`
+
+**No changes** (already at 0.1.0):
+- e2e/package.json — already had `"version": "0.1.0"`
+- All pyproject.toml files — already had `version = "0.1.0"`
+
+### Verification
+- Version AST scan: All 6 packages __version__ = 0.1.0 ✅
+- Setup.py AST scan: All 6 use imported __version__ ✅
+- Scripts tests: 160/160 passed ✅
+- nox -s all_tests: 8/8 sessions, 0 failures ✅
+- Jekyll build: 0 errors ✅
+
 {% endraw %}

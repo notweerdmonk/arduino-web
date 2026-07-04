@@ -20,11 +20,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from arduino_dash import __version__
+
 from setuptools import setup, find_packages
 
 setup(
     name="arduino-dash",
-    version="0.1.0",
+    version=__version__,
     description="Web GUI for Arduino gRPC Board Manager",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

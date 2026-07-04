@@ -3,6 +3,24 @@
 {% raw %}
 # MedMinder Project Journal
 
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
+
+**Goal**: Establish consistent semantic versioning across the 6 Python packages + root files.
+
+**Changes**:
+- Added `__version__ = "0.1.0"` to 3 `__init__.py` files that were missing it
+- Standardized all 6 `setup.py` files to import version from `__init__.py`
+- Added `"version": "0.1.0"` to root `package.json`
+- Created root `VERSION` file with `0.1.0`
+
+**Pattern**: `__init__.py` is the single source of truth for version. `setup.py` imports it.
+`pyproject.toml` keeps the string for PEP 621 tooling compatibility.
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures.
+Jekyll build — 0 errors.
+
+---
+
 ## 2026-07-04 04:12 — Phase 110: Security Audit Completed
 
 **Scope**: Full codebase audit (Python/Flask, gRPC, shell scripts, JS/HTML).

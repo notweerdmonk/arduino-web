@@ -20,6 +20,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+__version__ = "0.1.0"
+
 from board_manager_client.pubsub_client import PubSubClient
 from board_manager import (
     protocol,

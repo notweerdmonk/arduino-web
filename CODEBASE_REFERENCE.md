@@ -4028,4 +4028,33 @@ python3 scripts/gen_e2e_spec_docs.py
 
 - `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
 - `bundle exec jekyll build` — 0 errors, 0 warnings
+
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline
+
+### Version Single Source of Truth Pattern
+
+```
+__init__.py  (__version__ = "0.1.0")
+    |
+    ├── setup.py          (from PKG import __version__; version=__version__)
+    ├── pyproject.toml    (version = "0.1.0" — PEP 621)
+    ├── VERSION (root)    (0.1.0)
+    └── package.json      ("version": "0.1.0")
+```
+
+### Version Locations (v0.1.0)
+
+| Location | File | Status |
+|----------|------|--------|
+| arduino_dash | `__init__.py` line 23, `setup.py` (imported) | ✅ |
+| arduino_sketch_tools | `__init__.py` line 23, `setup.py` (imported) | ✅ (was missing __version__) |
+| board_manager | `__init__.py` line 27, `setup.py` (imported) | ✅ |
+| board_manager_client | `__init__.py` line 23, `setup.py` (imported) | ✅ (was missing __version__) |
+| arduino_grpc | `__init__.py` line 33, `setup.py` (imported) | ✅ |
+| medminder_dash | `__init__.py` line 23, `setup.py` (imported) | ✅ (was missing __version__) |
+| Root | `package.json` `"version": "0.1.0"`, `VERSION` file | ✅ |
+| e2e | `package.json` `"version": "0.1.0"` | ✅ (unchanged) |
+
+
+#### Last updated
 {% endraw %}

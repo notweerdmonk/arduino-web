@@ -20,11 +20,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from medminder_dash import __version__
+
 from setuptools import setup, find_packages
 
 setup(
     name="medminder-dash",
-    version="0.1.0",
+    version=__version__,
     description="Medicine reminder web app for Arduino MedMinderV2",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

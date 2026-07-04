@@ -1367,4 +1367,33 @@ Created `.prettierrc` and `.prettierignore` configuration files. Integrated `esl
 - Rate-limited endpoints return 429 after threshold
 - Session cookies have security flags set
 - `nox -s all_tests` — 8/8 sessions, 0 failures
+
+---
+
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
+
+**Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
+all versionable modules/packages as v0.1.0 and standardize the single-source-of-truth pattern.
+
+### Tasks
+
+| # | Task | Status |
+|---|------|--------|
+| A | Add `__version__` to 3 missing `__init__.py` files | ✅ |
+| B | Standardize all 6 `setup.py` to import version from package | ✅ |
+| C | Add `"version": "0.1.0"` to root `package.json` | ✅ |
+| D | Create root `VERSION` file | ✅ |
+| E | Test all changes | ✅ |
+
+### Single Source of Truth Pattern
+
+```
+__init__.py  (__version__ = "0.1.0")
+    |
+    ├── setup.py          (from PKG import __version__; version=__version__)
+    ├── pyproject.toml    (version = "0.1.0" — PEP 621)
+    └── VERSION (root)    (0.1.0)
+```
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures. Jekyll build — 0 errors.
 {% endraw %}

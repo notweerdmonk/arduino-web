@@ -5,7 +5,7 @@
 
 Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-07-03 — Phase 108 complete (Document Reference tables + broken link fixes) + User-facing docs sweep (consolidated entry points). See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-07-04 — Phases 109-111 complete (Code Review, Security Audit, Semantic Versioning v0.1.0). See [PLAN.md](PLAN.md) for full phase history.
 
 ---
 

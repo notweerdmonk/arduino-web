@@ -20,11 +20,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from board_manager import __version__
+
 from setuptools import setup, find_packages
 
 setup(
     name="board-manager",
-    version="0.1.0",
+    version=__version__,
     description="Board Manager Service for Arduino gRPC",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

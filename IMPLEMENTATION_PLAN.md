@@ -140,4 +140,50 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 | 9 | dist-standalone-install docs/index.md | Related links | ✅ |
 | 10 | scripts docs/index.md | Related links | ✅ |
 | 11 | All agent-facing docs sync'd | REVIEW_*, TESTING_*, PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md | ✅ |
+## 2026-07-04 04:12 — Phase 111: Semantic Versioning — v0.1.0 Baseline
+
+**Goal**: Establish consistent semantic versioning across the monorepo. All 6 Python packages plus
+the E2E package already declare `0.1.0` — the work is to fill gaps and standardize the single
+source of truth pattern.
+
+**Scope**: 6 Python packages (`arduino-dash`, `arduino-sketch-tools`, `board-manager`,
+`board-manager-client`, `arduino-grpc`, `medminder-dash`) + root `package.json` + `e2e/package.json`.
+
+### Architecture
+
+```
+Version Single Source of Truth (SSoT) Pattern:
+  ┌──────────────────────┐
+  │  __init__.py          │  ← __version__ = "0.1.0" (single source)
+  └──────┬───────────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+  setup.py   pyproject.toml
+  (import)   (redundant but kept
+              for PEP 621 compliance)
+```
+
+Each Python package declares `__version__` in its `__init__.py`. The `setup.py` imports
+`__version__` from the package rather than hardcoding it. `pyproject.toml` retains the
+version string for PEP 621 tooling compatibility.
+
+### Tasks
+
+| # | Task | Scope | Files Changed | Status |
+|---|------|-------|---------------|--------|
+| A | Add `__version__` to 3 missing packages | `arduino-sketch-tools`, `board-manager-client`, `medminder-dash` | 3 `__init__.py` files | ⬜ |
+| B | Standardize setup.py to import version | All 6 Python packages | 6 `setup.py` files | ⬜ |
+| C | Add version to root package.json | Root `package.json` | 1 file | ⬜ |
+| D | Create root-level VERSION file | Root directory | 1 file | ⬜ |
+| E | Test all changes | scripts tests, module imports | — | ⬜ |
+
+### Existing References (unchanged)
+
+- `arduino_dash/.../__init__.py`: `__version__ = "0.1.0"` ✅
+- `board_manager/.../__init__.py`: `__version__ = "0.1.0"` ✅
+- `grpc_client/.../__init__.py`: `__version__ = "0.1.0"` ✅
+- `e2e/package.json`: `version: "0.1.0"` ✅
+- All `pyproject.toml` files: `version = "0.1.0"` ✅ (kept as-is)
+
 {% endraw %}

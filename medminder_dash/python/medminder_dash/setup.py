@@ -28,7 +28,7 @@ setup(
     name="medminder-dash",
     version=__version__,
     description="Medicine reminder web app for Arduino MedMinderV2",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="notweerdmonk",
     author_email="wrdmnk@gmail.com",
@@ -36,6 +36,10 @@ setup(
     packages=find_packages(include=["medminder_dash*"]),
     install_requires=[
         "flask>=3.0",
+        "flask-sock>=0.7.0",
+        "simple-websocket>=1.0.0",
+        "arduino-sketch-tools>=0.1.0",
+        "board-manager-client>=0.1.0",
         "gunicorn>=20.0",
     ],
     entry_points={

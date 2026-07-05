@@ -214,6 +214,58 @@ layout: default
 
 ---
 
+## Category 4: Config/Resource File Fixes (2026-07-05 03:31)
+
+### Task C1 — CI Workflow (4A)
+- [x] Create `.github/workflows/ci.yml` — ruff lint, format check, djlint, full CI pipeline
+- [x] Verify CI triggers on push/PR to master
+
+### Task C2 — Dependency Manifests — medminder_dash (4B)
+- [x] Add `flask-sock>=0.7.0`, `simple-websocket>=1.0.0`, `arduino-sketch-tools>=0.1.0`, `board-manager-client>=0.1.0` to `install_requires`
+
+### Task C3 — Dependency Manifests — arduino_dash (4B)
+- [x] Add `simple-websocket>=1.0.0` to `install_requires`
+
+### Task C4 — Dependency Manifests — grpc_client (4B)
+- [x] Move `grpcio`, `protobuf`, `googleapis-common-protos` from `[dev-packages]` to `[packages]`
+- [x] Remove `grpcio-tools` from `[dev-packages]`
+
+### Task C5 — Git/Config — .gitattributes (4C)
+- [x] Create `.gitattributes` — `* text=auto`, shell/Bat EOL, export-ignore patterns
+
+### Task C6 — Git/Config — .editorconfig (4C)
+- [x] Create `.editorconfig` — indent rules, charset, trimming whitespace
+
+### Task C7 — Git/Config — .gitignore (4C)
+- [x] Add missing patterns: `__pycache__`, `*.pyc`, `.eggs/`, `.mypy_cache/`, `htmlcov/`, `.coverage*`, `*.swp`, `.Python`, `pip-wheel-metadata/`, `.DS_Store`, `Thumbs.db`
+
+### Task C8 — Git/Config — MANIFEST.in (4C)
+- [x] Create `MANIFEST.in` for `arduino_sketch_tools`, `arduino_dash`, `medminder_dash`
+- [x] Fix `arduino_sketch_tools/setup.py` — remove stale `"config/**/*"` from `package_data`
+
+### Task C9 — Tooling — Root pyproject.toml (4D)
+- [x] Create root `pyproject.toml` with `[tool.ruff]`, `[tool.pytest.ini_options]`, `[tool.djlint]`
+
+### Task C10 — Tooling — .ruby-version (4D)
+- [x] Create `.ruby-version` (3.1)
+
+### Task C11 — Polish — encoding in setup.py (4E)
+- [x] Add `encoding="utf-8"` to all 6 `setup.py` files
+
+### Task C12 — Polish — .prettierignore (4E)
+- [x] Add `eslint.config.mjs` to `.prettierignore`
+
+### Task C13 — Polish — noxfile.py reuse_venv (4E)
+- [x] Add `nox.options.reuse_existing_virtualenvs = True`
+
+### Task C14 — Verify — nox all_tests (4F)
+- [x] Run `nox -s all_tests` — 8/8 sessions, 0 failures
+
+### Task C15 — Record findings in REVIEW_JOURNAL.md
+- [x] Record all Category 4 fix outcomes and verification results
+
+---
+
 ## Code Review — Category 3: User-Facing Docs Fixes (2026-07-05 04:51)
 
 ### Task U1 — Verify 3A: Broken Links (5 issues)

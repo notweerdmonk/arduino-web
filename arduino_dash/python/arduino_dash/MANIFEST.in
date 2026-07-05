@@ -1,0 +1,2 @@
+include arduino_dash/templates/**/*
+include arduino_dash/static/**/*

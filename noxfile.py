@@ -2,6 +2,8 @@
 
 Nox session definitions for the Arduino Web monorepo.
 
+nox.options.reuse_existing_virtualenvs = True
+
 Author: notweerdmonk
 SPDX-License-Identifier: Apache-2.0
 

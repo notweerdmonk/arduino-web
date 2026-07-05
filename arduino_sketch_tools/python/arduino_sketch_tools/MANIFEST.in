@@ -1,0 +1,2 @@
+include arduino_sketch_tools/templates/**/*
+include arduino_sketch_tools/static/**/*

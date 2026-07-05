@@ -28,7 +28,7 @@ setup(
     name="arduino-grpc",
     version=__version__,
     description="gRPC client stubs for arduino-cli",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="notweerdmonk",
     author_email="wrdmnk@gmail.com",

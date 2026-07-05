@@ -873,6 +873,51 @@ blocks remain properly balanced.
 
 ---
 
+## 2026-07-05 04:35 — Category 4: Config/Resource File Fixes — Applied & Verified
+
+### Changes Applied
+
+**4B — Dependency Manifests:**
+- `medminder_dash/setup.py`: Added `flask-sock>=0.7.0`, `simple-websocket>=1.0.0`, `arduino-sketch-tools>=0.1.0`, `board-manager-client>=0.1.0` to `install_requires`
+- `arduino_dash/setup.py`: Added `simple-websocket>=1.0.0` to `install_requires`
+- `grpc_client/Pipfile`: Moved `googleapis-common-protos`, `grpcio`, `protobuf` from `[dev-packages]` to `[packages]`; removed `grpcio-tools` (build-time dep for stub generation, not needed for tests)
+
+**4A — CI:**
+- Created `.github/workflows/ci.yml` — runs ruff lint, ruff format check, djlint, and full `./scripts/ci.sh` on push/PR to master
+
+**4C — Git/Config:**
+- Created `.gitattributes` — `* text=auto`, shell/Bat EOL, export-ignore for test/build artifacts
+- Created `.editorconfig` — indent_style=space, indent_size=4 (2 for yml/yaml/json/html/js), utf-8, trim trailing whitespace
+- Updated `.gitignore` — added mypy_cache, eggs, sdist, coverage, .DS_Store, Thumbs.db
+- Created `MANIFEST.in` for arduino_sketch_tools, arduino_dash, medminder_dash (templates/static/sketches)
+- Fixed `arduino_sketch_tools/setup.py` — removed stale `"config/**/*"` from `package_data`
+
+**4D — Tooling:**
+- Created root `pyproject.toml` with `[tool.ruff]`, `[tool.pytest.ini_options]`, `[tool.djlint]`
+- Created `.ruby-version` (3.1)
+
+**4E — Polish:**
+- Added `encoding="utf-8"` to all 6 `setup.py` files
+- Added `eslint.config.mjs` to `.prettierignore`
+- Added `nox.options.reuse_existing_virtualenvs = True` to `noxfile.py`
+
+### Verification
+
+- All 6 setup.py files pass Python AST parse
+- `nox -s all_tests` — 8/8 sessions, 0 failures (board_manager 212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 118, medminder_dash 186+1, arduino_grpc 33+2, scripts 170, all_tests OK in 3 min)
+
+**Gotcha:** `grpcio-tools` in Pipfile [dev-packages] caused lock resolution failure. Removed since it's a stub-generation build dep, not needed for testing.
+
+### Remaining
+
+- `dist-test-install/Pipfile` hardcoded `0.1.0` version pins (LOW — update on version bump)
+- Root `Pipfile` empty `[packages]` with 6 local sources (LOW — intentional for tooling)
+- `config/eslint.config.mjs` `sourceType: "script"` vs `"module"` (debatable, kept as-is)
+- `jekyll.yml` mixed action pinning strategy (LOW — functional as-is)
+- `medminder_dash/Pipfile.lock` needs regeneration (requires user to run `pipenv lock`)
+
+---
+
 ## 2026-07-05 04:51 — Code Review: Category 3 User-Facing Docs Fixes
 
 **Scope**: Code review of 20+ fixes across 10 sub-categories (3A–3J) in user-facing documentation. All changes were already applied in the working tree.

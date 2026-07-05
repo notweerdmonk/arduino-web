@@ -70,6 +70,26 @@ layout: default
 | R7 | Regression — nox all_tests | ✅ | 8/8 sessions, 0 failures, 0 errors |
 | R8 | Record findings in REVIEW_JOURNAL.md | ✅ | Full code review entry recorded |
 
+## Category 4: Config/Resource File Fixes (2026-07-05 04:35)
+
+| Task | Description | Status | Details |
+|------|-------------|--------|---------|
+| C1 | `.github/workflows/ci.yml` | ✅ | Created — ruff lint, djlint, full CI pipeline on push/PR |
+| C2 | medminder_dash/setup.py deps | ✅ | Added flask-sock, simple-websocket, arduino-sketch-tools, board-manager-client |
+| C3 | arduino_dash/setup.py deps | ✅ | Added simple-websocket |
+| C4 | grpc_client/Pipfile deps | ✅ | Moved grpcio/protobuf/googleapis-common-protos to [packages]; removed grpcio-tools |
+| C5 | `.gitattributes` | ✅ | Created — text=auto, shell/Bat eol, export-ignore |
+| C6 | `.editorconfig` | ✅ | Created — indent rules, charset, trimming |
+| C7 | `.gitignore` | ✅ | Added missing Python/test/OS patterns |
+| C8 | `MANIFEST.in` files | ✅ | Created for 3 data-carrying packages |
+| C9 | arduino_sketch_tools/setup.py | ✅ | Removed stale `config/**/*` from package_data |
+| C10 | Root `pyproject.toml` | ✅ | Added ruff/pytest/djlint config |
+| C11 | `.ruby-version` | ✅ | Created — 3.1 |
+| C12 | `encoding="utf-8"` all setup.py | ✅ | Fixed all 6 files |
+| C13 | `.prettierignore` | ✅ | Added root eslint.config.mjs |
+| C14 | `noxfile.py` reuse_venv | ✅ | Added `nox.options.reuse_existing_virtualenvs = True` |
+| C15 | Regression — nox all_tests | ✅ | 8/8 sessions, 0 failures |
+
 ## Category 3: User-Facing Docs Review (2026-07-05 04:51)
 
 | Task | Description | Status | Details |

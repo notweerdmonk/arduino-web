@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install pipenv
+        run: pip install pipenv
+      - name: Install root dev dependencies
+        run: pipenv install --dev
+      - name: Lint with ruff
+        run: pipenv run ruff check .
+      - name: Check formatting with ruff
+        run: pipenv run ruff format --check .
+      - name: Lint templates with djlint
+        run: pipenv run djlint . --check
+      - name: Full CI pipeline
+        run: ./scripts/ci.sh

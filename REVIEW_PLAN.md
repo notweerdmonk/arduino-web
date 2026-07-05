@@ -156,6 +156,38 @@ line number validity, and absence of regressions.
 
 **Verdict**: ✅ All Category 2 fixes are correct and verified. One pre-existing structural nit (stray code fence at line 3692) noted but not introduced by this work.
 
+## Category 4: Config/Resource File Fixes
+
+**Date**: 2026-07-05 03:31
+
+**Source**: Config & Resource Files Audit (see REVIEW_JOURNAL.md — 2026-07-05 01:04, sections 4A–4I)
+
+### Scope
+
+Fix 23 issues across 5 sub-categories: dependency manifests, CI configuration, git/config gaps, tool configuration, and polish items.
+
+### Quantum Breakdown
+
+| Quantum | Sub-Cat | Description | Files |
+|---------|---------|-------------|-------|
+| 4A | CI | Create `.github/workflows/ci.yml` | new file |
+| 4B | Deps | Fix dependency manifest mismatches (5 issues) | medminder_dash/setup.py, arduino_dash/setup.py, grpc_client/Pipfile |
+| 4C | Git/Config | Create `.gitattributes`, `.editorconfig`, `MANIFEST.in` files | new files + 3 setup.py fixes |
+| 4D | Tooling | Add root `pyproject.toml` with ruff/pytest/djlint config, `.ruby-version` | new files |
+| 4E | Polish | `encoding="utf-8"` in all setup.py, `.prettierignore`, `noxfile.py` reuse, `jekyll.yml` consistency | 6 setup.py + 3 config |
+| 4F | Verify | `nox -s all_tests` — 8/8 sessions must pass | — |
+
+### Verification Criteria
+
+- All 6 setup.py files parse syntactically
+- `nox -s all_tests` — all 8 sessions pass
+- No regressions in existing test suites
+- All new files properly formatted
+
+**Verdict**: ✅ Completed — all 15 tasks verified; 8/8 nox sessions pass
+
+---
+
 ## Category 3: User-Facing Docs Fixes (Batch 5)
 
 **Date**: 2026-07-05 04:51

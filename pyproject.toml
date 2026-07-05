@@ -1,0 +1,22 @@
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+select = ["E", "F", "I", "W"]
+exclude = ["cc/arduino/cli/commands/v1/"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "board_manager/python/board_manager",
+    "board_manager_client/python/board_manager_client",
+    "arduino_sketch_tools/python/arduino_sketch_tools",
+    "grpc_client/python/arduino_grpc",
+    "arduino_dash/python/arduino_dash",
+    "medminder_dash/python/medminder_dash",
+    "scripts",
+]
+python_files = ["test_*.py", "*_test.py"]
+asyncio_mode = "auto"
+
+[tool.djlint]
+profile = "jinja"
+extend_exclude = "node_modules"

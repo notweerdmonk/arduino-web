@@ -28,7 +28,7 @@ setup(
     name="arduino-sketch-tools",
     version=__version__,
     description="Flask Extension for Arduino sketch compile/upload",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="notweerdmonk",
     author_email="wrdmnk@gmail.com",
@@ -44,7 +44,6 @@ setup(
         "arduino_sketch_tools": [
             "templates/**/*",
             "static/**/*",
-            "config/**/*",
         ],
     },
     include_package_data=True,

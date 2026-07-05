@@ -1,0 +1,3 @@
+include medminder_dash/templates/**/*
+include medminder_dash/static/**/*
+include medminder_dash/sketches/**/*

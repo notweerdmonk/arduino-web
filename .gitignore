@@ -55,3 +55,26 @@ config/board_sketches.json
 
 # --- Scratch directory ---
 scratch/
+
+# --- Python build/test artifacts ---
+.mypy_cache/
+.eggs/
+*.egg
+parts/
+sdist/
+develop-eggs/
+installed.cfg
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# --- OS artifacts ---
+*~
+.DS_Store
+Thumbs.db

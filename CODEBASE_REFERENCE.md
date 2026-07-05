@@ -4,7 +4,7 @@ layout: default
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-06-24 (Phases 89-100 + Code Review — Linting, ESLint, Playwright, Pipfile)
+**Last updated**: 2026-07-05 (Phases 89-112)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -3442,8 +3442,8 @@ medminder: board-selector(/medicines) + Sketch Path (+ assigned-sketch-info) + a
 
 | File | Line | Change |
 |------|------|--------|
-| `arduino_dash/.../templates/base.html` | 9 | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
-| `medminder_dash/.../templates/base.html` | 13 | Same URL change |
+| `arduino_dash/.../templates/base.html` | 32 | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| `medminder_dash/.../templates/base.html` | 40 | Same URL change |
 
 ### Bug 2: WebSocket "Invalid frame header"
 
@@ -3518,10 +3518,10 @@ The bash tool tracks processes by **session ID**. When the shell (session leader
 |------|-------|-----------|
 | `e2e/servers/arduino_dash_server.py` | 81-109 | `_daemonize()` |
 | `e2e/servers/arduino_dash_server.py` | 24-78 | `_get_default_pidfile`, `_write_pidfile`, `_remove_pidfile`, `_stop_server` |
-| `e2e/servers/arduino_dash_server.py` | 208-237 | `main()` — args, --stop check, daemonize call |
+| `e2e/servers/arduino_dash_server.py` | 184 | `main()` — args, --stop check, daemonize call |
 | `e2e/servers/medminder_dash_server.py` | 83-111 | `_daemonize()` (identical) |
 | `e2e/servers/medminder_dash_server.py` | 26-80 | Lifecycle helpers (identical) |
-| `e2e/servers/medminder_dash_server.py` | 237-266 | `main()` — args, --stop check, daemonize call |
+| `e2e/servers/medminder_dash_server.py` | 220 | `main()` — args, --stop check, daemonize call |
 
 ### Usage (no shell hacks required)
 
@@ -3868,7 +3868,7 @@ sed -i "s|@REPO_ROOT@|$PROJECT_ROOT|g" scripts/pyoxidizer/$APP/pyoxidizer.bzl
 
 | File | Changes |
 |------|---------|
-| `e2e/docs/index.md` | Added Automated Playwright Specs section (install, run, webServer, spec summary) + Test Sketch section; refocused as MCP sub-page |
+| `e2e/index.md` | Added Automated Playwright Specs section (install, run, webServer, spec summary) + Test Sketch section; refocused as MCP sub-page |
 | `e2e/docs/servers.md` | Added webServer auto-management note referencing `playwright.config.ts` |
 | `e2e/agent_tools/COMMAND.md` | Added test-sketch path reference for compile/upload scenarios |
 | `e2e/agent_tools/AGENT.md` | Added step 4: "Locate test-sketch" |
@@ -3908,7 +3908,7 @@ e2e/
 
 | File | Section | Content |
 |------|---------|---------|
-| `e2e/docs/index.md` | "Test Data Fixtures" under Automated Playwright Specs | Export table (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), import path, `--mock` relation, shelf status |
+| `e2e/index.md` | "Test Data Fixtures" under Automated Playwright Specs | Export table (MOCK_PORTS, MOCK_SKETCH, MOCK_MEDICINES, URL helpers), import path, `--mock` relation, shelf status |
 
 ### Fixtures Reference
 
@@ -3933,13 +3933,77 @@ e2e/
 
 | File | Section | Change |
 |------|---------|--------|
-| `e2e/docs/index.md` | Installation | Added `npx playwright install --with-deps` after `npm install` with error callout |
-| `e2e/docs/index.md` | Running Specs | Added callout: `npx playwright test --config e2e/playwright.config.ts` for project-root runs |
+| `e2e/index.md` | Installation | Added `npx playwright install --with-deps` after `npm install` with error callout |
+| `e2e/index.md` | Running Specs | Added callout: `npx playwright test --config e2e/playwright.config.ts` for project-root runs |
 
 ### Verification
 
 - 3 test scenarios: all pass ✅
 - Jekyll build: 0 errors, 0 warnings ✅
+
+---
+
+## Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `e2e/docs/index.md`, `e2e/README.md`, `e2e/index.md`, `CODEBASE_REFERENCE.md` | Removed "(Shelved)" labels from automated specs sections |
+| `e2e/agent_tools/GUIDE.md`, `e2e/MCP_TESTING_GUIDE.md` | Stripped standalone Playwright file references |
+| `PLAN.md`, `JOURNAL.md`, `IMPLEMENTATION_PLAN.md`, `IMPLEMENTATION_PROGRESS.md`, `TESTING_JOURNAL.md` | Updated historical Phase 100 entries |
+
+### Verification
+
+- All "(Shelved)" labels removed from user-facing docs
+- Playwright refs cleaned from agent_tools
+- Jekyll build: 0 errors, 0 warnings ✅
+
+---
+
+## Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `medminder_dash/docs/` → `medminder_dash/python/medminder_dash/docs/` | Moved docs alongside setup.py |
+| `board_manager/docs/` → `board_manager/python/board_manager/docs/` | Moved docs alongside setup.py |
+| `docs/api.md`, `docs/guide.md`, `docs/tests.md`, `docs/architecture.md`, `index.md`, `CODEBASE_REFERENCE.md` | Updated all path references to new doc locations |
+
+### Verification
+
+- All internal doc links verified against new paths
+- Jekyll build: 0 errors, 0 warnings ✅
+
+---
+
+## Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+### Dependencies Added
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `prettier` | ^3.9.0 | JavaScript formatter |
+| `eslint-config-prettier` | ^10.1.8 | Disables conflicting ESLint rules |
+| `eslint-plugin-prettier` | ^5.5.6 | Runs prettier as ESLint rule |
+
+### Configuration Files Created
+
+| File | Key Settings |
+|------|-------------|
+| `.prettierrc` | `singleQuote: false`, `semi: true`, `tabWidth: 2`, `trailingComma: "es5"` |
+| `.prettierignore` | `_site/`, `node_modules/`, `.nox/`, `*.ts`, `*.tsx`, `config/eslint.config.mjs` |
+
+### Key Finding
+
+`trailingComma: "all"` produces invalid Jinja2 syntax in `{{ }}` expressions. Fixed by using `trailingComma: "es5"` (only adds trailing commas to object literals and arrays, not function calls).
+
+### Formatting Results
+
+- 190 HTML files processed via `npx prettier --write "**/*.html"`
+- Zero errors — verified with `npx prettier --check "**/*.html"`
+- Verified with `npx eslint .` — no new violations
 
 ---
 
@@ -3971,7 +4035,7 @@ e2e/
 | `scripts/gen_api_docs.sh` | Added typedoc section + spec extraction + stale `./docs/` cleanup |
 | `README.md` | API Reference section: typedoc + specs.md links added |
 | `index.md` | Reference Documents table: typedoc + specs.md entries added |
-| `e2e/index.md`, `e2e/README.md`, `e2e/docs/index.md` | `reference/` dir in directory layout + link rows |
+| `e2e/index.md`, `e2e/README.md` | `reference/` dir in directory layout + link rows |
 
 ### Key Decisions
 
@@ -4015,7 +4079,7 @@ python3 scripts/gen_e2e_spec_docs.py
 | dist-standalone-install | `dist-standalone-install/README.md` | **New** — copied from `dist-standalone/` |
 | dist-standalone-install | `dist-standalone-install/index.md` | Moved from docs/; entry point + Related links |
 | scripts | `scripts/docs/index.md` | Related links added |
-| e2e | `e2e/docs/index.md` | Already had Document Reference (Phase 107) — verified |
+| e2e | `e2e/index.md` | Already had Document Reference (Phase 107) — verified |
 
 ### Broken Links Fixed
 
@@ -4023,12 +4087,67 @@ python3 scripts/gen_e2e_spec_docs.py
 |------|-----|
 | `scripts/docs/index.md` | Added Related section linking tests.md, dist-test-install, dist-standalone-install |
 | `dist-standalone-install/index.md` | Added Related section linking build-standalone.md + README |
-| `dist-test-install/docs/index.md` | Added Related section linking test-installs.md + tests.md |
+| `dist-test-install/index.md` | Added Related section linking test-installs.md + tests.md |
 
 ### Verification
 
 - `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
 - `bundle exec jekyll build` — 0 errors, 0 warnings
+
+---
+
+## Phase 109 — Code Review of Phase 107/108 (2026-07-04 03:10)
+
+### Scope
+
+5 un-pushed commits across 5 files — JSDoc annotations (`e2e/fixtures/test-data.ts`, `e2e/playwright.config.ts`),
+new tooling script (`scripts/gen_e2e_spec_docs.py`), pipeline config (`scripts/gen_api_docs.sh`, `package.json`).
+
+### Findings & Fixes
+
+| Severity | Issue | Fix Applied |
+|----------|-------|-------------|
+| Warning | Broken spec file links in generated `specs.md` | Corrected relative paths (`../../specs/{group}/{fname}`) |
+| Warning | Latent nested-describe parsing bug | Documented no-nesting assumption |
+| Suggestion | Typedoc stderr suppressed | Redirected to `typedoc-errors.log` |
+| Suggestion | No unit tests for `gen_e2e_spec_docs.py` | 32 unit tests added |
+| Nit | Inconsistent JSDoc style on `MOCK_PORTS` | Converted to multi-line format |
+| Nit | `@module` naming in playwright.config.ts | Changed to descriptive name |
+| Nit | Regex edge case for `describe.only`/`describe.skip` | Benign — no action needed |
+
+### Verification
+
+- 32 unit tests added for `gen_e2e_spec_docs.py`
+- `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors
+- `bundle exec jekyll build` — 0 errors, 0 warnings
+
+---
+
+## Phase 110 — Authentication, Authorization, CSRF, Rate Limiting (2026-07-04 04:12)
+
+### Source
+
+Security audit covering medminder_dash, arduino_dash, arduino_sketch_tools, board_manager, grpc_client.
+
+### Audit Findings Summary
+
+| Severity | Count | Key Issues |
+|----------|-------|------------|
+| Critical | 5 | No authentication (CWE-306), hardcoded secret key (CWE-798), cleartext gRPC (CWE-319), no CSRF protection (CWE-352), world-writable UDS socket (CWE-276) |
+| High | 8 | Session hardening, rate limiting, XSS, path traversal, etc. |
+| Medium | 7 | Information disclosure, missing security headers, etc. |
+| Low | 4 | Debug mode, verbose errors, etc. |
+
+### Output
+
+- **`AUDIT_FINDINGS.md`**: Full findings recorded with CWE references, severity ratings, and remediation guidance
+- **`PLAN.md`**: Implementation plan with 6 actionable items spanning authentication, authorization, CSRF, rate limiting, session hardening, and encryption
+
+### Verification
+
+- `nox -s all_tests` — 8/8 sessions, 0 failures (no regressions from audit tooling)
+
+---
 
 ## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline
 
@@ -4058,4 +4177,37 @@ __init__.py  (__version__ = "0.1.0")
 
 
 #### Last updated
+
+## 2026-07-05 04:35 — Phase 112: Jekyll Optional Front Matter Plugin
+
+### Files Modified/Created
+
+| File | Change |
+|------|--------|
+| `Gemfile` | Added `:jekyll_plugins` group with `jekyll-optional-front-matter` and `jekyll-relative-links` |
+| `_config.yml` | Added `- jekyll-optional-front-matter` to `plugins`; added `remove_originals: true` |
+
+### Plugin Details
+
+- **Plugin**: `jekyll-optional-front-matter` (https://github.com/benbalter/jekyll-optional-front-matter)
+- **Blacklist** (`lib/jekyll-optional-front-matter.rb`): `FILENAME_BLACKLIST = %w(README LICENSE LICENCE COPYING CODE_OF_CONDUCT CONTRIBUTING ISSUE_TEMPLATE PULL_REQUEST_TEMPLATE)`
+- **Override**: Files listed in `_config.yml` `include` bypass the blacklist
+- **Config**: `optional_front_matter.remove_originals: true` strips raw `.md` copies from `_site/`
+
+### 12 README.md files in `include` list
+
+| # | Path |
+|---|------|
+| 1 | `README.md` |
+| 2 | `scripts/README.md` |
+| 3 | `e2e/README.md` |
+| 4 | `e2e/test-sketch/README.md` |
+| 5 | `dist-test-install/README.md` |
+| 6 | `dist-standalone-install/README.md` |
+| 7 | `board_manager/python/board_manager/README.md` |
+| 8 | `board_manager_client/python/board_manager_client/README.md` |
+| 9 | `arduino_sketch_tools/python/arduino_sketch_tools/README.md` |
+| 10 | `grpc_client/python/arduino_grpc/README.md` |
+| 11 | `arduino_dash/python/arduino_dash/README.md` |
+| 12 | `medminder_dash/python/medminder_dash/README.md` |
 {% endraw %}

@@ -89,7 +89,7 @@ Issues are classified along two axes:
 
 ## Review Structure
 
-Reviews are documented in `REVIEW_JOURNAL.md` with the following format:
+Reviews are documented in `agent-docs/REVIEW_JOURNAL.md` with the following format:
 
 ```
 ## <date> — <phase description>
@@ -139,7 +139,7 @@ After fixes are applied, a verification pass confirms:
 
 | Document | Description |
 |----------|-------------|
-| [`REVIEW_PLAN.md`](../REVIEW_PLAN.md) | Agent-facing review plans per phase |
-| [`REVIEW_JOURNAL.md`](../REVIEW_JOURNAL.md) | Agent-facing review findings journal |
+| [`agent-docs/REVIEW_PLAN.md`](../agent-docs/REVIEW_PLAN.md) | Agent-facing review plans per phase |
+| [`agent-docs/REVIEW_JOURNAL.md`](../agent-docs/REVIEW_JOURNAL.md) | Agent-facing review findings journal |
 | [`docs/architecture.md`](architecture.md) | System architecture and design decisions |
 | [`docs/tests.md`](tests.md) | Testing methodology and coverage |

@@ -213,7 +213,7 @@ npx eslint .            # check (includes prettier/prettier errors)
 npx eslint . --fix      # auto-fix (prettier + JS corrections)
 ```
 
-Config is in `config/eslint.config.mjs`. See `CODEBASE_REFERENCE.md` for known edge cases (two `base.html` files cycle between standalone prettier and eslint-plugin-prettier on long-line wrapping).
+Config is in `config/eslint.config.mjs`. See `agent-docs/CODEBASE_REFERENCE.md` for known edge cases (two `base.html` files cycle between standalone prettier and eslint-plugin-prettier on long-line wrapping).
 
 ## Related Documentation
 

@@ -6,7 +6,7 @@ layout: default
 
 Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-07-05 — Phases 109-112 complete (Code Review, Security Audit, Semantic Versioning v0.1.0, Config/CI/Docs). See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-07-05 — Phases 109-112 complete (Code Review, Security Audit, Semantic Versioning v0.1.0, Config/CI/Docs). See [agent-docs/PLAN.md](agent-docs/PLAN.md) for full phase history.
 
 ---
 
@@ -145,11 +145,11 @@ Base: `medminder_dash/python/medminder_dash/`
 
 | Document | Description |
 |----------|-------------|
-| [PLAN.md](PLAN.md) | Project master plan (append-only, per-phase) |
-| [JOURNAL.md](JOURNAL.md) | Development log (append-only) |
-| [CODEBASE_REFERENCE.md](CODEBASE_REFERENCE.md) | Technical reference, code snippets, declarations |
-| [BUGS.md](BUGS.md) | Known issues and regressions |
-| [TODOS.md](TODOS.md) | Active task checklist |
+| [agent-docs/PLAN.md](agent-docs/PLAN.md) | Project master plan (append-only, per-phase) |
+| [agent-docs/JOURNAL.md](agent-docs/JOURNAL.md) | Development log (append-only) |
+| [agent-docs/CODEBASE_REFERENCE.md](agent-docs/CODEBASE_REFERENCE.md) | Technical reference, code snippets, declarations |
+| [agent-docs/BUGS.md](agent-docs/BUGS.md) | Known issues and regressions |
+| [agent-docs/TODOS.md](agent-docs/TODOS.md) | Active task checklist |
 | [docs/ws-event-flow.md](docs/ws-event-flow.md) | WebSocket event flow documentation |
 | [e2e/docs/reference/typedoc/](e2e/docs/reference/typedoc/) | E2E fixtures + config API reference (typedoc) |
 | [e2e/docs/reference/specs.md](e2e/docs/reference/specs.md) | E2E Playwright spec reference (22 tests across 8 files) |

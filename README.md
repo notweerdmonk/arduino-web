@@ -323,9 +323,9 @@ medminder/
 
 ### Reference
 
-- [PLAN.md](PLAN.md) — project master plan
-- [JOURNAL.md](JOURNAL.md) — development log
-- [CODEBASE_REFERENCE.md](CODEBASE_REFERENCE.md) — technical reference
+- [agent-docs/PLAN.md](agent-docs/PLAN.md) — project master plan
+- [agent-docs/JOURNAL.md](agent-docs/JOURNAL.md) — development log
+- [agent-docs/CODEBASE_REFERENCE.md](agent-docs/CODEBASE_REFERENCE.md) — technical reference
 - [index.md](index.md) — full documentation hub (all docs across the monorepo)
 
 ### API Reference

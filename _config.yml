@@ -38,6 +38,7 @@ exclude:
   - pyproject.toml
   - setup.py
   - developer_reference_docs/
+  - agent-docs/
 
 # Include README files that had front matter stripped (they need processing as pages)
 include:

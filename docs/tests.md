@@ -71,6 +71,10 @@ cd grpc_client/python/arduino_grpc              && pipenv run pytest tests/    #
 
 ### All packages (nox)
 
+Nox is configured with `reuse_existing_virtualenvs = True` in
+`noxfile.py`, so virtualenvs created on the first run are reused
+on subsequent runs rather than being deleted and recreated:
+
 ```bash
 nox -s all_tests          # all 6 packages + scripts (8 sessions)
 nox -s scripts_tests      # scripts/tests only (pytest + bash)

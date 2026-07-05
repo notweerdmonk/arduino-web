@@ -80,6 +80,22 @@ cd medminder_dash
 pipenv run python -m medminder_dash --port 8081
 ```
 
+## Semantic Versioning
+
+The project follows [Semantic Versioning 2.0](https://semver.org/).
+Versions are tracked in `medminder/__init__.py`:
+
+```python
+__version__ = "0.1.0"
+```
+
+- **Major** — Breaking protocol, API, or CLI changes
+- **Minor** — Features, non-breaking enhancements
+- **Patch** — Bug fixes, docs, config, CI changes
+
+Run `pipenv run python -c "import medminder; print(medminder.__version__)"`
+to query the current version.
+
 ## Running tests
 
 ```bash

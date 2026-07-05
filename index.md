@@ -6,7 +6,7 @@ layout: default
 
 Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-07-04 — Phases 109-111 complete (Code Review, Security Audit, Semantic Versioning v0.1.0). See [PLAN.md](PLAN.md) for full phase history.
+> **Last updated**: 2026-07-05 — Phases 109-112 complete (Code Review, Security Audit, Semantic Versioning v0.1.0, Config/CI/Docs). See [PLAN.md](PLAN.md) for full phase history.
 
 ---
 
@@ -19,6 +19,7 @@ Welcome to the Arduino Web documentation. This index maps all documentation reso
 | [docs/guide.md](docs/guide.md) | User guide: setup, board selection, medicine management, compile/upload, gunicorn deployment, troubleshooting |
 | [docs/api.md](docs/api.md) | API reference: pub/sub protocol, gRPC client, Flask routes, environment variables |
 | [docs/tests.md](docs/tests.md) | Testing methodology: framework, categories, running tests, coverage by package |
+| [docs/review.md](docs/review.md) | Code review methodology: process, finding classification, review categories, verification |
 | [scripts/](scripts/docs/index.md) | Scripts: CI, builds, gRPC stubs, Arduino deps, test suite |
 | [e2e/](e2e/index.md) | E2E browser testing: mock servers, scenarios, Playwright MCP |
 | [dist-test-install/](dist-test-install/index.md) | Wheel install validation |

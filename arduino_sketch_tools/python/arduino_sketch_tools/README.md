@@ -95,10 +95,10 @@ and upload output uses `<span hx-swap-oob="beforeend:#upload-output-{port_safe}"
 |--------|------|-------------|
 | POST | `/board/<port>/compile` | Compile a sketch |
 | POST | `/board/<port>/upload` | Upload compiled binary |
-| GET | `/board/<port>/list` | List connected boards |
-| GET | `/board/<port>/ports` | List serial ports |
-| GET | `/board/<port>/compile-result` | Poll compile status |
-| GET | `/board/<port>/upload-result` | Poll upload status |
+| POST | `/board/<port>/upload/confirm` | Confirm upload after warnings |
+| GET | `/board/<port>/compile/poll` | Poll compile status |
+| GET | `/board/<port>/upload/poll` | Poll upload status |
+| GET | `/board/<port>/upload/section` | Get upload output section |
 
 ## Development
 

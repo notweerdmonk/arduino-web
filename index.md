@@ -22,7 +22,7 @@ Welcome to the Arduino Web documentation. This index maps all documentation reso
 | [scripts/](scripts/docs/index.md) | Scripts: CI, builds, gRPC stubs, Arduino deps, test suite |
 | [e2e/](e2e/index.md) | E2E browser testing: mock servers, scenarios, Playwright MCP |
 | [dist-test-install/](dist-test-install/index.md) | Wheel install validation |
-| [dist-standalone-install/](dist-standalone/index.md) | Standalone binary builds |
+| [dist-standalone-install/](dist-standalone-install/index.md) | Standalone binary builds |
 
 ---
 
@@ -138,7 +138,7 @@ Base: `medminder_dash/python/medminder_dash/`
 | Document | Description | Full Docs |
 |----------|-------------|-----------|
 | [dist-test-install/index.md](dist-test-install/index.md) | Wheel install validation | [`README.md`](dist-test-install/README.md) |
-| [dist-standalone/index.md](dist-standalone/index.md) | Standalone binary builds | [`dist-standalone-install/index.md`](dist-standalone-install/index.md) |
+| [dist-standalone-install/index.md](dist-standalone-install/index.md) | Standalone binary builds | [`dist-standalone-install/index.md`](dist-standalone-install/index.md) |
 
 ## Reference Documents
 

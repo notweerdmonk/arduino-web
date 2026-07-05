@@ -318,6 +318,7 @@ client.on_reconnect = lambda: print("reconnected")
 | `/admin/board-selector` | GET | Board selector partial (HTMX) |
 | `/admin/active-board` | POST | Set active board in session |
 | `/board/compile-upload-card` | GET | Compile/upload card partial (HTMX) |
+| `/boards/grid/card/<port>` | GET | Single board card partial |
 | `/daemon/status` | GET | Daemon status badge partial |
 | `/last-upload` | GET | Last upload info partial |
 | `/sketch/upload` | POST | Upload a sketch archive |
@@ -337,11 +338,17 @@ client.on_reconnect = lambda: print("reconnected")
 | `/boards/grid` | GET | Grid view of all boards |
 | `/admin` | GET | Admin page: board selector, sketch management |
 | `/admin/board-selector` | GET | Board selector partial (HTMX) |
-| `/admin/active-board` | POST | Set active board in session |
+| `/medicines/active-board` | POST | Set active board and render medicine cards |
 | `/board/compile-upload-card` | GET | Compile/upload card partial (HTMX) |
+| `/boards/grid/card/<port>` | GET | Single board card partial |
 | `/daemon/status` | GET | Daemon status badge partial |
 | `/medicines` | GET | Medicine list page |
 | `/medicine/new` | GET | Medicine creation form |
+| `/medicine` | POST | Create a medicine |
+| `/medicine/<med_id>/edit` | GET | Medicine edit form |
+| `/medicine/<med_id>` | PUT | Update a medicine |
+| `/medicine/<med_id>` | DELETE | Delete a medicine |
+| `/medicine/<med_id>/toggle` | PUT | Toggle medicine enabled/disabled |
 | `/medicines/board-selector` | GET | Board selector dropdown partial |
 | `/medicines/active-board-card` | GET | Active board medicine cards partial |
 | `/medicines/confirm-modal` | GET | Confirm modal partial |

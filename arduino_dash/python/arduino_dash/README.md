@@ -74,7 +74,7 @@ nox -s 'tests(arduino_dash)' 'build(arduino_dash)'
 ## Usage
 
 ```bash
-# Start the dashboard (default port 5000)
+# Start the dashboard (default port 8080)
 python -m arduino_dash
 
 # Or use the console script
@@ -84,7 +84,7 @@ arduino-dash
 gunicorn arduino_dash.wsgi:app -c arduino_dash/gunicorn_conf.py
 ```
 
-Open `http://localhost:5000` in a browser.
+Open `http://localhost:8080` in a browser.
 
 ## Development
 

@@ -11,14 +11,14 @@ Python gRPC client for [arduino-cli](https://github.com/arduino/arduino-cli). De
 ## Installation
 
 ```bash
-cd gRPC_client/python
+cd grpc_client/python
 pip install -e .
 ```
 
 Or with pipenv:
 
 ```bash
-cd gRPC_client/python
+cd grpc_client/python
 pipenv install
 pipenv shell
 ```
@@ -130,7 +130,7 @@ Integration tests: Connection, Init, List Boards, List All Boards, Watch Boards 
 ## Project Structure
 
 ```
-gRPC_client/python/
+grpc_client/python/
 ├── arduino_grpc/
 │   ├── __init__.py
 │   ├── client.py          # ArduinoGrpcClient

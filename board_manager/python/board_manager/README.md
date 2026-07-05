@@ -1,6 +1,6 @@
 # board-manager
 
-Board Manager Service for arduino-cli. A standalone gRPC service that
+Board Manager Service for arduino-cli. A standalone pub/sub service that
 wraps the arduino-cli daemon, provides pubsub-based board detection,
 and routes compile/upload/list requests to the daemon on behalf of one
 or more dashboard consumers.
@@ -87,14 +87,14 @@ nox -s 'tests(board_manager)' 'build(board_manager)'
 ### Standalone service
 
 ```bash
-# Start with default port (50051)
+# Start with default TCP port (9090)
 board-manager
 
 # With explicit port
-board-manager --port 50051
+board-manager --tcp-port 9090
 
 # Or via Python
-python -m board_manager --port 50051
+python -m board_manager --tcp-port 9090
 ```
 
 ### Embedded in tests / code
@@ -116,9 +116,9 @@ service.stop()
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BOARD_MGR_DAEMON_PORT` | `50051` | arduino-cli daemon gRPC port |
-| `BOARD_MGR_PUBSUB_PORT` | `50052` | PubSub TCP port |
-| `BOARD_MGR_UDS_PATH` | `/tmp/bms.sock` | PubSub UDS path (used if set) |
+| `BOARD_MGR_DAEMON_PORT` | `50051` | arduino-cli daemon gRPC port (not the pubsub port) |
+| `BOARD_MGR_TCP_PORT` | `9090` | PubSub TCP port |
+| `BOARD_MGR_UDS_PATH` | `/tmp/board_mgr.sock` | PubSub UDS path (used if set) |
 | `BOARD_MGR_LOG_LEVEL` | `INFO` | Logging level |
 
 ## Development

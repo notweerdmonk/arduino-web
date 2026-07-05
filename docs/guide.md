@@ -188,14 +188,14 @@ Minutes are restricted to 0, 10, 20, 30, 40, 50 (6-minute resolution for the TM1
 
 ```bash
 # Compile only
-curl -X POST /api/compile-and-upload \
+curl -X POST /board/ttyACM0/compile \
   -H "Content-Type: application/json" \
-  -d '{"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno"}'
+  -d '{"fqbn": "arduino:avr:uno"}'
 
-# Deploy (compile + upload + record)
-curl -X POST /api/deploy \
+# Compile + upload
+curl -X POST /board/ttyACM0/upload \
   -H "Content-Type: application/json" \
-  -d '{"port": "/dev/ttyACM0", "fqbn": "arduino:avr:uno"}'
+  -d '{"fqbn": "arduino:avr:uno"}'
 ```
 
 ### Via arduino-cli directly

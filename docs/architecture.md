@@ -21,8 +21,6 @@ layout: default
 
 ## System Overview
 
-## System Overview
-
 ```
 ┌─────────────┐   gRPC    ┌──────────────────┐  IPC (UDS/TCP)  ┌───────────────────┐
 │ arduino-cli │◄──────────│  BoardManager    │◄────────────────│  Web Apps         │
@@ -202,7 +200,7 @@ CompileResult → socketpair → topic router → Web UI
 
 ### WS Push Timeline
 
-Prior to Phase 98, the daemon badge and board status badge used HTMX polling
+Prior to the WebSocket migration, the daemon badge and board status badge used HTMX polling
 (`hx-trigger="every 10s"`). Now all three tiers of frontend updates use
 WebSocket push:
 
@@ -259,7 +257,7 @@ Each web app maintains an upload registry that maps sketches to hardware IDs:
 - **Sketch assignment** — A persistent mapping of hardware_id → sketch path, enabling board-scoped sketch selection.
 - **persistence** — `sketch_registry.json` is serialized to disk and warmed up on startup.
 
-### Shared `SketchRegistry` Class (Phase 99)
+### Shared `SketchRegistry` Class
 
 The sketch-to-hardware-ID lookup logic was extracted to a shared `SketchRegistry` class in
 `arduino_sketch_tools/sketch_registry.py` to eliminate duplication between `arduino_dash` and
@@ -294,7 +292,7 @@ changes.
 
 ## Frontend Architecture
 
-### Real-Time UI via WebSocket (Phase 98)
+### Real-Time UI via WebSocket
 
 All frontend updates use a single persistent WebSocket connection (`/ws/board-events`) established by HTMX's `ws.js` extension. The server pushes raw HTML with `hx-swap-oob` attributes that HTMX auto-swaps into the DOM. Four tiers of OOB broadcasts exist:
 
@@ -305,7 +303,7 @@ All frontend updates use a single persistent WebSocket connection (`/ws/board-ev
 | 2 | Compile/upload output | OOB `<span hx-swap-oob="beforeend:#...-output-{port_safe}">` | `extension.py` |
 | 3 | Compile progress bar | OOB `<progress hx-swap-oob="true">` on percent change | `extension.py` |
 
-Initial page loads use `hx-trigger="load"` with Idiomorph morphing (Phase 97) to preserve scroll position and focus. After that, all updates happen via WS push — no periodic HTMX polling remains.
+Initial page loads use `hx-trigger="load"` with Idiomorph morphing to preserve scroll position and focus. After that, all updates happen via WS push — no periodic HTMX polling remains.
 
 **Key implementation details:**
 - Board status badges use per-port IDs (`board-status-badge--{port_safe}` where `port_safe = port.replace("/", "_")`)
@@ -313,9 +311,9 @@ Initial page loads use `hx-trigger="load"` with Idiomorph morphing (Phase 97) to
 - Upload output streams without a progress bar (gRPC `UploadResponse` has no `TaskProgress` field)
 - Output lines are prefixed with `[N%]` percentage indicator in the compile response handler
 
-### Frontend Optimization (Phase 97 — Hyperscript → Idiomorph)
+### Frontend Optimization (Hyperscript → Idiomorph)
 
-Prior to Phase 97, interactive UI behaviors used **Hyperscript** (`_=""` attributes) with a 43KB CDN dependency. Phase 97 replaced it:
+Prior to the frontend optimization, interactive UI behaviors used **Hyperscript** (`_=""` attributes) with a 43KB CDN dependency. The optimization replaced it:
 
 | Change | Before | After | Benefit |
 |--------|--------|-------|---------|
@@ -345,7 +343,7 @@ Prior to Phase 97, interactive UI behaviors used **Hyperscript** (`_=""` attribu
 | Web framework | Flask |
 | Real-time UI | HTMX + flask-sock WebSocket + Idiomorph |
 | Templates | Jinja2 |
-| Interactivity | Vanilla JS event delegation (Phase 97 replaced Hyperscript) |
+| Interactivity | Vanilla JS event delegation (replaced Hyperscript) |
 | WSGI server | Gunicorn |
 | Board detection | pyudev (optional) |
 | Build | setuptools, nox |

@@ -211,4 +211,90 @@ layout: default
 ### Task R8 — Record findings in REVIEW_JOURNAL.md
 
 - [x] Record all code review findings and verification outcomes
+
+---
+
+## Code Review — Category 3: User-Facing Docs Fixes (2026-07-05 04:51)
+
+### Task U1 — Verify 3A: Broken Links (5 issues)
+
+- [x] `index.md` line 25: `dist-standalone/index.md` → `dist-standalone-install/index.md` — ✅ resolves
+- [x] `index.md` line 141: `dist-standalone/index.md` → `dist-standalone-install/index.md` — ✅ resolves
+- [x] `e2e/README.md` line 92: `../test-sketch/README.md` → `test-sketch/README.md` — ✅ resolves
+- [x] `e2e/README.md` line 131: `docs/tests.md` → `../docs/tests.md` — ✅ resolves
+- [x] `e2e/README.md` line 135: `../agent_tools/GUIDE.md` → `agent_tools/GUIDE.md` — ✅ resolves
+
+### Task U2 — Verify 3B: Wrong Default Port Numbers (4 issues)
+
+- [x] `arduino_dash/README.md`: "default port 5000" → "default port 8080" — ✅ `__main__.py:34` default=8080
+- [x] `arduino_dash/README.md`: `http://localhost:5000` → `http://localhost:8080` — ✅ correct
+- [x] `medminder_dash/README.md`: "default port 5000" → "default port 8080" — ✅ `__main__.py:36` default=8080
+- [x] `medminder_dash/README.md`: `http://localhost:5000` → `http://localhost:8080` — ✅ correct
+
+### Task U3 — Verify 3C: Nonexistent API Endpoints (2 issues)
+
+- [x] `docs/guide.md`: `POST /api/compile-and-upload` → `POST /api/pubsub/board/ttyACM0/spawn` — ⚠️ route exists but spawns monitor, not compile
+- [x] `docs/guide.md`: `POST /api/deploy` → `POST /api/pubsub/board/ttyACM0/compile` — ❌ route does not exist (see findings in REVIEW_JOURNAL.md)
+
+### Task U4 — Verify 3D: Nonexistent Environment Variables (5 issues)
+
+- [x] `board_manager/README.md`: `BOARD_MGR_DAEMON_PORT` → clarified description — ✅ actual vars in `boot.py` use different names
+- [x] `board_manager/README.md`: `BOARD_MGR_PUBSUB_PORT` → `BOARD_MGR_TCP_PORT` — ✅ matches actual `BmsEnv` class
+- [x] `medminder_dash/README.md`: `MEDMINDER_PORT` removed — ✅ no such env var in code
+- [x] `medminder_dash/README.md`: `MEDMINDER_DEBUG` removed — ✅ no such env var in code
+- [x] `medminder_dash/README.md`: `MEDMINDER_SKETCH_DIR` removed — ✅ no such env var in code
+
+### Task U5 — Verify 3E: Stale CLI Flags and Paths (2 issues)
+
+- [x] `board_manager/README.md`: `--port 50051` → `--tcp-port 9090` — ✅ flag exists in `__main__.py:33`
+- [x] `grpc_client/README.md`: `cd gRPC_client/python` → `cd grpc_client/python/arduino_grpc` — ✅ path exists
+
+### Task U6 — Verify 3F: Incorrect Protocol Descriptions (2 issues)
+
+- [x] `board_manager/README.md`: "gRPC service" → "pub/sub service" — ✅ correct protocol
+- [x] `board_manager_client/README.md`: "PubSub gRPC stream" → "pubsub stream" — ✅ correct protocol
+- [x] `board_manager_client/README.md`: Default port 50052 → 9090 — ✅ matches `BmsDefaults.TCP_PORT`
+- [x] `board_manager_client/README.md`: UDS path `/tmp/bms.sock` → `/tmp/board_mgr.sock` — ✅ matches `BmsDefaults.UDS_PATH`
+
+### Task U7 — Verify 3G: Stale Route Documentation (4 issues)
+
+- [x] `arduino_sketch_tools/README.md`: Removed stale `GET /board/<port>/list` — ❌ route still listed (NOT removed) — see findings
+- [x] `arduino_sketch_tools/README.md`: Removed stale `GET /board/<port>/ports` — ❌ route still listed (NOT removed) — see findings
+- [x] `arduino_sketch_tools/README.md`: Updated `/board/<port>/compile-result` → `/board/<port>/compile/poll` — ✅ exists
+- [x] `arduino_sketch_tools/README.md`: Updated `/board/<port>/upload-result` → `/board/<port>/upload/poll` — ✅ exists
+- [x] `arduino_sketch_tools/README.md`: Added missing routes — ⚠️ 2 correct, 2 fabricated (see findings)
+
+### Task U8 — Verify 3H: Architecture Doc Issues (2 issues)
+
+- [x] `docs/architecture.md`: Remove duplicate `## System Overview` header — ✅ confirmed (1 occurrence)
+- [x] `docs/architecture.md`: Remove phase references (Phase 97, 98, 99) from user-facing text — ✅ confirmed (zero remaining)
+
+### Task U9 — Verify 3I: Missing Routes in api.md (3 issues)
+
+- [x] `docs/api.md`: Added `GET /boards/grid/card/<port>` to arduino-dash table — ✅ exists in `html_routes.py:145`
+- [x] `docs/api.md`: Added `GET /boards/grid/card/<port>` to medminder-dash table — ✅ exists in `html_routes.py:806`
+- [x] `docs/api.md`: Added medicine CRUD routes (POST, PUT, DELETE, toggle) — ✅ all verified against `html_routes.py`
+- [x] `docs/api.md`: Fixed `/admin/active-board` → `/medicines/active-board` — ✅ confirmed in `html_routes.py:666`
+
+### Task U10 — Verify 3J: Phase Numbers in External Docs (6+ locations)
+
+- [x] `README.md`: Remove Phase column from "Recent Enhancements" table — ✅ confirmed removed
+- [x] `README.md`: Remove "Phase N" references from descriptions — ✅ confirmed removed
+- [x] `README.md`: Remove "Phase 94" reference in nox section — ⚠️ NOT removed (line 100: "(Phase 94)")
+- [x] `index.md`: Remove phase range from "Last updated" line — ✅ confirmed removed
+- [x] `docs/architecture.md`: Remove phase numbers from sections — ✅ confirmed zero remaining
+- [x] `docs/guide.md`: Remove "Phase 94" reference — ✅ confirmed removed
+
+### Task U11 — Jekyll Build Verification
+
+- [x] Run `bundle exec jekyll build` — ✅ 0 errors, 0 warnings
+- [x] Verify REVIEW docs (PLAN, TASK, PROGRESS, JOURNAL) are included in Jekyll output — ✅ all 4 generated
+
+### Task U12 — Regression Verification
+
+- [x] Run `nox -s all_tests` — ✅ 8/8 sessions, 0 failures
+
+### Task U13 — Record findings in REVIEW_JOURNAL.md
+
+- [x] Record all review findings and outcomes — ✅ full entry added
 {% endraw %}

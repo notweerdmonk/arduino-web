@@ -69,4 +69,22 @@ layout: default
 | R6 | Content accuracy & structure | ⚠️ | Content accurate. Pre-existing stray triple-backtick at line 3692 (cosmetic, not from Category 2 changes) |
 | R7 | Regression — nox all_tests | ✅ | 8/8 sessions, 0 failures, 0 errors |
 | R8 | Record findings in REVIEW_JOURNAL.md | ✅ | Full code review entry recorded |
+
+## Category 3: User-Facing Docs Review (2026-07-05 04:51)
+
+| Task | Description | Status | Details |
+|------|-------------|--------|---------|
+| U1 | 3A — Broken Links (5) | ✅ | All 5 links verified: `dist-standalone-install/index.md`, `test-sketch/README.md`, `../docs/tests.md`, `agent_tools/GUIDE.md` |
+| U2 | 3B — Wrong Default Ports (4) | ✅ | `__main__.py` default=8080; READMEs updated 5000→8080 |
+| U3 | 3C — Nonexistent API Endpoints (2) | ⚠️ | See review findings — endpoints fixed but `/api/pubsub/board/.../compile` doesn't exist |
+| U4 | 3D — Nonexistent Env Vars (5) | ✅ | Removed vars verified nonexistent in code; corrected to actual `BOARD_MGR_TCP_PORT`, `BOARD_MGR_UDS_PATH` |
+| U5 | 3E — Stale CLI Flags/Paths (2) | ✅ | `--tcp-port 9090` verified; `grpc_client/python/arduino_grpc/` path exists |
+| U6 | 3F — Incorrect Protocol Descriptions (2) | ✅ | "pub/sub service" wording verified; ports/paths match actual defaults |
+| U7 | 3G — Stale Route Documentation (4+) | ⚠️ | See review findings — 2 stale routes remain, 2 fabricated routes added |
+| U8 | 3H — Architecture Doc Issues (2) | ✅ | Duplicate header removed; zero phase references remain |
+| U9 | 3I — Missing Routes in api.md (3+) | ✅ | All added routes verified against actual source code |
+| U10 | 3J — Phase Numbers in External Docs (6+) | ⚠️ | 5/6 locations fixed; one remaining at README.md:100 "(Phase 94)" |
+| U11 | Jekyll Build Verification | ✅ | `bundle exec jekyll build` — 0 errors, 0 warnings (REVIEW docs included) |
+| U12 | Regression — nox all_tests | ✅ | 8/8 sessions, 0 failures (186+212+119+51+35+24+202+0) |
+| U13 | Record findings in REVIEW_JOURNAL.md | ✅ | Full review entry added |
 {% endraw %}

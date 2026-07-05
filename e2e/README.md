@@ -89,7 +89,7 @@ Location: \`e2e/test-sketch/\` — contains \`README.md\` and \`test-sketch.ino\
 
 Purpose: minimal \`setup(){}\` \`loop(){}\` sketch that validates the compile pipeline without board-specific logic
 
-See [e2e/test-sketch/README.md](../test-sketch/README.md)
+See [test-sketch/README.md](test-sketch/README.md)
 
 ## Directory Layout
 
@@ -128,11 +128,11 @@ e2e/
 
 - [docs/servers.md](docs/servers.md) — Mock server reference
 - [docs/scenarios.md](docs/scenarios.md) — Test scenario recipes
-- [docs/tests.md](docs/tests.md) — Overall testing methodology
+- [docs/tests.md](../docs/tests.md) — Overall testing methodology
 - [docs/agent-tools.md](docs/agent-tools.md) — Agent integration
 - [docs/reference/typedoc/](docs/reference/typedoc/) — Fixtures + config API reference (typedoc)
 - [docs/reference/specs.md](docs/reference/specs.md) — Playwright spec reference (22 tests across 8 files)
-- [agent_tools/GUIDE.md](../agent_tools/GUIDE.md) — full MCP testing guide (529 lines)
+- [agent_tools/GUIDE.md](agent_tools/GUIDE.md) — full MCP testing guide (529 lines)
 
 ## Acknowledgements
 

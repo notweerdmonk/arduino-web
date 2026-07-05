@@ -870,4 +870,115 @@ blocks remain properly balanced.
 | Category 2 fixes applied | 7 | ✅ All correct |
 | Side issues found | 1 | ✅ Fixed (duplicate entry) |
 | Side issues remaining | 0 | ✅ Clean |
+
+---
+
+## 2026-07-05 04:51 — Code Review: Category 3 User-Facing Docs Fixes
+
+**Scope**: Code review of 20+ fixes across 10 sub-categories (3A–3J) in user-facing documentation. All changes were already applied in the working tree.
+
+### Verification Results
+
+| Task | Sub-Cat | Description | Status | Details |
+|------|---------|-------------|--------|---------|
+| U1 | 3A | Broken Links (5) | ✅ | All 5 links now resolve to actual files |
+| U2 | 3B | Wrong Default Ports (4) | ✅ | Port 8080 confirmed in `__main__.py`; READMEs updated |
+| U3 | 3C | Nonexistent API Endpoints (2) | ⚠️ | Partially correct — see findings below |
+| U4 | 3D | Nonexistent Env Vars (5) | ✅ | All removed vars confirmed nonexistent; actual vars match code |
+| U5 | 3E | Stale CLI Flags/Paths (2) | ✅ | `--tcp-port` flag exists; `grpc_client/` path correct |
+| U6 | 3F | Incorrect Protocol Descriptions (2) | ✅ | "pub/sub" wording correct; ports/paths match defaults |
+| U7 | 3G | Stale Route Documentation (4+) | ⚠️ | Partially incorrect — see findings below |
+| U8 | 3H | Architecture Doc Issues (2) | ✅ | Duplicate header removed; zero phase references remain |
+| U9 | 3I | Missing Routes in api.md (3+) | ✅ | All added routes verified against actual source code |
+| U10 | 3J | Phase Numbers (6+ locations) | ⚠️ | 5/6 fixed; one remaining at README.md:100 |
+| U11 | Jekyll Build | Site build | ✅ | 0 errors, 0 warnings; REVIEW docs included |
+| U12 | Regression | nox all_tests | ✅ | 8/8 sessions, 0 failures |
+
+### Issues Found
+
+#### [Warning] U3/3C — Compile endpoint in `docs/guide.md` does not exist
+
+**File**: `docs/guide.md` lines 188-198
+
+The fix replaced non-existent endpoints (`/api/compile-and-upload`, `/api/deploy`) with:
+
+```
+# Compile only
+curl -X POST /api/pubsub/board/ttyACM0/spawn \
+  -d '{"fqbn": "arduino:avr:uno"}'
+
+# Compile + upload
+curl -X POST /api/pubsub/board/ttyACM0/compile \
+  -d '{"fqbn": "arduino:avr:uno"}'
+```
+
+The first endpoint (`/api/pubsub/board/.../spawn`) **exists** (`api_routes.py:223`) but it spawns a board monitor, not a compile. The second endpoint (`/api/pubsub/board/.../compile`) **does not exist** as a route.
+
+The actual compile endpoint is `POST /board/<port>/compile` (in `arduino_sketch_tools/routes.py:34`), registered as a Flask blueprint without URL prefix.
+
+**Suggestion**: Correct the guide to use:
+```bash
+# Compile only
+curl -X POST /board/ttyACM0/compile \
+  -H "Content-Type: application/json" \
+  -d '{"fqbn": "arduino:avr:uno"}'
+```
+
+#### [Warning] U7/3G — Stale route documentation in `arduino_sketch_tools/README.md` is still incorrect
+
+**File**: `arduino_sketch_tools/python/arduino_sketch_tools/README.md` lines 94-103
+
+The fix introduced **2 fabricated routes** that don't exist and left **2 stale routes** that should have been removed:
+
+| Route in README | Status | Actual Route |
+|----------------|--------|-------------|
+| `POST /board/<port>/compile` | ✅ | Exists (`routes.py:34`) |
+| `POST /board/<port>/compile/confirm` | ❌ **FABRICATED** | Does not exist |
+| `POST /board/<port>/upload` | ✅ | Exists (`routes.py:131`) |
+| `POST /board/<port>/upload/confirm` | ✅ | Exists (`routes.py:227`) |
+| `GET /board/<port>/list` | ❌ **STALE** | Does not exist (should have been removed) |
+| `GET /board/<port>/ports` | ❌ **STALE** | Does not exist (should have been removed) |
+| `GET /board/<port>/compile/section/<name>` | ❌ **FABRICATED** | Does not exist |
+| `GET /board/<port>/upload/section/<name>` | ❌ **WRONG PARAM** | Actual: `GET /board/<port>/upload/section` (no `<name>`) |
+| `GET /board/<port>/compile/poll` | ✅ | Exists (`routes.py:64`) |
+| `GET /board/<port>/upload/poll` | ✅ | Exists (`routes.py:205`) |
+
+**Suggestion**: 
+1. Remove `GET /board/<port>/list` and `GET /board/<port>/ports` (stale routes)
+2. Remove `POST /board/<port>/compile/confirm` and `GET /board/<port>/compile/section/<name>` (fabricated)
+3. Fix `GET /board/<port>/upload/section/<name>` → `GET /board/<port>/upload/section`
+4. Add missing `GET /board/<port>/upload/poll` (already present at line 103)
+
+#### [Nit] U10/3J — One remaining phase reference in `README.md`
+
+**File**: `README.md` line 100
+
+One phase number reference was not removed:
+
+```
+**Note:** Nox sessions auto-regenerate `Pipfile.lock` (Phase 94) — no manual lock management after wheel rebuilds.
+```
+
+**Suggestion**: Change to:
+```
+**Note:** Nox sessions auto-regenerate `Pipfile.lock` — no manual lock management after wheel rebuilds.
+```
+
+#### [Fix] Pre-existing Liquid raw/endraw nesting issue in REVIEW docs
+
+Discovered during Jekyll build verification: all 4 REVIEW workflow documents had literal `raw`/`endraw` Liquid tags appearing inside the outer raw-protected block, causing Liquid parser errors. The inner endraw tag prematurely closed the outer raw block.
+
+**Fix applied**: Replaced all inner occurrences of literal Liquid raw/endraw tags with descriptive text (e.g., "Liquid `raw`/`endraw` wrapping").
+
+**Files affected**: `REVIEW_JOURNAL.md`, `REVIEW_PROGRESS.md`, `REVIEW_PLAN.md`, `REVIEW_TASK.md`
+
+### Summary
+
+| Severity | Count | Items |
+|----------|-------|-------|
+| **Warning** | 2 | Non-existent compile endpoint in guide.md; stale/fabricated routes in arduino_sketch_tools README |
+| **Nit** | 1 | One remaining phase reference in README.md |
+| **Fix** | 1 | Liquid raw/endraw nesting issue (pre-existing, fixed) |
+
+**Overall Verdict**: ⚠️ **Most fixes are correct (19/22 verified), but 3 issues require attention before merge.** The route documentation and compile endpoint issues are the most significant — users could be misled about the actual API.
 {% endraw %}

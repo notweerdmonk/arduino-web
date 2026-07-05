@@ -103,7 +103,7 @@ nox -s 'tests(medminder_dash)' 'build(medminder_dash)'
 ## Usage
 
 ```bash
-# Start the dashboard (default port 5000)
+# Start the dashboard (default port 8080)
 python -m medminder_dash
 
 # Or use the console script
@@ -113,13 +113,12 @@ medminder-dash
 gunicorn medminder_dash.wsgi:app -c medminder_dash/gunicorn_conf.py
 ```
 
-Open `http://localhost:5000` in a browser.
+Open `http://localhost:8080` in a browser.
 
 ### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MEDMINDER_PORT` | `5000` | Flask server port |
 | `MEDMINDER_DEBUG` | `0` | Enable debug mode |
 | `MEDMINDER_SKETCH_DIR` | (packaged) | Path to MedMinderV2 sketch source |
 

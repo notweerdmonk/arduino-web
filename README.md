@@ -2,24 +2,24 @@
 
 Arduino board monitoring and management via gRPC, with a pub/sub BoardManagerService and a Flask+HTMX+WebSocket web dashboard. All frontend updates use WebSocket push (no periodic HTMX polling). The frontend stack uses vanilla JS event delegation (no Hyperscript) with Idiomorph for scroll-preserving morphing swaps.
 
-## Recent Enhancements (Phases 94-100)
+## Recent Enhancements
 
-| Area | Change | Phase |
-|------|--------|-------|
-| **Build** | Noxfile self-healing: auto-regenerates `Pipfile.lock` on each run | 94 |
-| **CI** | `test_ci.sh` (30 bash assertions) wired into nox `scripts_tests` | 96 |
-| **Frontend** | Hyperscript (43KB) → centralized JS event delegation; Idiomorph morphing for scroll-preserving swaps | 97 |
-| **Frontend** | Card-level WS swap targeting (`data-event-port`) — per-event payload from 1-5KB → ~200-500B | 97 |
-| **Frontend** | All badge updates (daemon, board status) use OOB HTML over WS — no more polling | 98 |
-| **Frontend** | Compile/upload output OOB targeting — lines appear in correct per-port container | 98 |
-| **Frontend** | Compile progress bar with `<progress>` element + `[N%]` prefix per output line | 98 |
-| **gRPC** | `compile_stream()` yields 4-tuple `(out, err, done, percent)` for progress tracking | 98 |
-| **Docs** | Full Jekyll documentation site (254 pages, 0 errors); `WS_EVENT_FLOW.md` relocated to `docs/` | 93, 95 |
-| **Tests** | `TestAdminBoardSelectorPolling` renamed to `TestAdminBoardSelector` (stale name after WS push migration) | 98(Q6) |
-| **Templates** | All shared templates homogenised across arduino_dash + medminder_dash (14+ structurally identical) | 99 |
-| **Templates** | Medicine management extracted to reusable partials (`medicine_management.html`, `admin_medicine_section.html`) | 99 |
-| **Refactor** | `SketchRegistry` extracted to shared `arduino_sketch_tools/sketch_registry.py` — per-app modules become 10-line wrappers | 99 |
-| **E2E Servers** | Server process lifecycle: `os.fork()` + `os.setsid()` daemonization; `--pidfile`, `--stop`, `--force`, `--logfile` flags; no shell hacks (`&`, `disown`, `&>/dev/null`) needed | 100 |
+| Area | Change |
+|------|--------|
+| **Build** | Noxfile self-healing: auto-regenerates `Pipfile.lock` on each run |
+| **CI** | `test_ci.sh` (30 bash assertions) wired into nox `scripts_tests` |
+| **Frontend** | Hyperscript (43KB) → centralized JS event delegation; Idiomorph morphing for scroll-preserving swaps |
+| **Frontend** | Card-level WS swap targeting (`data-event-port`) — per-event payload from 1-5KB → ~200-500B |
+| **Frontend** | All badge updates (daemon, board status) use OOB HTML over WS — no more polling |
+| **Frontend** | Compile/upload output OOB targeting — lines appear in correct per-port container |
+| **Frontend** | Compile progress bar with `<progress>` element + `[N%]` prefix per output line |
+| **gRPC** | `compile_stream()` yields 4-tuple `(out, err, done, percent)` for progress tracking |
+| **Docs** | Full Jekyll documentation site (254 pages, 0 errors); `WS_EVENT_FLOW.md` relocated to `docs/` |
+| **Tests** | `TestAdminBoardSelectorPolling` renamed to `TestAdminBoardSelector` (stale name after WS push migration) |
+| **Templates** | All shared templates homogenised across arduino_dash + medminder_dash (14+ structurally identical) |
+| **Templates** | Medicine management extracted to reusable partials (`medicine_management.html`, `admin_medicine_section.html`) |
+| **Refactor** | `SketchRegistry` extracted to shared `arduino_sketch_tools/sketch_registry.py` — per-app modules become 10-line wrappers |
+| **E2E Servers** | Server process lifecycle: `os.fork()` + `os.setsid()` daemonization; `--pidfile`, `--stop`, `--force`, `--logfile` flags; no shell hacks (`&`, `disown`, `&>/dev/null`) needed |
 
 ## Architecture
 
@@ -97,7 +97,7 @@ nox -s 'tests(medminder_dash)'
 
 **Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 186 (+1 skip), arduino_grpc 33 (+2 skip), scripts 170.
 
-**Note:** Nox sessions auto-regenerate `Pipfile.lock` (Phase 94) — no manual lock management after wheel rebuilds.
+**Note:** Nox sessions auto-regenerate `Pipfile.lock` on each run — no manual lock management after wheel rebuilds.
 
 ## Linting & Formatting
 

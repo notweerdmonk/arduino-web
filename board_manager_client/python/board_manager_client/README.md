@@ -1,7 +1,7 @@
 # board-manager-client
 
 PubSub client library for the BoardManagerService. Wraps the raw
-PubSub gRPC stream exposed by `board-manager` with a simple Python API
+pubsub stream exposed by `board-manager` with a simple Python API
 for subscribing to command responses and board/port events.
 
 ## Overview
@@ -107,11 +107,11 @@ with PubSubClient() as client:
 The client supports both TCP and Unix Domain Socket connections:
 
 ```python
-# TCP (default port 50052)
-client.connect(host="localhost", port=50052)
+# TCP (default port 9090)
+client.connect(host="localhost", port=9090)
 
 # Unix Domain Socket
-client.connect(uds_path="/tmp/bms.sock")
+client.connect(uds_path="/tmp/board_mgr.sock")
 ```
 
 ## Development

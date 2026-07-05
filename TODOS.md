@@ -75,6 +75,21 @@ layout: default
 | 98 | WS Push Migration (Badge/Compile/Upload OOB) | ✅ DONE | 8/8 nox |
 | 99 | HTML Template Homogenisation Across Both Dashboards | ✅ DONE | 119 + 186 pass |
 | 100 | Server Script Process Lifecycle (Disown & Cleanup) | ✅ DONE | 8/8 nox |
+| 101 | Redesign & Rebuild Standalone Distributions (PyOxidizer) | ✅ DONE | 4/4 verifications |
+| 101a | Portability Fix: Commit .bzl Changes | ✅ DONE | 4/4 Qs |
+| 102 | Fix Pre-Existing Test Failures | ✅ DONE | 8/8 nox |
+| 103 | API Route Restructure | ✅ DONE | 8/8 nox |
+| 104 | E2E Documentation Restructure | ✅ DONE | 8 endpoints verified |
+| 104.1 | Document e2e/fixtures/ | ✅ DONE | 2 items |
+| 104.2 | Fix shelved-specs activation docs | ✅ DONE | 1 item |
+| 104.3 | Remove shelved labels | ✅ DONE | verified |
+| 105 | Relocate medminder_dash and board_manager docs | ✅ DONE | verified |
+| 106 | Prettier + eslint-plugin-prettier | ✅ DONE | 190 files formatted |
+| 107 | E2E TypeScript API Reference (typedoc + spec extraction) | ✅ DONE | 8/8 nox |
+| 108 | Document Reference Tables + Broken Links Fix | ✅ DONE | 8/8 nox + Jekyll 0 errors |
+| 109 | Code Review of Phase 107/108 | ✅ DONE | 160 scripts + 8/8 nox |
+| 110 | Authentication, Authorization, CSRF, Rate Limiting | ✅ DONE | 5 Critical findings addressed |
+| 111 | Semantic Versioning v0.1.0 Baseline | ✅ DONE | 8/8 nox + Jekyll 0 errors |
 
 ## Phase 60 — COMPLETED ✅
 

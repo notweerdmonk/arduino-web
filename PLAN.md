@@ -11,6 +11,313 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
+### Phase 111 — Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
+
+**Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
+all versionable modules/packages as v0.1.0 and standardize the single-source-of-truth pattern.
+
+### Tasks
+
+| # | Task | Status |
+|---|------|--------|
+| A | Add `__version__` to 3 missing `__init__.py` files | ✅ |
+| B | Standardize all 6 `setup.py` to import version from package | ✅ |
+| C | Add `"version": "0.1.0"` to root `package.json` | ✅ |
+| D | Create root `VERSION` file | ✅ |
+| E | Test all changes | ✅ |
+
+### Single Source of Truth Pattern
+
+```
+__init__.py  (__version__ = "0.1.0")
+    |
+    ├── setup.py          (from PKG import __version__; version=__version__)
+    ├── pyproject.toml    (version = "0.1.0" — PEP 621)
+    └── VERSION (root)    (0.1.0)
+```
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures. Jekyll build — 0 errors.
+### Phase 110 — Authentication, Authorization, CSRF, Rate Limiting
+
+**Priority**: Immediate (security)
+**Scope**: medminder_dash, arduino_dash, arduino_sketch_tools, board_manager, grpc_client
+**Source**: Security audit — 5 Critical + 2 High findings addressing auth, CSRF, rate-limiting
+
+### Plan Items
+
+1. **Authentication (CWE-306)** — Implement Flask-Login with session-based auth. Add login page, logout, `@login_required` decorator to all routes in medminder_dash, arduino_dash, arduino_sketch_tools. Supports single-user mode (auto-login on localhost?) with configurable multi-user via env var.
+
+2. **Strong secret key (CWE-798)** — Remove `"dev-secret"` fallback. Fail hard if `FLASK_SECRET_KEY` is unset. Generate key via `secrets.token_hex(32)`. Document in `.env.example`.
+
+3. **CSRF protection (CWE-352)** — Add Flask-WTF `CSRFProtect`. Include CSRF tokens in all HTMX requests via `hx-headers`. Validate `X-CSRF-Token` for JSON API. Set `SESSION_COOKIE_SAMESITE="Lax"`.
+
+4. **Rate limiting (CWE-400)** — Add Flask-Limiter. Per-endpoint limits: 30 req/min for POST/PUT/DELETE, 60 req/min for GET. Higher limits for WebSocket. Set `MAX_CONTENT_LENGTH = 50 MB`.
+
+5. **Session hardening (CWE-1004)** — Configure `SESSION_COOKIE_HTTPONLY=True`, `SESSION_COOKIE_SECURE=True` (when HTTPS), `SESSION_COOKIE_SAMESITE="Lax"`, `PERMANENT_SESSION_LIFETIME=8h`.
+
+6. **Authorization model (CWE-862)** — (Future, after auth is stable) Add user roles and board ownership validation.
+
+### Verification
+
+- All existing tests must pass
+- Unauthenticated requests to any route return 401/403
+- CSRF-missing POST requests return 400
+- Rate-limited endpoints return 429 after threshold
+- Session cookies have security flags set
+- `nox -s all_tests` — 8/8 sessions, 0 failures
+
+---
+
+### Phase 109 — Code Review of Phase 107/108 ✅ COMPLETED
+
+**Scope**: 5 un-pushed commits across 5 files — JSDoc annotations (`e2e/fixtures/test-data.ts`, `e2e/playwright.config.ts`), new tooling script (`scripts/gen_e2e_spec_docs.py`), pipeline config (`scripts/gen_api_docs.sh`, `package.json`).
+
+**Findings**: 2 Warnings (broken spec links, latent nested-describe parsing bug), 2 Suggestions (typedoc stderr redirect, add unit tests), 3 Nits (JSDoc style, @module naming, regex edge case for describe.only/skip).
+
+**Outcome**: All 7 actionable items fixed. 32 unit tests added for `gen_e2e_spec_docs.py`. All tests pass — 160 scripts tests, nox 8/8 sessions, Jekyll 0 errors.
+
+---
+
+### Phase 108 — Document Reference Tables + Broken Related Links Fix (2026-07-03 17:32)
+
+**Status**: ✅ COMPLETED
+
+**Goal**: Add `## Document Reference` tables to all per-module `docs/index.md` files linking sibling `.md` files + `../README.md`. Fix 11 broken "Related" links. Create `dist-standalone-install/README.md` (copied from `dist-standalone/`).
+
+**Files changed** (14 files across 9 modules):
+
+| Module | File | Change |
+|--------|------|--------|
+| arduino_dash | `docs/index.md` | Added Document Reference table (13 rows) |
+| arduino_sketch_tools | `docs/index.md` | Added Document Reference table (4 rows) |
+| board_manager | `docs/index.md` | Added Document Reference table (11 rows) |
+| board_manager_client | `docs/index.md` | Added Document Reference table (2 rows) |
+| grpc_client | `docs/index.md` | Added Document Reference table (4 rows) |
+| medminder_dash | `docs/index.md` | Added Document Reference table (15 rows) |
+| dist-test-install | `docs/index.md` | Added Document Reference + Related links |
+| dist-standalone-install | `README.md` | **New** — copied from `dist-standalone/` |
+| dist-standalone-install | `docs/index.md` | Added Related links |
+| scripts | `docs/index.md` | Added Related links |
+| e2e | `docs/index.md` | Already had Document Reference (Phase 107) — verified |
+| root | `index.md` | Links synced |
+| root | `README.md` | Links synced |
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors. `bundle exec jekyll build` — 0 errors, 0 warnings.
+
+---
+
+### Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction) (2026-07-03 00:30)
+
+**Date**: 2026-07-03 00:30
+
+**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
+
+| Tool | Target | Output |
+|------|--------|--------|
+| typedoc | `fixtures/test-data.ts` (5 exports), `playwright.config.ts` (1 export) | `e2e/docs/reference/typedoc/` — 11 HTML pages |
+| Python extraction | 8 `.spec.ts` files (22 tests) | `e2e/docs/reference/specs.md` — Markdown reference |
+
+**Key decisions**:
+1. **typedoc alone insufficient for specs**: Spec files have no exported declarations — all `test()`/`test.describe()` are internal closures. typedoc produces blank pages for them.
+2. **`--skipErrorChecking`**: Required because `@playwright/test` and `@types/node` types aren't installed at root level.
+3. **Python extraction script** (`scripts/gen_e2e_spec_docs.py`): Uses stdlib `re` + `pathlib` — zero new dependencies. Matches project pattern of Python-based doc tooling (pdoc, shdoc, gen_grpc_bindings.py).
+4. **JSDoc annotations**: Added `/** */` comments to `test-data.ts` exports and `@module` header to `playwright.config.ts` so typedoc output is meaningful.
+
+**Files changed** (10 files):
+| File | Change |
+|------|--------|
+| `e2e/fixtures/test-data.ts` | JSDoc on 5 exports |
+| `e2e/playwright.config.ts` | `@module` file header |
+| `scripts/gen_e2e_spec_docs.py` | **New** — 50-line Python stdlib script |
+| `scripts/gen_api_docs.sh` | Added typedoc + spec extraction targets + cleanup |
+| `e2e/docs/reference/specs.md` | **New** — auto-generated spec reference |
+| `e2e/docs/reference/typedoc/` | **New** — 11 typedoc HTML pages |
+| `README.md` | Added typedoc + specs.md to API Reference section |
+| `index.md` | Added typedoc + specs.md to Reference Documents table |
+| `e2e/docs/index.md` | Added typedoc + specs.md to Document Reference table |
+| `e2e/index.md`, `e2e/README.md` | Added `reference/` to directory layout + links |
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors.
+
+---
+
+### Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
+
+**Status**: ✅ COMPLETED
+
+Created `.prettierrc` and `.prettierignore` configuration files. Integrated `eslint-plugin-prettier/recommended` into the ESLint flat config. Formatted all 190 HTML template files with prettier (inline JS). Updated CODEBASE_REFERENCE.md with prettier documentation.
+
+**Usage**: `npx prettier --write "**/*.html"` to format, `npx prettier --check "**/*.html"` to verify, `npx eslint .` to lint including prettier rules.
+
+---
+
+### Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
+
+**Status**: ✅ COMPLETED
+
+Moved both docs/ directories alongside setup.py so they are no longer inside the importable Python package. Updated all cross-references in user-facing and agent-facing docs.
+
+### Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
+
+**Status**: ✅ COMPLETED
+
+Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools docs.
+
+### Phase 104 — E2E Documentation Restructure (README, index, test-sketch, fixtures/specs docs) ✅ COMPLETED
+
+**Date**: 2026-06-25 16:10
+
+**Goal**: Bring e2e documentation up to the same standard as other monorepo modules. Six action items:
+
+1. **Create `e2e/README.md`** — module overview aligned with `scripts/README.md` style
+2. **Move `.playwright-mcp/test-sketch` to `e2e/test-sketch/`** — version-control the minimal Arduino compile/upload sketch
+3. **Document `e2e/fixtures/` and `e2e/specs/`** — automated Playwright spec usage, webServer auto-management, per-spec summaries
+4. **Create `e2e/index.md`** — doc entry point (quick reference table + directory layout, like `scripts/docs/index.md`)
+5. **Update project-level docs** — `docs/e2e-testing.md` and root `index.md`
+6. **Update agent_tools for test-sketch** — COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md
+7. **Verify end-to-end** — run playwright-mcp-testing command to confirm all paths resolve correctly
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/README.md | Module overview, quick start (MCP + automated), directory layout, requirements | ✅ |
+| 2 | e2e/test-sketch/ | Copy from `.playwright-mcp/`, rewrite README with purpose + usage | ✅ |
+| 3 | e2e/index.md | Quick reference table + directory layout (like `scripts/docs/index.md`) | ✅ |
+| 4 | e2e/docs/index.md | Add automated specs section + test-sketch section, refocus as MCP sub-page | ✅ |
+| 5 | e2e/docs/servers.md | Add webServer auto-management note for automated specs | ✅ |
+| 6 | agent_tools/docs | COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md — add test-sketch refs | ✅ |
+| 7 | Project-level docs | `docs/e2e-testing.md` updated, root `index.md` updated | ✅ |
+| 8 | End-to-end verification | playwright-mcp-testing command: skill load, guide read, server start, navigate, cleanup | ✅ |
+
+---
+
+## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
+
+**Goal**: Document `fixtures/test-data.ts` — purpose, contents (mock ports, sketch, medicines, URL helpers), import path, and relationship to server `--mock` state.
+
+**Items**:
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/docs/index.md | Add "Test Data Fixtures" subsection under Automated Playwright Specs | ✅ |
+| 2 | Verify all e2e docs consistency for fixtures | Check e2e/index.md, e2e/README.md, docs/e2e-testing.md reference it correctly | ✅ |
+
+---
+
+## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
+
+**Goal**: Add missing `npx playwright install --with-deps` to installation section and document project-root run alternative `npx playwright test --config e2e/playwright.config.ts`.
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| 1 | e2e/docs/index.md Installation + Running | Add browser binary install step + project-root config flag | ✅ |
+
+---
+
+### Phase 103 — API Route Restructure ✅ COMPLETED
+
+**Date**: 2026-06-25 11:57
+
+**Goal**: Align API routes across arduino_dash and medminder_dash into a consistent pattern: PubSub-backed board commands under `/api/pubsub/board/*` (spawn, status, remove, health), local CRUD endpoints under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`, and add missing PubSub endpoints to medminder_dash.
+
+**Route naming convention**:
+
+| Prefix | Purpose |
+|--------|---------|
+| `/api/pubsub/board/*` | Commands sent via PubSub to BoardManagerService |
+| `/api/board/<port>/status` | Local CRUD — connection status from cached state |
+| `/api/boards/list` | Local CRUD — board list from cached state |
+| `/api/boards/events` | Local CRUD — board events buffer |
+| `/api/daemon/status` | Local CRUD — daemon connected + ready flags |
+| `/api/sketches` | Sketch version listing with optional `?hardware_id=X` filter |
+| `/api/sketches/last-upload` | Latest upload details (null + 404 when none found) |
+
+**Parts**:
+
+| Part | Scope | Status |
+|------|-------|--------|
+| 1 | arduino_dash events buffer (state.py, pubsub.py, utils.py) | ✅ |
+| 2 | arduino_dash api_routes.py — move PubSub + add 5 CRUD + enhance /api/sketches | ✅ |
+| 3 | medminder_dash api_routes.py — add 4 PubSub + rename `/api/board_list`→`/api/boards/list` + add 5 CRUD | ✅ |
+| 4 | medminder_dash html_routes.py — comment out `/boards/event` | ✅ |
+| 5 | Test updates (4 URL changes + TestBoardsEvent redirect) | ✅ |
+| 6 | Module docs (4 files) | ✅ |
+| 7 | Verification `nox -s all_tests` — 8/8 sessions, 0 failures | ✅ |
+| 8 | Agent-facing docs sync | ✅ |
+
+**Key decisions**:
+1. `/api/sketches/last-upload` returns `(dict, 200)` or `(null, 404)` — final form after reconciliation
+2. Old `GET /api/board/<port>/status` (PubSub health) → `GET /api/pubsub/board/<port>/status`; freed route returns local connection status from `get_port_info()`
+3. Parallel task agents used for Parts 1-2 and Parts 3-4 — no conflicts, correct on first try
+
+---
+
+### Phase 102 — Fix Pre-Existing Test Failures ✅ COMPLETED
+
+**Date**: 2026-06-25 09:10
+
+**Goal**: Fix two pre-existing test failures that have persisted across multiple phases.
+
+**Problems**:
+1. **arduino_dash (111 errors)**: `test_app.py` fixture accesses state variables via `_app_module.*` but `app.py` doesn't re-export them from `state.py`. Every test fails at setup with `AttributeError: module 'arduino_dash.app' has no attribute '_pending_responses_lock'`.
+2. **medminder_dash (1 failure)**: djlint reformatting split `<input id="active-board-hardware-id" value="">` across multiple lines in `board_detail.html:42-44`. Test assertion expects `value=""` on the same line as `id=`, but rendered HTML has them separated by newlines.
+
+**Fixes**:
+| Q | Scope | Fix | Status |
+|---|-------|-----|--------|
+| Q1 | `app.py` — add state re-exports | Added `from arduino_dash.state import (...)` with 14 state variables | ✅ |
+| Q2 | `test_routes.py` — remove brittle `value=""` assertion | Removed line 395, verified 3 prior assertions already cover the hidden input's existence | ✅ |
+| Q3 | Verification | `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors | ✅ |
+
+---
+
+### Phase 101 (continued) — Portability Fix: Commit .bzl Changes
+
+**Date**: 2026-06-24 21:00
+
+**Problem**: Phase 101's `pyoxidizer.bzl` changes (`@REPO_ROOT@` placeholder, `pip_download()` → `pip_install()`, `simple-websocket` dep) were **never committed**. The `build_standalone.sh` RETURN trap's `git checkout` restored the original hardcoded-path versions after each build. The tracked files still have non-portable absolute paths and use `pip_download()` (PyPI-only) for local wheels.
+
+**Goal**: Commit the three `.bzl` files with `@REPO_ROOT@` + `pip_install()` + `simple-websocket` so that `git checkout` in the build script restores the portable placeholder versions. Then rebuild and verify.
+
+| Q | Scope | Change | Status |
+|---|-------|--------|--------|
+| Q1 | 3 pyoxidizer.bzl files | @REPO_ROOT@ + pip_install + simple-websocket (commit to git) | ✅ |
+| Q2 | Build | `nox -s all_builds` then `./scripts/build_standalone.sh` | ✅ |
+| Q3 | Verification | Smoke test + module/template/dep audit | ✅ |
+| Q4 | Agent-facing docs | Update IMPLEMENTATION_*, JOURNAL, CODEBASE_REFERENCE | ✅ |
+
+---
+
+### Phase 101 — Redesign & Rebuild Standalone Distributions (PyOxidizer) ✅ COMPLETED
+
+**Date**: 2026-06-24 18:54
+
+**Goal**: Rebuild the `dist-standalone/` bundles (arduino-dash, medminder-dash, board-manager) from current source code, replace hardcoded absolute paths in pyoxidizer.bzl with portable paths, and add missing `simple-websocket` runtime dependency.
+
+**Problem**: The existing dist-standalone bundles were built from an old codebase version. They are missing 6 Python modules (html_routes, api_routes, pubsub, settings, state, utils, sketch_registry), 14+ templates, all static files, and the `simple-websocket` dep. The pyoxidizer.bzl configs have hardcoded `/home/weerdmonk/...` absolute paths making them non-portable.
+
+**Approach**:
+1. Replace hardcoded paths with `@REPO_ROOT@` placeholder in pyoxidizer.bzl files
+2. Add `simple-websocket>=1.0.0` to dashboard PyOxidizer config
+3. Fix `pip_download()` → `pip_install()` for local wheel paths
+4. Build fresh wheels (`nox -s all_builds`)
+5. Rebuild standalone binaries via `./scripts/build_standalone.sh` (sed-substitutes `@REPO_ROOT@` then git-restores tracked files)
+6. Smoke-test each binary, verify modules/templates/deps
+
+**Key learnings**: PyOxidizer Starlark has no `__file__`; `load()` from another bzl also fails (CP04). Solution: `@REPO_ROOT@` placeholder → `sed` substitution in build script + `git checkout` cleanup via RETURN trap. `pip_download()` only supports PyPI — use `pip_install()` for local wheel paths.
+
+**Files**:
+- `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
+- `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
+- `scripts/pyoxidizer/board-manager/pyoxidizer.bzl` — @REPO_ROOT@ + pip_install for local wheels
+- `scripts/build_standalone.sh` — sed substitution + git restore cleanup logic
+
+| Q | Scope | Change | Status |
+|---|-------|--------|--------|
+| Q1 | pyoxidizer.bzl (3 files) | @REPO_ROOT@ placeholder + simple-websocket + pip_install | ✅ |
+| Q2 | Wheel build | `nox -s all_builds` | ✅ |
+| Q3 | Standalone build | `./scripts/build_standalone.sh` | ✅ |
+| Q4 | Verification | Smoke test + module/template/dep audit | ✅ |
+
 ### Phase 100 — Server Script Process Lifecycle (Disown & Cleanup) ✅ COMPLETED
 
 **Date**: 2026-06-22 16:14
@@ -60,36 +367,6 @@ Before (broken):                          After (works):
 
 ---
 
-### Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
-
-**Date**: 2026-06-24 17:57
-
-**Goal**: Fix two non-blocking console errors observed during Playwright E2E testing:
-
-1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` returns 404. Idiomorph is a separate npm package starting from htmx 2.x and is not bundled inside `htmx.org`.
-2. **WebSocket "Invalid frame header"** — `ws://localhost:8766/ws/board-events` fails because `flask-sock` lacks `simple-websocket` (the WS transport implementation). The Werkzeug/gunicorn sync workers return a non-101 response during WS upgrade.
-
-**Root cause analysis**:
-- Idiomorph was historically loaded from `htmx.org/dist/ext/idiomorph.js` when it was bundled inside htmx org (htmx 1.x). In htmx 2.x, all extensions became separate packages. The correct unpkg path is `idiomorph/dist/idiomorph-ext.js`.
-- `flask-sock` requires one of `simple-websocket` (for dev server / sync gunicorn) or `gevent-websocket` (for gevent worker). Without either, the WS upgrade request gets a garbled/non-101 HTTP response, causing the browser to emit "Invalid frame header".
-
-| Q | Scope | Files | Change |
-|---|-------|-------|--------|
-| 1 | arduino_dash base.html CDN | `base.html:9` | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
-| 2 | medminder_dash base.html CDN | `base.html:13` | Same URL change |
-| 3 | arduino_dash pyproject.toml dep | `pyproject.toml:13` | Add `simple-websocket>=1.0.0` |
-| 4 | medminder_dash pyproject.toml dep | `pyproject.toml:14` | Add `simple-websocket>=1.0.0` |
-
-**Verification**:
-| Test | Method | Pass Criteria |
-|------|--------|--------------|
-| Idiomorph CDN | `curl -I https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
-| Old URL dead | `curl -I https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
-| Pyproject deps | `grep simple-websocket */python/*/pyproject.toml` | 2 matches |
-| E2E console | Start dev server, check browser console | No 404 / Invalid frame header |
-
----
-
 ### Phase 100b — Code Review Uniformity Sweep (Ruff + ESLint + djlint) ✅ COMPLETED
 
 **Date**: 2026-06-24
@@ -119,6 +396,36 @@ Before (broken):                          After (works):
 11. Fixed CODEBASE_REFERENCE.md stale references (CSS identity, gunicorn_conf.py, infra.py, file layout)
 
 **Post-sweep**: All 8 nox sessions pass, 10 Playwright E2E recipes pass, review docs updated.
+
+---
+
+### Phase 100c — Fix Console Errors (idiomorph.js 404 + WS Invalid Frame Header)
+
+**Date**: 2026-06-24 17:57
+
+**Goal**: Fix two non-blocking console errors observed during Playwright E2E testing:
+
+1. **idiomorph.js 404** — CDN URL `https://unpkg.com/htmx.org/dist/ext/idiomorph.js` returns 404. Idiomorph is a separate npm package starting from htmx 2.x and is not bundled inside `htmx.org`.
+2. **WebSocket "Invalid frame header"** — `ws://localhost:8766/ws/board-events` fails because `flask-sock` lacks `simple-websocket` (the WS transport implementation). The Werkzeug/gunicorn sync workers return a non-101 response during WS upgrade.
+
+**Root cause analysis**:
+- Idiomorph was historically loaded from `htmx.org/dist/ext/idiomorph.js` when it was bundled inside htmx org (htmx 1.x). In htmx 2.x, all extensions became separate packages. The correct unpkg path is `idiomorph/dist/idiomorph-ext.js`.
+- `flask-sock` requires one of `simple-websocket` (for dev server / sync gunicorn) or `gevent-websocket` (for gevent worker). Without either, the WS upgrade request gets a garbled/non-101 HTTP response, causing the browser to emit "Invalid frame header".
+
+| Q | Scope | Files | Change |
+|---|-------|-------|--------|
+| 1 | arduino_dash base.html CDN | `base.html:9` | `htmx.org/dist/ext/idiomorph.js` → `idiomorph/dist/idiomorph-ext.js` |
+| 2 | medminder_dash base.html CDN | `base.html:13` | Same URL change |
+| 3 | arduino_dash pyproject.toml dep | `pyproject.toml:13` | Add `simple-websocket>=1.0.0` |
+| 4 | medminder_dash pyproject.toml dep | `pyproject.toml:14` | Add `simple-websocket>=1.0.0` |
+
+**Verification**:
+| Test | Method | Pass Criteria |
+|------|--------|--------------|
+| Idiomorph CDN | `curl -I https://unpkg.com/idiomorph/dist/idiomorph-ext.js` | HTTP 200 |
+| Old URL dead | `curl -I https://unpkg.com/htmx.org/dist/ext/idiomorph.js` | HTTP 404 |
+| Pyproject deps | `grep simple-websocket */python/*/pyproject.toml` | 2 matches |
+| E2E console | Start dev server, check browser console | No 404 / Invalid frame header |
 
 ---
 
@@ -1090,311 +1397,4 @@ Three issues found after Phase 20:
 
 ---
 
-### Phase 101 — Redesign & Rebuild Standalone Distributions (PyOxidizer) ✅ COMPLETED
-
-**Date**: 2026-06-24 18:54
-
-**Goal**: Rebuild the `dist-standalone/` bundles (arduino-dash, medminder-dash, board-manager) from current source code, replace hardcoded absolute paths in pyoxidizer.bzl with portable paths, and add missing `simple-websocket` runtime dependency.
-
-**Problem**: The existing dist-standalone bundles were built from an old codebase version. They are missing 6 Python modules (html_routes, api_routes, pubsub, settings, state, utils, sketch_registry), 14+ templates, all static files, and the `simple-websocket` dep. The pyoxidizer.bzl configs have hardcoded `/home/weerdmonk/...` absolute paths making them non-portable.
-
-**Approach**:
-1. Replace hardcoded paths with `@REPO_ROOT@` placeholder in pyoxidizer.bzl files
-2. Add `simple-websocket>=1.0.0` to dashboard PyOxidizer config
-3. Fix `pip_download()` → `pip_install()` for local wheel paths
-4. Build fresh wheels (`nox -s all_builds`)
-5. Rebuild standalone binaries via `./scripts/build_standalone.sh` (sed-substitutes `@REPO_ROOT@` then git-restores tracked files)
-6. Smoke-test each binary, verify modules/templates/deps
-
-**Key learnings**: PyOxidizer Starlark has no `__file__`; `load()` from another bzl also fails (CP04). Solution: `@REPO_ROOT@` placeholder → `sed` substitution in build script + `git checkout` cleanup via RETURN trap. `pip_download()` only supports PyPI — use `pip_install()` for local wheel paths.
-
-**Files**:
-- `scripts/pyoxidizer/arduino-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
-- `scripts/pyoxidizer/medminder-dash/pyoxidizer.bzl` — @REPO_ROOT@ + simple-websocket + pip_install for local wheels
-- `scripts/pyoxidizer/board-manager/pyoxidizer.bzl` — @REPO_ROOT@ + pip_install for local wheels
-- `scripts/build_standalone.sh` — sed substitution + git restore cleanup logic
-
-| Q | Scope | Change | Status |
-|---|-------|--------|--------|
-| Q1 | pyoxidizer.bzl (3 files) | @REPO_ROOT@ placeholder + simple-websocket + pip_install | ✅ |
-| Q2 | Wheel build | `nox -s all_builds` | ✅ |
-| Q3 | Standalone build | `./scripts/build_standalone.sh` | ✅ |
-| Q4 | Verification | Smoke test + module/template/dep audit | ✅ |
-
-### Phase 101 (continued) — Portability Fix: Commit .bzl Changes
-
-**Date**: 2026-06-24 21:00
-
-**Problem**: Phase 101's `pyoxidizer.bzl` changes (`@REPO_ROOT@` placeholder, `pip_download()` → `pip_install()`, `simple-websocket` dep) were **never committed**. The `build_standalone.sh` RETURN trap's `git checkout` restored the original hardcoded-path versions after each build. The tracked files still have non-portable absolute paths and use `pip_download()` (PyPI-only) for local wheels.
-
-**Goal**: Commit the three `.bzl` files with `@REPO_ROOT@` + `pip_install()` + `simple-websocket` so that `git checkout` in the build script restores the portable placeholder versions. Then rebuild and verify.
-
-| Q | Scope | Change | Status |
-|---|-------|--------|--------|
-| Q1 | 3 pyoxidizer.bzl files | @REPO_ROOT@ + pip_install + simple-websocket (commit to git) | ✅ |
-| Q2 | Build | `nox -s all_builds` then `./scripts/build_standalone.sh` | ✅ |
-| Q3 | Verification | Smoke test + module/template/dep audit | ✅ |
-| Q4 | Agent-facing docs | Update IMPLEMENTATION_*, JOURNAL, CODEBASE_REFERENCE | ✅ |
-
----
-
-### Phase 102 — Fix Pre-Existing Test Failures ✅ COMPLETED
-
-**Date**: 2026-06-25 09:10
-
-**Goal**: Fix two pre-existing test failures that have persisted across multiple phases.
-
-**Problems**:
-1. **arduino_dash (111 errors)**: `test_app.py` fixture accesses state variables via `_app_module.*` but `app.py` doesn't re-export them from `state.py`. Every test fails at setup with `AttributeError: module 'arduino_dash.app' has no attribute '_pending_responses_lock'`.
-2. **medminder_dash (1 failure)**: djlint reformatting split `<input id="active-board-hardware-id" value="">` across multiple lines in `board_detail.html:42-44`. Test assertion expects `value=""` on the same line as `id=`, but rendered HTML has them separated by newlines.
-
-**Fixes**:
-| Q | Scope | Fix | Status |
-|---|-------|-----|--------|
-| Q1 | `app.py` — add state re-exports | Added `from arduino_dash.state import (...)` with 14 state variables | ✅ |
-| Q2 | `test_routes.py` — remove brittle `value=""` assertion | Removed line 395, verified 3 prior assertions already cover the hidden input's existence | ✅ |
-| Q3 | Verification | `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors | ✅ |
-
----
-
-### Phase 103 — API Route Restructure ✅ COMPLETED
-
-**Date**: 2026-06-25 11:57
-
-**Goal**: Align API routes across arduino_dash and medminder_dash into a consistent pattern: PubSub-backed board commands under `/api/pubsub/board/*` (spawn, status, remove, health), local CRUD endpoints under `/api/boards/*`, `/api/board/<port>`, `/api/daemon/`, `/api/sketches/`, and add missing PubSub endpoints to medminder_dash.
-
-**Route naming convention**:
-
-| Prefix | Purpose |
-|--------|---------|
-| `/api/pubsub/board/*` | Commands sent via PubSub to BoardManagerService |
-| `/api/board/<port>/status` | Local CRUD — connection status from cached state |
-| `/api/boards/list` | Local CRUD — board list from cached state |
-| `/api/boards/events` | Local CRUD — board events buffer |
-| `/api/daemon/status` | Local CRUD — daemon connected + ready flags |
-| `/api/sketches` | Sketch version listing with optional `?hardware_id=X` filter |
-| `/api/sketches/last-upload` | Latest upload details (null + 404 when none found) |
-
-**Parts**:
-
-| Part | Scope | Status |
-|------|-------|--------|
-| 1 | arduino_dash events buffer (state.py, pubsub.py, utils.py) | ✅ |
-| 2 | arduino_dash api_routes.py — move PubSub + add 5 CRUD + enhance /api/sketches | ✅ |
-| 3 | medminder_dash api_routes.py — add 4 PubSub + rename `/api/board_list`→`/api/boards/list` + add 5 CRUD | ✅ |
-| 4 | medminder_dash html_routes.py — comment out `/boards/event` | ✅ |
-| 5 | Test updates (4 URL changes + TestBoardsEvent redirect) | ✅ |
-| 6 | Module docs (4 files) | ✅ |
-| 7 | Verification `nox -s all_tests` — 8/8 sessions, 0 failures | ✅ |
-| 8 | Agent-facing docs sync | ✅ |
-
-**Key decisions**:
-1. `/api/sketches/last-upload` returns `(dict, 200)` or `(null, 404)` — final form after reconciliation
-2. Old `GET /api/board/<port>/status` (PubSub health) → `GET /api/pubsub/board/<port>/status`; freed route returns local connection status from `get_port_info()`
-3. Parallel task agents used for Parts 1-2 and Parts 3-4 — no conflicts, correct on first try
-
----
-
-### Phase 104 — E2E Documentation Restructure (README, index, test-sketch, fixtures/specs docs) ✅ COMPLETED
-
-**Date**: 2026-06-25 16:10
-
-**Goal**: Bring e2e documentation up to the same standard as other monorepo modules. Six action items:
-
-1. **Create `e2e/README.md`** — module overview aligned with `scripts/README.md` style
-2. **Move `.playwright-mcp/test-sketch` to `e2e/test-sketch/`** — version-control the minimal Arduino compile/upload sketch
-3. **Document `e2e/fixtures/` and `e2e/specs/`** — automated Playwright spec usage, webServer auto-management, per-spec summaries
-4. **Create `e2e/index.md`** — doc entry point (quick reference table + directory layout, like `scripts/docs/index.md`)
-5. **Update project-level docs** — `docs/e2e-testing.md` and root `index.md`
-6. **Update agent_tools for test-sketch** — COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md
-7. **Verify end-to-end** — run playwright-mcp-testing command to confirm all paths resolve correctly
-
-| Q | Scope | Key Changes | Status |
-|---|-------|-------------|--------|
-| 1 | e2e/README.md | Module overview, quick start (MCP + automated), directory layout, requirements | ✅ |
-| 2 | e2e/test-sketch/ | Copy from `.playwright-mcp/`, rewrite README with purpose + usage | ✅ |
-| 3 | e2e/index.md | Quick reference table + directory layout (like `scripts/docs/index.md`) | ✅ |
-| 4 | e2e/docs/index.md | Add automated specs section + test-sketch section, refocus as MCP sub-page | ✅ |
-| 5 | e2e/docs/servers.md | Add webServer auto-management note for automated specs | ✅ |
-| 6 | agent_tools/docs | COMMAND.md, AGENT.md, GUIDE.md, MCP_TESTING_GUIDE.md — add test-sketch refs | ✅ |
-| 7 | Project-level docs | `docs/e2e-testing.md` updated, root `index.md` updated | ✅ |
-| 8 | End-to-end verification | playwright-mcp-testing command: skill load, guide read, server start, navigate, cleanup | ✅ |
-
----
-
-## Phase 104.1 — Document e2e/fixtures/ (2026-06-25 17:53)
-
-**Goal**: Document `fixtures/test-data.ts` — purpose, contents (mock ports, sketch, medicines, URL helpers), import path, and relationship to server `--mock` state.
-
-**Items**:
-
-| Q | Scope | Key Changes | Status |
-|---|-------|-------------|--------|
-| 1 | e2e/docs/index.md | Add "Test Data Fixtures" subsection under Automated Playwright Specs | ✅ |
-| 2 | Verify all e2e docs consistency for fixtures | Check e2e/index.md, e2e/README.md, docs/e2e-testing.md reference it correctly | ✅ |
-
----
-
-## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
-
-**Goal**: Add missing `npx playwright install --with-deps` to installation section and document project-root run alternative `npx playwright test --config e2e/playwright.config.ts`.
-
-| Q | Scope | Key Changes | Status |
-|---|-------|-------------|--------|
-| 1 | e2e/docs/index.md Installation + Running | Add browser binary install step + project-root config flag | ✅ |
-
----
-
-### Phase 104.3 — Remove shelved labels + strip agent_tools Playwright refs (2026-06-27 19:22)
-
-**Status**: ✅ COMPLETED
-
-Removed "(Shelved)" labels from all e2e docs and CODEBASE_REFERENCE.md. Stripped standalone Playwright file references from agent_tools docs.
-
-### Phase 105 — Relocate medminder_dash and board_manager docs alongside setup.py (2026-06-27 19:22)
-
-**Status**: ✅ COMPLETED
-
-Moved both docs/ directories alongside setup.py so they are no longer inside the importable Python package. Updated all cross-references in user-facing and agent-facing docs.
-
-### Phase 106 — Set up Prettier + eslint-plugin-prettier for JS formatting (2026-06-28 00:54)
-
-**Status**: ✅ COMPLETED
-
-Created `.prettierrc` and `.prettierignore` configuration files. Integrated `eslint-plugin-prettier/recommended` into the ESLint flat config. Formatted all 190 HTML template files with prettier (inline JS). Updated CODEBASE_REFERENCE.md with prettier documentation.
-
-**Usage**: `npx prettier --write "**/*.html"` to format, `npx prettier --check "**/*.html"` to verify, `npx eslint .` to lint including prettier rules.
-
----
-
-### Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction) (2026-07-03 00:30)
-
-**Date**: 2026-07-03 00:30
-
-**Goal**: Generate API reference docs for `e2e/` TypeScript sources — typedoc for exported symbols (fixtures, config), Python extraction for spec test descriptions.
-
-| Tool | Target | Output |
-|------|--------|--------|
-| typedoc | `fixtures/test-data.ts` (5 exports), `playwright.config.ts` (1 export) | `e2e/docs/reference/typedoc/` — 11 HTML pages |
-| Python extraction | 8 `.spec.ts` files (22 tests) | `e2e/docs/reference/specs.md` — Markdown reference |
-
-**Key decisions**:
-1. **typedoc alone insufficient for specs**: Spec files have no exported declarations — all `test()`/`test.describe()` are internal closures. typedoc produces blank pages for them.
-2. **`--skipErrorChecking`**: Required because `@playwright/test` and `@types/node` types aren't installed at root level.
-3. **Python extraction script** (`scripts/gen_e2e_spec_docs.py`): Uses stdlib `re` + `pathlib` — zero new dependencies. Matches project pattern of Python-based doc tooling (pdoc, shdoc, gen_grpc_bindings.py).
-4. **JSDoc annotations**: Added `/** */` comments to `test-data.ts` exports and `@module` header to `playwright.config.ts` so typedoc output is meaningful.
-
-**Files changed** (10 files):
-| File | Change |
-|------|--------|
-| `e2e/fixtures/test-data.ts` | JSDoc on 5 exports |
-| `e2e/playwright.config.ts` | `@module` file header |
-| `scripts/gen_e2e_spec_docs.py` | **New** — 50-line Python stdlib script |
-| `scripts/gen_api_docs.sh` | Added typedoc + spec extraction targets + cleanup |
-| `e2e/docs/reference/specs.md` | **New** — auto-generated spec reference |
-| `e2e/docs/reference/typedoc/` | **New** — 11 typedoc HTML pages |
-| `README.md` | Added typedoc + specs.md to API Reference section |
-| `index.md` | Added typedoc + specs.md to Reference Documents table |
-| `e2e/docs/index.md` | Added typedoc + specs.md to Document Reference table |
-| `e2e/index.md`, `e2e/README.md` | Added `reference/` to directory layout + links |
-
-**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors.
-
----
-
-### Phase 108 — Document Reference Tables + Broken Related Links Fix (2026-07-03 17:32)
-
-**Status**: ✅ COMPLETED
-
-**Goal**: Add `## Document Reference` tables to all per-module `docs/index.md` files linking sibling `.md` files + `../README.md`. Fix 11 broken "Related" links. Create `dist-standalone-install/README.md` (copied from `dist-standalone/`).
-
-**Files changed** (14 files across 9 modules):
-
-| Module | File | Change |
-|--------|------|--------|
-| arduino_dash | `docs/index.md` | Added Document Reference table (13 rows) |
-| arduino_sketch_tools | `docs/index.md` | Added Document Reference table (4 rows) |
-| board_manager | `docs/index.md` | Added Document Reference table (11 rows) |
-| board_manager_client | `docs/index.md` | Added Document Reference table (2 rows) |
-| grpc_client | `docs/index.md` | Added Document Reference table (4 rows) |
-| medminder_dash | `docs/index.md` | Added Document Reference table (15 rows) |
-| dist-test-install | `docs/index.md` | Added Document Reference + Related links |
-| dist-standalone-install | `README.md` | **New** — copied from `dist-standalone/` |
-| dist-standalone-install | `docs/index.md` | Added Related links |
-| scripts | `docs/index.md` | Added Related links |
-| e2e | `docs/index.md` | Already had Document Reference (Phase 107) — verified |
-| root | `index.md` | Links synced |
-| root | `README.md` | Links synced |
-
-**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors. `bundle exec jekyll build` — 0 errors, 0 warnings.
-
----
-
-## 2026-07-04 03:10 — Phase 109: Code Review of Phase 107/108 ✅ COMPLETED
-
-**Scope**: 5 un-pushed commits across 5 files — JSDoc annotations (`e2e/fixtures/test-data.ts`, `e2e/playwright.config.ts`), new tooling script (`scripts/gen_e2e_spec_docs.py`), pipeline config (`scripts/gen_api_docs.sh`, `package.json`).
-
-**Findings**: 2 Warnings (broken spec links, latent nested-describe parsing bug), 2 Suggestions (typedoc stderr redirect, add unit tests), 3 Nits (JSDoc style, @module naming, regex edge case for describe.only/skip).
-
-**Outcome**: All 7 actionable items fixed. 32 unit tests added for `gen_e2e_spec_docs.py`. All tests pass — 160 scripts tests, nox 8/8 sessions, Jekyll 0 errors.
-
----
-
-## 2026-07-04 04:12 — Phase 110: Authentication, Authorization, CSRF, Rate Limiting
-
-**Priority**: Immediate (security)
-**Scope**: medminder_dash, arduino_dash, arduino_sketch_tools, board_manager, grpc_client
-**Source**: Security audit — 5 Critical + 2 High findings addressing auth, CSRF, rate-limiting
-
-### Plan Items
-
-1. **Authentication (CWE-306)** — Implement Flask-Login with session-based auth. Add login page, logout, `@login_required` decorator to all routes in medminder_dash, arduino_dash, arduino_sketch_tools. Supports single-user mode (auto-login on localhost?) with configurable multi-user via env var.
-
-2. **Strong secret key (CWE-798)** — Remove `"dev-secret"` fallback. Fail hard if `FLASK_SECRET_KEY` is unset. Generate key via `secrets.token_hex(32)`. Document in `.env.example`.
-
-3. **CSRF protection (CWE-352)** — Add Flask-WTF `CSRFProtect`. Include CSRF tokens in all HTMX requests via `hx-headers`. Validate `X-CSRF-Token` for JSON API. Set `SESSION_COOKIE_SAMESITE="Lax"`.
-
-4. **Rate limiting (CWE-400)** — Add Flask-Limiter. Per-endpoint limits: 30 req/min for POST/PUT/DELETE, 60 req/min for GET. Higher limits for WebSocket. Set `MAX_CONTENT_LENGTH = 50 MB`.
-
-5. **Session hardening (CWE-1004)** — Configure `SESSION_COOKIE_HTTPONLY=True`, `SESSION_COOKIE_SECURE=True` (when HTTPS), `SESSION_COOKIE_SAMESITE="Lax"`, `PERMANENT_SESSION_LIFETIME=8h`.
-
-6. **Authorization model (CWE-862)** — (Future, after auth is stable) Add user roles and board ownership validation.
-
-### Verification
-
-- All existing tests must pass
-- Unauthenticated requests to any route return 401/403
-- CSRF-missing POST requests return 400
-- Rate-limited endpoints return 429 after threshold
-- Session cookies have security flags set
-- `nox -s all_tests` — 8/8 sessions, 0 failures
-
----
-
-## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
-
-**Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
-all versionable modules/packages as v0.1.0 and standardize the single-source-of-truth pattern.
-
-### Tasks
-
-| # | Task | Status |
-|---|------|--------|
-| A | Add `__version__` to 3 missing `__init__.py` files | ✅ |
-| B | Standardize all 6 `setup.py` to import version from package | ✅ |
-| C | Add `"version": "0.1.0"` to root `package.json` | ✅ |
-| D | Create root `VERSION` file | ✅ |
-| E | Test all changes | ✅ |
-
-### Single Source of Truth Pattern
-
-```
-__init__.py  (__version__ = "0.1.0")
-    |
-    ├── setup.py          (from PKG import __version__; version=__version__)
-    ├── pyproject.toml    (version = "0.1.0" — PEP 621)
-    └── VERSION (root)    (0.1.0)
-```
-
-**Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures. Jekyll build — 0 errors.
 {% endraw %}

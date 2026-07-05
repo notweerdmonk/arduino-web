@@ -1,6 +1,7 @@
 ---
 layout: default
 ---
+{% raw %}
 # Research Tasks — Phase 97: Frontend Stack Optimization
 
 **Date**: 2026-06-20 22:17
@@ -14,3 +15,4 @@ layout: default
 - [x] Identify swap targets that can be made more granular
 - [x] Research Idiomorph API and morphing swap strategy
 - [x] Document Phase 97 plan
+{% endraw %}

@@ -2,7 +2,7 @@
 layout: default
 ---
 {% raw %}
-# Review Journal — Phase 104: E2E Documentation Restructure
+# Review Journal — Phase 111: Semantic Versioning v0.1.0 Baseline
 
 ## 2026-06-25 16:10 — Phase 104: E2E Documentation Restructure
 
@@ -638,4 +638,49 @@ is public anyway.
 4. **Config manifest mismatches** (4A-4D) — can cause broken installations
 5. **Missing phase sections** (1F, 2D) — completeness gap
 6. **Remaining medium/low items** — cleanup pass
+
+---
+
+## 2026-07-05 — Category 1: Workflow Document Fixes Applied
+
+**Scope**: All 23 issues across sub-categories 1A through 1J from the Comprehensive Document & Codebase Audit.
+
+### Fixes Applied
+
+| Sub-Category | Description | Severity | Status |
+|---|---|---|---|
+| 1A | Stale Statuses in IMPLEMENTATION_PLAN.md | HIGH | ✅ 4 markers updated (Phase 104.2, 107 statuses, Q1-Q6, A-E tasks) |
+| 1B | Missing Phase 109 Entry in JOURNAL.md | HIGH | ✅ Entry inserted between Phase 110 and Phase 108 |
+| 1C | JOURNAL.md Status Marker Gaps | MEDIUM | ✅ Phase 102 got ✅ marker; Phase 82 "(In Progress)" → ✅ COMPLETED |
+| 1D | Stale h1 Document Headings | MEDIUM | ✅ All 3 journals updated to "Phase 111: Semantic Versioning v0.1.0 Baseline" |
+| 1E | PLAN.md Structural Issues | HIGH/MED/LOW | ✅ Phases 101-111 moved before Phase 100; Phase 101 continued → Phase 101a; Phase 110 got ✅; Phase 109 heading `##` → `###`; sub-phase order 100→100b→100c |
+| 1F | TODOS.md Missing 11 Phases | HIGH | ✅ Phases 101-111 added to completed table |
+| 1G | RESEARCH Docs Missing Liquid Protection | MEDIUM | ✅ Liquid `raw`/`endraw` added to RESEARCH_TASK.md and RESEARCH_PROGRESS.md |
+| 1H | Typos | LOW | ✅ "Reasearch" → "Research" (RESEARCH_PLAN.md); "Hueristic" → "Heuristic" (RESEARCH_JOURNAL.md) |
+| 1I | IMPLEMENTATION_TASK.md Completion Summary | MEDIUM | ✅ Completed section added for Tasks A-E |
+| 1J | BUGS.md Documents Removed Technology | LOW | ✅ Historical note header added about Hyperscript removal in Phase 97 |
+
+### Files Modified (13 total)
+
+1. `IMPLEMENTATION_PLAN.md` — Fixed 4 stale status markers
+2. `JOURNAL.md` — Added Phase 109 entry; fixed 2 status marker gaps
+3. `IMPLEMENTATION_JOURNAL.md` — Updated h1 heading to Phase 111
+4. `TESTING_JOURNAL.md` — Updated h1 heading to Phase 111
+5. `REVIEW_JOURNAL.md` — Updated h1 heading to Phase 111
+6. `PLAN.md` — Restructured: moved Phases 101-111 before Phase 100; fixed heading levels; fixed sub-phase ordering; fixed Phase 110 status
+7. `TODOS.md` — Added 11 missing phases to completed table
+8. `RESEARCH_TASK.md` — Added Liquid protection wrapping
+9. `RESEARCH_PROGRESS.md` — Added Liquid protection wrapping
+10. `RESEARCH_PLAN.md` — Fixed "Reasearch" typo
+11. `RESEARCH_JOURNAL.md` — Fixed "Hueristic" typo
+12. `IMPLEMENTATION_TASK.md` — Added completion summary
+13. `BUGS.md` — Added historical note header
+
+### Verification
+
+- All status markers now match actual completion state
+- Phase ordering in PLAN.md follows natural descending order (111→101→100→...→1)
+- All headings use consistent `###` level for phases
+- Liquid protection present on all workflow documents with Jinja2 patterns
+- Typo fixes confirmed by grep
 {% endraw %}

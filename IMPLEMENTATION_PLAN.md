@@ -56,7 +56,7 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 
 ## Phase 104.2 — Fix shelved-specs activation docs (2026-06-25 18:14)
 
-**Status**: 🏗️ IN PROGRESS
+**Status**: ✅ COMPLETED
 
 **Motivation**: Review of Phase 104.1 identified two remaining gaps in the Automated Playwright Specs docs:
 1. Installation section missing `npx playwright install --with-deps` (needed to download browser binaries)
@@ -95,7 +95,7 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 ## Phase 107 — E2E TypeScript API Reference (typedoc + spec extraction)
 
 **Date**: 2026-07-03 00:30
-**Status**: 🏗️ IN PROGRESS
+**Status**: ✅ COMPLETED
 
 **Motivation**: The `e2e/` directory has TypeScript sources (specs, fixtures, config) with no API reference documentation. Python mock servers are already covered by pdoc, but the `.ts` files have no doc tooling. Two tools now available:
 - **typedoc** (root `package.json`) — picks up exported symbols from `test-data.ts` and `playwright.config.ts`
@@ -105,12 +105,12 @@ Each file change is scoped. Revert via `git checkout -- <file>` to undo individu
 
 | Q | Scope | Key Changes | Status |
 |---|-------|-------------|--------|
-| Q1 | JSDoc annotations | Add `/** */` to `test-data.ts` exports + `playwright.config.ts` module header | 🔲 |
-| Q2 | gen_e2e_spec_docs.py | Write Python stdlib-only script to parse `.spec.ts` files → specs.md | 🔲 |
-| Q3 | gen_api_docs.sh | Add typedoc + spec extraction targets | 🔲 |
-| Q4 | Generate + verify | Run full generation, check output, nox test | 🔲 |
-| Q5 | User-facing docs | README.md + docs/index.md reference links | 🔲 |
-| Q6 | Agent-facing docs | Sync PLAN, JOURNAL, REVIEW_*, TESTING_*, CODEBASE_REFERENCE | 🔲 |
+| Q1 | JSDoc annotations | Add `/** */` to `test-data.ts` exports + `playwright.config.ts` module header | ✅ |
+| Q2 | gen_e2e_spec_docs.py | Write Python stdlib-only script to parse `.spec.ts` files → specs.md | ✅ |
+| Q3 | gen_api_docs.sh | Add typedoc + spec extraction targets | ✅ |
+| Q4 | Generate + verify | Run full generation, check output, nox test | ✅ |
+| Q5 | User-facing docs | README.md + docs/index.md reference links | ✅ |
+| Q6 | Agent-facing docs | Sync PLAN, JOURNAL, REVIEW_*, TESTING_*, CODEBASE_REFERENCE | ✅ |
 
 ## Phase 108 — Document Reference Tables + Broken Related Links Fix
 
@@ -173,11 +173,11 @@ version string for PEP 621 tooling compatibility.
 
 | # | Task | Scope | Files Changed | Status |
 |---|------|-------|---------------|--------|
-| A | Add `__version__` to 3 missing packages | `arduino-sketch-tools`, `board-manager-client`, `medminder-dash` | 3 `__init__.py` files | ⬜ |
-| B | Standardize setup.py to import version | All 6 Python packages | 6 `setup.py` files | ⬜ |
-| C | Add version to root package.json | Root `package.json` | 1 file | ⬜ |
-| D | Create root-level VERSION file | Root directory | 1 file | ⬜ |
-| E | Test all changes | scripts tests, module imports | — | ⬜ |
+| A | Add `__version__` to 3 missing packages | `arduino-sketch-tools`, `board-manager-client`, `medminder-dash` | 3 `__init__.py` files | ✅ |
+| B | Standardize setup.py to import version | All 6 Python packages | 6 `setup.py` files | ✅ |
+| C | Add version to root package.json | Root `package.json` | 1 file | ✅ |
+| D | Create root-level VERSION file | Root directory | 1 file | ✅ |
+| E | Test all changes | scripts tests, module imports | — | ✅ |
 
 ### Existing References (unchanged)
 

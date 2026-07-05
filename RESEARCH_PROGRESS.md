@@ -1,6 +1,7 @@
 ---
 layout: default
 ---
+{% raw %}
 # Research Progress — Phase 97: Frontend Stack Optimization
 
 **Date**: 2026-06-20 22:17
@@ -14,3 +15,4 @@ layout: default
 | Swap target audit | ✅ Identified granularization candidates |
 | Idiomorph research | ✅ 0 dependencies, works as HTMX extension, ~1KB |
 | Document Phase 97 plan | ✅ Done |
+{% endraw %}

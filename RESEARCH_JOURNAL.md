@@ -162,7 +162,7 @@ Upload progress bar cannot be implemented at the gRPC/arduino-cli level. The ard
 
 If upload progress is needed in the future, it would require:
 1. Parsing avrdude output for percentage patterns (`"Writing | ################################################## | 100% 0.48s"`)
-2. Hueristic/synthetic progress based on upload phases (binary size, erase time, write time, verify time)
+2. Heuristic/synthetic progress based on upload phases (binary size, erase time, write time, verify time)
 
 ## 7. Summary of Findings
 

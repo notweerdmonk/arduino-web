@@ -25,6 +25,6 @@ Reduce JS payload, simplify the frontend stack, and optimize HTMX swap targets t
 2. Audit all partial templates and hx-target combos
 3. Audit all Hyperscript usages across 10 template files
 4. Research Idiomorph API and compatibility
-5. Reasearch HTMX SSE extension
+5. Research HTMX SSE extension
 6. Document findings and propose phased implementation
 {% endraw %}

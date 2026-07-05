@@ -2,7 +2,7 @@
 layout: default
 ---
 {% raw %}
-# Testing Journal — Phase 93: GitHub Pages Jekyll Documentation Site
+# Testing Journal — Phase 112: Jekyll Optional Front Matter Plugin
 
 **Date**: 2026-06-20
 
@@ -711,4 +711,15 @@ root VERSION file, and root package.json. Full suite expected to pass.
 - Scripts tests: 160/160 passed ✅
 - Full nox suite: 8/8 sessions, 0 failures ✅
 - Jekyll build: 0 errors ✅
+
+## 2026-07-05 04:35 — Phase 112: Jekyll Optional Front Matter Plugin
+
+**Tests executed**:
+- `bundle exec jekyll build` — 0 errors, 0 warnings ✅
+- `_site/README.html` — rendered with `<html>` tag ✅
+- `_site/scripts/README.html` — rendered HTML ✅
+- `_site/e2e/README.html` — rendered HTML ✅
+- `_site/board_manager/python/board_manager/README.html` — rendered HTML ✅
+- `_site/medminder_dash/python/medminder_dash/README.html` — rendered HTML ✅
+- No raw `.md` output in `_site/` — all 12 README.md files excluded from static copy ✅
 {% endraw %}

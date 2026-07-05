@@ -6,10 +6,14 @@ description: >-
 theme: minima
 
 plugins:
+  - jekyll-optional-front-matter
   - jekyll-relative-links
 
 relative_links:
   enabled: true
+
+optional_front_matter:
+  remove_originals: true
 
 defaults:
   - scope:
@@ -33,3 +37,19 @@ exclude:
   - noxfile.py
   - pyproject.toml
   - setup.py
+  - developer_reference_docs/
+
+# Include README files that had front matter stripped (they need processing as pages)
+include:
+  - README.md
+  - scripts/README.md
+  - e2e/README.md
+  - e2e/test-sketch/README.md
+  - dist-test-install/README.md
+  - dist-standalone-install/README.md
+  - board_manager/python/board_manager/README.md
+  - board_manager_client/python/board_manager_client/README.md
+  - arduino_sketch_tools/python/arduino_sketch_tools/README.md
+  - grpc_client/python/arduino_grpc/README.md
+  - arduino_dash/python/arduino_dash/README.md
+  - medminder_dash/python/medminder_dash/README.md

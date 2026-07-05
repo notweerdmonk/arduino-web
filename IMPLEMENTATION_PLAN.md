@@ -187,4 +187,32 @@ version string for PEP 621 tooling compatibility.
 - `e2e/package.json`: `version: "0.1.0"` ✅
 - All `pyproject.toml` files: `version = "0.1.0"` ✅ (kept as-is)
 
+## 2026-07-05 04:35 — Phase 112: Jekyll Optional Front Matter Plugin
+
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+Front matter was stripped from all 12 README.md files during the document audit (Category 1/2). Without front matter, Jekyll treats them as static files — served as raw `.md` without layout rendering. The `jekyll-optional-front-matter` plugin processes markdown files without front matter as pages, converting them to `.html` with the site layout.
+
+### Quantums
+
+| Q | Description | Changes | Status |
+|---|-------------|---------|--------|
+| 1 | Add gem to Gemfile + plugin to `_config.yml` | `Gemfile`, `_config.yml` | ✅ |
+| 2 | `bundle install` + `jekyll build` | Environment | ✅ |
+| 3 | Verify 12 README.md → `.html` in `_site/` | Verification | ✅ |
+
+### Key Details
+
+- Plugin blacklists `README` as a common meta filename (case-insensitive, any path depth). The `include` list overrides this.
+- All 12 README.md paths were already added to `include` in Category 5.
+- Added `remove_originals: true` to suppress raw `.md` static copies from output.
+
+### Existing References
+
+- Plugin docs: https://github.com/benbalter/jekyll-optional-front-matter
+- Blacklist source: `lib/jekyll-optional-front-matter.rb` — `FILENAME_BLACKLIST = %w(README LICENSE LICENCE COPYING CODE_OF_CONDUCT CONTRIBUTING ISSUE_TEMPLATE PULL_REQUEST_TEMPLATE)`
+
+---
 {% endraw %}

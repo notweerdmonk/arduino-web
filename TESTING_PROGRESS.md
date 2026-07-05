@@ -2,12 +2,17 @@
 layout: default
 ---
 {% raw %}
-# Testing Progress — Phase 111: Semantic Versioning v0.1.0
+# Testing Progress — Phase 112: Jekyll Optional Front Matter Plugin
+
+## Phase 112: Jekyll Optional Front Matter Plugin
 
 | Test | Status | Notes |
 |------|--------|-------|
-| T1 — Import version test | ✅ | All 6 packages: __version__ = 0.1.0 verified via AST |
-| T2 — Setup.py consistency | ✅ | All 6 setup.py import __version__ from package |
-| T3 — Root files test | ✅ | VERSION=0.1.0, package.json=0.1.0, e2e/package.json=0.1.0 |
-| T4 — Full test suite | ✅ | nox -s all_tests: 8/8 sessions, 0 failures |
+| T1 — `bundle exec jekyll build` | ✅ | Exit code 0, no errors/warnings |
+| T2 — `_site/README.html` exists | ✅ | Rendered HTML with layout |
+| T3 — `_site/scripts/README.html` exists | ✅ | Rendered HTML with layout |
+| T4 — `_site/e2e/README.html` exists | ✅ | Rendered HTML with layout |
+| T5 — `_site/board_manager/python/board_manager/README.html` exists | ✅ | Rendered HTML with layout |
+| T6 — `_site/medminder_dash/python/medminder_dash/README.html` exists | ✅ | Rendered HTML with layout |
+| T7 — No raw `README.md` in `_site/` | ✅ | Zero `.md` output files |
 {% endraw %}

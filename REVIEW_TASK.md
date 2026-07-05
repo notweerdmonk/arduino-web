@@ -349,4 +349,29 @@ layout: default
 ### Task U13 — Record findings in REVIEW_JOURNAL.md
 
 - [x] Record all review findings and outcomes — ✅ full entry added
+
+---
+
+## Category 5: Jekyll Optional Front Matter Plugin (2026-07-05 04:35)
+
+### Task R1 — Verify Gemfile Changes
+
+- [x] Confirm `jekyll-optional-front-matter` in `:jekyll_plugins` group
+- [x] Confirm `jekyll-relative-links` moved to same group
+
+### Task R2 — Verify _config.yml Changes
+
+- [x] Confirm `- jekyll-optional-front-matter` in `plugins` list
+- [x] Confirm `optional_front_matter.remove_originals: true`
+- [x] Confirm all 12 README.md paths in `include` list
+
+### Task R3 — Verify Build Output
+
+- [x] `bundle exec jekyll build` — 0 errors, 0 warnings
+- [x] All 12 README.html files present in `_site/`
+- [x] Zero raw `.md` copies in `_site/`
+
+### Task R4 — Record findings in REVIEW_JOURNAL.md
+
+- [x] Record all review outcomes
 {% endraw %}

@@ -234,4 +234,34 @@ duplicate headers, missing routes, and phase numbers leaking into external docs.
 | Regression | `nox -s all_tests` — 8/8 sessions pass |
 
 **Verdict**: ⚠️ In progress — 19/22 fixes verified; 3 issues found (nonexistent compile endpoint in guide.md, stale/fabricated routes in arduino_sketch_tools README.md, remaining phase reference in README.md:100)
+
+## Category 5: Jekyll Optional Front Matter Plugin
+
+**Date**: 2026-07-05 04:35
+
+**Source**: Phase 112 implementation — `jekyll-optional-front-matter` plugin enabled for 12 README.md files stripped of front matter.
+
+### Scope
+
+Verify that the plugin is correctly configured and all 12 README.md files render as HTML pages with `layout: default`.
+
+### Review Criteria
+
+| # | Check | Method |
+|---|-------|--------|
+| 1 | `jekyll-optional-front-matter` gem added to Gemfile | Read Gemfile — confirm `:jekyll_plugins` group |
+| 2 | Plugin listed in `_config.yml` `plugins` | Read `_config.yml` — confirm entry |
+| 3 | `remove_originals: true` configured | Read `_config.yml` — confirm setting |
+| 4 | All 12 README paths in `include` list | Read `_config.yml` — count entries |
+| 5 | Jekyll build passes | `bundle exec jekyll build` — 0 errors |
+
+### Verification
+
+- [x] Gemfile has `jekyll-optional-front-matter` in `:jekyll_plugins` group
+- [x] `_config.yml` has plugin in `plugins` list
+- [x] `_config.yml` has `remove_originals: true`
+- [x] All 12 README.md paths present in `include`
+- [x] `bundle exec jekyll build` — 0 errors
+- [x] All 12 README.html files present in `_site/`
+- [x] No raw `.md` copies in `_site/`
 {% endraw %}

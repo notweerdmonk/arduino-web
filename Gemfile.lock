@@ -34,6 +34,8 @@ GEM
       jekyll (>= 3.6, < 5.0)
     jekyll-feed (0.17.0)
       jekyll (>= 3.7, < 5.0)
+    jekyll-optional-front-matter (0.3.2)
+      jekyll (>= 3.0, < 5.0)
     jekyll-relative-links (0.7.0)
       jekyll (>= 3.3, < 5.0)
     jekyll-sass-converter (1.5.2)
@@ -82,6 +84,7 @@ PLATFORMS
 DEPENDENCIES
   jekyll (~> 3.10.0)
   jekyll-archives
+  jekyll-optional-front-matter
   jekyll-relative-links
   jekyll-theme-cayman
   kramdown-parser-gfm

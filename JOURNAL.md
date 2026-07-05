@@ -4,6 +4,22 @@ layout: default
 {% raw %}
 # MedMinder Project Journal
 
+## 2026-07-05 04:35 — Phase 112: Jekyll Optional Front Matter Plugin ✅ COMPLETED
+
+**Goal**: Restore HTML rendering for the 12 front-matter-less README.md files using the `jekyll-optional-front-matter` plugin.
+
+**Changes**:
+- Added `gem "jekyll-optional-front-matter"` to Gemfile in `:jekyll_plugins` group
+- Added `- jekyll-optional-front-matter` to `_config.yml` plugins list
+- Added `remove_originals: true` to suppress raw `.md` static copies
+- The 12 README.md paths were already in the `include` list from Category 5
+
+**Plugin detail**: The plugin has a built-in blacklist excluding `README` at any path depth. The `include` list overrides this. Without it, even nested README.md files would be skipped.
+
+**Verification**: `bundle exec jekyll build` — 0 errors. All 12 README.md files render as `.html` with `layout: default`.
+
+---
+
 ## 2026-07-04 04:12 — Phase 111: Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
 
 **Goal**: Establish consistent semantic versioning across the 6 Python packages + root files.

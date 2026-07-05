@@ -107,4 +107,13 @@ layout: default
 | U11 | Jekyll Build Verification | ✅ | `bundle exec jekyll build` — 0 errors, 0 warnings (REVIEW docs included) |
 | U12 | Regression — nox all_tests | ✅ | 8/8 sessions, 0 failures (186+212+119+51+35+24+202+0) |
 | U13 | Record findings in REVIEW_JOURNAL.md | ✅ | Full review entry added |
+
+## Category 5: Jekyll Optional Front Matter Plugin (2026-07-05 04:35)
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | Verify Gemfile changes | ✅ | `jekyll-optional-front-matter` in `:jekyll_plugins` group |
+| R2 | Verify `_config.yml` changes | ✅ | Plugin listed, `remove_originals: true`, 12 include paths |
+| R3 | Verify build output | ✅ | `bundle exec jekyll build` — 0 errors; 12 README.html files |
+| R4 | Record findings in REVIEW_JOURNAL.md | ✅ | Full entry recorded |
 {% endraw %}

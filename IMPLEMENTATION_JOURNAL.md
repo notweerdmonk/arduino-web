@@ -2,7 +2,7 @@
 layout: default
 ---
 {% raw %}
-# Implementation Journal — Phase 98: WS Push Migration (Badge OOB → Compile/Upload OOB → Compile Progress Bar)
+# Implementation Journal — Phase 112: Jekyll Optional Front Matter Plugin
 
 **Date**: 2026-06-21 11:55
 
@@ -1044,4 +1044,22 @@ to the next.
 - nox -s all_tests: 8/8 sessions, 0 failures ✅
 - Jekyll build: 0 errors ✅
 
+---
+
+## 2026-07-05 04:35 — Phase 112: Jekyll Optional Front Matter Plugin
+
+**Objective**: Enable `jekyll-optional-front-matter` plugin so the 12 README.md files stripped of front matter during the document audit render as HTML pages with `layout: default`.
+
+**Problem**: Without front matter, Jekyll treats markdown files as static files — served as raw `.md` without layout. The `include` list in `_config.yml` alone doesn't force processing.
+
+**Solution**: The `jekyll-optional-front-matter` plugin (a GitHub Pages supported plugin) processes markdown files without front matter as Pages. However, it has a built-in blacklist that excludes common meta filenames (`README`, `LICENSE`, `CONTRIBUTING`, etc.) at any path depth. The `include` list overrides this blacklist.
+
+**Changes**:
+1. **Gemfile**: Added `gem "jekyll-optional-front-matter"` to a new `:jekyll_plugins` group. Moved `jekyll-relative-links` into the same group.
+2. **`_config.yml`**: Added `- jekyll-optional-front-matter` to `plugins`. Added `optional_front_matter.remove_originals: true` to suppress raw `.md` static copies.
+3. **`_config.yml` `include`**: Already had all 12 README.md paths from Category 5.
+
+**Gotcha**: The plugin's `FILENAME_BLACKLIST` (case-insensitive) at `lib/jekyll-optional-front-matter.rb` excludes `README` at ALL path depths, not just root. Without the `include` list, even `board_manager/python/board_manager/README.md` would be skipped.
+
+**Verification**: `bundle exec jekyll build` — 0 errors. All 12 README.md files appear as `.html` in `_site/`. Use `grep -c '<html' _site/README.html` (or any README.html) to confirm they render with layout.
 {% endraw %}

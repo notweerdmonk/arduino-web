@@ -1026,4 +1026,45 @@ Discovered during Jekyll build verification: all 4 REVIEW workflow documents had
 | **Fix** | 1 | Liquid raw/endraw nesting issue (pre-existing, fixed) |
 
 **Overall Verdict**: ⚠️ **Most fixes are correct (19/22 verified), but 3 issues require attention before merge.** The route documentation and compile endpoint issues are the most significant — users could be misled about the actual API.
+
+---
+
+## 2026-07-05 04:35 — Category 5: Jekyll Optional Front Matter Plugin
+
+**Scope**: Review Phase 112 implementation — enabling `jekyll-optional-front-matter` plugin so 12 front-matter-less README.md files render as HTML pages.
+
+### Changes Reviewed
+
+| File | Change |
+|------|--------|
+| `Gemfile` | Added `gem "jekyll-optional-front-matter"` in new `:jekyll_plugins` group; moved `jekyll-relative-links` into same group |
+| `_config.yml` | Added `- jekyll-optional-front-matter` to `plugins`; added `optional_front_matter.remove_originals: true` |
+
+### Key Finding
+
+The `jekyll-optional-front-matter` plugin has a built-in `FILENAME_BLACKLIST` at `lib/jekyll-optional-front-matter.rb`:
+```ruby
+FILENAME_BLACKLIST = %w(README LICENSE LICENCE COPYING CODE_OF_CONDUCT
+                        CONTRIBUTING ISSUE_TEMPLATE PULL_REQUEST_TEMPLATE)
+```
+
+This blacklist matches **any path depth** — not just root. Without the `include` list in `_config.yml`, even `board_manager/python/board_manager/README.md` would be excluded. The `include` list overrides the blacklist, which is why all 12 README paths were already added in Category 5.
+
+### Verification Results
+
+| Check | Result |
+|-------|--------|
+| Gemfile has `jekyll-optional-front-matter` in `:jekyll_plugins` | ✅ |
+| `_config.yml` has plugin in `plugins` | ✅ |
+| `remove_originals: true` configured | ✅ |
+| All 12 README paths in `include` list | ✅ |
+| `bundle exec jekyll build` — 0 errors | ✅ |
+| `_site/README.html` exists with layout | ✅ |
+| `_site/scripts/README.html` exists | ✅ |
+| `_site/e2e/README.html` exists | ✅ |
+| `_site/board_manager/python/board_manager/README.html` exists | ✅ |
+| `_site/medminder_dash/python/medminder_dash/README.html` exists | ✅ |
+| No raw `README.md` in `_site/` | ✅ |
+
+**Verdict**: ✅ **All changes are correct and verified.**
 {% endraw %}

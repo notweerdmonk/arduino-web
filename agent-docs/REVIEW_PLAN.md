@@ -355,4 +355,32 @@ as values — combined string exceeds 100-char limit.
 | R10 | Fix application | Correctness | Wrap 35 values in `(...)\n` |
 | R11 | ruff check | Idempotency | Verify `ruff check .` → 0 errors |
 
+---
+
+## Phase 120 — Git Hooks — Review Plan
+
+### Review Criteria
+
+| # | Item | Type | Method |
+|---|------|------|--------|
+| R1 | pre-commit hook contents | Correctness | Verify ruff check, ruff format --check, djlint --check all present |
+| R2 | pre-push hook contents | Correctness | Verify nox -s scripts_tests present |
+| R3 | AGENTS.md updates | Completeness | Verify hook setup instructions and formatter split are documented |
+| R4 | README.md updates | Completeness | Verify quick start section is present |
+| R5 | scripts/ci.sh updates | Correctness | Verify docblock reference is accurate |
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence — Review Plan
+
+### Review Criteria
+
+| # | Item | Type | Method |
+|---|------|------|--------|
+| R1 | pyproject.toml indent config | Correctness | Verify `[tool.djlint]` has `indent = 2` |
+| R2 | .prettierignore templates exclusion | Correctness | Verify `**/templates/` pattern present |
+| R3 | djlint --check exit 0 | Verification | Run and confirm clean output |
+| R4 | ruff check exit 0 | Verification | Run and confirm no regressions |
+| R5 | Formatter split documented | Completeness | AGENTS.md has the responsibility table |
+
 {% endraw %}

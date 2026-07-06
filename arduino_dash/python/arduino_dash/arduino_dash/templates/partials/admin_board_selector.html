@@ -21,32 +21,32 @@
     limitations under the License.
 -->
 <div class="card" id="admin-board-selector-card">
-    <div class="form-group mb-0">
-        <label for="admin-active-board">{{ board_selector_label }}</label>
-        <div class="flex-row">
-            <select id="admin-active-board"
-                    name="port"
-                    hx-post="{{ board_selector_hx_post }}"
-                    hx-trigger="change"
-                    hx-target="{{ board_selector_hx_target }}"
-                    hx-swap="{{ board_selector_hx_swap }}"
-                    hx-include="this"
-                    hx-on::after-request="htmx.trigger('body', 'board-changed')"
-                    class="flex-1">
-                {% for port in ports %}
-                    {% set port_value = port.port if port is mapping else port %}
-                    <option value="{{ port_value }}"
-                            {{ "selected" if active_board == port_value else "" }}>
-                        {{ port_value }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <span class="hint hint-block">
-            FQBN: <code id="global-fqbn-display">{{ active_board_fqbn or 'arduino:avr:uno' }}</code>
-        </span>
-        <input type="hidden"
-               id="global-fqbn"
-               value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
+  <div class="form-group mb-0">
+    <label for="admin-active-board">{{ board_selector_label }}</label>
+    <div class="flex-row">
+      <select id="admin-active-board"
+              name="port"
+              hx-post="{{ board_selector_hx_post }}"
+              hx-trigger="change"
+              hx-target="{{ board_selector_hx_target }}"
+              hx-swap="{{ board_selector_hx_swap }}"
+              hx-include="this"
+              hx-on::after-request="htmx.trigger('body', 'board-changed')"
+              class="flex-1">
+        {% for port in ports %}
+          {% set port_value = port.port if port is mapping else port %}
+          <option value="{{ port_value }}"
+                  {{ "selected" if active_board == port_value else "" }}>
+            {{ port_value }}
+          </option>
+        {% endfor %}
+      </select>
     </div>
+    <span class="hint hint-block">
+      FQBN: <code id="global-fqbn-display">{{ active_board_fqbn or 'arduino:avr:uno' }}</code>
+    </span>
+    <input type="hidden"
+           id="global-fqbn"
+           value="{{ active_board_fqbn or 'arduino:avr:uno' }}">
+  </div>
 </div>

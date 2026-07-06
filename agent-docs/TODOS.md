@@ -94,6 +94,11 @@ layout: default
 | 113 | Fix setup.py isolated build failure | ✅ DONE | 7/7 nox builds |
 | 114 | Fix all ruff lint errors | ✅ DONE | 8/8 nox tests |
 | 115 | Remove asyncio_mode pytest warning | ✅ DONE | 0 warnings, 8/8 nox |
+| 116 | djlint template reformatting | ✅ DONE | 50 templates, 0 djlint errors |
+| 117 | Fix CI Pipeline (nox + build order) | ✅ DONE | 202/202 scripts_tests |
+| 118 | Ruff Format Audit | ✅ DONE | 111 files cosmetic only |
+| 119 | Prettier/Djlint Convergence | ✅ DONE | indent=2, 50 templates reformatted, both formatters pass |
+| 120 | Git Hooks (pre-commit/pre-push) | ⏳ PENDING | Not yet implemented |
 
 ## Phase 60 — COMPLETED ✅
 

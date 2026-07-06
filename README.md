@@ -126,8 +126,8 @@ pipenv run ruff format .      # format
 pipenv run djlint . --check   # lint
 pipenv run djlint . --reformat  # auto-fix
 
-# JavaScript in HTML templates (requires npm install)
-npx prettier --check "**/*.html"   # check
+# Non-Jinja HTML (requires npm install)
+npx prettier --check "**/*.html"   # check (Jinja templates excluded via .prettierignore)
 npx prettier --write "**/*.html"   # format
 npx eslint .                        # lint (includes prettier rules)
 npx eslint . --fix                  # auto-fix

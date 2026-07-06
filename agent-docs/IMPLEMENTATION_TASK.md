@@ -120,4 +120,28 @@ Apply documentation skill to update docs/ directory for CI pipeline changes.
 | D — Update all agent-facing docs (16) | ✅ |
 | E — Update user-facing docs | ✅ |
 
+---
+
+## Phase 120 — Git Hooks
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | Create `.githooks/pre-commit` — ruff check, ruff format --check, djlint --check | ✅ |
+| B | Create `.githooks/pre-push` — nox -s scripts_tests | ✅ |
+| C | Update AGENTS.md with hook setup instructions | ✅ |
+| D | Add README.md quick start section | ✅ |
+| E | Update scripts/ci.sh docblock | ✅ |
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | `pyproject.toml` — set `[tool.djlint]` `indent = 2` | ✅ |
+| B | `.prettierignore` — add `**/templates/` | ✅ |
+| C | Run `djlint . --reformat` with indent=2 on 50 templates | ✅ |
+| D | Verify `djlint . --check` exit 0 | ✅ |
+| E | Verify `ruff check .` exit 0 | ✅ |
+
 {% endraw %}

@@ -176,4 +176,28 @@ layout: default
 | R7 | Verdict | ✅ | Safe — cosmetic only |
 | R8 | E501 fix — scripts/add_license_headers.py | ✅ | 35 lines wrapped, 0 ruff errors |
 
+---
+
+## Phase 120 — Git Hooks
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | pre-commit hook contents | ✅ | ruff check, format --check, djlint --check |
+| R2 | pre-push hook contents | ✅ | nox -s scripts_tests |
+| R3 | AGENTS.md updates | ✅ | Hook setup + formatter split table |
+| R4 | README.md updates | ✅ | Quick start section added |
+| R5 | scripts/ci.sh docblock | ✅ | core.hooksPath reference added |
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | pyproject.toml indent = 2 | ✅ | Aligns djlint with prettier tabWidth |
+| R2 | .prettierignore templates exclusion | ✅ | `**/templates/` pattern correct |
+| R3 | djlint --check exit 0 | ✅ | 50 files, 0 flagged |
+| R4 | ruff check . exit 0 | ✅ | 0 errors |
+| R5 | Formatter split documented | ✅ | AGENTS.md updated |
+
 {% endraw %}

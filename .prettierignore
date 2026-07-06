@@ -10,8 +10,7 @@ dist-standalone/
 *.tsx
 config/eslint.config.mjs
 eslint.config.mjs
-# Jinja2 syntax in HTML attributes — prettier's HTML parser can't handle {{ }} inside tag attrs
-**/partials/admin_board_selector.html
-**/medicine_form.html
-**/medicines.html
-**/partials/sketch_path_selector.html
+**/docs/reference/
+scratch/
+# Jinja2 templates — handled by djlint (Jinja-aware); prettier's HTML parser can't handle {{ }} / {% %} syntax
+**/templates/

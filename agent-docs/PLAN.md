@@ -50,6 +50,58 @@ modifications.
 
 ---
 
+### Phase 119 — Prettier/Djlint Convergence ✅ COMPLETED
+
+**Date**: 2026-07-07 02:02
+**Status**: ✅ COMPLETED
+
+**Root cause**: `.prettierrc` sets `tabWidth: 2` but djlint defaults to `indent = 4`.
+Prettier does not understand Jinja2 template syntax (`{% %}`, `{{ }}`), so it
+mangles template logic when run on `.html` files containing Jinja2.
+
+**Resolution**: Split formatter responsibilities:
+
+| Formatter | Scope | Config |
+|-----------|-------|--------|
+| Ruff | All Python (`.py`) | `line-length = 100` |
+| Prettier | Non-Jinja HTML, JS, JSON, YAML | `.prettierrc` (tabWidth=2) |
+| djlint | Jinja2 HTML templates | `pyproject.toml` (`indent = 2`) |
+| ESLint | JavaScript (in templates + standalone) | `eslint.config.mjs` |
+
+**Changes**:
+
+| File | Change | Status |
+|------|--------|--------|
+| `pyproject.toml` | `[tool.djlint]` `indent = 2` — match prettier tabWidth | ✅ |
+| `.prettierignore` | Add `**/templates/` — exclude Jinja2 from prettier | ✅ |
+| 50 templates | Reformatted by djlint with indent=2 (25 medminder_dash, 15 arduino_dash, 10 arduino_sketch_tools) | ✅ |
+
+**Verification**: `pipenv run djlint . --check` — exit 0 ✅, `pipenv run ruff check .` — exit 0 ✅, `npx prettier --check "**/*.html"` — no Jinja files checked ✅
+
+---
+
+### Phase 120 — Git Hooks ✅ COMPLETED
+
+**Date**: 2026-07-07 02:02
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates
+before commits and pushes.
+
+**Changes**:
+
+| File | Change | Status |
+|------|--------|--------|
+| `.githooks/pre-commit` | **New** — run ruff check, ruff format --check, djlint --check | ✅ |
+| `.githooks/pre-push` | **New** — run nox -s scripts_tests (smoke test) | ✅ |
+| `AGENTS.md` | Add git hooks setup instructions | ✅ |
+| `README.md` | Add git hooks quick start section | ✅ |
+| `scripts/ci.sh` | Add core.hooksPath reference in docblock | ✅ |
+
+**Verification**: `git config core.hooksPath .githooks` — hooks active ✅, `bash .githooks/pre-commit` — 0 errors ✅
+
+---
+
 ### Phase 111 — Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
 
 **Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of

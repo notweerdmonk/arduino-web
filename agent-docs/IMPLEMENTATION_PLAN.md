@@ -454,4 +454,40 @@ all_tests:  7 sessions (scripts_tests + 6 per-package tests)
 
 Each change is scoped to one file. Revert via `git checkout -- <file>`.
 
+---
+
+## Phase 120 — Git Hooks
+
+**Date**: 2026-07-07 02:02
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates.
+
+**Scope**:
+- `.githooks/pre-commit` — ruff check, ruff format --check, djlint --check
+- `.githooks/pre-push` — nox -s scripts_tests (smoke test)
+- AGENTS.md — add hook setup instructions
+- README.md — add quick start section
+- scripts/ci.sh — add core.hooksPath reference
+
+**Verification**: `git config core.hooksPath .githooks` ✅, `bash .githooks/pre-commit` — 0 errors ✅
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence
+
+**Date**: 2026-07-07 02:02
+**Status**: ✅ COMPLETED
+
+**Root cause**: `.prettierrc` tabWidth=2 vs djlint default indent=4. Prettier doesn't understand Jinja2.
+
+**Resolution**: Split formatter responsibilities — ruff (Python), prettier (non-Jinja), djlint (Jinja2), ESLint (JS).
+
+**Changes**:
+- `pyproject.toml`: `[tool.djlint]` `indent = 2`
+- `.prettierignore`: Add `**/templates/`
+- 50 templates reformatted with djlint indent=2
+
+**Verification**: `djlint . --check` exit 0 ✅, `ruff check .` exit 0 ✅
+
 {% endraw %}

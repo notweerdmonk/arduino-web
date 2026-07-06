@@ -798,4 +798,41 @@ were hardcoded to the old test-first order. After swapping build/test order,
 these assertions failed with "needle not found" errors. The fix was to update
 the expected phase labels to match the new semantics.
 
+---
+
+## Phase 120 — Git Hooks — Test Results
+
+**Date**: 2026-07-07 02:02
+
+**Status**: ✅ All tests pass
+
+| Test | Result | Details |
+|------|--------|---------|
+| `bash -n .githooks/pre-commit` | ✅ Exit 0 | No syntax errors |
+| `bash -n .githooks/pre-push` | ✅ Exit 0 | No syntax errors |
+| `bash .githooks/pre-commit` | ✅ Exit 0 | ruff check, ruff format --check, djlint --check all pass |
+| `bash .githooks/pre-push` | ✅ Exit 0 | scripts_tests passes (no actual nox run — guarded by CI env check) |
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence — Test Results
+
+**Date**: 2026-07-07 02:02
+
+**Status**: ✅ All tests pass
+
+| Test | Result | Details |
+|------|--------|---------|
+| `djlint . --check` | ✅ Exit 0 | 50 files checked, 0 flagged |
+| `ruff check .` | ✅ Exit 0 | 0 errors, 0 warnings |
+| `prettier --check "**/*.html"` | ✅ Exit 0 | Templates excluded by `**/templates/` in .prettierignore |
+
+### Gotcha
+
+The first run of `djlint . --reformat` with `indent = 2` does not fully converge
+all 50 templates on the first pass. A second pass was needed for 8 files where
+`{% endblock %}` tag indentation was adjusted differently. This is the same
+djlint idempotency issue observed in Phase 116 — always run `--check` after
+`--reformat` to confirm.
+
 {% endraw %}

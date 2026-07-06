@@ -362,5 +362,5 @@ All commands run from the project root. See [`docs/tests.md`](tests.md#code-qual
 |------|-------|---------|
 | ruff | Python sources | `pipenv run ruff check .` / `ruff format .` |
 | djlint | Jinja2 templates | `pipenv run djlint . --check` / `--reformat` |
-| prettier | JS in HTML templates | `npx prettier --check "**/*.html"` / `--write` |
+| prettier | Non-Jinja HTML | `npx prettier --check "**/*.html"` / `--write` (Jinja `**/templates/` excluded) |
 | ESLint | JS linting + prettier enforcement | `npx eslint .` / `--fix` |

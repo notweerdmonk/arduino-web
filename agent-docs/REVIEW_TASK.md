@@ -434,4 +434,26 @@ layout: default
 | R7 | Verdict | ✅ | Safe to proceed. Formatter is deterministic (like black/gofmt) |
 | R8 | E501 fix — scripts/add_license_headers.py | ✅ | 35 lines wrapped, 0 ruff errors |
 
+---
+
+## Phase 120 — Git Hooks — Review Task
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| R1 | pre-commit hook — 3 quality checks present | ✅ | ruff check, ruff format --check, djlint --check |
+| R2 | pre-push hook — smoke test present | ✅ | nox -s scripts_tests |
+| R3 | AGENTS.md — hook setup + formatter split | ✅ | Documented in Commands section |
+| R4 | README.md — quick start section | ✅ | Present under Development Setup |
+| R5 | scripts/ci.sh — docblock updated | ✅ | core.hooksPath reference added |
+
+## Phase 119 — Prettier/Djlint Convergence — Review Task
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| R1 | pyproject.toml indent = 2 | ✅ | Matches prettier tabWidth |
+| R2 | .prettierignore **/templates/ | ✅ | Excludes Jinja2 from prettier |
+| R3 | djlint --check exit 0 | ✅ | 50 files, 0 flagged |
+| R4 | ruff check . exit 0 | ✅ | 0 errors |
+| R5 | Formatter split in AGENTS.md | ✅ | ruff/prettier/djlint/ESLint documented |
+
 {% endraw %}

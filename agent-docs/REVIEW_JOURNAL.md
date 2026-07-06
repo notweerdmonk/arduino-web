@@ -1255,4 +1255,51 @@ unchanged:
 - `pipenv run ruff format scripts/add_license_headers.py` — 1 file reformatted ✅
 - `pipenv run ruff check .` — 0 errors ✅
 
+---
+
+## 2026-07-07 02:02 — Phase 120: Git Hooks — Review
+
+### Review Summary
+
+Created `.githooks/pre-commit` and `.githooks/pre-push` hooks, updated AGENTS.md
+and README.md with setup instructions, and added formatter responsibility split
+documentation.
+
+### Files Reviewed
+
+| File | Verdict | Notes |
+|------|---------|-------|
+| `.githooks/pre-commit` | ✅ | 3 quality checks: ruff check, ruff format --check, djlint --check |
+| `.githooks/pre-push` | ✅ | scripts_tests smoke test |
+| `AGENTS.md` | ✅ | Hook setup + formatter split table (ruff/prettier/djlint/ESLint) |
+| `README.md` | ✅ | Quick start section under Development Setup |
+| `scripts/ci.sh` | ✅ | Docblock updated with core.hooksPath reference |
+
+---
+
+## 2026-07-07 02:02 — Phase 119: Prettier/Djlint Convergence — Review
+
+### Review Summary
+
+Fixed formatter conflict between prettier (tabWidth=2) and djlint (indent=4) by:
+1. Setting `indent = 2` in `[tool.djlint]` in `pyproject.toml`
+2. Adding `**/templates/` to `.prettierignore` to exclude Jinja2 from prettier
+3. Reformatting 50 templates with djlint indent=2
+
+### Key Findings
+
+1. **Root cause confirmed**: `.prettierrc` tabWidth=2 creates a mismatch with
+   djlint's default indent=4. Running both formatters on the same `.html` files
+   causes ping-pong reformatting.
+2. **Prettier cannot handle Jinja2**: Prettier parses HTML with standard HTML
+   parser — `{% %}` and `{{ }}` are syntax errors to it. Excluding Jinja2
+   templates from prettier is the correct approach.
+3. **djlint idempotency**: Same issue as Phase 116 — `--reformat` needs two
+   passes for `{% endblock %}` indentation. Always run `--check` after.
+
+### Verdict: ✅ COMPLETE
+
+The formatter responsibility split is now clear and documented. All 50 templates
+use indent=2 matching prettier's tabWidth. No more formatter conflicts.
+
 {% endraw %}

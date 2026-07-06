@@ -85,4 +85,26 @@ layout: default
 | Q4 | Update all agent-facing docs (16) | ✅ | All project + workflow docs updated |
 | Q5 | Update user-facing docs | ✅ | Documentation skill applied |
 
+---
+
+### Phase 120 — Git Hooks
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | Create pre-commit hook | ✅ | ruff check + format --check + djlint --check |
+| 2 | Create pre-push hook | ✅ | nox -s scripts_tests |
+| 3 | Update AGENTS.md | ✅ | Hook setup + formatter responsibility split |
+| 4 | Update README.md | ✅ | Quick start section |
+| 5 | Update scripts/ci.sh | ✅ | core.hooksPath docblock |
+
+### Phase 119 — Prettier/Djlint Convergence
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | djlint indent = 2 in pyproject.toml | ✅ | Matches prettier tabWidth |
+| 2 | Add `**/templates/` to .prettierignore | ✅ | Exclude Jinja2 from prettier |
+| 3 | Reformatted 50 templates with djlint | ✅ | 25 medminder_dash + 15 arduino_dash + 10 arduino_sketch_tools |
+| 4 | Verify djlint --check exit 0 | ✅ | |
+| 5 | Verify ruff check . exit 0 | ✅ | |
+
 {% endraw %}

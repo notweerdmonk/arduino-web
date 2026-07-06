@@ -198,16 +198,16 @@ pipenv run djlint . --check      # check formatting (exit 0 = clean)
 pipenv run djlint . --reformat   # auto-fix formatting
 ```
 
-### prettier (JavaScript in HTML templates)
+### prettier (non-Jinja HTML)
 
-Prettier formats inline JavaScript inside HTML template files. Requires Node.js:
+Prettier formats inline JavaScript in HTML files that don't contain Jinja2 syntax. Requires Node.js:
 
 ```bash
 npx prettier --check "**/*.html"   # check formatting
 npx prettier --write "**/*.html"  # auto-format
 ```
 
-Config is in `.prettierrc` — double quotes, semicolons, 2-space indent, es5 trailing commas. Four templates with Jinja2 syntax in HTML tag attributes are excluded via `.prettierignore`.
+Config is in `.prettierrc` — double quotes, semicolons, 2-space indent, es5 trailing commas. All Jinja2 templates (`**/templates/`) are excluded from prettier via `.prettierignore` — djlint is the authoritative formatter for Jinja2 HTML.
 
 ### ESLint (JavaScript linting)
 
@@ -218,7 +218,7 @@ npx eslint .            # check (includes prettier/prettier errors)
 npx eslint . --fix      # auto-fix (prettier + JS corrections)
 ```
 
-Config is in `config/eslint.config.mjs`. See `agent-docs/CODEBASE_REFERENCE.md` for known edge cases (two `base.html` files cycle between standalone prettier and eslint-plugin-prettier on long-line wrapping).
+Config is in `config/eslint.config.mjs`. See `agent-docs/CODEBASE_REFERENCE.md` for known edge cases (two `base.html` files under `**/templates/` — excluded from standalone prettier, eslint-plugin-prettier may still trigger on long-line wrapping within `npx eslint .`).
 
 ## Related Documentation
 

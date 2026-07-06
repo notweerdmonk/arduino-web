@@ -64,4 +64,23 @@ All Phase 112 tests verified:
 | T3 | YAML validity check | ✅ | `yaml.safe_load` no error |
 | T4 | `nox -s scripts_tests` | ✅ | 202/202 tests pass |
 
+---
+
+## Phase 120 — Git Hooks
+
+| # | Test Task | Status | Notes |
+|---|-----------|--------|-------|
+| T1 | pre-commit syntax check | ✅ | `bash -n .githooks/pre-commit` |
+| T2 | pre-push syntax check | ✅ | `bash -n .githooks/pre-push` |
+| T3 | pre-commit dry run | ✅ | All quality checks pass |
+| T4 | pre-push dry run | ✅ | scripts_tests passes |
+
+## Phase 119 — Prettier/Djlint Convergence
+
+| # | Test Task | Status | Notes |
+|---|-----------|--------|-------|
+| T1 | `djlint . --check` exit 0 | ✅ | 50 files, 0 flagged |
+| T2 | `ruff check .` exit 0 | ✅ | No regressions |
+| T3 | `prettier --check "**/*.html"` | ✅ | No Jinja files checked |
+
 {% endraw %}

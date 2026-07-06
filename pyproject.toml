@@ -20,4 +20,5 @@ python_files = ["test_*.py", "*_test.py"]
 
 [tool.djlint]
 profile = "jinja"
+indent = 2
 extend_exclude = "node_modules|_site|dist-standalone|docs/reference|scratch"

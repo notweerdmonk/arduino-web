@@ -106,4 +106,29 @@ Python tests or functionality.
 - Phase label assertions in test_ci.sh were updated from old order (tests first)
   to new order (builds first)
 
+---
+
+## Phase 120 — Git Hooks
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | pre-commit hook syntax | `bash -n .githooks/pre-commit` | Exit 0 |
+| T2 | pre-push hook syntax | `bash -n .githooks/pre-push` | Exit 0 |
+| T3 | pre-commit dry run | `bash .githooks/pre-commit` | Exit 0 (all checks pass) |
+| T4 | pre-push dry run | `bash .githooks/pre-push` | Exit 0 (scripts_tests passes) |
+
+---
+
+## Phase 119 — Prettier/Djlint Convergence
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | djlint --check | `pipenv run djlint . --check` | Exit 0, 0 files flagged |
+| T2 | ruff check | `pipenv run ruff check .` | Exit 0 |
+| T3 | prettier check | `npx prettier --check "**/*.html"` | Only non-Jinja files checked |
+
 {% endraw %}

@@ -1251,4 +1251,90 @@ when pipenv resolves `file://` dependency sources.
    failure = exit 2. These codes are tested by test_ci.sh Q18.9/Q18.10
    using `FAKE_NOX_RC` and must not change.
 
+---
+
+## 2026-07-07 02:02 — Phase 120: Git Hooks
+
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates
+before commits and pushes.
+
+### Changes
+
+**File 1: `.githooks/pre-commit`** (new, 62 lines)
+- Runs in sequence: `ruff check .`, `ruff format --check .`, `djlint . --check`
+- Exits with error on first failure (set -e)
+- Uses `pipenv run` to ensure correct virtualenv
+
+**File 2: `.githooks/pre-push`** (new, 26 lines)
+- Runs `nox -s scripts_tests` as a quick smoke test before push
+- Lightweight — completes in ~30s
+
+**File 3: `AGENTS.md`**
+- Added `## Commands` section documenting the hooks, setup command
+  (`git config core.hooksPath .githooks`), and the formatter responsibility
+  split: ruff (Python), prettier (non-Jinja HTML/JS/JSON/YAML),
+  djlint (Jinja2 templates), ESLint (JS)
+
+**File 4: `README.md`**
+- Added "Prettier/Djlint Convergence" quick start section under Development Setup
+
+**File 5: `scripts/ci.sh`**
+- Added `core.hooksPath .githooks` reference in docblock
+
+### Verification
+
+| Check | Method | Result |
+|-------|--------|--------|
+| Hook setup | `git config core.hooksPath .githooks` | ✅ |
+| pre-commit dry run | `bash .githooks/pre-commit` | ✅ exit 0 |
+| pre-push dry run | `bash .githooks/pre-push` | ✅ exit 0 |
+
+## 2026-07-07 02:02 — Phase 119: Prettier/Djlint Convergence
+
+**Status**: ✅ COMPLETED
+
+**Root cause**: `.prettierrc` sets `tabWidth: 2` but djlint defaults to
+`indent = 4`. Prettier does not understand Jinja2 template syntax, so it
+mangles template logic when run on `.html` files containing Jinja2.
+
+**Resolution**: Split formatter responsibilities:
+
+| Formatter | Scope | Config |
+|-----------|-------|--------|
+| Ruff | All Python (`.py`) | `line-length = 100` |
+| Prettier | Non-Jinja HTML, JS, JSON, YAML | `.prettierrc` (tabWidth=2) |
+| djlint | Jinja2 HTML templates | `pyproject.toml` (`indent = 2`) |
+| ESLint | JavaScript (in templates + standalone) | `eslint.config.mjs` |
+
+### Changes Made
+
+**File 1: `pyproject.toml`**
+- Added `indent = 2` to `[tool.djlint]` section
+- This aligns djlint indentation with prettier's tabWidth=2
+
+**File 2: `.prettierignore`**
+- Added `**/templates/` pattern to exclude all Jinja2 template directories
+- Prettier still handles non-Jinja `.html` files (those without template syntax)
+
+**File 3: 50 source templates**
+- Ran `pipenv run djlint . --reformat` which reformatted 50 templates with
+  indent=2: 25 medminder_dash, 15 arduino_dash, 10 arduino_sketch_tools
+
+### Gotcha
+
+The `**/templates/` glob in `.prettierignore` must match the directory structure
+precisely. Both dashboards have their templates under `<pkg>/templates/`. The
+double-star glob `**/templates/` handles any nesting depth and also covers
+shared templates in `arduino_sketch_tools`.
+
+### Verification
+
+| Check | Method | Result |
+|-------|--------|--------|
+| djlint --check | `pipenv run djlint . --check` | ✅ exit 0 |
+| ruff check | `pipenv run ruff check .` | ✅ exit 0 |
+| prettier check | `npx prettier --check "**/*.html"` | ✅ no Jinja files checked |
+
 {% endraw %}

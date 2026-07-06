@@ -21,21 +21,21 @@
     limitations under the License.
 -->
 <div class="card mt-1">
-    <div class="section-header">
-        <h3>Medicines</h3>
-        <button class="btn btn-primary"
-                hx-get="/medicine/new"
-                hx-target="#medicine-form-container"
-                hx-swap="outerHTML">Add Medicine</button>
+  <div class="section-header">
+    <h3>Medicines</h3>
+    <button class="btn btn-primary"
+            hx-get="/medicine/new"
+            hx-target="#medicine-form-container"
+            hx-swap="outerHTML">Add Medicine</button>
+  </div>
+  <div id="medicine-form-container"></div>
+  <div id="medicine-list"
+       hx-get="/medicines"
+       hx-trigger="load"
+       hx-target="this"
+       hx-swap="innerHTML">
+    <div class="card empty-state-card">
+      <p>Loading...</p>
     </div>
-    <div id="medicine-form-container"></div>
-    <div id="medicine-list"
-         hx-get="/medicines"
-         hx-trigger="load"
-         hx-target="this"
-         hx-swap="innerHTML">
-        <div class="card empty-state-card">
-            <p>Loading...</p>
-        </div>
-    </div>
+  </div>
 </div>

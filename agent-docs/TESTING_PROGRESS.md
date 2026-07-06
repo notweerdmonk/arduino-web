@@ -51,4 +51,23 @@ layout: default
 | T3 — YAML validity | ✅ | `yaml.safe_load` OK |
 | T4 — `nox -s scripts_tests` | ✅ | 202/202 tests pass |
 
+---
+
+## Phase 120 — Git Hooks
+
+| Test | Status | Notes |
+|------|--------|-------|
+| T1 — pre-commit bash syntax | ✅ | `bash -n .githooks/pre-commit` |
+| T2 — pre-push bash syntax | ✅ | `bash -n .githooks/pre-push` |
+| T3 — pre-commit dry run | ✅ | ruff check, ruff format --check, djlint --check all pass |
+| T4 — pre-push dry run | ✅ | scripts_tests passes |
+
+## Phase 119 — Prettier/Djlint Convergence
+
+| Test | Status | Notes |
+|------|--------|-------|
+| T1 — `djlint . --check` | ✅ | 50 files, 0 flagged, exit 0 |
+| T2 — `ruff check .` | ✅ | 0 errors |
+| T3 — `prettier --check "**/*.html"` | ✅ | Templates excluded by .prettierignore |
+
 {% endraw %}

@@ -1,5 +1,5 @@
 {% if events %}
-    <!--
+  <!--
     medminder_dash/python/medminder_dash/medminder_dash/templates/partials/board_event.html
 
     Board Event template.
@@ -21,15 +21,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-    {% for evt in events %}
-        <div class="board-event">
-            <span class="badge badge-ok">{{ evt.get('event', 'unknown') }}</span>
-            <span>{{ evt.get('port', '') }}</span>
-            <span class="hint">{{ evt.get('board', '') }}</span>
-        </div>
-    {% endfor %}
-{% else %}
-    <div class="card empty-state-card">
-        <p>No board events yet.</p>
+  {% for evt in events %}
+    <div class="board-event">
+      <span class="badge badge-ok">{{ evt.get('event', 'unknown') }}</span>
+      <span>{{ evt.get('port', '') }}</span>
+      <span class="hint">{{ evt.get('board', '') }}</span>
     </div>
+  {% endfor %}
+{% else %}
+  <div class="card empty-state-card">
+    <p>No board events yet.</p>
+  </div>
 {% endif %}

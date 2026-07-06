@@ -4404,4 +4404,32 @@ All 111 changes are cosmetic. No risks identified.
 long descriptions). Restructured 35 values with parenthetical line continuation.
 Dict type and consumer code unchanged. Verified: `ruff check .` → 0 errors ✅.
 
+---
+
+## 2026-07-07 02:02 — Phase 119: Prettier/Djlint Convergence ✅ COMPLETED
+
+**Root cause**: `.prettierrc` sets `tabWidth: 2` but djlint defaults to
+`indent = 4`. Prettier does not understand Jinja2 template syntax, so it
+mangles template logic when run on `.html` files containing Jinja2.
+
+**Resolution**: Split formatter responsibilities:
+
+| Formatter | Scope | Config |
+|-----------|-------|--------|
+| Ruff | All Python (`.py`) | `line-length = 100` |
+| Prettier | Non-Jinja HTML, JS, JSON, YAML | `.prettierrc` (tabWidth=2) |
+| djlint | Jinja2 HTML templates | `pyproject.toml` (`indent = 2`) |
+| ESLint | JavaScript (in templates + standalone) | `eslint.config.mjs` |
+
+**Changes**:
+
+| File | Change | Status |
+|------|--------|--------|
+| `pyproject.toml` | `[tool.djlint]` `indent = 2` — match prettier tabWidth | ✅ |
+| `.prettierignore` | Add `**/templates/` — exclude Jinja2 from prettier | ✅ |
+| 50 templates | Reformatted by djlint with indent=2 | ✅ |
+| All agent-facing docs | Updated with Phase 119 + 120 entries | ✅ |
+
+**Verification**: `djlint . --check` exit 0, `ruff check .` exit 0, `prettier --check "**/*.html"` no Jinja files checked.
+
 {% endraw %}

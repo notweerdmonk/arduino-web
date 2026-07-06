@@ -1,5 +1,5 @@
 {% if boards %}
-    <!--
+  <!--
     medminder_dash/python/medminder_dash/medminder_dash/templates/partials/board_grid.html
 
     Board Grid template.
@@ -21,12 +21,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-    {% for b in boards %}
-        {% include "partials/board_card.html" %}
-    {% endfor %}
-{% else %}
-    <div class="card empty-state-card">
-        <p>No boards detected.</p>
-        <p class="hint">Connect a board via USB and the BoardManagerService will auto-detect it.</p>
-    </div>
+  {% for b in boards %}
+    {% include "partials/board_card.html" %}
+  {% endfor %}
+  {%
+  else %}
+  <div class="card empty-state-card">
+    <p>No boards detected.</p>
+    <p class="hint">Connect a board via USB and the BoardManagerService will auto-detect it.</p>
+  </div>
 {% endif %}

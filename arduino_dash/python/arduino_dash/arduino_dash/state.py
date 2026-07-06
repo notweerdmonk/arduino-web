@@ -68,4 +68,3 @@ _fallback_scanner: threading.Thread | None = None
 _stop_fallback_scan: bool = False
 _fallback_patterns = ["/dev/ttyACM*", "/dev/ttyUSB*"]
 _fallback_scan_interval = 5.0
-

@@ -31,4 +31,3 @@ app.config.update(
     BMS_TCP_PORT=int(os.environ.get("BOARD_MGR_TCP_PORT", "9090")),
     BMS_NO_UDS=os.environ.get("BMS_NO_UDS", "").lower() in ("1", "true"),
 )
-

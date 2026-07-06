@@ -98,4 +98,3 @@ class TestBoardList:
     def test_api_boards_returns_200(self, client):
         resp = client.get("/boards")
         assert resp.status_code == 200
-

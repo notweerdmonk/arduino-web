@@ -20,6 +20,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+
 class ArduinoError(Exception):
     """Base exception for all Arduino gRPC errors"""
 
@@ -66,4 +67,3 @@ class InvalidFqbnError(ArduinoError):
     """Raised when FQBN is invalid"""
 
     pass
-

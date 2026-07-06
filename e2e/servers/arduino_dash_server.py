@@ -124,9 +124,7 @@ from arduino_dash.pubsub import init_pubsub  # noqa: E402
 
 def _start_bms() -> subprocess.Popen:
     """Start the BMS daemon as a subprocess, return Popen handle."""
-    bms_proc = subprocess.Popen(
-        [sys.executable, "-m", "board_manager", "--log-level", "INFO"]
-    )
+    bms_proc = subprocess.Popen([sys.executable, "-m", "board_manager", "--log-level", "INFO"])
     return bms_proc
 
 
@@ -240,9 +238,7 @@ def main():
 
     if args.mock:
         _inject_mock_state()
-        print(
-            f"[arduino_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})"
-        )
+        print(f"[arduino_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})")
     else:
         print("[arduino_dash_server] Starting with empty state (no --mock)")
 
@@ -266,9 +262,7 @@ def main():
 
     print(f"[arduino_dash_server] Listening on http://0.0.0.0:{args.port}")
     try:
-        app.run(
-            host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader
-        )
+        app.run(host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader)
     finally:
         _remove_pidfile(pidfile)
         _stop_bms(bms_proc)

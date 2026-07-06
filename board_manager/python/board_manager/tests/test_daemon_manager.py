@@ -36,9 +36,7 @@ class TestDaemonManagerInit:
         assert dm._port == 50051
 
     def test_custom_binary(self):
-        dm = DaemonManager(
-            binary="/usr/local/bin/arduino-cli", daemon_addr="192.168.1.1:50052"
-        )
+        dm = DaemonManager(binary="/usr/local/bin/arduino-cli", daemon_addr="192.168.1.1:50052")
         assert dm._binary == "/usr/local/bin/arduino-cli"
         assert dm._host == "192.168.1.1"
         assert dm._port == 50052
@@ -132,9 +130,7 @@ class TestDaemonManagerStart:
         with patch.object(dm, "_port_is_listening", side_effect=[False, True]):
             with patch.object(dm, "_health_check", side_effect=[True]):
                 with patch.object(dm, "_find_port_pid", return_value=12345):
-                    with patch(
-                        "subprocess.Popen", return_value=mock_proc
-                    ) as mock_popen:
+                    with patch("subprocess.Popen", return_value=mock_proc) as mock_popen:
                         dm.start()
         args, _ = mock_popen.call_args
         assert args[0][0] == "arduino-cli"
@@ -190,9 +186,7 @@ class TestDaemonManagerStart:
         with patch.object(dm, "_port_is_listening", side_effect=[False, True]):
             with patch.object(dm, "_health_check", side_effect=[True]):
                 with patch.object(dm, "_find_port_pid", return_value=None):
-                    with patch(
-                        "subprocess.Popen", return_value=mock_proc
-                    ) as mock_popen:
+                    with patch("subprocess.Popen", return_value=mock_proc) as mock_popen:
                         dm.start()
         args, _ = mock_popen.call_args
         assert args[0][0] == "/opt/bin/arduino-cli"
@@ -214,9 +208,7 @@ class TestDaemonManagerStop:
         with patch("os.kill") as mock_kill:
             dm.stop()
         # Should kill daemon pid first
-        kill_calls = [
-            c[0][0] for c in mock_kill.call_args_list if c[0][1] == signal.SIGTERM
-        ]
+        kill_calls = [c[0][0] for c in mock_kill.call_args_list if c[0][1] == signal.SIGTERM]
         assert 54321 in kill_calls
         assert dm._daemon_pid is None
 
@@ -428,7 +420,7 @@ class TestDaemonManagerFindPortPid:
                 else:
                     result.returncode = 0
                     result.stdout = (
-                        'LISTEN 0 4096 127.0.0.1:50051 0.0.0.0:* '
+                        "LISTEN 0 4096 127.0.0.1:50051 0.0.0.0:* "
                         'users:(("arduino-cli",pid=12345,fd=6))\n'
                     )
                 return result
@@ -467,4 +459,3 @@ class TestDaemonManagerKillPortOwner:
             with patch("os.kill") as mock_kill:
                 dm._kill_port_owner()
         mock_kill.assert_not_called()
-

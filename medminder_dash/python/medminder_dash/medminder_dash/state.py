@@ -55,4 +55,3 @@ _fallback_scan_interval = 5.0
 UPLOAD_BASE_DIR = Path.home() / ".local" / "share" / "medminder" / "uploads"
 _upload_registry: dict = {}
 _upload_registry_lock = threading.Lock()
-

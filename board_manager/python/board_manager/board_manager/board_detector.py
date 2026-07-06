@@ -95,9 +95,7 @@ class BoardDetector:
         else:
             self._thread = threading.Thread(target=self._run, daemon=True)
             self._thread.start()
-            logger.info(
-                "BoardDetector started (poll mode, every %.1fs)", self._poll_interval
-            )
+            logger.info("BoardDetector started (poll mode, every %.1fs)", self._poll_interval)
 
     def stop(self) -> None:
         """Stop the detector background thread."""
@@ -115,9 +113,7 @@ class BoardDetector:
             return client
         except Exception as e:
             if not silent:
-                logger.warning(
-                    "BoardDetector: failed to connect to daemon (%s), retrying...", e
-                )
+                logger.warning("BoardDetector: failed to connect to daemon (%s), retrying...", e)
             client.disconnect()
             if self._restart_daemon():
                 client = ArduinoGrpcClient(daemon=self._daemon)
@@ -126,9 +122,7 @@ class BoardDetector:
                     client.init()
                     return client
                 except Exception as e2:
-                    logger.warning(
-                        "BoardDetector: still cannot connect after restart (%s)", e2
-                    )
+                    logger.warning("BoardDetector: still cannot connect after restart (%s)", e2)
                     client.disconnect()
             return None
 
@@ -189,9 +183,7 @@ class BoardDetector:
                 try:
                     boards = client.list_boards(timeout=self._list_timeout)
                 except Exception as e:
-                    logger.warning(
-                        "BoardDetector: list_boards failed (%s), reconnecting...", e
-                    )
+                    logger.warning("BoardDetector: list_boards failed (%s), reconnecting...", e)
                     client.disconnect()
                     self._restart_daemon()
                     return False
@@ -277,9 +269,7 @@ class BoardDetector:
                         )
                         self._emit(event, payload)
             except Exception as e:
-                logger.warning(
-                    "BoardDetector: watch stream error (%s), reconnecting...", e
-                )
+                logger.warning("BoardDetector: watch stream error (%s), reconnecting...", e)
                 try:
                     client.disconnect()
                 except Exception:
@@ -308,4 +298,3 @@ class BoardDetector:
             self._callback(info["port"], msg)
         except Exception as e:
             logger.error("BoardDetector: callback error: %s", e)
-

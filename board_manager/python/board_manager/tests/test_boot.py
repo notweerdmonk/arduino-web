@@ -158,4 +158,3 @@ class TestWaitForBms:
         result = wait_for_bms(timeout=0.5)
 
         assert result is False
-

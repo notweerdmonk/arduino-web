@@ -77,12 +77,8 @@ def api_compile_poll(port: str):
         if started and time.time() - started > tools.COMPILE_TIMEOUT:
             with tools._compile_meta_lock:
                 tools._compile_meta.pop(port, None)
-            return render_template(
-                "partials/compile_timeout.html", port=port, meta=meta
-            )
-        return render_template(
-            "partials/compile_poll_pending.html", port=port, meta=meta
-        )
+            return render_template("partials/compile_timeout.html", port=port, meta=meta)
+        return render_template("partials/compile_poll_pending.html", port=port, meta=meta)
     if result.get("status") == "ok":
         sketch_path = result.get("data", {}).get("sketch_path", meta.get("sketch", ""))
         if sketch_path:
@@ -91,9 +87,7 @@ def api_compile_poll(port: str):
             with tools._last_compile_mtime_lock:
                 tools._last_compile_mtime[port] = tools._get_sketch_mtime(sketch_path)
             with tools._last_compile_checksum_lock:
-                tools._last_compile_checksum[port] = tools._compute_sketch_checksum(
-                    sketch_path
-                )
+                tools._last_compile_checksum[port] = tools._compute_sketch_checksum(sketch_path)
     compile_warning: str | None = None
     if result.get("status") == "error":
         with tools._last_compiled_sketch_lock:
@@ -147,9 +141,7 @@ def api_upload(port: str):
     with tools._last_compiled_sketch_lock:
         last_sketch = tools._last_compiled_sketch.get(port)
     if last_sketch and last_sketch != sketch_path:
-        warnings.append(
-            {"type": "sketch_path_changed", "old": last_sketch, "new": sketch_path}
-        )
+        warnings.append({"type": "sketch_path_changed", "old": last_sketch, "new": sketch_path})
     modified = False
     with tools._last_compile_mtime_lock:
         last_mtime = tools._last_compile_mtime.get(port)
@@ -214,14 +206,10 @@ def api_upload_poll(port: str):
     with tools._upload_meta_lock:
         meta = tools._upload_meta.get(port, {})
     if result is None:
-        return render_template(
-            "partials/upload_poll_pending.html", port=port, meta=meta
-        )
+        return render_template("partials/upload_poll_pending.html", port=port, meta=meta)
     with tools._upload_meta_lock:
         tools._upload_meta.pop(port, None)
-    return render_template(
-        "partials/upload_result.html", result=result, port=port, meta=meta
-    )
+    return render_template("partials/upload_result.html", result=result, port=port, meta=meta)
 
 
 @compile_bp.route("/board/<path:port>/upload/confirm", methods=["POST"])
@@ -269,4 +257,3 @@ def api_upload_section(port: str):
     if port is None:
         return jsonify({"error": "Invalid port"}), 400
     return render_template("partials/upload_init.html", port=port)
-

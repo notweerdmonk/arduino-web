@@ -202,9 +202,7 @@ class TestRoutePoolMessage:
             "topic": "board::/dev/ttyACM0::event",
             "data": {"event": "connected"},
         }
-        mock_service._route_pool_message(
-            "/dev/ttyACM0", msg, "board::/dev/ttyACM0::event"
-        )
+        mock_service._route_pool_message("/dev/ttyACM0", msg, "board::/dev/ttyACM0::event")
 
         mock_sock.sendall.assert_called_once()
 
@@ -214,9 +212,7 @@ class TestRoutePoolMessage:
         mock_service._clients[conn.fileno()] = conn
 
         msg = {"type": "event", "topic": "board:/dev/ttyACM0/event", "data": {}}
-        mock_service._route_pool_message(
-            "/dev/ttyACM0", msg, "board:/dev/ttyACM0/event"
-        )
+        mock_service._route_pool_message("/dev/ttyACM0", msg, "board:/dev/ttyACM0/event")
 
         mock_sock.sendall.assert_not_called()
 
@@ -445,9 +441,7 @@ class TestServiceStartStop:
 
     @patch("board_manager.service.DaemonManager")
     @patch("board_manager.service.BoardDetector")
-    def test_stop_calls_daemon_mgr_stop(
-        self, mock_board_detector, mock_daemon_mgr_cls, config
-    ):
+    def test_stop_calls_daemon_mgr_stop(self, mock_board_detector, mock_daemon_mgr_cls, config):
         svc = BoardManagerService(config)
         mock_daemon = MagicMock()
         svc._daemon_mgr = mock_daemon
@@ -596,15 +590,12 @@ class TestDaemonStateReEmission:
         sendall_calls = mock_sock.sendall.call_args_list
         parsed = [json.loads(call[0][0].decode()) for call in sendall_calls]
         daemon_events = [
-            m
-            for m in parsed
-            if m.get("type") == "event" and m.get("topic") == "sys::daemon/ready"
+            m for m in parsed if m.get("type") == "event" and m.get("topic") == "sys::daemon/ready"
         ]
         board_events = [
             m
             for m in parsed
-            if m.get("type") == "event"
-            and m.get("topic") == "board::/dev/ttyACM0::event"
+            if m.get("type") == "event" and m.get("topic") == "board::/dev/ttyACM0::event"
         ]
         assert len(daemon_events) == 1, (
             f"Expected 1 daemon event, got {len(daemon_events)}: "
@@ -614,4 +605,3 @@ class TestDaemonStateReEmission:
             f"Expected 1 board event, got {len(board_events)}: "
             f"{[m['topic'] for m in parsed if m.get('type') == 'event']}"
         )
-

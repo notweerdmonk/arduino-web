@@ -161,4 +161,19 @@ layout: default
 | R6 | Docs sync — agent-facing | ✅ | All 16 docs updated with Phase 117 entries |
 | R7 | Docs sync — user-facing | ✅ | Documentation skill applied |
 
+---
+
+## Phase 118 — Ruff Format Audit
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | Audit ruff exclusion config | ✅ | `exclude = ["cc/arduino/cli/commands/v1/"]` — correct |
+| R2 | Capture full --check output | ✅ | 111 files, piped to /tmp/ruff_format_check.txt |
+| R3 | File-type check | ✅ | 111/111 are `.py` files |
+| R4 | Per-package breakdown | ✅ | 9 categories, all within known package boundaries |
+| R5 | Diff sampling & cosmetic verification | ✅ | 8 files sampled across all package groups |
+| R6 | Excluded dirs confirmation | ✅ | 0 generated stub files in output |
+| R7 | Verdict | ✅ | Safe — cosmetic only |
+| R8 | E501 fix — scripts/add_license_headers.py | ✅ | 35 lines wrapped, 0 ruff errors |
+
 {% endraw %}

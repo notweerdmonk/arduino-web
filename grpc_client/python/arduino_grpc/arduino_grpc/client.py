@@ -520,4 +520,3 @@ class ArduinoGrpcClient:
 
         upload_result = self.upload(sketch_path, fqbn, port, verbose, verify)
         return compile_result, upload_result
-

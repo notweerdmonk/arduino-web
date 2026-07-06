@@ -141,4 +141,3 @@ class TestOnExit:
             mock_stop.assert_not_called()
         finally:
             conf._bms_proc = old_proc
-

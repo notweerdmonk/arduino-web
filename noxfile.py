@@ -194,8 +194,6 @@ def _write_index_html(pkg_outdir: Path, pip_name: str):
     pkg_outdir.joinpath("index.html").write_text(pkg_html)
 
     root_html = (
-        f'<!DOCTYPE html>\n<html><body>\n<a href="{pip_name}/">'
-        f'{pip_name}</a><br>\n</body></html>\n'
+        f'<!DOCTYPE html>\n<html><body>\n<a href="{pip_name}/">{pip_name}</a><br>\n</body></html>\n'
     )
     dist_root.joinpath("index.html").write_text(root_html)
-

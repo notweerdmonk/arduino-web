@@ -63,9 +63,7 @@ def init_api_routes(app: Flask):
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(
-            f"board::{port}::cmd", {"method": "spawn"}, f"resp:spawn:{port}"
-        )
+        state.pubsub.publish(f"board::{port}::cmd", {"method": "spawn"}, f"resp:spawn:{port}")
         return jsonify({"status": "accepted"})
 
     @app.route("/api/pubsub/board/<path:port>/status")
@@ -74,9 +72,7 @@ def init_api_routes(app: Flask):
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(
-            f"board::{port}::cmd", {"method": "status"}, f"resp:status:{port}"
-        )
+        state.pubsub.publish(f"board::{port}::cmd", {"method": "status"}, f"resp:status:{port}")
         return jsonify({"status": "accepted"})
 
     @app.route("/api/pubsub/board/<path:port>/remove", methods=["POST"])
@@ -85,9 +81,7 @@ def init_api_routes(app: Flask):
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
-        state.pubsub.publish(
-            f"board::{port}::cmd", {"method": "remove"}, f"resp:remove:{port}"
-        )
+        state.pubsub.publish(f"board::{port}::cmd", {"method": "remove"}, f"resp:remove:{port}")
         return jsonify({"status": "accepted"})
 
     @app.route("/api/pubsub/boards/health", methods=["POST"])
@@ -112,12 +106,14 @@ def init_api_routes(app: Flask):
             return jsonify({"error": "Invalid port"}), 400
         info = get_port_info(port)
         connected = bool(info)
-        return jsonify({
-            "connected": connected,
-            "port": port,
-            "fqbn": info.get("fqbn", ""),
-            "hardware_id": info.get("hardware_id", ""),
-        })
+        return jsonify(
+            {
+                "connected": connected,
+                "port": port,
+                "fqbn": info.get("fqbn", ""),
+                "hardware_id": info.get("hardware_id", ""),
+            }
+        )
 
     @app.route("/api/boards/list")
     def api_boards_list():
@@ -139,19 +135,23 @@ def init_api_routes(app: Flask):
             sketch_dir = get_assignment(hardware_id)
             if sketch_dir:
                 sketch_name = os.path.basename(os.path.normpath(sketch_dir))
-                return jsonify({
-                    "path": sketch_dir,
-                    "name": sketch_name,
-                    "timestamp": "",
-                })
+                return jsonify(
+                    {
+                        "path": sketch_dir,
+                        "name": sketch_name,
+                        "timestamp": "",
+                    }
+                )
         latest = _resolve_latest_upload()
         if latest:
             sketch_name = os.path.basename(os.path.normpath(latest))
-            return jsonify({
-                "path": latest,
-                "name": sketch_name,
-                "timestamp": "",
-            })
+            return jsonify(
+                {
+                    "path": latest,
+                    "name": sketch_name,
+                    "timestamp": "",
+                }
+            )
         return jsonify(None), 404
 
     @app.route("/api/sketches")
@@ -270,9 +270,7 @@ def init_api_routes(app: Flask):
                     key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                _broadcast_ws(
-                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
-                )
+                _broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
                 if hardware_id:
                     set_assignment(hardware_id, sketch_dir)
 
@@ -306,9 +304,6 @@ def init_api_routes(app: Flask):
         if removed:
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             _save_registry()
-            _broadcast_ws(
-                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
-            )
+            _broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
             return jsonify({"status": "deleted"})
         return jsonify({"error": "Not found"}), 404
-

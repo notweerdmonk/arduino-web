@@ -4359,4 +4359,64 @@ reformatted 50 files, but a second pass was needed for 8 files where
 `{% endblock %}` tag placement was adjusted differently by `--check` vs
 `--reformat`. Always run `--check` after `--reformat` to confirm.
 
+---
+
+## Phase 118 — Ruff Format
+
+### Config
+
+`pyproject.toml`: `exclude = ["cc/arduino/cli/commands/v1/"]`, `line-length = 100`
+
+No `[tool.ruff.format]` override — format inherits base config.
+
+### Scope (ruff format --check .)
+
+111 files would be reformatted across 9 categories:
+
+| Category | Files |
+|----------|-------|
+| medminder_dash | 29 |
+| board_manager | 26 |
+| arduino_dash | 18 |
+| arduino_grpc | 15 |
+| scripts | 8 |
+| arduino_sketch_tools | 7 |
+| board_manager_client | 5 |
+| e2e | 2 |
+| root | 1 |
+
+### Change types (all cosmetic)
+
+- Line wrapping/unwrapping within 100-char limit
+- Quote normalization (single `'` → double `"`)
+- Trailing blank line removal (EOF normalization)
+- Adjacent string merging (implicit concatenation)
+
+### Commands
+
+| Command | Purpose |
+|---------|---------|
+| `pipenv run ruff format --check .` | Check which files would be reformatted (read-only) |
+| `pipenv run ruff format --diff <file>` | Show specific diff for a file |
+| `pipenv run ruff format .` | Auto-format all Python sources |
+
+### E501 workaround — DESCRIPTIONS dict pattern
+
+When `ruff check .` flags E501 (line-too-long) in a dict with long string
+keys+values, restructure by wrapping the value in parentheses:
+
+```python
+# Before (E501 > 100 chars):
+"long/path/file.py": "Description that is too long.",
+
+# After (within 100 chars):
+"long/path/file.py": (
+    "Description that is too long."
+),
+```
+
+Dict type (`dict[str, str]`) and consumer lookups (`in`, `[]`) are unchanged.
+
+**Applied to**: `scripts/add_license_headers.py:74-148` — 35 values wrapped.
+
 {% endraw %}

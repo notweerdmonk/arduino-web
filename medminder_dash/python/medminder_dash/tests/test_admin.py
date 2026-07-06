@@ -35,9 +35,7 @@ def app(tmp_path, monkeypatch):
     from medminder_dash import state
 
     monkeypatch.setattr(state, "UPLOAD_BASE_DIR", str(upload_base))
-    monkeypatch.setattr(
-        "medminder_dash.sketch_management.state.UPLOAD_BASE_DIR", str(upload_base)
-    )
+    monkeypatch.setattr("medminder_dash.sketch_management.state.UPLOAD_BASE_DIR", str(upload_base))
 
     from medminder_dash.app import create_app
 
@@ -96,9 +94,7 @@ class TestSketchUpload:
         assert called["rendered"] is False  # not called for non-hx
 
     def test_upload_with_no_files_returns_400(self, app, client):
-        resp = client.post(
-            "/api/sketch/upload", data={}, content_type="multipart/form-data"
-        )
+        resp = client.post("/api/sketch/upload", data={}, content_type="multipart/form-data")
         assert resp.status_code == 400
         assert b"No files provided" in resp.data
 
@@ -147,8 +143,7 @@ class TestSketchUpload:
         # Use the same key the route will compute
         resp = client.get("/api/sketches")  # any request to learn the actual IP/UA
         key = tuple(
-            resp.request.environ.get(k, "unknown")
-            for k in ("REMOTE_ADDR", "HTTP_USER_AGENT")
+            resp.request.environ.get(k, "unknown") for k in ("REMOTE_ADDR", "HTTP_USER_AGENT")
         )
         # remote_addr from environ
         ip = resp.request.environ.get("REMOTE_ADDR") or "unknown"
@@ -187,10 +182,7 @@ class TestConfirmModal:
         assert b"Generate alarm.hpp" in resp.data
         assert b"overwrite" in resp.data.lower()
         assert b'name="confirm_token"' in resp.data
-        assert (
-            b'"/medicines/generate-hpp"' in resp.data
-            or b"/medicines/generate-hpp" in resp.data
-        )
+        assert b'"/medicines/generate-hpp"' in resp.data or b"/medicines/generate-hpp" in resp.data
 
     def test_confirm_modal_sync(self, app, client):
         resp = client.get("/medicines/confirm-modal?action=sync")
@@ -217,17 +209,13 @@ class TestSetMedicinesSync:
         assert m is not None, f"No token in response: {resp.data[:500]}"
         return m.group(1).decode()
 
-    def test_sync_with_valid_token_replaces_metadata(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_sync_with_valid_token_replaces_metadata(self, app, client, tmp_path, monkeypatch):
         # Write alarm.hpp with 2 medicines
         from medminder_dash.app import store
         from medminder_dash.medicines_state import Medicine
 
         # Pre-populate store with 1 medicine
-        store._board_meta["TestBoard"] = {
-            "medicines": [Medicine(name="Old", hour=1, minute=0)]
-        }
+        store._board_meta["TestBoard"] = {"medicines": [Medicine(name="Old", hour=1, minute=0)]}
         with client.session_transaction() as sess:
             sess["board_port"] = "TestBoard"
 
@@ -246,9 +234,7 @@ class TestSetMedicinesSync:
         )
 
         # Patch sketch_dir and alarm.hpp path
-        monkeypatch.setattr(
-            "medminder_dash.pubsub._get_sketch_dir", lambda: str(tmp_path)
-        )
+        monkeypatch.setattr("medminder_dash.pubsub._get_sketch_dir", lambda: str(tmp_path))
         monkeypatch.setattr(
             "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(alarm_hpp)
         )
@@ -265,9 +251,7 @@ class TestSetMedicinesSync:
         names = {m.name for m in meds}
         assert names == {"NewA", "NewB"}
 
-    def test_sync_with_invalid_token_returns_403(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_sync_with_invalid_token_returns_403(self, app, client, tmp_path, monkeypatch):
         resp = client.post(
             "/medicines/sync-from-hpp",
             data={"confirm_token": "invalid-token"},
@@ -275,9 +259,7 @@ class TestSetMedicinesSync:
         assert resp.status_code == 403
         assert b"Confirmation required" in resp.data
 
-    def test_sync_after_success_token_consumed(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_sync_after_success_token_consumed(self, app, client, tmp_path, monkeypatch):
         # Get token, use it once, then try to reuse
         token = self._get_token(client, "sync")
         # First POST succeeds (but alarm.hpp is empty so 0 entries)
@@ -303,9 +285,7 @@ class TestSetMedicinesGenerate:
         assert m is not None
         return m.group(1).decode()
 
-    def test_generate_with_valid_token_writes_file(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_generate_with_valid_token_writes_file(self, app, client, tmp_path, monkeypatch):
         from medminder_dash.app import store
         from medminder_dash.medicines_state import Medicine
 
@@ -315,9 +295,7 @@ class TestSetMedicinesGenerate:
             sess["board_port"] = "TestBoard"
 
         alarm_hpp = tmp_path / "alarm.hpp"
-        monkeypatch.setattr(
-            "medminder_dash.pubsub._get_sketch_dir", lambda: str(tmp_path)
-        )
+        monkeypatch.setattr("medminder_dash.pubsub._get_sketch_dir", lambda: str(tmp_path))
         monkeypatch.setattr(
             "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(alarm_hpp)
         )
@@ -373,9 +351,7 @@ class TestAdminPage:
 class TestMedicinesDiff:
     """Tests for /api/medicines/diff — diff between metadata and alarm.hpp."""
 
-    def test_diff_equal_when_metadata_matches_hpp(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_diff_equal_when_metadata_matches_hpp(self, app, client, tmp_path, monkeypatch):
         from medminder_dash.app import store
 
         m = type("M", (), {})()
@@ -391,9 +367,7 @@ class TestMedicinesDiff:
             sess["admin_active_board"] = "TestBoard"
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text('const Medicine medicines[] = {\n  {0, 0, 8, 3, "Ibup"},\n};\n')
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.get("/api/medicines/diff")
         assert resp.status_code == 200
         payload = resp.get_json()
@@ -423,18 +397,14 @@ class TestMedicinesDiff:
             sess["admin_active_board"] = "TestBoard"
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text('const Medicine medicines[] = {\n  {0, 0, 8, 3, "Ibup"},\n};\n')
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.get("/api/medicines/diff")
         payload = resp.get_json()
         assert payload["differ"] is True
         assert len(payload["metadata"]) == 2
         assert len(payload["alarm_hpp"]) == 1
 
-    def test_diff_differs_when_hpp_has_extra_medicine(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_diff_differs_when_hpp_has_extra_medicine(self, app, client, tmp_path, monkeypatch):
         from medminder_dash.app import store
 
         m = type("M", (), {"enabled": True, "id": "m1"})()
@@ -453,9 +423,7 @@ class TestMedicinesDiff:
             '  {0, 0, 20, 0, "PaRa"},\n'
             "};\n"
         )
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.get("/api/medicines/diff")
         payload = resp.get_json()
         assert payload["differ"] is True
@@ -475,9 +443,7 @@ class TestMedicinesDiff:
         with client.session_transaction() as sess:
             sess["admin_active_board"] = "TestBoard"
         hpp = tmp_path / "alarm.hpp"
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.get("/api/medicines/diff")
         payload = resp.get_json()
         assert payload["differ"] is True
@@ -498,9 +464,7 @@ class TestMedicinesDiff:
             sess["admin_active_board"] = "TestBoard"
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text("this is not valid c++ {{{")
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
 
         def fake_parse(path):
             raise ValueError("simulated parse error")
@@ -569,9 +533,7 @@ class TestMedicineCardsRender:
     def test_cards_endpoint_returns_html(self, app, client, tmp_path, monkeypatch):
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text("static Medicine meds[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("TestBoard", "TestFQBN", "TestHWID")
         resp = client.get("/medicines/active-board-card")
@@ -579,18 +541,14 @@ class TestMedicineCardsRender:
         assert b"medicine-cards-container" in resp.data
         assert b"medicines" in resp.data.lower()
 
-    def test_cards_endpoint_post_changes_board(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_cards_endpoint_post_changes_board(self, app, client, tmp_path, monkeypatch):
         monkeypatch.setattr(
             "medminder_dash.html_routes.get_known_ports",
             lambda: [{"port": "/dev/ttyACM0"}, {"port": "/dev/ttyUSB0"}],
         )
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text("static Medicine meds[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.post("/medicines/active-board", data={"port": "/dev/ttyUSB0"})
         assert resp.status_code == 200
         assert b"medicine-cards-container" in resp.data
@@ -619,9 +577,7 @@ class TestMedicineCardsRender:
 class TestSyncButtonsState:
     """Tests for sync button disabled state based on diff."""
 
-    def test_buttons_disabled_when_metadata_matches_hpp(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_buttons_disabled_when_metadata_matches_hpp(self, app, client, tmp_path, monkeypatch):
         from medminder_dash.app import store
 
         m = type("M", (), {"enabled": True, "id": "m1"})()
@@ -635,9 +591,7 @@ class TestSyncButtonsState:
             sess["admin_active_board"] = ("TestBoard", "TestFQBN", "TestHWID")
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text('static Medicine meds[] = {\n  {"Ibup", 8, 30, 0, 0},\n};\n')
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         resp = client.get("/admin")
         assert resp.status_code == 200
         assert b"Generate alarm.hpp FROM metadata" in resp.data
@@ -646,9 +600,7 @@ class TestSyncButtonsState:
     def test_buttons_endpoint_returns_diff(self, app, client, tmp_path, monkeypatch):
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text("static Medicine meds[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.api_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = "TestBoard"
         resp = client.get("/api/medicines/diff")
@@ -700,9 +652,7 @@ class TestAdminFrontendStructure:
         )
         hpp = __import__("pathlib").Path("/tmp/test_alarm_q2.hpp")
         hpp.write_text("const Medicine medicines[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("/dev/ttyACM0", "arduino:avr:uno", "HW-123")
         resp = client.get("/admin")
@@ -733,9 +683,7 @@ class TestAdminFrontendStructure:
         store._board_meta["/dev/ttyACM0"] = {"medicines": [m]}
         hpp = __import__("pathlib").Path("/tmp/test_alarm_q2.hpp")
         hpp.write_text("const Medicine medicines[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("/dev/ttyACM0", "arduino:avr:uno", "HW-123")
         resp = client.get("/admin")
@@ -745,9 +693,7 @@ class TestAdminFrontendStructure:
         assert b"Add Medicine" not in alarm_hpp_section
         assert b'hx-get="/medicine/new"' not in alarm_hpp_section
 
-    def test_admin_page_sync_buttons_disabled_when_equal(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_admin_page_sync_buttons_disabled_when_equal(self, app, client, tmp_path, monkeypatch):
         monkeypatch.setattr(
             "medminder_dash.html_routes.get_known_ports",
             lambda: [
@@ -769,9 +715,7 @@ class TestAdminFrontendStructure:
         store._board_meta["/dev/ttyACM0"] = {"medicines": [m]}
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text('const Medicine medicines[] = {\n  {0, 0, 8, 3, "Ibup"},\n};\n')
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("/dev/ttyACM0", "arduino:avr:uno", "HW-123")
         resp = client.get("/admin")
@@ -780,9 +724,7 @@ class TestAdminFrontendStructure:
         assert b'id="sync-hpp-btn"' in resp.data
         assert b'id="sync-buttons-help"' in resp.data
 
-    def test_admin_page_sync_buttons_enabled_when_differ(
-        self, app, client, tmp_path, monkeypatch
-    ):
+    def test_admin_page_sync_buttons_enabled_when_differ(self, app, client, tmp_path, monkeypatch):
         monkeypatch.setattr(
             "medminder_dash.html_routes.get_known_ports",
             lambda: [
@@ -804,9 +746,7 @@ class TestAdminFrontendStructure:
         store._board_meta["/dev/ttyACM0"] = {"medicines": [m]}
         hpp = tmp_path / "alarm.hpp"
         hpp.write_text("const Medicine medicines[] = {\n};\n")
-        monkeypatch.setattr(
-            "medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp)
-        )
+        monkeypatch.setattr("medminder_dash.html_routes._get_alarm_hpp_path", lambda: str(hpp))
         with client.session_transaction() as sess:
             sess["admin_active_board"] = ("/dev/ttyACM0", "arduino:avr:uno", "HW-123")
         resp = client.get("/admin")
@@ -827,9 +767,7 @@ class TestMedMinderV2DefaultSketch:
         resp = client.get("/api/sketches")
         assert resp.status_code == 200
         payload = resp.get_json()
-        assert payload == [
-            {"name": "MedMinderV2", "path": _DEFAULT_SKETCH_DIR, "timestamp": ""}
-        ]
+        assert payload == [{"name": "MedMinderV2", "path": _DEFAULT_SKETCH_DIR, "timestamp": ""}]
 
     def test_api_sketches_default_first_when_uploads_exist(self, app, client, tmp_path):
         from medminder_dash.settings import _DEFAULT_SKETCH_DIR
@@ -939,9 +877,7 @@ class TestAdminBoardSelector:
         assert b'id="admin-board-selector-container"' in resp.data
         assert b'hx-trigger="load, board-changed from:body"' in resp.data
 
-    def test_admin_html_board_selector_trigger_matches_main_dashboard(
-        self, app, client
-    ):
+    def test_admin_html_board_selector_trigger_matches_main_dashboard(self, app, client):
         """Phase 71: board selector trigger uses 'board-changed from:body'
         matching the main dashboard's trigger pattern for consistency.
         """
@@ -952,17 +888,12 @@ class TestAdminBoardSelector:
         assert resp.status_code == 200
         admin_html = resp.data.decode()
         # Extract the hx-trigger value from the admin page.
-        m = re.search(
-            r'id="admin-board-selector-container"[^>]*hx-trigger="([^"]+)"', admin_html
-        )
+        m = re.search(r'id="admin-board-selector-container"[^>]*hx-trigger="([^"]+)"', admin_html)
         assert m is not None, "could not find hx-trigger on board selector container"
         admin_trigger = m.group(1)
         # Read main dashboard's index.html and extract its hx-trigger.
         index_path = (
-            Path(__file__).resolve().parents[1]
-            / "medminder_dash"
-            / "templates"
-            / "index.html"
+            Path(__file__).resolve().parents[1] / "medminder_dash" / "templates" / "index.html"
         )
         index_html = index_path.read_text()
         m2 = re.search(r'hx-trigger="([^"]+)"', index_html)
@@ -1058,12 +989,8 @@ class TestAdminHtmxNativeCompileUpload:
         html = partial.read_text()
         # The inner wrapper must NOT use id="compile-section" (the conflict).
         # It must use the new id="compile-output-area".
-        assert 'id="compile-section"' not in html, (
-            "inner wrapper still uses id=compile-section"
-        )
-        assert 'id="compile-output-area"' in html, (
-            "inner wrapper must use id=compile-output-area"
-        )
+        assert 'id="compile-section"' not in html, "inner wrapper still uses id=compile-section"
+        assert 'id="compile-output-area"' in html, "inner wrapper must use id=compile-output-area"
         # Polling div must target the new id
         assert 'hx-target="#compile-output-area"' in html, (
             "polling div must target #compile-output-area"
@@ -1106,9 +1033,7 @@ class TestGlobalBoardSelectorForCompileUpload:
         assert resp.status_code == 200
         assert b'id="admin-active-board"' in resp.data
 
-    def test_admin_html_compile_card_shows_active_board_as_text(
-        self, app, client, monkeypatch
-    ):
+    def test_admin_html_compile_card_shows_active_board_as_text(self, app, client, monkeypatch):
         """Compile card (loaded via htmx) has #compile-port-display and
         #compile-fqbn-display text labels populated with active board + FQBN.
         Phase 62.6 Q5: card loaded from /board/compile-upload-card.
@@ -1134,9 +1059,7 @@ class TestGlobalBoardSelectorForCompileUpload:
         assert b"/dev/ttyACM0" in resp.data
         assert b"arduino:avr:uno" in resp.data
 
-    def test_admin_html_upload_card_disabled_when_no_port(
-        self, app, client, monkeypatch
-    ):
+    def test_admin_html_upload_card_disabled_when_no_port(self, app, client, monkeypatch):
         """Upload card (loaded via htmx) is disabled when no active board.
         Phase 62.6 Q5: card loaded from /board/compile-upload-card.
         """
@@ -1170,9 +1093,7 @@ class TestGlobalBoardSelectorForCompileUpload:
         assert b'class="flex-1"' in resp.data
         # No refresh button (replaced by WS-triggered auto-refresh in Phase 71)
 
-    def test_admin_html_fqbn_below_select_in_global_selector(
-        self, app, client, monkeypatch
-    ):
+    def test_admin_html_fqbn_below_select_in_global_selector(self, app, client, monkeypatch):
         """FQBN display is below the global select in DOM order (per user
         request: 'display the FQDN for global select below the board port select').
         """
@@ -1222,9 +1143,7 @@ class TestGlobalBoardSelectorForCompileUpload:
         assert b'id="global-fqbn"' in resp.data
         assert b"arduino:avr:nano:cpu=atmega328" in resp.data
 
-    def test_compile_card_enabled_even_without_connected_board(
-        self, app, client, monkeypatch
-    ):
+    def test_compile_card_enabled_even_without_connected_board(self, app, client, monkeypatch):
         """Compile card is ALWAYS enabled (compile works without connected
         board). Phase 62.6 Q5: card loaded from /board/compile-upload-card.
         """
@@ -1250,9 +1169,7 @@ class TestPhase62Q4AdminSketchAssignment:
         assert _DEFAULT_SKETCH_DIR.encode() in resp.data
         assert b"MedMinderV2" in resp.data
 
-    def test_admin_page_includes_hardware_id_hidden_input(
-        self, app, client, monkeypatch
-    ):
+    def test_admin_page_includes_hardware_id_hidden_input(self, app, client, monkeypatch):
         """Admin page includes hidden input for active board hardware_id."""
         from medminder_dash.state import _known_ports, _known_ports_lock
 
@@ -1278,9 +1195,7 @@ class TestPhase62Q4AdminSketchAssignment:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
 
-    def test_admin_shows_assigned_sketch_when_present(
-        self, app, client, monkeypatch, tmp_path
-    ):
+    def test_admin_shows_assigned_sketch_when_present(self, app, client, monkeypatch, tmp_path):
         """Admin page shows assigned sketch badge when per-board assignment exists."""
         sketch_path = str(tmp_path / "sketches" / "mysketch")
         import os
@@ -1330,9 +1245,7 @@ class TestPhase62Q4AdminSketchAssignment:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
 
-    def test_sketch_assignment_resolved_via_admin_route(
-        self, app, client, monkeypatch, tmp_path
-    ):
+    def test_sketch_assignment_resolved_via_admin_route(self, app, client, monkeypatch, tmp_path):
         """Sketch path assignment is resolved server-side. The admin page
         shows the assigned sketch badge (Q3 removed hidden input; sketch
         path is now loaded via htmx from /last-upload).
@@ -1387,4 +1300,3 @@ class TestPhase62Q4AdminSketchAssignment:
         finally:
             with _known_ports_lock:
                 _known_ports.pop("/dev/ttyACM0", None)
-

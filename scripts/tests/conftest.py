@@ -108,4 +108,3 @@ def gen_e2e_spec_docs_module():
         return gen_e2e_spec_docs
     finally:
         sys.path[:] = saved
-

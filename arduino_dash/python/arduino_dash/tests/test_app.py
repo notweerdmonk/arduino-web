@@ -116,13 +116,9 @@ class TestOnResp:
         with _app_module._pending_responses_lock:
             _app_module._pending_responses[topic] = (None, event)
 
-        _app_module._on_resp(
-            {"topic": topic, "status": "ok", "data": {"output": "first"}}
-        )
+        _app_module._on_resp({"topic": topic, "status": "ok", "data": {"output": "first"}})
         assert event.is_set()
-        _app_module._on_resp(
-            {"topic": topic, "status": "ok", "data": {"output": "second"}}
-        )
+        _app_module._on_resp({"topic": topic, "status": "ok", "data": {"output": "second"}})
 
         with _app_module._pending_responses_lock:
             stored = _app_module._pending_responses.get(topic)
@@ -283,12 +279,8 @@ class TestInitPubsub:
             )
 
             # subscribe and start_reader should still be called after failure
-            instance.subscribe.assert_any_call(
-                "board::+::event", _app_module._on_board_event
-            )
-            instance.subscribe.assert_any_call(
-                "sys::daemon/ready", _app_module._on_daemon_ready
-            )
+            instance.subscribe.assert_any_call("board::+::event", _app_module._on_board_event)
+            instance.subscribe.assert_any_call("sys::daemon/ready", _app_module._on_daemon_ready)
             instance.start_reader.assert_called_once()
 
             # Warning should be logged
@@ -310,12 +302,8 @@ class TestInitPubsub:
 
             assert instance.on_reconnect == _app_module._on_pubsub_reconnect
             instance.connect.assert_called_once_with(retry=True)
-            instance.subscribe.assert_any_call(
-                "board::+::event", _app_module._on_board_event
-            )
-            instance.subscribe.assert_any_call(
-                "sys::daemon/ready", _app_module._on_daemon_ready
-            )
+            instance.subscribe.assert_any_call("board::+::event", _app_module._on_board_event)
+            instance.subscribe.assert_any_call("sys::daemon/ready", _app_module._on_daemon_ready)
             instance.start_reader.assert_called_once()
 
 
@@ -520,9 +508,7 @@ class TestDaemonStatus:
 
     def test_daemon_ready_handler_ignores_unknown_type(self):
         state._daemon_ready = False
-        _app_module._on_daemon_ready(
-            {"type": "heartbeat", "topic": "sys::daemon/ready"}
-        )
+        _app_module._on_daemon_ready({"type": "heartbeat", "topic": "sys::daemon/ready"})
         assert state._daemon_ready is False
 
     def test_pubsub_reconnect_resets_flag(self):
@@ -735,9 +721,7 @@ class TestUploadConfirmWarnings:
 
 
 class TestCompileWarning:
-    def test_poll_sets_warning_on_error_when_sketch_modified(
-        self, client, tmp_path, tools
-    ):
+    def test_poll_sets_warning_on_error_when_sketch_modified(self, client, tmp_path, tools):
         sketch_dir = tmp_path / "sketch"
         sketch_dir.mkdir()
         ino = sketch_dir / "main.ino"
@@ -852,9 +836,7 @@ class TestSketchUpload:
                     (io.BytesIO(b"int main() {}"), "blinky/src/main.cpp"),
                 ],
             }
-            resp = client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
         assert resp.status_code == 200
         result = resp.get_json()
         assert result is not None
@@ -875,9 +857,7 @@ class TestSketchUpload:
                     (io.BytesIO(b"void setup() {}"), "blinky/blinky.ino"),
                 ],
             }
-            resp = client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
         assert resp.status_code == 200
         result = resp.get_json()
         sketch_dir = result["path"]
@@ -902,9 +882,7 @@ class TestSketchUpload:
                     (io.BytesIO(b"void setup() {}"), "sketch/sketch.ino"),
                 ],
             }
-            resp = client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            resp = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
         assert resp.status_code == 200
         result = resp.get_json()
         assert "path" in result
@@ -913,9 +891,7 @@ class TestSketchUpload:
         assert os.path.isdir(result["path"])
 
     def test_upload_rejects_empty(self, client):
-        resp = client.post(
-            "/api/sketch/upload", data={}, content_type="multipart/form-data"
-        )
+        resp = client.post("/api/sketch/upload", data={}, content_type="multipart/form-data")
         assert resp.status_code == 400
         result = resp.get_json()
         assert result is not None
@@ -1133,13 +1109,9 @@ class TestApiSketches:
     def test_returns_sketches_for_ip_ua(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
             data2 = {"files[]": [(io.BytesIO(b"int x = 1;"), "other/other.ino")]}
-            client.post(
-                "/api/sketch/upload", data=data2, content_type="multipart/form-data"
-            )
+            client.post("/api/sketch/upload", data=data2, content_type="multipart/form-data")
             resp = client.get("/api/sketches")
         assert resp.status_code == 200
         sketches = resp.get_json()
@@ -1314,9 +1286,7 @@ class TestSketchVersionListing:
     def test_api_sketches_returns_all_versions(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
             resp = client.get("/api/sketches")
         sketches = resp.get_json()
         assert isinstance(sketches, list)
@@ -1331,9 +1301,7 @@ class TestDedupAcrossVersions:
     def test_same_content_dedup_across_names(self, client, tmp_path):
         with patch("arduino_dash.state.UPLOAD_BASE_DIR", str(tmp_path)):
             data = {"files[]": [(io.BytesIO(b"void setup() {}"), "blinky/blinky.ino")]}
-            resp1 = client.post(
-                "/api/sketch/upload", data=data, content_type="multipart/form-data"
-            )
+            resp1 = client.post("/api/sketch/upload", data=data, content_type="multipart/form-data")
             path1 = resp1.get_json()["path"]
             data2 = {"files[]": [(io.BytesIO(b"void setup() {}"), "other/other.ino")]}
             resp2 = client.post(
@@ -1382,10 +1350,7 @@ class TestAdminRoutes:
         resp = client.get("/admin/board-selector")
         assert resp.status_code == 200
         html = resp.data.decode()
-        assert (
-            "admin-board-selector-card" in html
-            or 'id="admin-board-selector-card"' in html
-        )
+        assert "admin-board-selector-card" in html or 'id="admin-board-selector-card"' in html
         assert "admin-active-board" in html or 'id="admin-active-board"' in html
 
     def test_board_compile_upload_card_renders(self, client):
@@ -1585,4 +1550,3 @@ class TestNormalizePort:
 
         assert normalize_port("COM1") is None
         assert normalize_port("/random/path") is None
-

@@ -313,4 +313,3 @@ class TestBoardPoolSpawnArgs:
             assert "board_worker" in args[0][1] or "board_worker" in args[0][2]
             assert kwargs.get("pass_fds") == [7]
             assert kwargs.get("close_fds") is True
-

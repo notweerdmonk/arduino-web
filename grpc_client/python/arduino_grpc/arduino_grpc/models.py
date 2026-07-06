@@ -126,4 +126,3 @@ class UploadResult:
             output=proto.out_stream.decode() if proto.out_stream else "",
             error=proto.err_stream.decode() if proto.err_stream else "",
         )
-

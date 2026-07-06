@@ -197,10 +197,7 @@ class TestParseAlarmHpp:
     def test_multiple_entries(self, tmp_path: Path):
         p = tmp_path / "alarm.hpp"
         p.write_text(
-            "const Medicine medicines[] = {\n"
-            '  {0, 1, 8, 3, "Ibup"},\n'
-            '  {0, 0, 8, 0, "PaRa"},\n'
-            "};\n"
+            'const Medicine medicines[] = {\n  {0, 1, 8, 3, "Ibup"},\n  {0, 0, 8, 0, "PaRa"},\n};\n'
         )
         result = parse_alarm_hpp(p)
         assert len(result) == 2
@@ -251,4 +248,3 @@ class TestParseAlarmHpp:
         assert len(parsed) == 2
         assert parsed[0]["name"] == "Test"
         assert parsed[1]["name"] == 'Qu"ot'
-

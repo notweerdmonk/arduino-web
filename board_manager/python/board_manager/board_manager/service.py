@@ -167,9 +167,7 @@ class BoardManagerService:
         """
         topic = msg.get("topic", "")
         event = msg.get("data", {}).get("event", "")
-        logger.debug(
-            "_on_detector_event: port=%s topic=%s event=%s", port, topic, event
-        )
+        logger.debug("_on_detector_event: port=%s topic=%s event=%s", port, topic, event)
         if event == "connected":
             self._board_state[port] = msg.get("data", {})
         elif event == "disconnected":
@@ -312,9 +310,7 @@ class BoardManagerService:
             topics = msg.get("topics", [msg.get("topic", "")])
             for topic in topics:
                 self.router.subscribe(conn.addr, topic)
-            self._send(
-                conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")}
-            )
+            self._send(conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")})
             if not conn.initial_state_sent:
                 self._send_current_boards_to(conn)
                 self._send_daemon_state_to(conn)
@@ -324,9 +320,7 @@ class BoardManagerService:
             topics = msg.get("topics", [msg.get("topic", "")])
             for topic in topics:
                 self.router.unsubscribe(conn.addr, topic)
-            self._send(
-                conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")}
-            )
+            self._send(conn, {"type": "result", "status": "ok", "topic": msg.get("topic", "")})
 
         elif msg_type == "publish":
             topic = msg.get("topic", "")
@@ -340,11 +334,7 @@ class BoardManagerService:
             elif method == "list_all_boards":
                 self._handle_list_all_boards(conn, msg)
             elif method == "list_boards":
-                boards = (
-                    list(self._detector.get_known_boards().values())
-                    if self._detector
-                    else []
-                )
+                boards = list(self._detector.get_known_boards().values()) if self._detector else []
                 self._send(
                     conn,
                     {
@@ -512,11 +502,7 @@ class BoardManagerService:
 
         is_result = not topic.endswith("::progress")
         if topic.startswith("resp::compile::") and is_result:
-            extra = (
-                f" message={msg.get('message', '')}"
-                if msg.get("status") == "error"
-                else ""
-            )
+            extra = f" message={msg.get('message', '')}" if msg.get("status") == "error" else ""
             logger.info(
                 "compile result for port %s: status=%s%s",
                 port,
@@ -524,11 +510,7 @@ class BoardManagerService:
                 extra,
             )
         elif topic.startswith("resp::upload::") and is_result:
-            extra = (
-                f" message={msg.get('message', '')}"
-                if msg.get("status") == "error"
-                else ""
-            )
+            extra = f" message={msg.get('message', '')}" if msg.get("status") == "error" else ""
             logger.info(
                 "upload result for port %s: status=%s%s",
                 port,
@@ -543,9 +525,7 @@ class BoardManagerService:
         sub_ids.update(self.router.subscribers_for(event_topic))
         sub_ids.update(self.router.subscribers_for(status_topic))
 
-        logger.debug(
-            "_route_pool_message: port=%s topic=%s sub_ids=%s", port, topic, sub_ids
-        )
+        logger.debug("_route_pool_message: port=%s topic=%s sub_ids=%s", port, topic, sub_ids)
 
         if not sub_ids:
             logger.debug(
@@ -670,4 +650,3 @@ class BoardManagerService:
         self._clients.pop(conn.fileno(), None)
         conn.close()
         logger.debug("Client disconnected: %s", conn.addr)
-

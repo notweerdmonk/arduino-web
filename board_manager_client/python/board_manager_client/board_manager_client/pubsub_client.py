@@ -107,9 +107,7 @@ class PubSubClient:
                     logger.info(
                         "Connected to BoardManagerService (mode: %s)",
                         "UDS"
-                        if self.use_uds
-                        and self._sock
-                        and self._sock.family == socket.AF_UNIX
+                        if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX
                         else "TCP",
                     )
                     return
@@ -128,9 +126,7 @@ class PubSubClient:
         self._connect_once()
         logger.info(
             "Connected to BoardManagerService (mode: %s)",
-            "UDS"
-            if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX
-            else "TCP",
+            "UDS" if self.use_uds and self._sock and self._sock.family == socket.AF_UNIX else "TCP",
         )
 
     def _connect_once(self) -> None:
@@ -409,4 +405,3 @@ class PubSubClient:
                 e,
                 ReconnectConfig.RECONNECT_DELAY,
             )
-

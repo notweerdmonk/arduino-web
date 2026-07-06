@@ -160,4 +160,3 @@ def encode_and_frame(msg: dict, mode: str = FramingMode.NEWLINE) -> bytes:
     if mode == FramingMode.LENGTH:
         return frame_length(payload)
     return frame_newline(payload)
-

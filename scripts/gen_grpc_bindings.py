@@ -318,8 +318,7 @@ def resolve_proto_src(
         proto_dir = _find_proto_dir(extracted)
         if proto_dir is None:
             raise FileNotFoundError(
-                f"downloaded archive at {extracted} does not contain "
-                f"{PROTO_SUBDIR}/*.proto"
+                f"downloaded archive at {extracted} does not contain {PROTO_SUBDIR}/*.proto"
             )
         # Caller cleans up extracted.parent if --keep-temp is not set.
         return proto_dir, extracted.parent if not args.keep_temp else None
@@ -375,8 +374,7 @@ def ensure_grpc_tools(
 
     if not (install or no_prompt):
         prompt = (
-            f"grpcio-tools and/or googleapis-common-protos are missing from "
-            f"{python}. Install now?"
+            f"grpcio-tools and/or googleapis-common-protos are missing from {python}. Install now?"
         )
         if not _prompt_yes_no(prompt):
             raise RuntimeError(
@@ -653,4 +651,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

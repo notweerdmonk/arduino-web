@@ -4355,4 +4355,53 @@ needs wheels in `dist/` directories for `file://` source resolution. The
 board-manager-client → arduino-sketch-tools → arduino-dash → medminder-dash.
 All_builds handles this ordering automatically via nox parametrized sessions.
 
+---
+
+## 2026-07-07 00:45 — Phase 118: Ruff Format Audit ✅ REVIEW COMPLETE
+
+**Goal**: Audit `pipenv run ruff format .` output — 111 files across 6
+packages + scripts + e2e + root. Confirm cosmetic-only changes.
+
+### Review approach
+
+1. **Exclusion config** — `pyproject.toml`: `exclude = ["cc/arduino/cli/commands/v1/"]`. No `[tool.ruff.format]` override. ✅
+2. **Scope capture** — `ruff format --check .` → 111 files would be reformatted. All `.py`. ✅
+3. **Per-package breakdown**:
+
+   | Package | Files |
+   |---------|-------|
+   | medminder_dash | 29 |
+   | board_manager | 26 |
+   | arduino_dash | 18 |
+   | arduino_grpc | 15 |
+   | scripts | 8 |
+   | arduino_sketch_tools | 7 |
+   | board_manager_client | 5 |
+   | e2e | 2 |
+   | root (noxfile.py) | 1 |
+
+4. **Diff sampling** — 8 files sampled across all groups. All changes:
+   - Line wrapping/unwrapping (100-char limit)
+   - Quote normalization (single → double)
+   - Trailing blank line removal (EOF)
+   - Adjacent string merging (implicit concatenation)
+5. **Excluded dirs** — 0 generated stub files in output. ✅
+
+### Verdict: ✅ SAFE TO PROCEED
+
+`ruff format` is a deterministic formatter (equivalent to black/gofmt).
+All 111 changes are cosmetic. No risks identified.
+
+### Execution (2026-07-07)
+
+- `pipenv run ruff format .` → 111 files reformatted, 1 left unchanged
+- `pipenv run ruff format --check .` → 112 files already formatted (idempotent, one pass) ✅
+
+### Follow-up — E501 fix (2026-07-07)
+
+`ruff check .` post-formatting revealed 35 E501 errors in
+`scripts/add_license_headers.py:74-148` (DESCRIPTIONS dict — long paths +
+long descriptions). Restructured 35 values with parenthetical line continuation.
+Dict type and consumer code unchanged. Verified: `ruff check .` → 0 errors ✅.
+
 {% endraw %}

@@ -200,4 +200,3 @@ class MedicineStore:
                     m.enabled = not m.enabled
                     break
             self._save()
-

@@ -107,11 +107,7 @@ def find_board_info_by_port(port: str, boards: list[dict]) -> dict:
         Matching board dict or empty dict.
     """
     return next(
-        (
-            b
-            for b in boards
-            if (b.get("port", "") if isinstance(b, dict) else "") == port
-        ),
+        (b for b in boards if (b.get("port", "") if isinstance(b, dict) else "") == port),
         {},
     )
 
@@ -127,11 +123,7 @@ def find_board_info_by_fqbn(fqbn: str, boards: list[dict]) -> dict:
         Matching board dict or empty dict.
     """
     return next(
-        (
-            b
-            for b in boards
-            if (b.get("fqbn", "") if isinstance(b, dict) else "") == fqbn
-        ),
+        (b for b in boards if (b.get("fqbn", "") if isinstance(b, dict) else "") == fqbn),
         {},
     )
 
@@ -241,4 +233,3 @@ def time_display(hour: int, minute: int) -> str:
         Formatted time string.
     """
     return f"{hour_display(hour)}:{minute_display(minute)}"
-

@@ -129,9 +129,7 @@ def upload_sketch(stub, instance, sketch_path, fqbn, port):
         print(f"Sketch path not found: {sketch_path}", file=sys.stderr)
         return
 
-    req = rpc_pb2.UploadRequest(
-        instance=instance, fqbn=fqbn, sketch_path=sketch_path, port=port
-    )
+    req = rpc_pb2.UploadRequest(instance=instance, fqbn=fqbn, sketch_path=sketch_path, port=port)
     try:
         # Upload is server streaming
         resp_iter = stub.Upload(req)
@@ -144,25 +142,19 @@ def upload_sketch(stub, instance, sketch_path, fqbn, port):
 
 def main():
     """Parse CLI args, connect to daemon, and run the requested action."""
-    p = argparse.ArgumentParser(
-        description="Show/upload Arduino sketches via arduino-cli gRPC"
-    )
+    p = argparse.ArgumentParser(description="Show/upload Arduino sketches via arduino-cli gRPC")
     p.add_argument(
         "--daemon",
         default=DEFAULT_DAEMON,
         help="Daemon host:port (default %(default)s)",
     )
-    p.add_argument(
-        "--detect", action="store_true", help="Run board detection (streams updates)"
-    )
+    p.add_argument("--detect", action="store_true", help="Run board detection (streams updates)")
     p.add_argument(
         "--upload",
         metavar="SKETCH_PATH",
         help="Upload sketch directory (path containing .ino)",
     )
-    p.add_argument(
-        "--port", help="Serial port to upload to (e.g., /dev/ttyUSB0 or COM3)"
-    )
+    p.add_argument("--port", help="Serial port to upload to (e.g., /dev/ttyUSB0 or COM3)")
     p.add_argument(
         "--fqbn",
         default=DEFAULT_FQBN,

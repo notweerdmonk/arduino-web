@@ -50,9 +50,7 @@ class TestMigration:
 
         store._board_meta["default"] = {
             "medicines": [
-                Medicine(
-                    name="Migrated", hour=8, minute=0, day_of_week=0, day_of_month=0
-                )
+                Medicine(name="Migrated", hour=8, minute=0, day_of_week=0, day_of_month=0)
             ]
         }
         resp = client.get("/board/select/dev/ttyACM0", follow_redirects=True)
@@ -66,15 +64,11 @@ class TestMigration:
         from medminder_dash.app import store
 
         store._board_meta["default"] = {
-            "medicines": [
-                Medicine(name="Orphan", hour=8, minute=0, day_of_week=0, day_of_month=0)
-            ]
+            "medicines": [Medicine(name="Orphan", hour=8, minute=0, day_of_week=0, day_of_month=0)]
         }
         store._board_meta["/dev/ttyACM0"] = {
             "medicines": [
-                Medicine(
-                    name="Existing", hour=9, minute=0, day_of_week=0, day_of_month=0
-                )
+                Medicine(name="Existing", hour=9, minute=0, day_of_week=0, day_of_month=0)
             ]
         }
         resp = client.get("/board/select/dev/ttyACM0", follow_redirects=True)
@@ -88,11 +82,8 @@ class TestMigration:
         from medminder_dash.app import store
 
         missing = tmp_path / "nonexistent.hpp"
-        with patch(
-            "medminder_dash.html_routes._get_alarm_hpp_path", return_value=str(missing)
-        ):
+        with patch("medminder_dash.html_routes._get_alarm_hpp_path", return_value=str(missing)):
             resp = client.get("/board/select/dev/ttyACM1", follow_redirects=True)
         assert resp.status_code == 200
         meds = store._board_meta.get("/dev/ttyACM1", {})
         assert len(meds.get("medicines", [])) == 0
-

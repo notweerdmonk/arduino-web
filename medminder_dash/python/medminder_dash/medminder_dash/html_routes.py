@@ -112,9 +112,7 @@ def _resolve_first_port_info(ports):
     return port, fqbn, hw_id
 
 
-def _resolve_board_info(
-    active_board_port, active_board_fqbn, active_board_hardware_id, ports
-):
+def _resolve_board_info(active_board_port, active_board_fqbn, active_board_hardware_id, ports):
     """Resolve and reconcile board info from session state and known ports.
 
     Args:
@@ -334,9 +332,7 @@ def init_html_routes(
     @app.route("/")
     def index():
         """Render the index/home page."""
-        return render_template(
-            "index.html", count=len(store.all()), sketch_path=load_sketch_dir()
-        )
+        return render_template("index.html", count=len(store.all()), sketch_path=load_sketch_dir())
 
     @app.route("/medicines")
     def medicines():
@@ -352,9 +348,7 @@ def init_html_routes(
     @app.route("/medicine/new")
     def medicine_new_form():
         """Render the medicine creation form."""
-        return render_template(
-            "medicine_form.html", medicine=None, errors=[], day_name=day_name
-        )
+        return render_template("medicine_form.html", medicine=None, errors=[], day_name=day_name)
 
     @app.route("/medicine", methods=["POST"])
     def medicine_create():
@@ -388,9 +382,7 @@ def init_html_routes(
         med = store.get(med_id)
         if med is None:
             return "", 404
-        return render_template(
-            "medicine_form.html", medicine=med, errors=[], day_name=day_name
-        )
+        return render_template("medicine_form.html", medicine=med, errors=[], day_name=day_name)
 
     @app.route("/medicine/<med_id>", methods=["PUT"])
     def medicine_update(med_id):
@@ -514,9 +506,7 @@ def init_html_routes(
         diff = _compute_diff(active_board_port)
 
         if active_board_hardware_id:
-            active_board_sketch = (
-                get_board_sketch_assignment(active_board_hardware_id) or ""
-            )
+            active_board_sketch = get_board_sketch_assignment(active_board_hardware_id) or ""
 
         return render_template(
             "admin.html",
@@ -538,9 +528,7 @@ def init_html_routes(
         (active_board_port, active_board_fqbn, _) = _get_active_board_info()
         if not active_board_port and ports:
             try:
-                (active_board_port, active_board_fqbn, _) = _resolve_first_port_info(
-                    ports
-                )
+                (active_board_port, active_board_fqbn, _) = _resolve_first_port_info(ports)
             except ValueError as e:
                 return str(e), 500
         try:
@@ -563,9 +551,7 @@ def init_html_routes(
     @app.route("/board/compile-upload-card")
     def html_board_compile_upload_card():
         """Render the compile/upload card partial."""
-        (active_board_port, active_board_fqbn, active_board_hardware_id) = (
-            _get_active_board_info()
-        )
+        (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
         ports = get_known_ports()
         if not active_board_port and ports:
             try:
@@ -575,13 +561,11 @@ def init_html_routes(
             except ValueError as e:
                 return str(e), 500
         try:
-            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
-                _resolve_board_info(
-                    active_board_port,
-                    active_board_fqbn,
-                    active_board_hardware_id,
-                    ports,
-                )
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = _resolve_board_info(
+                active_board_port,
+                active_board_fqbn,
+                active_board_hardware_id,
+                ports,
             )
         except ValueError as e:
             return str(e), 500
@@ -644,7 +628,7 @@ def init_html_routes(
         )
         return (
             f'<div class="log-viewer">Generated alarm.hpp with '
-            f'{len(meds)} enabled medicine(s).</div>',
+            f"{len(meds)} enabled medicine(s).</div>",
             200,
         )
 
@@ -856,9 +840,7 @@ def init_html_routes(
                 )
         selected_path = _resolve_latest_upload()
         if selected_path is None:
-            return _render_sketch_path_selector(
-                include_default=True, hardware_id=hardware_id
-            )
+            return _render_sketch_path_selector(include_default=True, hardware_id=hardware_id)
         return _render_sketch_path_selector(
             selected_path, include_default=True, hardware_id=hardware_id
         )
@@ -951,9 +933,7 @@ def init_html_routes(
                     key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                broadcast_ws(
-                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
-                )
+                broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
 
         if hardware_id:
             set_assignment(hardware_id, sketch_dir)
@@ -989,20 +969,13 @@ def init_html_routes(
             if removed:
                 all_latest = [vs[-1] for vs in entries.values() if vs]
                 latest = (
-                    max(all_latest, key=lambda v: v["server_timestamp"])
-                    if all_latest
-                    else None
+                    max(all_latest, key=lambda v: v["server_timestamp"]) if all_latest else None
                 )
         if removed:
             _save_registry()
-            broadcast_ws(
-                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
-            )
+            broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             if latest is not None:
-                return _render_sketch_path_selector(
-                    latest.get("path", ""), hardware_id=hardware_id
-                )
+                return _render_sketch_path_selector(latest.get("path", ""), hardware_id=hardware_id)
             return _render_sketch_path_selector(hardware_id=hardware_id)
         return _render_sketch_path_selector(hardware_id=hardware_id)
-

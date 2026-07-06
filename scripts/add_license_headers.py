@@ -41,9 +41,19 @@ EXTRA_ROOTS = [
     "scripts",
 ]
 
-EXCLUDE_SUFFIXES = {"__pycache__", ".nox", "node_modules", "_site",
-                    ".opencode", ".playwright-mcp", ".ruff_cache",
-                    "build", "dist", ".git", ".egg-info"}
+EXCLUDE_SUFFIXES = {
+    "__pycache__",
+    ".nox",
+    "node_modules",
+    "_site",
+    ".opencode",
+    ".playwright-mcp",
+    ".ruff_cache",
+    "build",
+    "dist",
+    ".git",
+    ".egg-info",
+}
 
 LICENSE_BLOCK = """Copyright 2026 notweerdmonk
 
@@ -63,153 +73,152 @@ limitations under the License."""
 # Key = relative path from repo root, Value = description string
 DESCRIPTIONS: dict[str, str] = {
     # board_manager
-    "board_manager/python/board_manager/tests/__init__.py":
-        "Test suite for board_manager.",
-    "board_manager/python/board_manager/tests/conftest.py":
-        "Pytest fixtures and configuration for board_manager tests.",
-    "board_manager/python/board_manager/tests/test_board_detector.py":
-        "Tests for board_detector module.",
-    "board_manager/python/board_manager/tests/test_board_worker.py":
-        "Tests for board_worker module.",
-    "board_manager/python/board_manager/tests/test_boot.py":
-        "Tests for boot module.",
-    "board_manager/python/board_manager/tests/test_config.py":
-        "Tests for config module.",
-    "board_manager/python/board_manager/tests/test_daemon_manager.py":
-        "Tests for daemon_manager module.",
-    "board_manager/python/board_manager/tests/test_integration.py":
-        "Integration tests for board_manager.",
-    "board_manager/python/board_manager/tests/test_pool.py":
-        "Tests for pool module.",
-    "board_manager/python/board_manager/tests/test_protocol.py":
-        "Tests for protocol module.",
-    "board_manager/python/board_manager/tests/test_router.py":
-        "Tests for router module.",
-    "board_manager/python/board_manager/tests/test_service.py":
-        "Tests for service module.",
-    "board_manager/python/board_manager/tests/test_udev_monitor.py":
-        "Tests for udev_monitor module.",
-
+    "board_manager/python/board_manager/tests/__init__.py": "Test suite for board_manager.",
+    "board_manager/python/board_manager/tests/conftest.py": (
+        "Pytest fixtures and configuration for board_manager tests."
+    ),
+    "board_manager/python/board_manager/tests/test_board_detector.py": (
+        "Tests for board_detector module."
+    ),
+    "board_manager/python/board_manager/tests/test_board_worker.py": (
+        "Tests for board_worker module."
+    ),
+    "board_manager/python/board_manager/tests/test_boot.py": "Tests for boot module.",
+    "board_manager/python/board_manager/tests/test_config.py": "Tests for config module.",
+    "board_manager/python/board_manager/tests/test_daemon_manager.py": (
+        "Tests for daemon_manager module."
+    ),
+    "board_manager/python/board_manager/tests/test_integration.py": (
+        "Integration tests for board_manager."
+    ),
+    "board_manager/python/board_manager/tests/test_pool.py": "Tests for pool module.",
+    "board_manager/python/board_manager/tests/test_protocol.py": "Tests for protocol module.",
+    "board_manager/python/board_manager/tests/test_router.py": "Tests for router module.",
+    "board_manager/python/board_manager/tests/test_service.py": "Tests for service module.",
+    "board_manager/python/board_manager/tests/test_udev_monitor.py": (
+        "Tests for udev_monitor module."
+    ),
     # board_manager_client
-    "board_manager_client/python/board_manager_client/board_manager_client/__init__.py":
-        "board_manager_client package.",
-    "board_manager_client/python/board_manager_client/tests/__init__.py":
-        "Test suite for board_manager_client.",
-    "board_manager_client/python/board_manager_client/tests/test_pubsub_client.py":
-        "Tests for pubsub_client module.",
-
+    "board_manager_client/python/board_manager_client/board_manager_client/__init__.py": (
+        "board_manager_client package."
+    ),
+    "board_manager_client/python/board_manager_client/tests/__init__.py": (
+        "Test suite for board_manager_client."
+    ),
+    "board_manager_client/python/board_manager_client/tests/test_pubsub_client.py": (
+        "Tests for pubsub_client module."
+    ),
     # arduino_grpc (non-generated)
-    "grpc_client/python/arduino_grpc/cc/__init__.py":
-        "Namespace package for cc.",
-    "grpc_client/python/arduino_grpc/cc/arduino/__init__.py":
-        "Namespace package for cc.arduino.",
-    "grpc_client/python/arduino_grpc/cc/arduino/cli/__init__.py":
-        "Namespace package for cc.arduino.cli.",
-    "grpc_client/python/arduino_grpc/cc/arduino/cli/commands/__init__.py":
-        "Namespace package for cc.arduino.cli.commands.",
-    "grpc_client/python/arduino_grpc/cc/arduino/cli/commands/v1/__init__.py":
-        "Namespace package for cc.arduino.cli.commands.v1.",
-    "grpc_client/python/arduino_grpc/tests/__init__.py":
-        "Test suite for arduino_grpc.",
-    "grpc_client/python/arduino_grpc/tests/conftest.py":
-        "Pytest fixtures and configuration for arduino_grpc tests.",
-    "grpc_client/python/arduino_grpc/tests/test_client.py":
-        "Tests for client module.",
-    "grpc_client/python/arduino_grpc/tests/test_integration.py":
-        "Integration tests for arduino_grpc.",
-
+    "grpc_client/python/arduino_grpc/cc/__init__.py": "Namespace package for cc.",
+    "grpc_client/python/arduino_grpc/cc/arduino/__init__.py": "Namespace package for cc.arduino.",
+    "grpc_client/python/arduino_grpc/cc/arduino/cli/__init__.py": (
+        "Namespace package for cc.arduino.cli."
+    ),
+    "grpc_client/python/arduino_grpc/cc/arduino/cli/commands/__init__.py": (
+        "Namespace package for cc.arduino.cli.commands."
+    ),
+    "grpc_client/python/arduino_grpc/cc/arduino/cli/commands/v1/__init__.py": (
+        "Namespace package for cc.arduino.cli.commands.v1."
+    ),
+    "grpc_client/python/arduino_grpc/tests/__init__.py": "Test suite for arduino_grpc.",
+    "grpc_client/python/arduino_grpc/tests/conftest.py": (
+        "Pytest fixtures and configuration for arduino_grpc tests."
+    ),
+    "grpc_client/python/arduino_grpc/tests/test_client.py": "Tests for client module.",
+    "grpc_client/python/arduino_grpc/tests/test_integration.py": (
+        "Integration tests for arduino_grpc."
+    ),
     # arduino_sketch_tools
-    "arduino_sketch_tools/python/arduino_sketch_tools/tests/__init__.py":
-        "Test suite for arduino_sketch_tools.",
-    "arduino_sketch_tools/python/arduino_sketch_tools/tests/test_extension.py":
-        "Tests for extension module.",
-
+    "arduino_sketch_tools/python/arduino_sketch_tools/tests/__init__.py": (
+        "Test suite for arduino_sketch_tools."
+    ),
+    "arduino_sketch_tools/python/arduino_sketch_tools/tests/test_extension.py": (
+        "Tests for extension module."
+    ),
     # arduino_dash
-    "arduino_dash/python/arduino_dash/tests/__init__.py":
-        "Test suite for arduino_dash.",
-    "arduino_dash/python/arduino_dash/tests/test_app.py":
-        "Tests for app module.",
-    "arduino_dash/python/arduino_dash/tests/test_gunicorn_conf.py":
-        "Tests for gunicorn_conf module.",
-
+    "arduino_dash/python/arduino_dash/tests/__init__.py": "Test suite for arduino_dash.",
+    "arduino_dash/python/arduino_dash/tests/test_app.py": "Tests for app module.",
+    "arduino_dash/python/arduino_dash/tests/test_gunicorn_conf.py": (
+        "Tests for gunicorn_conf module."
+    ),
     # medminder_dash
-    "medminder_dash/python/medminder_dash/tests/__init__.py":
-        "Test suite for medminder_dash.",
-    "medminder_dash/python/medminder_dash/tests/test_admin.py":
-        "Tests for admin routes and templates.",
-    "medminder_dash/python/medminder_dash/tests/test_api_medicines.py":
-        "Tests for medicine API routes.",
-    "medminder_dash/python/medminder_dash/tests/test_board_isolation.py":
-        "Tests for board-level data isolation.",
-    "medminder_dash/python/medminder_dash/tests/test_bootstrap.py":
-        "Tests for app bootstrap and initialization.",
-    "medminder_dash/python/medminder_dash/tests/test_deploy.py":
-        "Tests for sketch deploy workflow.",
-    "medminder_dash/python/medminder_dash/tests/test_e2e_sketch.py":
-        "End-to-end tests for sketch generation.",
-    "medminder_dash/python/medminder_dash/tests/test_gunicorn_conf.py":
-        "Tests for gunicorn_conf module.",
-    "medminder_dash/python/medminder_dash/tests/test_pubsub.py":
-        "Tests for pubsub module.",
-    "medminder_dash/python/medminder_dash/tests/test_routes.py":
-        "Tests for HTML and API routes.",
-    "medminder_dash/python/medminder_dash/tests/test_sketch_gen.py":
-        "Tests for sketch_gen module.",
-    "medminder_dash/python/medminder_dash/tests/test_sketch_registry.py":
-        "Tests for sketch_registry module.",
-
+    "medminder_dash/python/medminder_dash/tests/__init__.py": "Test suite for medminder_dash.",
+    "medminder_dash/python/medminder_dash/tests/test_admin.py": (
+        "Tests for admin routes and templates."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_api_medicines.py": (
+        "Tests for medicine API routes."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_board_isolation.py": (
+        "Tests for board-level data isolation."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_bootstrap.py": (
+        "Tests for app bootstrap and initialization."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_deploy.py": (
+        "Tests for sketch deploy workflow."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_e2e_sketch.py": (
+        "End-to-end tests for sketch generation."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_gunicorn_conf.py": (
+        "Tests for gunicorn_conf module."
+    ),
+    "medminder_dash/python/medminder_dash/tests/test_pubsub.py": "Tests for pubsub module.",
+    "medminder_dash/python/medminder_dash/tests/test_routes.py": "Tests for HTML and API routes.",
+    "medminder_dash/python/medminder_dash/tests/test_sketch_gen.py": "Tests for sketch_gen module.",
+    "medminder_dash/python/medminder_dash/tests/test_sketch_registry.py": (
+        "Tests for sketch_registry module."
+    ),
     # scripts
-    "scripts/tests/conftest.py":
-        "Pytest fixtures and configuration for scripts tests.",
-    "scripts/tests/test_gen_grpc_bindings.py":
-        "Tests for gen_grpc_bindings script.",
-    "scripts/tests/test_setup_py.py":
-        "Tests for setup.py helper utilities.",
-    "scripts/tests/test_ci.sh":
-        "Tests for the ci.sh script.",
-    "scripts/tests/test_install_arduino_deps.sh":
-        "Tests for the install_arduino_deps.sh script.",
-    "scripts/ci.sh":
-        "Full CI pipeline — tests + builds in one command.",
-    "scripts/build_standalone.sh":
-        "Build standalone binaries via PyOxidizer.",
-    "scripts/install_arduino_deps.sh":
-        "Install Arduino libraries required by sketches.",
-    "scripts/test_installs.sh":
-        "Install wheels into clean venv + smoke test.",
-    "scripts/check_venv.bash":
-        "Recursively verify pipenv venvs in the project tree.",
-    "scripts/gen_grpc_bindings.py":
-        "Regenerate Python gRPC stubs from proto files.",
-
+    "scripts/tests/conftest.py": "Pytest fixtures and configuration for scripts tests.",
+    "scripts/tests/test_gen_grpc_bindings.py": "Tests for gen_grpc_bindings script.",
+    "scripts/tests/test_setup_py.py": "Tests for setup.py helper utilities.",
+    "scripts/tests/test_ci.sh": "Tests for the ci.sh script.",
+    "scripts/tests/test_install_arduino_deps.sh": "Tests for the install_arduino_deps.sh script.",
+    "scripts/ci.sh": "Full CI pipeline — tests + builds in one command.",
+    "scripts/build_standalone.sh": "Build standalone binaries via PyOxidizer.",
+    "scripts/install_arduino_deps.sh": "Install Arduino libraries required by sketches.",
+    "scripts/test_installs.sh": "Install wheels into clean venv + smoke test.",
+    "scripts/check_venv.bash": "Recursively verify pipenv venvs in the project tree.",
+    "scripts/gen_grpc_bindings.py": "Regenerate Python gRPC stubs from proto files.",
     # noxfile
-    "noxfile.py":
-        "Nox session definitions for the Arduino Web monorepo.",
-
+    "noxfile.py": "Nox session definitions for the Arduino Web monorepo.",
     # Key HTML templates
-    "arduino_dash/python/arduino_dash/arduino_dash/templates/base.html":
-        "Base layout template with nav, WS event feed, and daemon status badge.",
-    "arduino_dash/python/arduino_dash/arduino_dash/templates/dashboard.html":
-        "Dashboard page with board grid and connection status.",
-    "arduino_dash/python/arduino_dash/arduino_dash/templates/board_detail.html":
-        "Board detail page with compile/upload controls and live events.",
-    "arduino_dash/python/arduino_dash/arduino_dash/templates/admin.html":
-        "Admin page with board and sketch management.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/base.html":
-        "Base layout template with nav, WS event feed, and daemon status badge.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/index.html":
-        "Dashboard page with board grid, medicine cards, and quick actions.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/board_detail.html":
-        "Board detail page with medicine management and compile/upload.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/admin.html":
-        "Admin page for board and medicine management.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/medicines.html":
-        "Medicine list and management page.",
-    "medminder_dash/python/medminder_dash/medminder_dash/templates/medicine_form.html":
-        "Medicine add/edit form page.",
+    "arduino_dash/python/arduino_dash/arduino_dash/templates/base.html": (
+        "Base layout template with nav, WS event feed, and daemon status badge."
+    ),
+    "arduino_dash/python/arduino_dash/arduino_dash/templates/dashboard.html": (
+        "Dashboard page with board grid and connection status."
+    ),
+    "arduino_dash/python/arduino_dash/arduino_dash/templates/board_detail.html": (
+        "Board detail page with compile/upload controls and live events."
+    ),
+    "arduino_dash/python/arduino_dash/arduino_dash/templates/admin.html": (
+        "Admin page with board and sketch management."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/base.html": (
+        "Base layout template with nav, WS event feed, and daemon status badge."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/index.html": (
+        "Dashboard page with board grid, medicine cards, and quick actions."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/board_detail.html": (
+        "Board detail page with medicine management and compile/upload."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/admin.html": (
+        "Admin page for board and medicine management."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/medicines.html": (
+        "Medicine list and management page."
+    ),
+    "medminder_dash/python/medminder_dash/medminder_dash/templates/medicine_form.html": (
+        "Medicine add/edit form page."
+    ),
 }
 
 # -- File discovery -----------------------------------------------------
+
 
 def is_excluded(path: Path) -> bool:
     """Check if a file path matches any excluded directory suffix."""
@@ -259,6 +268,7 @@ def relative_path(path: Path) -> str:
 
 # -- Description resolution ----------------------------------------------
 
+
 def has_header_already(path: Path) -> bool:
     """Check if file already has a license header."""
     try:
@@ -272,9 +282,12 @@ def _git_original_docstring(rel: str) -> str | None:
     """Extract original module docstring from git HEAD."""
     try:
         import subprocess
+
         result = subprocess.run(
             ["git", "show", f"HEAD:{rel}"],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode == 0:
             content = result.stdout
@@ -315,24 +328,33 @@ def describe(path: Path) -> str:
 
 # -- Header generation --------------------------------------------------
 
+
 def py_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for a .py file."""
-    return (f'"""{rel}\n'
-            f'\n'
-            f'{desc}\n'
-            f'\n'
-            f'Author: notweerdmonk\n'
-            f'SPDX-License-Identifier: Apache-2.0\n'
-            f'\n'
-            f'{LICENSE_BLOCK}\n'
-            f'"""')
+    return (
+        f'"""{rel}\n'
+        f"\n"
+        f"{desc}\n"
+        f"\n"
+        f"Author: notweerdmonk\n"
+        f"SPDX-License-Identifier: Apache-2.0\n"
+        f"\n"
+        f"{LICENSE_BLOCK}\n"
+        f'"""'
+    )
 
 
 def sh_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for a .sh/.bash file."""
-    lines = [f"# {rel}", "#", f"# {desc}", "#",
-             "# Author: notweerdmonk",
-             "# SPDX-License-Identifier: Apache-2.0", "#"]
+    lines = [
+        f"# {rel}",
+        "#",
+        f"# {desc}",
+        "#",
+        "# Author: notweerdmonk",
+        "# SPDX-License-Identifier: Apache-2.0",
+        "#",
+    ]
     for li in LICENSE_BLOCK.split("\n"):
         if li.strip():
             lines.append(f"# {li}")
@@ -343,9 +365,16 @@ def sh_header(rel: str, desc: str) -> str:
 
 def html_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for an .html file."""
-    lines = ["<!--", f"    {rel}", "", f"    {desc}", "",
-             "    Author: notweerdmonk",
-             "    SPDX-License-Identifier: Apache-2.0", ""]
+    lines = [
+        "<!--",
+        f"    {rel}",
+        "",
+        f"    {desc}",
+        "",
+        "    Author: notweerdmonk",
+        "    SPDX-License-Identifier: Apache-2.0",
+        "",
+    ]
     for li in LICENSE_BLOCK.split("\n"):
         if li.strip():
             lines.append(f"    {li}")
@@ -357,9 +386,16 @@ def html_header(rel: str, desc: str) -> str:
 
 def css_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for a .css file."""
-    lines = ["/*", f" * {rel}", " *", f" * {desc}", " *",
-             " * Author: notweerdmonk",
-             " * SPDX-License-Identifier: Apache-2.0", " *"]
+    lines = [
+        "/*",
+        f" * {rel}",
+        " *",
+        f" * {desc}",
+        " *",
+        " * Author: notweerdmonk",
+        " * SPDX-License-Identifier: Apache-2.0",
+        " *",
+    ]
     for li in LICENSE_BLOCK.split("\n"):
         if li.strip():
             lines.append(f" * {li}")
@@ -371,11 +407,12 @@ def css_header(rel: str, desc: str) -> str:
 
 # -- File patching ------------------------------------------------------
 
+
 def strip_shebang(content: str) -> tuple[str, str]:
     """Separate shebang line from content."""
     if content.startswith("#!/"):
         idx = content.index("\n")
-        return content[:idx], content[idx + 1:]
+        return content[:idx], content[idx + 1 :]
     return "", content
 
 
@@ -422,18 +459,18 @@ def patch_file(path: Path) -> bool:
         trailer = ""
         if rest.lstrip().startswith("{%"):
             # Find the end of the first Jinja2 block
-            m = re.match(r'(\s*\{%[^%]*%\}\s*)', rest)
+            m = re.match(r"(\s*\{%[^%]*%\}\s*)", rest)
             if m:
                 trailer = m.group(1)
-                rest = rest[m.end():]
+                rest = rest[m.end() :]
         # Strip existing HTML comment header at top
-        rest = re.sub(r'^\s*<!--.*?-->\s*', '', rest, count=1, flags=re.DOTALL)
+        rest = re.sub(r"^\s*<!--.*?-->\s*", "", rest, count=1, flags=re.DOTALL)
         header = html_header(rel, desc)
         content = f"{trailer}{header}\n\n{rest.lstrip()}\n"
 
     elif path.suffix == ".css":
         # Strip existing CSS comment header at top
-        rest = re.sub(r'^\s*/\*.*?\*/\s*', '', content, count=1, flags=re.DOTALL)
+        rest = re.sub(r"^\s*/\*.*?\*/\s*", "", content, count=1, flags=re.DOTALL)
         header = css_header(rel, desc)
         content = f"{header}\n\n{rest.lstrip()}\n"
 
@@ -454,7 +491,7 @@ def _strip_existing_docstring(content: str, doc: str) -> str:
         if idx != -1:
             end = content.find(q, idx + 3)
             if end != -1:
-                return content[:idx] + content[end + 3:]
+                return content[:idx] + content[end + 3 :]
     return content
 
 
@@ -468,6 +505,7 @@ def _strip_shell_header(content: str) -> str:
 
 
 # -- Main ----------------------------------------------------------------
+
 
 def main():
     """Entry point: discover, patch, and report on all source files."""
@@ -495,9 +533,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-

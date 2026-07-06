@@ -254,4 +254,3 @@ class TestUdevMonitor:
 
         assert len(events) == 1
         assert events[0][1]["data"]["event"] == "connected"
-

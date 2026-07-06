@@ -31,4 +31,3 @@ set_assignment = _registry.set_assignment
 clear_assignment = _registry.clear_assignment
 get_all_assignments = _registry.get_all_assignments
 reset_for_tests = _registry.reset_for_tests
-

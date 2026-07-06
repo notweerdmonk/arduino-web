@@ -174,4 +174,3 @@ class TestApiMedicineToggle:
         resp = client.put("/api/medicine/nonexistent/toggle")
         assert resp.status_code == 404
         assert resp.get_json()["error"] == "Not found"
-

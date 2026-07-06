@@ -59,13 +59,9 @@ def _start_fallback_scanner(ps: PubSubClient) -> None:
         ps: PubSubClient instance for event callbacks.
     """
     state._stop_fallback_scan = False
-    state._fallback_scanner = threading.Thread(
-        target=_fallback_scan_loop, args=(ps,), daemon=True
-    )
+    state._fallback_scanner = threading.Thread(target=_fallback_scan_loop, args=(ps,), daemon=True)
     state._fallback_scanner.start()
-    _logger.info(
-        "Fallback board scanner started (every %.1fs)", state._fallback_scan_interval
-    )
+    _logger.info("Fallback board scanner started (every %.1fs)", state._fallback_scan_interval)
 
 
 def _stop_fallback_scanner() -> None:
@@ -103,9 +99,7 @@ def _fallback_scan_loop(ps: PubSubClient) -> None:
                             "event": "disconnected",
                             "board": state._known_ports.get(port, {}).get("board", ""),
                             "fqbn": state._known_ports.get(port, {}).get("fqbn", ""),
-                            "hardware_id": state._known_ports.get(port, {}).get(
-                                "hardware_id", ""
-                            ),
+                            "hardware_id": state._known_ports.get(port, {}).get("hardware_id", ""),
                         }
                     }
                 )
@@ -193,9 +187,7 @@ def init_pubsub(
     """
     global _pubsub, _app
     state._app = app
-    ps = PubSubClient(
-        uds_path=uds_path, use_uds=use_uds, tcp_host=tcp_host, tcp_port=tcp_port
-    )
+    ps = PubSubClient(uds_path=uds_path, use_uds=use_uds, tcp_host=tcp_host, tcp_port=tcp_port)
     ps.on_reconnect = _on_pubsub_reconnect
     with _pubsub_lock:
         _pubsub = ps
@@ -269,17 +261,13 @@ def _on_board_event(msg: dict) -> None:
             if port in state._known_ports:
                 return
             state._known_ports[port] = data
-            _logger.debug(
-                "Board connected: %s (total: %d)", port, len(state._known_ports)
-            )
+            _logger.debug("Board connected: %s (total: %d)", port, len(state._known_ports))
     elif event == "disconnected":
         with state._known_ports_lock:
             if port not in state._known_ports:
                 return
             state._known_ports.pop(port, None)
-            _logger.debug(
-                "Board disconnected: %s (total: %d)", port, len(state._known_ports)
-            )
+            _logger.debug("Board disconnected: %s (total: %d)", port, len(state._known_ports))
         _clear_sketch_tools_state(port)
     if event:
         with state._board_events_lock:
@@ -467,4 +455,3 @@ def broadcast_ws(html: str) -> None:
 
 SKETCH_DIR = load_sketch_dir()
 ALARM_HPP_PATH = _get_alarm_hpp_path()
-

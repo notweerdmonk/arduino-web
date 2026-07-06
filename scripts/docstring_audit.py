@@ -101,32 +101,38 @@ def analyze_file(filepath, pkg_name):
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef):
             doc = has_docstring(node)
-            classes.append({
-                "name": node.name,
-                "lineno": node.lineno,
-                "docstring": doc,
-            })
+            classes.append(
+                {
+                    "name": node.name,
+                    "lineno": node.lineno,
+                    "docstring": doc,
+                }
+            )
 
     # Find top-level functions and methods
     for node in ast.iter_child_nodes(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             func_doc = has_docstring(node)
-            functions_found.append({
-                "name": node.name,
-                "lineno": node.lineno,
-                "class": None,
-                "docstring": func_doc,
-            })
+            functions_found.append(
+                {
+                    "name": node.name,
+                    "lineno": node.lineno,
+                    "class": None,
+                    "docstring": func_doc,
+                }
+            )
         elif isinstance(node, ast.ClassDef):
             for child in ast.iter_child_nodes(node):
                 if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
                     method_doc = has_docstring(child)
-                    functions_found.append({
-                        "name": child.name,
-                        "lineno": child.lineno,
-                        "class": node.name,
-                        "docstring": method_doc,
-                    })
+                    functions_found.append(
+                        {
+                            "name": child.name,
+                            "lineno": child.lineno,
+                            "class": node.name,
+                            "docstring": method_doc,
+                        }
+                    )
 
     missing = 0
     if not module_doc:
@@ -190,9 +196,9 @@ def main():
     all_results = []
 
     for pkg_name, filepaths in sorted(files_by_pkg.items()):
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print(f"  PACKAGE: {pkg_name}")
-        print(f"{'='*80}")
+        print(f"{'=' * 80}")
 
         pkg_functions = 0
         pkg_classes = 0
@@ -236,9 +242,9 @@ def main():
             print(f"     Total missing docstrings: {pkg_missing}")
 
     # Grand totals
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("  GRAND TOTALS")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
     grand_files = 0
     grand_classes = 0
@@ -261,11 +267,11 @@ def main():
         print(f"  Missing docstring rate: {pct:.1f}%")
 
     # Summary by package
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("  SUMMARY BY PACKAGE")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
     print(f"  {'Package':<25} {'Files':>6} {'Classes':>9} {'Funcs':>9} {'Missing':>9} {'Rate':>8}")
-    print(f"  {'-'*25} {'-'*6} {'-'*9} {'-'*9} {'-'*9} {'-'*8}")
+    print(f"  {'-' * 25} {'-' * 6} {'-' * 9} {'-' * 9} {'-' * 9} {'-' * 8}")
 
     by_pkg = defaultdict(lambda: {"files": 0, "classes": 0, "functions": 0, "missing": 0})
     for r in all_results:
@@ -287,9 +293,9 @@ def main():
     print()
 
     # Detailed missing list
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print("  DETAILED LIST OF ALL MISSING DOCSTRINGS")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
     total_missing_entries = 0
     for r in all_results:

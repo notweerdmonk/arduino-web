@@ -195,4 +195,3 @@ class DaemonCtx:
             os.kill(pid, signal.SIGKILL)
         except OSError:
             pass
-

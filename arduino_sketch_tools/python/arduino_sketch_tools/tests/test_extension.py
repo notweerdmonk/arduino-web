@@ -80,9 +80,7 @@ class TestArduinoSketchTools:
 
     def test_init_app_registers_blueprint(self):
         _app = Flask(__name__)
-        ext = ArduinoSketchTools(
-            broadcast_ws=lambda h: None, get_board_info=lambda p: {}
-        )
+        ext = ArduinoSketchTools(broadcast_ws=lambda h: None, get_board_info=lambda p: {})
         ext.init_app(_app)
         assert "arduino_sketch_tools" in _app.extensions
         assert "arduino_sketch_tools" in _app.blueprints
@@ -90,9 +88,7 @@ class TestArduinoSketchTools:
     def test_init_app_with_pubsub_subscribes(self):
         _app = Flask(__name__)
         mock_pubsub = MagicMock()
-        ext = ArduinoSketchTools(
-            broadcast_ws=lambda h: None, get_board_info=lambda p: {}
-        )
+        ext = ArduinoSketchTools(broadcast_ws=lambda h: None, get_board_info=lambda p: {})
         ext.init_app(_app, pubsub=mock_pubsub)
         mock_pubsub.subscribe.assert_any_call("resp::compile::*", ext._on_compile_resp)
         mock_pubsub.subscribe.assert_any_call("resp::upload::*", ext._on_upload_resp)
@@ -101,9 +97,7 @@ class TestArduinoSketchTools:
 class TestOnCompileResp:
     def test_stores_result(self, tools):
         topic = "resp::compile::/dev/ttyACM0"
-        tools._on_compile_resp(
-            {"topic": topic, "status": "ok", "data": {"output": "ok"}}
-        )
+        tools._on_compile_resp({"topic": topic, "status": "ok", "data": {"output": "ok"}})
         with tools._compile_results_lock:
             cached = tools._compile_results.get("/dev/ttyACM0")
         assert cached is not None
@@ -183,9 +177,7 @@ class TestOnCompileResp:
 class TestOnUploadResp:
     def test_stores_result(self, tools):
         topic = "resp::upload::/dev/ttyACM0"
-        tools._on_upload_resp(
-            {"topic": topic, "status": "ok", "data": {"output": "uploaded"}}
-        )
+        tools._on_upload_resp({"topic": topic, "status": "ok", "data": {"output": "uploaded"}})
         with tools._upload_results_lock:
             cached = tools._upload_results.get("/dev/ttyACM0")
         assert cached is not None
@@ -653,4 +645,3 @@ class TestNormPort:
     def test_rejects_non_dev_path(self, tools):
         assert tools._norm_port("COM1") is None
         assert tools._norm_port("/random/path") is None
-

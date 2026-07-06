@@ -75,11 +75,7 @@ class TestParseSpecOrphans:
 
     def test_multiple_orphan_tests(self, gen_e2e_spec_docs_module, tmp_path):
         f = tmp_path / "multi-orphan.spec.ts"
-        f.write_text(
-            "test('a', () => {});\n"
-            "test('b', () => {});\n"
-            "test('c', () => {});\n"
-        )
+        f.write_text("test('a', () => {});\ntest('b', () => {});\ntest('c', () => {});\n")
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("(unnamed)", ["a", "b", "c"])]
 
@@ -92,9 +88,7 @@ class TestParseSpecOrphans:
             "test.fixme('fix me', () => {});\n"
         )
         result = gen_e2e_spec_docs_module.parse_spec(f)
-        assert result == [
-            ("(unnamed)", ["plain", "only one", "skipped", "fix me"])
-        ]
+        assert result == [("(unnamed)", ["plain", "only one", "skipped", "fix me"])]
 
     def test_orphan_test_ignores_describe_matches(self, gen_e2e_spec_docs_module, tmp_path):
         # Known limitation: regex-based parsing cannot distinguish
@@ -131,11 +125,7 @@ class TestParseSpecSingleDescribe:
 
     def test_single_describe_uses_double_quotes(self, gen_e2e_spec_docs_module, tmp_path):
         f = tmp_path / "double-quotes.spec.ts"
-        f.write_text(
-            'test.describe("Suite", () => {\n'
-            '  test("t1", () => {});\n'
-            "});\n"
-        )
+        f.write_text('test.describe("Suite", () => {\n  test("t1", () => {});\n});\n')
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("Suite", ["t1"])]
 
@@ -154,21 +144,13 @@ class TestParseSpecSingleDescribe:
 
     def test_describe_with_only_modifier(self, gen_e2e_spec_docs_module, tmp_path):
         f = tmp_path / "describe-only.spec.ts"
-        f.write_text(
-            "test.describe.only('Focused Suite', () => {\n"
-            "  test('t1', () => {});\n"
-            "});\n"
-        )
+        f.write_text("test.describe.only('Focused Suite', () => {\n  test('t1', () => {});\n});\n")
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("Focused Suite", ["t1"])]
 
     def test_describe_with_skip_modifier(self, gen_e2e_spec_docs_module, tmp_path):
         f = tmp_path / "describe-skip.spec.ts"
-        f.write_text(
-            "test.describe.skip('Skipped Suite', () => {\n"
-            "  test('t1', () => {});\n"
-            "});\n"
-        )
+        f.write_text("test.describe.skip('Skipped Suite', () => {\n  test('t1', () => {});\n});\n")
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("Skipped Suite", ["t1"])]
 
@@ -249,9 +231,7 @@ class TestParseSpecEdgeCases:
             "});\n"
         )
         result = gen_e2e_spec_docs_module.parse_spec(f)
-        assert result == [
-            ("Suite with $pecial chars (v1.0)", ["test with / slashes"])
-        ]
+        assert result == [("Suite with $pecial chars (v1.0)", ["test with / slashes"])]
 
     def test_describe_label_with_escaped_quotes(self, gen_e2e_spec_docs_module, tmp_path):
         # Known limitation: regex-based parsing stops at the first
@@ -260,9 +240,7 @@ class TestParseSpecEdgeCases:
         # backslash before the escaped quote).
         f = tmp_path / "escaped.spec.ts"
         f.write_text(
-            "test.describe('Suite with \\'quote\\'', () => {\n"
-            "  test('inner', () => {});\n"
-            "});\n"
+            "test.describe('Suite with \\'quote\\'', () => {\n  test('inner', () => {});\n});\n"
         )
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("Suite with \\", ["inner"])]
@@ -274,15 +252,12 @@ class TestParseSpecEdgeCases:
         # does not create spurious matches.
         f = tmp_path / "string-literal.spec.ts"
         f.write_text(
-            "const label = 'test.describe should not match';\n"
-            "test('real test', () => {});\n"
+            "const label = 'test.describe should not match';\ntest('real test', () => {});\n"
         )
         result = gen_e2e_spec_docs_module.parse_spec(f)
         assert result == [("(unnamed)", ["real test"])]
 
-    def test_irrelevant_imports_dont_create_matches(
-        self, gen_e2e_spec_docs_module, tmp_path
-    ):
+    def test_irrelevant_imports_dont_create_matches(self, gen_e2e_spec_docs_module, tmp_path):
         f = tmp_path / "imports.spec.ts"
         f.write_text(
             "import { test } from '@playwright/test';\n"
@@ -335,9 +310,7 @@ class TestGenerate:
         specs_dir.mkdir(parents=True)
         spec_file = specs_dir / "dashboard.spec.ts"
         spec_file.write_text(
-            "test.describe('Page Load', () => {\n"
-            "  test('shows title', () => {});\n"
-            "});\n"
+            "test.describe('Page Load', () => {\n  test('shows title', () => {});\n});\n"
         )
         output = tmp_path / "output.md"
 
@@ -366,9 +339,7 @@ class TestGenerate:
         med_dir.mkdir(parents=True)
 
         (dash_dir / "admin.spec.ts").write_text(
-            "test.describe('Admin', () => {\n"
-            "  test('list users', () => {});\n"
-            "});\n"
+            "test.describe('Admin', () => {\n  test('list users', () => {});\n});\n"
         )
         (med_dir / "medicines.spec.ts").write_text(
             "test.describe('Medicines', () => {\n"
@@ -403,9 +374,7 @@ class TestGenerate:
         specs_dir.mkdir(parents=True)
 
         (specs_dir / "test.spec.ts").write_text(
-            "test.describe('Suite', () => {\n"
-            "  test('t1', () => {});\n"
-            "});\n"
+            "test.describe('Suite', () => {\n  test('t1', () => {});\n});\n"
         )
 
         output = tmp_path / "output.md"
@@ -426,8 +395,7 @@ class TestGenerate:
         specs_dir = tmp_path / "e2e" / "specs" / "arduino_dash"
         specs_dir.mkdir(parents=True)
         (specs_dir / "orphan.spec.ts").write_text(
-            "test('standalone test', () => {});\n"
-            "test.only('another one', () => {});\n"
+            "test('standalone test', () => {});\ntest.only('another one', () => {});\n"
         )
         output = tmp_path / "output.md"
 

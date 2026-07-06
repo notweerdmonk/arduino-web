@@ -241,4 +241,3 @@ class UdevMonitor:
             self._callback(info["port"], msg)
         except Exception as e:
             logger.error("UdevMonitor: callback error: %s", e)
-

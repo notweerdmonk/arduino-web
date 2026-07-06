@@ -131,9 +131,7 @@ MOCK_HW_ID_2 = "HW-TEST-002"
 
 def _start_bms() -> subprocess.Popen:
     """Start the BMS daemon as a subprocess, return Popen handle."""
-    return subprocess.Popen(
-        [sys.executable, "-m", "board_manager", "--log-level", "INFO"]
-    )
+    return subprocess.Popen([sys.executable, "-m", "board_manager", "--log-level", "INFO"])
 
 
 def _stop_bms(proc: subprocess.Popen | None) -> None:
@@ -150,12 +148,8 @@ def _stop_bms(proc: subprocess.Popen | None) -> None:
 
 MOCK_MEDICINES = [
     dict(name="Aspirin", hour=8, minute=0, day_of_week=0, day_of_month=0, enabled=True),
-    dict(
-        name="VitaminD", hour=12, minute=30, day_of_week=0, day_of_month=0, enabled=True
-    ),
-    dict(
-        name="Ibuprofen", hour=18, minute=0, day_of_week=0, day_of_month=0, enabled=True
-    ),
+    dict(name="VitaminD", hour=12, minute=30, day_of_week=0, day_of_month=0, enabled=True),
+    dict(name="Ibuprofen", hour=18, minute=0, day_of_week=0, day_of_month=0, enabled=True),
 ]
 
 # Point MedicineStore at a temp file so mock data never pollutes production data
@@ -276,9 +270,7 @@ def main():
 
     if args.mock:
         _inject_mock_state()
-        print(
-            f"[medminder_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})"
-        )
+        print(f"[medminder_dash_server] Mock state injected ({MOCK_PORT_1}, {MOCK_PORT_2})")
     else:
         print("[medminder_dash_server] Starting with empty state (no --mock)")
 
@@ -302,9 +294,7 @@ def main():
 
     print(f"[medminder_dash_server] Listening on http://0.0.0.0:{args.port}")
     try:
-        app.run(
-            host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader
-        )
+        app.run(host="0.0.0.0", port=args.port, debug=debug_mode, use_reloader=use_reloader)
     finally:
         _remove_pidfile(pidfile)
         _stop_bms(bms_proc)

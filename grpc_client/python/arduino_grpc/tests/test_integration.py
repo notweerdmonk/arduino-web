@@ -226,4 +226,3 @@ def _run_all(daemon_url: str):
 
 if __name__ == "__main__":
     main()
-

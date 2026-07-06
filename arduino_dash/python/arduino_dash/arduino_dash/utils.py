@@ -76,11 +76,7 @@ def get_port_info(port: str) -> Optional[dict]:
 def find_board_info_by_port(port: str, boards: list[dict]) -> dict:
     """Find board info by port string."""
     return next(
-        (
-            b
-            for b in boards
-            if (b.get("port", "") if isinstance(b, dict) else "") == port
-        ),
+        (b for b in boards if (b.get("port", "") if isinstance(b, dict) else "") == port),
         {},
     )
 
@@ -88,11 +84,6 @@ def find_board_info_by_port(port: str, boards: list[dict]) -> dict:
 def find_board_info_by_fqbn(fqbn: str, boards: list[dict]) -> dict:
     """Find board info by FQBN string."""
     return next(
-        (
-            b
-            for b in boards
-            if (b.get("fqbn", "") if isinstance(b, dict) else "") == fqbn
-        ),
+        (b for b in boards if (b.get("fqbn", "") if isinstance(b, dict) else "") == fqbn),
         {},
     )
-

@@ -31,6 +31,25 @@ monorepo `file://` dependencies via `pipenv lock --dev`.
 
 ---
 
+### Phase 118 — Ruff Format Audit ✅ REVIEW COMPLETE
+
+**Date**: 2026-07-07 00:45
+**Status**: ✅ REVIEW COMPLETE
+
+**Goal**: Audit `pipenv run ruff format .` output to confirm all 111
+reformatted files contain only cosmetic changes with zero logic/semantic
+modifications.
+
+| # | Item | Result |
+|---|------|--------|
+| R1 | Exclusion config (`pyproject.toml`) | ✅ Protobuf stubs excluded |
+| R2 | Scope (files to reformat) | 111 `.py` files, 0 non-Python |
+| R3 | Per-package breakdown | 9 package categories |
+| R4 | Diff sampling (8 files) | All cosmetic — line wrapping, quotes, EOF blanks, string merging |
+| R5 | Verdict | ✅ Safe to proceed |
+
+---
+
 ### Phase 111 — Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
 
 **Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
@@ -1491,5 +1510,28 @@ build output and reformatting only the 50 actual Jinja source templates.
 | 1 | Add `_site|dist-standalone|docs/reference|scratch` to `extend_exclude` | ✅ |
 | 2 | `djlint . --reformat` — 50 templates (8 in second pass) | ✅ |
 | 3 | Verify: `djlint . --check` exit 0 | ✅ |
+
+### Phase 118 — Ruff Format Audit ✅ REVIEW COMPLETE
+
+**Date**: 2026-07-07 00:45
+**Status**: ✅ REVIEW COMPLETE
+
+**Goal**: Audit `ruff format .` output — 111 files across 6 packages
++ scripts + e2e + root. Confirm cosmetic-only changes.
+
+| R | Item | Result |
+|---|------|--------|
+| R1 | Exclusion config | ✅ `cc/arduino/cli/commands/v1/` excluded |
+| R2 | Scope | 111 `.py` files, 0 non-Python |
+| R3 | Per-package | medminder_dash:29, board_manager:26, arduino_dash:18, arduino_grpc:15, scripts:8, arduino_sketch_tools:7, board_manager_client:5, e2e:2, root:1 |
+| R4 | Diffs sampled | 8 files across all groups — all cosmetic |
+| R5 | Verdict | ✅ Safe to proceed. Formatter deterministic (like black/gofmt) |
+
+**Changes found**: Line wrapping, quote normalization (single→double), trailing blank line removal, adjacent string merging. Zero logic/semantic changes.
+
+**Follow-up — E501 fix**: Post-formatting, `ruff check .` flagged 35 E501
+errors in `scripts/add_license_headers.py` `DESCRIPTIONS` dict (long paths +
+long descriptions). Fixed by wrapping 35 values with parenthetical line
+continuation. Verified: `ruff check .` → 0 errors ✅.
 
 {% endraw %}

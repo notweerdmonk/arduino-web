@@ -94,9 +94,7 @@ def main() -> None:
         sock.close()
         return
 
-    sock.sendall(
-        encode_and_frame({"type": "event", "topic": "worker/ready", "data": {}})
-    )
+    sock.sendall(encode_and_frame({"type": "event", "topic": "worker/ready", "data": {}}))
 
     try:
         while True:
@@ -153,17 +151,12 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
                     _make_result(
                         msg,
                         "ok",
-                        [
-                            {"port": b.port.address, "fqbn": b.fqbn, "name": b.name}
-                            for b in boards
-                        ],
+                        [{"port": b.port.address, "fqbn": b.fqbn, "name": b.name} for b in boards],
                     )
                 )
             )
         except ArduinoError as e:
-            sock.sendall(
-                encode_and_frame(_make_error(msg, "board_list_failed", str(e)))
-            )
+            sock.sendall(encode_and_frame(_make_error(msg, "board_list_failed", str(e))))
 
     elif method == "compile":
         try:
@@ -182,18 +175,12 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
             ):
                 if out:
                     out_lines.append(out)
-                    sock.sendall(
-                        encode_and_frame(_make_progress(msg, out, "", percent))
-                    )
+                    sock.sendall(encode_and_frame(_make_progress(msg, out, "", percent)))
                     last_pct = percent
-                    logger.debug(
-                        "compile: received %d output bytes (%.0f%%)", len(out), percent
-                    )
+                    logger.debug("compile: received %d output bytes (%.0f%%)", len(out), percent)
                 if err:
                     err_lines.append(err)
-                    sock.sendall(
-                        encode_and_frame(_make_progress(msg, "", err, percent))
-                    )
+                    sock.sendall(encode_and_frame(_make_progress(msg, "", err, percent)))
                     last_pct = percent
                 if done:
                     success = True
@@ -228,22 +215,12 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
             fqbn = params.get("fqbn", "")
             port = params.get("port", "")
             verbose = params.get("verbose", False)
-            logger.info(
-                "upload: starting sketch=%s port=%s fqbn=%s", sketch_path, port, fqbn
-            )
-            sock.sendall(
-                encode_and_frame(
-                    _make_progress(msg, f"Starting upload to {port}...", "")
-                )
-            )
-            sock.sendall(
-                encode_and_frame(_make_progress(msg, f"  Sketch: {sketch_path}", ""))
-            )
+            logger.info("upload: starting sketch=%s port=%s fqbn=%s", sketch_path, port, fqbn)
+            sock.sendall(encode_and_frame(_make_progress(msg, f"Starting upload to {port}...", "")))
+            sock.sendall(encode_and_frame(_make_progress(msg, f"  Sketch: {sketch_path}", "")))
             sock.sendall(encode_and_frame(_make_progress(msg, f"  Board:  {fqbn}", "")))
             if verbose:
-                sock.sendall(
-                    encode_and_frame(_make_progress(msg, "  Verbose mode enabled", ""))
-                )
+                sock.sendall(encode_and_frame(_make_progress(msg, "  Verbose mode enabled", "")))
             out_lines: list[str] = []
             err_lines: list[str] = []
             success = False
@@ -269,16 +246,12 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
             )
             if success:
                 sock.sendall(
-                    encode_and_frame(
-                        _make_progress(msg, "Upload completed successfully.", "")
-                    )
+                    encode_and_frame(_make_progress(msg, "Upload completed successfully.", ""))
                 )
             else:
                 err_text = "".join(err_lines) or "Unknown error during upload"
                 sock.sendall(
-                    encode_and_frame(
-                        _make_progress(msg, "", f"Upload failed: {err_text}")
-                    )
+                    encode_and_frame(_make_progress(msg, "", f"Upload failed: {err_text}"))
                 )
             sock.sendall(
                 encode_and_frame(
@@ -295,9 +268,7 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
             )
         except ArduinoError as e:
             error_msg = str(e)
-            sock.sendall(
-                encode_and_frame(_make_progress(msg, "", f"Upload failed: {error_msg}"))
-            )
+            sock.sendall(encode_and_frame(_make_progress(msg, "", f"Upload failed: {error_msg}")))
             sock.sendall(encode_and_frame(_make_error(msg, "upload_failed", error_msg)))
 
     elif method == "compile_and_upload":
@@ -348,12 +319,9 @@ def _handle_message(msg: dict, client: Any, sock: socket.socket) -> None:
 
     else:
         sock.sendall(
-            encode_and_frame(
-                _make_error(msg, "unknown_method", f"Unknown method: {method}")
-            )
+            encode_and_frame(_make_error(msg, "unknown_method", f"Unknown method: {method}"))
         )
 
 
 if __name__ == "__main__":
     main()
-

@@ -78,9 +78,7 @@ def _record_deploy(port: str, sketch_path: str) -> None:
                         if hardware_id not in v["hardware_ids"]:
                             v["hardware_ids"].append(hardware_id)
                         v["board_timestamps"][hardware_id] = deploy_ts
-                        _update_meta_hw_ids(
-                            sketch_path, v["hardware_ids"], v["board_timestamps"]
-                        )
+                        _update_meta_hw_ids(sketch_path, v["hardware_ids"], v["board_timestamps"])
                         _save_registry()
                         broadcast_ws(
                             '<div class="sketch-event">Deploy recorded <!-- board-event --></div>'
@@ -157,4 +155,3 @@ def create_app() -> Flask:
     init_api_routes(app, store_param=store)
 
     return app
-

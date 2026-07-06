@@ -34,16 +34,12 @@ def _resolve_default_sketch_dir() -> str:
     Priority:
     1. Extracted XDG data dir (~/.local/share/medminder/sketches/MedMinderV2/)
     """
-    xdg_dir = (
-        Path.home() / ".local" / "share" / "medminder" / "sketches" / "MedMinderV2"
-    )
+    xdg_dir = Path.home() / ".local" / "share" / "medminder" / "sketches" / "MedMinderV2"
     if xdg_dir.is_dir():
         return str(xdg_dir)
 
     try:
-        pkg_sketch = (
-            importlib.resources.files("medminder_dash") / "sketches" / "MedMinderV2"
-        )
+        pkg_sketch = importlib.resources.files("medminder_dash") / "sketches" / "MedMinderV2"
         if pkg_sketch.is_dir():
             xdg_dir.mkdir(parents=True, exist_ok=True)
             for entry in pkg_sketch.iterdir():
@@ -90,4 +86,3 @@ def set_sketch_dir(path: str) -> None:
     _ensure_config_dir()
     with open(CONFIG_FILE, "w") as f:
         json.dump({"sketch_dir": path}, f)
-

@@ -152,9 +152,7 @@ class TestQ4VenvDetection:
         kind, _, _ = gen_grpc_module.detect_venv(tmp_path, prefer="uv")
         assert kind == "system"
 
-    def test_detect_venv_pipenv_with_pipfile_and_fake_venv(
-        self, gen_grpc_module, tmp_path
-    ):
+    def test_detect_venv_pipenv_with_pipfile_and_fake_venv(self, gen_grpc_module, tmp_path):
         # Lay down a fake venv layout under tmp_path, mock subprocess.run
         # to return a path to it. The detector should report "pipenv".
         (tmp_path / "Pipfile").touch()
@@ -171,12 +169,8 @@ class TestQ4VenvDetection:
             args=[], returncode=0, stdout=str(fake_venv), stderr=""
         )
         with (
-            mock.patch.object(
-                gen_grpc_module.shutil, "which", return_value=fake_pipenv
-            ),
-            mock.patch.object(
-                gen_grpc_module.subprocess, "run", return_value=completed
-            ),
+            mock.patch.object(gen_grpc_module.shutil, "which", return_value=fake_pipenv),
+            mock.patch.object(gen_grpc_module.subprocess, "run", return_value=completed),
         ):
             kind, python, pip = gen_grpc_module.detect_venv(tmp_path, prefer="pipenv")
         assert kind == "pipenv"
@@ -284,9 +278,7 @@ class TestQ5ProtoSourceResolution:
         try:
             assert cleanup is None  # keep_temp=True -> caller won't clean up
             # resolved points at the extracted wrapper root
-            assert (
-                resolved / "cc" / "arduino" / "cli" / "commands" / "v1" / "x.proto"
-            ).exists()
+            assert (resolved / "cc" / "arduino" / "cli" / "commands" / "v1" / "x.proto").exists()
         finally:
             # The caller is responsible for removing the temp dir
             # when keep_temp=False; for keep_temp tests we mimic that
@@ -337,9 +329,7 @@ class TestQ6InitChain:
         created = gen_grpc_module.ensure_init_chain(tmp_path)
         assert created == 4
         assert (tmp_path / "cc" / "__init__.py").is_file()
-        assert (
-            tmp_path / "cc" / "arduino" / "cli" / "commands" / "v1" / "__init__.py"
-        ).is_file()
+        assert (tmp_path / "cc" / "arduino" / "cli" / "commands" / "v1" / "__init__.py").is_file()
 
 
 # ---------------------------------------------------------------------------
@@ -386,9 +376,7 @@ class TestQ6GenerateStubs:
                 mock.patch.object(
                     gen_grpc_module, "_find_grpc_tools_proto_root", return_value=None
                 ),
-                mock.patch.object(
-                    gen_grpc_module, "_find_googleapis_protos", return_value=None
-                ),
+                mock.patch.object(gen_grpc_module, "_find_googleapis_protos", return_value=None),
             ):
                 n = gen_grpc_module.generate_stubs(tmp_path, out_dir)
         finally:
@@ -425,9 +413,7 @@ class TestQ6GenerateStubs:
                 mock.patch.object(
                     gen_grpc_module, "_find_grpc_tools_proto_root", return_value=None
                 ),
-                mock.patch.object(
-                    gen_grpc_module, "_find_googleapis_protos", return_value=None
-                ),
+                mock.patch.object(gen_grpc_module, "_find_googleapis_protos", return_value=None),
             ):
                 with pytest.raises(RuntimeError, match="grpc_tools.protoc failed"):
                     gen_grpc_module.generate_stubs(tmp_path, out_dir)
@@ -446,31 +432,19 @@ class TestQ6EnsureGrpcTools:
         fake_python = tmp_path / "bin" / "python"
         fake_python.parent.mkdir(parents=True)
         fake_python.touch()
-        with mock.patch.object(
-            gen_grpc_module, "_check_python_imports", return_value=True
-        ):
+        with mock.patch.object(gen_grpc_module, "_check_python_imports", return_value=True):
             # Should NOT call pip install
-            with mock.patch.object(
-                gen_grpc_module, "_venv_pip_install"
-            ) as fake_install:
-                gen_grpc_module.ensure_grpc_tools(
-                    fake_python, install=True, no_prompt=True
-                )
+            with mock.patch.object(gen_grpc_module, "_venv_pip_install") as fake_install:
+                gen_grpc_module.ensure_grpc_tools(fake_python, install=True, no_prompt=True)
                 fake_install.assert_not_called()
 
     def test_ensure_grpc_tools_installs_when_missing(self, gen_grpc_module, tmp_path):
         fake_python = tmp_path / "bin" / "python"
         fake_python.parent.mkdir(parents=True)
         fake_python.touch()
-        with mock.patch.object(
-            gen_grpc_module, "_check_python_imports", return_value=False
-        ):
-            with mock.patch.object(
-                gen_grpc_module, "_venv_pip_install"
-            ) as fake_install:
-                gen_grpc_module.ensure_grpc_tools(
-                    fake_python, install=True, no_prompt=True
-                )
+        with mock.patch.object(gen_grpc_module, "_check_python_imports", return_value=False):
+            with mock.patch.object(gen_grpc_module, "_venv_pip_install") as fake_install:
+                gen_grpc_module.ensure_grpc_tools(fake_python, install=True, no_prompt=True)
                 fake_install.assert_called_once()
                 # First positional arg should be the fake python
                 args = fake_install.call_args[0]
@@ -481,17 +455,11 @@ class TestQ6EnsureGrpcTools:
         fake_python.parent.mkdir(parents=True)
         fake_python.touch()
         with (
-            mock.patch.object(
-                gen_grpc_module, "_check_python_imports", return_value=False
-            ),
-            mock.patch.object(
-                gen_grpc_module, "_prompt_yes_no", return_value=True
-            ) as fake_prompt,
+            mock.patch.object(gen_grpc_module, "_check_python_imports", return_value=False),
+            mock.patch.object(gen_grpc_module, "_prompt_yes_no", return_value=True) as fake_prompt,
             mock.patch.object(gen_grpc_module, "_venv_pip_install") as fake_install,
         ):
-            gen_grpc_module.ensure_grpc_tools(
-                fake_python, install=False, no_prompt=False
-            )
+            gen_grpc_module.ensure_grpc_tools(fake_python, install=False, no_prompt=False)
             fake_prompt.assert_called_once()
             fake_install.assert_called_once()
 
@@ -500,16 +468,12 @@ class TestQ6EnsureGrpcTools:
         fake_python.parent.mkdir(parents=True)
         fake_python.touch()
         with (
-            mock.patch.object(
-                gen_grpc_module, "_check_python_imports", return_value=False
-            ),
+            mock.patch.object(gen_grpc_module, "_check_python_imports", return_value=False),
             mock.patch.object(gen_grpc_module, "_prompt_yes_no", return_value=False),
             mock.patch.object(gen_grpc_module, "_venv_pip_install") as fake_install,
         ):
             with pytest.raises(RuntimeError, match="install was declined"):
-                gen_grpc_module.ensure_grpc_tools(
-                    fake_python, install=False, no_prompt=False
-                )
+                gen_grpc_module.ensure_grpc_tools(fake_python, install=False, no_prompt=False)
             fake_install.assert_not_called()
 
 
@@ -573,9 +537,7 @@ class TestEdgeCasesMissingDeps:
     installed in the test interpreter.
     """
 
-    def test_main_exits_5_when_deps_missing_and_prompt_declined(
-        self, gen_grpc_module, tmp_path
-    ):
+    def test_main_exits_5_when_deps_missing_and_prompt_declined(self, gen_grpc_module, tmp_path):
         """main() returns 5 when ensure_grpc_tools raises because the
         user declined the install prompt."""
         proto_dir = tmp_path / "proto"
@@ -589,17 +551,13 @@ class TestEdgeCasesMissingDeps:
                 "detect_venv",
                 return_value=("pipenv", Path("/usr/bin/python3"), Path("/usr/bin/pip")),
             ),
-            mock.patch.object(
-                gen_grpc_module, "resolve_proto_src", return_value=(proto_dir, None)
-            ),
+            mock.patch.object(gen_grpc_module, "resolve_proto_src", return_value=(proto_dir, None)),
             mock.patch.object(
                 gen_grpc_module,
                 "ensure_grpc_tools",
                 side_effect=RuntimeError("install declined"),
             ),
-            mock.patch.object(
-                gen_grpc_module, "ARDUINO_GRPC_DIR", tmp_path / "arduino_grpc"
-            ),
+            mock.patch.object(gen_grpc_module, "ARDUINO_GRPC_DIR", tmp_path / "arduino_grpc"),
         ):
             rc = gen_grpc_module.main(["--proto-src", str(proto_dir), "--no-prompt"])
         assert rc == 5
@@ -609,15 +567,11 @@ class TestEdgeCasesMissingDeps:
         and the user declines the prompt."""
         python = Path("/usr/bin/python3")
         with (
-            mock.patch.object(
-                gen_grpc_module, "_check_python_imports", return_value=False
-            ),
+            mock.patch.object(gen_grpc_module, "_check_python_imports", return_value=False),
             mock.patch.object(gen_grpc_module, "_prompt_yes_no", return_value=False),
         ):
             with pytest.raises(RuntimeError, match="install was declined"):
-                gen_grpc_module.ensure_grpc_tools(
-                    python, install=False, no_prompt=False
-                )
+                gen_grpc_module.ensure_grpc_tools(python, install=False, no_prompt=False)
 
     def test_generate_stubs_warns_on_missing_well_known_protos(
         self, gen_grpc_module, tmp_path, capsys
@@ -632,12 +586,8 @@ class TestEdgeCasesMissingDeps:
 
         out_dir = tmp_path / "out"
         with (
-            mock.patch.object(
-                gen_grpc_module, "_find_grpc_tools_proto_root", return_value=None
-            ),
-            mock.patch.object(
-                gen_grpc_module, "_find_googleapis_protos", return_value=None
-            ),
+            mock.patch.object(gen_grpc_module, "_find_grpc_tools_proto_root", return_value=None),
+            mock.patch.object(gen_grpc_module, "_find_googleapis_protos", return_value=None),
             mock.patch("grpc_tools.protoc.main", return_value=0),
         ):
             n = gen_grpc_module.generate_stubs(proto_dir, out_dir)
@@ -673,9 +623,7 @@ class TestEdgeCasesMissingDeps:
         with mock.patch.object(
             gen_grpc_module, "detect_venv", side_effect=RuntimeError("no venv detected")
         ):
-            rc = gen_grpc_module.main(
-                ["--proto-src", "/tmp/nonexistent", "--no-prompt"]
-            )
+            rc = gen_grpc_module.main(["--proto-src", "/tmp/nonexistent", "--no-prompt"])
         assert rc == 3
 
     def test_main_exits_2_when_both_proto_args_missing(self, gen_grpc_module, capsys):
@@ -700,4 +648,3 @@ class TestEdgeCasesMissingDeps:
         ):
             with pytest.raises(RuntimeError, match="failed to download"):
                 gen_grpc_module.resolve_proto_src(args)
-

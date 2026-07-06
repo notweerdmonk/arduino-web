@@ -30,9 +30,7 @@ def _make_board(port: str, fqbn: str, name: str) -> Board:
     return Board(port=Port(address=port, protocol="serial"), fqbn=fqbn, name=name)
 
 
-def _make_board_with_hardware_id(
-    port: str, fqbn: str, name: str, hardware_id: str
-) -> Board:
+def _make_board_with_hardware_id(port: str, fqbn: str, name: str, hardware_id: str) -> Board:
     return Board(
         port=Port(address=port, protocol="serial", hardware_id=hardware_id),
         fqbn=fqbn,
@@ -54,9 +52,7 @@ class TestBoardDetector:
             detector._running = False
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector._running = True
             detector._run_once()
 
@@ -81,12 +77,8 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._known_boards = {
                 "/dev/ttyACM0": {
@@ -116,12 +108,8 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._known_boards = {
                 "/dev/ttyACM0": {
@@ -154,12 +142,8 @@ class TestBoardDetector:
         def callback(port, msg):
             events.append((port, msg))
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._known_boards = {
                 "/dev/ttyACM0": {
@@ -182,12 +166,8 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._run_once()
 
@@ -204,9 +184,7 @@ class TestBoardDetector:
             raise RuntimeError("callback crashed")
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector._running = True
             detector._run_once()
 
@@ -221,9 +199,7 @@ class TestBoardDetector:
             def callback(port, msg):
                 events.append((port, msg))
 
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._run_once()
 
@@ -238,9 +214,7 @@ class TestBoardDetector:
         def callback(port, msg):
             events.append((port, msg))
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector = BoardDetector(
                 callback=callback,
                 poll_interval=0.01,
@@ -268,12 +242,8 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._run_once()
 
@@ -293,12 +263,8 @@ class TestBoardDetector:
             events.append((port, msg))
             detector._running = False
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
-            detector = BoardDetector(
-                callback=callback, poll_interval=0.01, list_timeout=3
-            )
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
+            detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
             detector._running = True
             detector._known_boards = {
                 "/dev/ttyACM0": {
@@ -404,9 +370,7 @@ class TestRestartDaemon:
         mock_daemon_mgr = MagicMock()
         mock_daemon_mgr.ensure_alive.return_value = True
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector = BoardDetector(
                 callback=lambda p, m: None,
                 daemon_manager=mock_daemon_mgr,
@@ -424,9 +388,7 @@ class TestRestartDaemon:
         mock_daemon_mgr = MagicMock()
         mock_daemon_mgr.ensure_alive.return_value = True
 
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector = BoardDetector(
                 callback=lambda p, m: None,
                 daemon_manager=mock_daemon_mgr,
@@ -456,9 +418,7 @@ class TestRestartDaemon:
             detector._running = False
 
         detector = BoardDetector(callback=stop, poll_interval=0.01, list_timeout=3)
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector._running = True
             detector._run_once()
 
@@ -488,9 +448,7 @@ class TestRestartDaemon:
             detector._running = False
 
         detector = BoardDetector(callback=callback, poll_interval=0.01, list_timeout=3)
-        with patch(
-            "board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client
-        ):
+        with patch("board_manager.board_detector.ArduinoGrpcClient", return_value=mock_client):
             detector._running = True
             detector._run_once()
 
@@ -520,9 +478,7 @@ class TestRestartDaemon:
 class TestBoardDetectorWatch:
     """Tests for watch-mode BoardDetector (BoardListWatch streaming)."""
 
-    def _make_watch_board(
-        self, port: str, detected: bool, fqbn: str = "", name: str = ""
-    ) -> Board:
+    def _make_watch_board(self, port: str, detected: bool, fqbn: str = "", name: str = "") -> Board:
         return Board(
             port=Port(address=port, protocol="serial"),
             fqbn=fqbn,
@@ -755,4 +711,3 @@ class TestBoardDetectorWatch:
 
             assert mock_client.watch_boards.called
             assert detector._thread is not None
-

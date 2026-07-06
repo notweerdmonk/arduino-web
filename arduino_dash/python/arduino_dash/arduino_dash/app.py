@@ -64,9 +64,7 @@ def _record_deploy(port: str, sketch_path: str) -> None:
                         if hardware_id not in v["hardware_ids"]:
                             v["hardware_ids"].append(hardware_id)
                         v["board_timestamps"][hardware_id] = deploy_ts
-                        _update_meta_hw_ids(
-                            sketch_path, v["hardware_ids"], v["board_timestamps"]
-                        )
+                        _update_meta_hw_ids(sketch_path, v["hardware_ids"], v["board_timestamps"])
                         _save_registry()
                         _broadcast_ws(
                             '<div class="sketch-event">Deploy recorded <!-- board-event --></div>'
@@ -129,4 +127,3 @@ from arduino_dash.state import (  # noqa: E402, F401
     _upload_results,
     _upload_results_lock,
 )
-

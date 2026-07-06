@@ -116,9 +116,7 @@ def _find_existing_version(user_sketches: dict, checksum: str) -> Optional[dict]
     return None
 
 
-def _update_meta_hw_ids(
-    sketch_dir: str, hardware_ids: list, board_timestamps: dict
-) -> None:
+def _update_meta_hw_ids(sketch_dir: str, hardware_ids: list, board_timestamps: dict) -> None:
     """Update hardware_id and board_timestamp metadata in .meta file.
 
     Args:
@@ -214,9 +212,7 @@ def _resolve_latest_upload() -> Optional[str]:
     with state._upload_registry_lock:
         if key not in state._upload_registry:
             _warm_upload_registry()
-        all_latest = [
-            vs[-1] for vs in state._upload_registry.get(key, {}).values() if vs
-        ]
+        all_latest = [vs[-1] for vs in state._upload_registry.get(key, {}).values() if vs]
         if all_latest:
             latest = max(all_latest, key=lambda v: v["server_timestamp"])
             if os.path.isdir(latest["path"]):
@@ -275,16 +271,12 @@ def _render_sketch_path_selector(
         ts = v.get("server_timestamp", "")
         if ts:
             try:
-                dt = datetime.datetime.fromisoformat(ts).replace(
-                    tzinfo=datetime.timezone.utc
-                )
+                dt = datetime.datetime.fromisoformat(ts).replace(tzinfo=datetime.timezone.utc)
                 local_dt = dt.astimezone()
                 label = f"{name} ({local_dt.strftime('%Y-%m-%d %H:%M:%S')})"
             except (ValueError, TypeError):
                 pass
-        board_labels = [
-            hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels
-        ]
+        board_labels = [hw_labels[hw] for hw in v.get("hardware_ids", []) if hw in hw_labels]
         if board_labels:
             label += f" [{' / '.join(board_labels)}]"
         sketches.append({"name": label, "path": v["path"]})
@@ -307,4 +299,3 @@ def _render_sketch_path_selector(
         selected=selected_path,
         hardware_id=hardware_id,
     )
-

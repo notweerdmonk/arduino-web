@@ -27,19 +27,11 @@ import logging
 def main():
     """Parse CLI arguments and run the Flask app."""
     parser = argparse.ArgumentParser(description="Arduino Dash")
-    parser.add_argument(
-        "--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)"
-    )
-    parser.add_argument(
-        "--port", type=int, default=8080, help="Bind port (default: 8080)"
-    )
-    parser.add_argument(
-        "--uds", default="/tmp/board_mgr.sock", help="BoardManager UDS path"
-    )
+    parser.add_argument("--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)")
+    parser.add_argument("--port", type=int, default=8080, help="Bind port (default: 8080)")
+    parser.add_argument("--uds", default="/tmp/board_mgr.sock", help="BoardManager UDS path")
     parser.add_argument("--tcp-host", default="127.0.0.1", help="BoardManager TCP host")
-    parser.add_argument(
-        "--tcp-port", type=int, default=9090, help="BoardManager TCP port"
-    )
+    parser.add_argument("--tcp-port", type=int, default=9090, help="BoardManager TCP port")
     parser.add_argument("--no-uds", action="store_true", help="Force TCP (no UDS)")
     parser.add_argument("--debug", action="store_true", help="Debug mode")
     args = parser.parse_args()
@@ -67,4 +59,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

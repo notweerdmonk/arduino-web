@@ -71,9 +71,7 @@ def load_config(args: Optional[dict] = None) -> Config:
             cfg.arduino_daemon = svc.get("arduino_daemon", cfg.arduino_daemon)
             cfg.daemon_binary = svc.get("daemon_binary", cfg.daemon_binary)
             cfg.log_level = svc.get("log_level", cfg.log_level)
-            cfg.board_detection_mode = svc.get(
-                "board_detection_mode", cfg.board_detection_mode
-            )
+            cfg.board_detection_mode = svc.get("board_detection_mode", cfg.board_detection_mode)
 
     cfg.tcp_host = os.environ.get(BmsEnv.TCP_HOST, cfg.tcp_host)
     cfg.tcp_port = int(os.environ.get(BmsEnv.TCP_PORT, str(cfg.tcp_port)))
@@ -81,9 +79,7 @@ def load_config(args: Optional[dict] = None) -> Config:
     cfg.arduino_daemon = os.environ.get(BmsEnv.ARDUINO_DAEMON, cfg.arduino_daemon)
     cfg.daemon_binary = os.environ.get(BmsEnv.DAEMON_BINARY, cfg.daemon_binary)
     cfg.log_level = os.environ.get(BmsEnv.LOG_LEVEL, cfg.log_level)
-    cfg.board_detection_mode = os.environ.get(
-        "BOARD_MGR_DETECTION_MODE", cfg.board_detection_mode
-    )
+    cfg.board_detection_mode = os.environ.get("BOARD_MGR_DETECTION_MODE", cfg.board_detection_mode)
 
     if args:
         cfg.tcp_host = args.get("tcp_host") or cfg.tcp_host
@@ -92,9 +88,6 @@ def load_config(args: Optional[dict] = None) -> Config:
         cfg.arduino_daemon = args.get("arduino_daemon") or cfg.arduino_daemon
         cfg.daemon_binary = args.get("daemon_binary") or cfg.daemon_binary
         cfg.log_level = args.get("log_level") or cfg.log_level
-        cfg.board_detection_mode = (
-            args.get("board_detection_mode") or cfg.board_detection_mode
-        )
+        cfg.board_detection_mode = args.get("board_detection_mode") or cfg.board_detection_mode
 
     return cfg
-

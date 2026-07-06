@@ -210,9 +210,7 @@ class TestUpdateMedicine:
         assert resp.status_code == 400
 
     def test_update_404(self, client, board):
-        resp = client.put(
-            "/medicine/nonexistent", data={"name": "x", "hour": "1", "minute": "0"}
-        )
+        resp = client.put("/medicine/nonexistent", data={"name": "x", "hour": "1", "minute": "0"})
         assert resp.status_code == 404
 
 
@@ -532,4 +530,3 @@ class TestNormalizePort:
 
         assert normalize_port("COM1") is None
         assert normalize_port("/random/path") is None
-

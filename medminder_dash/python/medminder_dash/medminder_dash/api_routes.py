@@ -224,6 +224,7 @@ def init_api_routes(app: Flask, store_param):
     def api_pubsub_spawn(port: str):
         """Spawn the board monitor via PubSub."""
         from medminder_dash.utils import normalize_port
+
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
@@ -237,6 +238,7 @@ def init_api_routes(app: Flask, store_param):
     def api_pubsub_board_status(port: str):
         """Request board status via PubSub."""
         from medminder_dash.utils import normalize_port
+
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
@@ -250,6 +252,7 @@ def init_api_routes(app: Flask, store_param):
     def api_pubsub_remove_board(port: str):
         """Remove the board monitor via PubSub."""
         from medminder_dash.utils import normalize_port
+
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
@@ -279,17 +282,20 @@ def init_api_routes(app: Flask, store_param):
     def api_board_connection_status(port: str):
         """Return connection status for the board at the given port from local state."""
         from medminder_dash.utils import normalize_port
+
         port = normalize_port(port)
         if port is None:
             return jsonify({"error": "Invalid port"}), 400
         info = get_port_info(port)
         connected = bool(info)
-        return jsonify({
-            "connected": connected,
-            "port": port,
-            "fqbn": info.get("fqbn", ""),
-            "hardware_id": info.get("hardware_id", ""),
-        })
+        return jsonify(
+            {
+                "connected": connected,
+                "port": port,
+                "fqbn": info.get("fqbn", ""),
+                "hardware_id": info.get("hardware_id", ""),
+            }
+        )
 
     @app.route("/api/boards/events")
     def api_boards_events():
@@ -423,9 +429,7 @@ def init_api_routes(app: Flask, store_param):
                     key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                broadcast_ws(
-                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
-                )
+                broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
 
         if hardware_id:
             set_assignment(hardware_id, sketch_dir)
@@ -459,9 +463,7 @@ def init_api_routes(app: Flask, store_param):
                         break
         if removed:
             _save_registry()
-            broadcast_ws(
-                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
-            )
+            broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             return jsonify({"status": "deleted"})
         return jsonify({"error": "Not found"}), 404
@@ -474,19 +476,23 @@ def init_api_routes(app: Flask, store_param):
             sketch_dir = get_assignment(hardware_id)
             if sketch_dir:
                 sketch_name = os.path.basename(os.path.normpath(sketch_dir))
-                return jsonify({
-                    "path": sketch_dir,
-                    "name": sketch_name,
-                    "timestamp": "",
-                })
+                return jsonify(
+                    {
+                        "path": sketch_dir,
+                        "name": sketch_name,
+                        "timestamp": "",
+                    }
+                )
         latest = _resolve_latest_upload()
         if latest:
             sketch_name = os.path.basename(os.path.normpath(latest))
-            return jsonify({
-                "path": latest,
-                "name": sketch_name,
-                "timestamp": "",
-            })
+            return jsonify(
+                {
+                    "path": latest,
+                    "name": sketch_name,
+                    "timestamp": "",
+                }
+            )
         return jsonify(None), 404
 
     # ------------------------------------------------------------------ #
@@ -624,4 +630,3 @@ def init_api_routes(app: Flask, store_param):
                 "enabled": toggled.enabled,
             }
         )
-

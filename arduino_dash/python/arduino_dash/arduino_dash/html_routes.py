@@ -176,9 +176,7 @@ def init_html_routes(app: Flask, sock):
         connected = state.pubsub is not None and state.pubsub.is_connected
         with state._daemon_ready_lock:
             daemon_ready = state._daemon_ready
-        return render_template(
-            "partials/daemon_badge.html", ready=connected and daemon_ready
-        )
+        return render_template("partials/daemon_badge.html", ready=connected and daemon_ready)
 
     @app.route("/admin")
     def admin():
@@ -197,9 +195,7 @@ def init_html_routes(app: Flask, sock):
                 result = get_first_board(known_ports)
                 if not result:
                     return "port missing", 500
-                (active_board_port, active_board_fqbn, active_board_hardware_id) = (
-                    result
-                )
+                (active_board_port, active_board_fqbn, active_board_hardware_id) = result
                 if not active_board_fqbn:
                     return "fqbn missing", 500
                 session["admin_active_board"] = (
@@ -300,19 +296,15 @@ def init_html_routes(app: Flask, sock):
     @app.route("/board/compile-upload-card")
     def html_board_compile_upload_card():
         """Render the compile-upload card partial."""
-        (active_board_port, active_board_fqbn, active_board_hardware_id) = (
-            _get_active_board_info()
-        )
+        (active_board_port, active_board_fqbn, active_board_hardware_id) = _get_active_board_info()
         known_ports = get_known_boards()
 
         try:
-            (active_board_port, active_board_fqbn, active_board_hardware_id) = (
-                _resolve_board_info(
-                    active_board_port,
-                    active_board_fqbn,
-                    active_board_hardware_id,
-                    known_ports,
-                )
+            (active_board_port, active_board_fqbn, active_board_hardware_id) = _resolve_board_info(
+                active_board_port,
+                active_board_fqbn,
+                active_board_hardware_id,
+                known_ports,
             )
         except ValueError as e:
             return str(e), 500
@@ -427,9 +419,7 @@ def init_html_routes(app: Flask, sock):
                     key=lambda v: v["server_timestamp"],
                 )
                 _save_registry()
-                _broadcast_ws(
-                    '<div class="sketch-event">Sketch updated <!-- board-event --></div>'
-                )
+                _broadcast_ws('<div class="sketch-event">Sketch updated <!-- board-event --></div>')
                 if hardware_id:
                     set_assignment(hardware_id, sketch_dir)
 
@@ -463,16 +453,12 @@ def init_html_routes(app: Flask, sock):
             if removed:
                 all_latest = [vs[-1] for vs in entries.values() if vs]
                 latest = (
-                    max(all_latest, key=lambda v: v["server_timestamp"])
-                    if all_latest
-                    else None
+                    max(all_latest, key=lambda v: v["server_timestamp"]) if all_latest else None
                 )
         if removed:
             shutil.rmtree(os.path.dirname(norm_path), ignore_errors=True)
             _save_registry()
-            _broadcast_ws(
-                '<div class="sketch-event">Sketch deleted <!-- board-event --></div>'
-            )
+            _broadcast_ws('<div class="sketch-event">Sketch deleted <!-- board-event --></div>')
             if latest is not None:
                 return _render_sketch_path_selector(latest.get("path", ""))
             return _render_sketch_path_selector()
@@ -496,4 +482,3 @@ def init_html_routes(app: Flask, sock):
                 with state._ws_lock:
                     if ws in state._ws_clients:
                         state._ws_clients.remove(ws)
-

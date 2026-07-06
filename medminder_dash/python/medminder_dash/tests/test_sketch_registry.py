@@ -57,9 +57,7 @@ def test_set_and_get_assignment(tmp_path):
 
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
-    state._upload_registry[("127.0.0.1", "test-agent")] = {
-        "mysketch": [_make_version(sketch_dir)]
-    }
+    state._upload_registry[("127.0.0.1", "test-agent")] = {"mysketch": [_make_version(sketch_dir)]}
     hw_id = "USB:123 SER=456"
     set_assignment(hw_id, sketch_dir)
     assert get_assignment(hw_id) == sketch_dir
@@ -70,12 +68,8 @@ def test_get_assignment_returns_none_for_nonexistent_dir(tmp_path):
     from medminder_dash.sketch_registry import get_assignment
 
     sketch_dir = str(tmp_path / "nonexistent")
-    state._upload_registry[("127.0.0.1", "test-agent")] = {
-        "mysketch": [_make_version(sketch_dir)]
-    }
-    state._upload_registry[("127.0.0.1", "test-agent")]["mysketch"][0][
-        "hardware_ids"
-    ] = ["HW:001"]
+    state._upload_registry[("127.0.0.1", "test-agent")] = {"mysketch": [_make_version(sketch_dir)]}
+    state._upload_registry[("127.0.0.1", "test-agent")]["mysketch"][0]["hardware_ids"] = ["HW:001"]
     assert get_assignment("HW:001") is None
 
 
@@ -89,9 +83,7 @@ def test_clear_assignment(tmp_path):
 
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
-    state._upload_registry[("127.0.0.1", "test-agent")] = {
-        "mysketch": [_make_version(sketch_dir)]
-    }
+    state._upload_registry[("127.0.0.1", "test-agent")] = {"mysketch": [_make_version(sketch_dir)]}
     hw_id = "USB:123 SER=456"
     set_assignment(hw_id, sketch_dir)
     assert get_assignment(hw_id) == sketch_dir
@@ -109,9 +101,7 @@ def test_clear_assignment_only_removes_target(tmp_path):
 
     sketch_dir = str(tmp_path / "mysketch")
     os.makedirs(sketch_dir, exist_ok=True)
-    state._upload_registry[("127.0.0.1", "test-agent")] = {
-        "mysketch": [_make_version(sketch_dir)]
-    }
+    state._upload_registry[("127.0.0.1", "test-agent")] = {"mysketch": [_make_version(sketch_dir)]}
     set_assignment("HW:001", sketch_dir)
     set_assignment("HW:002", sketch_dir)
     clear_assignment("HW:001")
@@ -165,9 +155,7 @@ def test_set_assignment_finds_correct_version(tmp_path):
     sd2 = str(tmp_path / "sketch2")
     os.makedirs(sd1)
     os.makedirs(sd2)
-    state._upload_registry[("ip", "ua")] = {
-        "a": [_make_version(sd1), _make_version(sd2)]
-    }
+    state._upload_registry[("ip", "ua")] = {"a": [_make_version(sd1), _make_version(sd2)]}
     set_assignment("HW:001", sd2)
     assert get_assignment("HW:001") == sd2
 
@@ -224,4 +212,3 @@ def test_load_registry_corrupt_file(tmp_path, monkeypatch):
     reg_file.write_text("not valid json")
     monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_FILE", str(reg_file))
     _load_registry()  # should not raise
-

@@ -48,9 +48,7 @@ class ArduinoSketchTools:
 
     COMPILE_TIMEOUT = 150
 
-    def __init__(
-        self, pubsub=None, broadcast_ws=None, get_board_info=None, record_deploy=None
-    ):
+    def __init__(self, pubsub=None, broadcast_ws=None, get_board_info=None, record_deploy=None):
         """Initialize the extension with optional pubsub, broadcast, and hooks."""
         self.pubsub = pubsub
         self._broadcast_ws = broadcast_ws or (lambda html: None)
@@ -174,9 +172,7 @@ class ArduinoSketchTools:
             Metadata dict with port, board info, sketch info, and start time.
         """
         board_info = self._get_board_info(port)
-        utils_dir = (
-            os.path.basename(os.path.normpath(sketch_path)) if sketch_path else ""
-        )
+        utils_dir = os.path.basename(os.path.normpath(sketch_path)) if sketch_path else ""
         return {
             "port": port,
             "board": board_info.get("board", ""),
@@ -216,17 +212,12 @@ class ArduinoSketchTools:
                     )
                     self._broadcast_ws(bar)
             if out or err:
-                text = (
-                    (out + err)
-                    .replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                )
+                text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 pct_prefix = f"[{pct_int}%] " if percent >= 0 else ""
                 html = (
                     f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}">'
                     f'<div class="compile-line" data-port="{port}">'
-                    f'{pct_prefix}{text}</div></span>'
+                    f"{pct_prefix}{text}</div></span>"
                 )
                 self._broadcast_ws(html)
         else:
@@ -239,9 +230,7 @@ class ArduinoSketchTools:
                     with self._last_compiled_sketch_lock:
                         self._last_compiled_sketch[port] = sketch_path
                     with self._last_compile_mtime_lock:
-                        self._last_compile_mtime[port] = self._get_sketch_mtime(
-                            sketch_path
-                        )
+                        self._last_compile_mtime[port] = self._get_sketch_mtime(sketch_path)
 
     def _on_upload_resp(self, msg: dict) -> None:
         """Handle an upload response message from pubsub.
@@ -260,17 +249,12 @@ class ArduinoSketchTools:
             out = data.get("output", "")
             err = data.get("error", "")
             if out or err:
-                text = (
-                    (out + err)
-                    .replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
-                )
+                text = (out + err).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
                 port_safe = port.replace("/", "_")
                 html = (
                     f'<span hx-swap-oob="beforeend:#upload-output-{port_safe}">'
                     f'<div class="upload-line" data-port="{port}">'
-                    f'{text}</div></span>'
+                    f"{text}</div></span>"
                 )
                 self._broadcast_ws(html)
         else:
@@ -282,4 +266,3 @@ class ArduinoSketchTools:
                     sketch_path = self._upload_meta.get(port, {}).get("sketch", "")
                 if sketch_path:
                     self._record_deploy(port, sketch_path)
-

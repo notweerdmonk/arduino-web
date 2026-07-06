@@ -128,4 +128,3 @@ tcp_port = 7070
             assert cfg.tcp_port == 8080
         finally:
             os.unlink(path)
-

@@ -267,4 +267,3 @@ class BoardPool:
         """
         self.remove(port)
         return self.spawn(port)
-

@@ -79,4 +79,3 @@ def _resolve_board_info(
             else:
                 active_board_fqbn = fqbn
     return active_board_port, active_board_fqbn, active_board_hardware_id
-

@@ -349,4 +349,3 @@ class TestPubSubClientReconnect:
         from board_manager_client.pubsub_client import ReconnectConfig
 
         assert ReconnectConfig.RECONNECT_DELAY == 2.0
-

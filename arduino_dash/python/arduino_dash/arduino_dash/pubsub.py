@@ -49,13 +49,9 @@ _logger = logging.getLogger(__name__)
 def _start_fallback_scanner(ps: PubSubClient) -> None:
     """Start the background thread that polls for board connections via glob."""
     state._stop_fallback_scan = False
-    state._fallback_scanner = threading.Thread(
-        target=_fallback_scan_loop, args=(ps,), daemon=True
-    )
+    state._fallback_scanner = threading.Thread(target=_fallback_scan_loop, args=(ps,), daemon=True)
     state._fallback_scanner.start()
-    state.logger.info(
-        "Fallback board scanner started (every %.1fs)", state._fallback_scan_interval
-    )
+    state.logger.info("Fallback board scanner started (every %.1fs)", state._fallback_scan_interval)
 
 
 def _stop_fallback_scanner() -> None:
@@ -235,9 +231,7 @@ def _on_board_event(msg: dict) -> None:
                 len(state._board_list),
             )
         else:
-            state.logger.debug(
-                "Unknown event type: '%s' — skipping _board_list update", event
-            )
+            state.logger.debug("Unknown event type: '%s' — skipping _board_list update", event)
     try:
         from flask import render_template
 
@@ -276,9 +270,7 @@ def _on_health(msg: dict) -> None:
 def _on_resp(msg: dict) -> None:
     """Handle response messages and wake waiting callers."""
     topic = msg.get("topic", "")
-    state.logger.debug(
-        "_on_resp: topic=%s (compile/upload handled by extension)", topic
-    )
+    state.logger.debug("_on_resp: topic=%s (compile/upload handled by extension)", topic)
 
     with state._pending_responses_lock:
         entry = state._pending_responses.get(topic)
@@ -396,4 +388,3 @@ def _broadcast_ws(html: str) -> None:
                     state._ws_clients.remove(ws)
                 except ValueError:
                     pass
-

@@ -30,4 +30,3 @@ def init_board_routes(
 ):
     """Routes moved to html_routes.py — kept as no-op for import compatibility."""
     pass
-

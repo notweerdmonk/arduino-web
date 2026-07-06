@@ -72,9 +72,7 @@ def when_ready(server):
             timeout=float(os.environ.get("BMS_WAIT_TIMEOUT", "10")),
         )
         if not ready:
-            server.log.warning(
-                "BMS not ready within timeout — workers will retry on connect"
-            )
+            server.log.warning("BMS not ready within timeout — workers will retry on connect")
         else:
             server.log.info("BMS ready")
     else:
@@ -107,4 +105,3 @@ def on_exit(server):
         server.log.info("Stopping BMS (PID %d)", _bms_proc.pid)
         stop_bms(_bms_proc)
         _bms_proc = None
-

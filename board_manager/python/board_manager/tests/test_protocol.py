@@ -43,10 +43,7 @@ class TestFrameReaderNewline:
 
     def test_read_multiple_messages(self):
         reader = FrameReader("newline")
-        reader.feed(
-            encode_and_frame({"a": 1}, "newline")
-            + encode_and_frame({"b": 2}, "newline")
-        )
+        reader.feed(encode_and_frame({"a": 1}, "newline") + encode_and_frame({"b": 2}, "newline"))
         assert reader.read_one() == {"a": 1}
         assert reader.read_one() == {"b": 2}
 
@@ -154,4 +151,3 @@ class TestFrameReaderInvalidMode:
         assert reader.buffered_bytes == 0
         reader.feed(b"hello")
         assert reader.buffered_bytes == 5
-

@@ -216,8 +216,7 @@ class TestHandleMessage:
             progress = [
                 m
                 for m in msgs
-                if m.get("type") == "event"
-                and m.get("topic", "").endswith("::progress")
+                if m.get("type") == "event" and m.get("topic", "").endswith("::progress")
             ]
             assert len(progress) >= 1
         finally:
@@ -271,8 +270,7 @@ class TestHandleMessage:
             progress = [
                 m
                 for m in msgs
-                if m.get("type") == "event"
-                and m.get("topic", "").endswith("::progress")
+                if m.get("type") == "event" and m.get("topic", "").endswith("::progress")
             ]
             assert len(progress) >= 1
         finally:
@@ -286,9 +284,7 @@ class TestHandleMessage:
             from arduino_grpc.exceptions import UploadError
 
             client = FakeClient()
-            client.upload_error = UploadError(
-                "Wrong port or board not in bootloader mode"
-            )
+            client.upload_error = UploadError("Wrong port or board not in bootloader mode")
 
             msg = {
                 "id": "r1",
@@ -318,17 +314,13 @@ class TestHandleMessage:
             progress = [
                 m
                 for m in msgs
-                if m.get("type") == "event"
-                and m.get("topic", "").endswith("::progress")
+                if m.get("type") == "event" and m.get("topic", "").endswith("::progress")
             ]
             assert len(progress) >= 3
             assert any(
-                "Starting upload to" in m.get("data", {}).get("output", "")
-                for m in progress
+                "Starting upload to" in m.get("data", {}).get("output", "") for m in progress
             )
-            assert any(
-                "Upload failed" in m.get("data", {}).get("error", "") for m in progress
-            )
+            assert any("Upload failed" in m.get("data", {}).get("error", "") for m in progress)
 
             error = [m for m in msgs if m.get("type") == "error"][-1]
             assert error["status"] == "error"
@@ -388,4 +380,3 @@ class TestHandleMessage:
         finally:
             parent.close()
             child.close()
-

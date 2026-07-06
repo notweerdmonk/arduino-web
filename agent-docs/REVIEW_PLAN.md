@@ -311,4 +311,48 @@ Verify that the plugin is correctly configured and all 12 README.md files render
 | R6 | test_ci.sh exit codes | Correctness | Q18.9 (exit 2) and Q18.10 (exit 3) unchanged |
 | R7 | Docs sync | Completeness | All 16 agent-facing docs + user-facing docs updated |
 
+---
+
+## Phase 118 — Ruff Format Audit — Review Plan
+
+**Goal**: Audit `pipenv run ruff format .` output to confirm all 111 reformatted
+files contain only cosmetic changes (no logic/semantic modifications), exclusion
+config is correct, and the formatter is safe to run.
+
+### Review Criteria
+
+| # | Item | Type | Method |
+|---|------|------|--------|
+| R1 | Exclusion config | Correctness | Verify `pyproject.toml` excludes generated protobuf stubs only |
+| R2 | Scope audit | Completeness | Capture full `ruff format --check .` output, categorize by package |
+| R3 | File-type check | Correctness | Confirm all changed files are `.py` (no `.js`, `.html`, `.proto`, etc.) |
+| R4 | Diff sampling | Correctness | Sample 2-3 files per package, verify changes are purely cosmetic |
+| R5 | Trailing blank lines | Consistency | Verify only trailing blank line normalization (EOF) |
+| R6 | Line wrapping | Consistency | Verify only line-length normalization (100 chars, PEP 8) |
+| R7 | Quote normalization | Consistency | Verify single→double quote changes (ruff default style) |
+| R8 | Verdict | Completeness | Safe to proceed / not safe |
+
+---
+
+#### Phase 118 follow-up — E501 Eradication
+
+**Goal**: Fix 35 E501 (line-too-long) errors in `scripts/add_license_headers.py`
+exposed by `ruff format --check .` post-formatting.
+
+**Root cause**: `DESCRIPTIONS` dict uses long paths as keys + long descriptions
+as values — combined string exceeds 100-char limit.
+
+**Fix**: Restructure long values with parenthetical wrapping:
+```python
+"long/path.py": (
+    "Long description that would exceed the line length limit."
+),
+```
+
+| R | Item | Type | Method |
+|---|------|------|--------|
+| R9 | Long-line identification | Scope | `awk 'length>100'` on dict lines 74-148 |
+| R10 | Fix application | Correctness | Wrap 35 values in `(...)\n` |
+| R11 | ruff check | Idempotency | Verify `ruff check .` → 0 errors |
+
 {% endraw %}

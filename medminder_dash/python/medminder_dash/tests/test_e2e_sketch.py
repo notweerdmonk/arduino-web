@@ -37,16 +37,12 @@ class TestMedMinderV2SketchModified:
     """Verify MedMinderV2.ino has been correctly modified to use alarm.hpp"""
 
     def test_sketch_file_exists(self):
-        assert os.path.exists(SKETCH_PATH), (
-            f"MedMinderV2.ino not found at {SKETCH_PATH}"
-        )
+        assert os.path.exists(SKETCH_PATH), f"MedMinderV2.ino not found at {SKETCH_PATH}"
 
     def test_sketch_includes_alarm_hpp(self):
         with open(SKETCH_PATH) as f:
             content = f.read()
-        assert '#include "alarm.hpp"' in content, (
-            "MedMinderV2.ino must include alarm.hpp"
-        )
+        assert '#include "alarm.hpp"' in content, "MedMinderV2.ino must include alarm.hpp"
 
     def test_sketch_no_longer_has_inline_struct(self):
         """The struct Medicine, medicines[], and N_MED should be gone from .ino"""
@@ -121,4 +117,3 @@ class TestEndToEndGenerateAndSketch:
         content = generate_alarm_hpp([])
         assert "const Medicine medicines[] = {};" in content
         assert "N_MED  (sizeof(medicines) / sizeof(medicines[0]))" in content
-

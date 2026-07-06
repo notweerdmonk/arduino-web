@@ -65,12 +65,8 @@ def _get_bms_env_config() -> dict:
         "tcp_host": os.environ.get(BmsEnv.TCP_HOST, BmsDefaults.TCP_HOST),
         "tcp_port": int(os.environ.get(BmsEnv.TCP_PORT, str(BmsDefaults.TCP_PORT))),
         "uds_path": os.environ.get(BmsEnv.UDS_PATH, BmsDefaults.UDS_PATH),
-        "arduino_daemon": os.environ.get(
-            BmsEnv.ARDUINO_DAEMON, BmsDefaults.ARDUINO_DAEMON
-        ),
-        "daemon_binary": os.environ.get(
-            BmsEnv.DAEMON_BINARY, BmsDefaults.DAEMON_BINARY
-        ),
+        "arduino_daemon": os.environ.get(BmsEnv.ARDUINO_DAEMON, BmsDefaults.ARDUINO_DAEMON),
+        "daemon_binary": os.environ.get(BmsEnv.DAEMON_BINARY, BmsDefaults.DAEMON_BINARY),
         "log_level": os.environ.get(BmsEnv.LOG_LEVEL, BmsDefaults.LOG_LEVEL),
     }
 
@@ -91,9 +87,7 @@ def _free_bms_resources(tcp_host: str, tcp_port: int, uds_path: str) -> None:
         )
         if result.returncode == 0 and result.stdout.strip():
             for pid in result.stdout.strip().splitlines():
-                logger.warning(
-                    "Killing stale BMS (PID %s) on %s:%s", pid, tcp_host, tcp_port
-                )
+                logger.warning("Killing stale BMS (PID %s) on %s:%s", pid, tcp_host, tcp_port)
                 try:
                     os.kill(int(pid), 15)
                 except (OSError, ValueError) as e:
@@ -161,9 +155,7 @@ def stop_bms(proc: subprocess.Popen | None, timeout: float = 5.0) -> None:
         proc.wait(timeout=timeout)
         logger.info("BMS (PID %d) stopped gracefully", proc.pid)
     except subprocess.TimeoutExpired:
-        logger.warning(
-            "BMS (PID %d) did not exit in %.1fs, sending SIGKILL", proc.pid, timeout
-        )
+        logger.warning("BMS (PID %d) did not exit in %.1fs, sending SIGKILL", proc.pid, timeout)
         proc.kill()
         proc.wait()
 
@@ -215,4 +207,3 @@ def wait_for_bms(
         tcp_port,
     )
     return False
-

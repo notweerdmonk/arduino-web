@@ -419,4 +419,19 @@ layout: default
 | R6 | All agent-facing docs synced | ✅ | 16 docs updated |
 | R7 | User-facing docs synced | ✅ | Documentation skill applied |
 
+---
+
+## Phase 118 — Ruff Format Audit — Review Task
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| R1 | Audit pyproject.toml ruff exclusion config | ✅ | `exclude = ["cc/arduino/cli/commands/v1/"]` — protobuf stubs only |
+| R2 | Run ruff format --check . and capture scope | ✅ | 111 files would be reformatted, 1 file already formatted |
+| R3 | File-type check — all .py files | ✅ | 111/111 are Python source files. Zero non-Python files |
+| R4 | Per-package breakdown | ✅ | medminder_dash:29, board_manager:26, arduino_dash:18, arduino_grpc:15, scripts:8, arduino_sketch_tools:7, board_manager_client:5, e2e:2, root:1 |
+| R5 | Diff sampling — cosmetic-only verification | ✅ | Sampled 8 files across 6 packages + root — all cosmetic (line wrapping, quotes, EOF blanks, adjacent string merging) |
+| R6 | Excluded dirs verification | ✅ | `cc/arduino/cli/commands/v1/` — 0 files in output |
+| R7 | Verdict | ✅ | Safe to proceed. Formatter is deterministic (like black/gofmt) |
+| R8 | E501 fix — scripts/add_license_headers.py | ✅ | 35 lines wrapped, 0 ruff errors |
+
 {% endraw %}

@@ -26,12 +26,13 @@ from setuptools import setup
 
 
 def _read_version():
-    init_path = Path(__file__).parent / 'arduino_grpc' / '__init__.py'
+    init_path = Path(__file__).parent / "arduino_grpc" / "__init__.py"
     with open(init_path) as f:
         for line in f:
-            if line.startswith('__version__'):
-                return ast.literal_eval(line.split('=')[1].strip())
-    return '0.0.0'
+            if line.startswith("__version__"):
+                return ast.literal_eval(line.split("=")[1].strip())
+    return "0.0.0"
+
 
 setup(
     name="arduino-grpc",
@@ -62,4 +63,3 @@ setup(
     ],
     keywords=["arduino", "grpc", "stubs", "protobuf"],
 )
-

@@ -88,4 +88,3 @@ def test_create_medicine_requires_board(client, app):
     )
     assert resp.status_code == 400
     assert b"Select a board first" in resp.data
-

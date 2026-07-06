@@ -149,4 +149,3 @@ class TopicRouter:
     def patterns(self) -> list[str]:
         """Return all registered topic patterns."""
         return list(self._subs.keys())
-

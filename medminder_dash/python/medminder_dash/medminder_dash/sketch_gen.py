@@ -156,4 +156,3 @@ def generate_alarm_hpp(medicines: list[Medicine]) -> str:
         ]
     )
     return "\n".join(lines)
-

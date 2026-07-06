@@ -31,4 +31,3 @@ from .daemon_helper import DaemonCtx
 def daemon_url() -> Generator[str, None, None]:
     with DaemonCtx() as url:
         yield url
-

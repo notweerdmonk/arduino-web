@@ -146,4 +146,3 @@ class TestTopicRouter:
         router.subscribe("s1", "board::+::event")
         router.unsubscribe("s1", "board::+::event")
         assert router.patterns == []
-

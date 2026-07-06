@@ -28,9 +28,7 @@ def test_resolve_board_info_includes_hardware_id():
     from arduino_grpc.models import Board, Port
 
     board = Board(
-        port=Port(
-            address="/dev/ttyACM0", hardware_id="USB VID:PID=2341:0043 SER=12345"
-        ),
+        port=Port(address="/dev/ttyACM0", hardware_id="USB VID:PID=2341:0043 SER=12345"),
         fqbn="arduino:avr:uno",
         name="Arduino Uno",
     )
@@ -105,4 +103,3 @@ def test_get_port_info_returns_hardware_id():
     finally:
         with state._known_ports_lock:
             state._known_ports.pop("/dev/ttyACM0", None)
-

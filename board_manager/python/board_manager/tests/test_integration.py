@@ -103,11 +103,7 @@ class TestBoardManagerIntegration:
         sock.sendall(Handshake.NEWLINE.value)
 
         reader = FrameReader("newline")
-        sock.sendall(
-            encode_and_frame(
-                {"type": "subscribe", "topic": "board::+::event"}, "newline"
-            )
-        )
+        sock.sendall(encode_and_frame({"type": "subscribe", "topic": "board::+::event"}, "newline"))
 
         data = sock.recv(4096)
         reader.feed(data)
@@ -234,17 +230,13 @@ class TestBoardManagerIntegration:
         finally:
             sock.setblocking(True)
 
-        sock.sendall(
-            encode_and_frame({"type": "subscribe", "topic": "test::unsub"}, "newline")
-        )
+        sock.sendall(encode_and_frame({"type": "subscribe", "topic": "test::unsub"}, "newline"))
         time.sleep(0.1)
         data = sock.recv(4096)
         reader.feed(data)
         assert reader.read_one() is not None
 
-        sock.sendall(
-            encode_and_frame({"type": "unsubscribe", "topic": "test::unsub"}, "newline")
-        )
+        sock.sendall(encode_and_frame({"type": "unsubscribe", "topic": "test::unsub"}, "newline"))
         time.sleep(0.1)
         data = sock.recv(4096)
         reader = FrameReader("newline")
@@ -266,9 +258,7 @@ class TestBoardManagerIntegration:
 
         for sock in socks:
             sock.sendall(
-                encode_and_frame(
-                    {"type": "subscribe", "topic": "board::+::event"}, "newline"
-                )
+                encode_and_frame({"type": "subscribe", "topic": "board::+::event"}, "newline")
             )
 
         time.sleep(0.2)
@@ -339,4 +329,3 @@ class TestBoardManagerIntegration:
             return data
         except socket.timeout:
             return b""
-

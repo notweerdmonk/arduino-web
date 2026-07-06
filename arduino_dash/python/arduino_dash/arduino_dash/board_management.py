@@ -23,9 +23,9 @@ limitations under the License.
 from flask import session
 
 from arduino_dash.utils import (
+    find_board_info_by_fqbn,
     get_first_board,
     get_port_info,
-    find_board_info_by_fqbn,
 )
 
 

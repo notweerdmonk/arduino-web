@@ -21,6 +21,7 @@ limitations under the License.
 """
 
 from unittest.mock import patch
+
 import pytest
 from medminder_dash.app import create_app
 from medminder_dash.medicines_state import Medicine

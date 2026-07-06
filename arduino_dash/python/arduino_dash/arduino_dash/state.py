@@ -23,9 +23,9 @@ limitations under the License.
 import logging
 import threading
 
-from arduino_dash.settings import UPLOAD_BASE_DIR
-
 import flask
+
+from arduino_dash.settings import UPLOAD_BASE_DIR  # noqa: F401
 from board_manager_client import PubSubClient
 
 _app: flask.Flask = None

@@ -29,8 +29,7 @@ import time
 from typing import Optional
 
 import grpc
-
-from cc.arduino.cli.commands.v1 import commands_pb2_grpc, commands_pb2
+from cc.arduino.cli.commands.v1 import commands_pb2, commands_pb2_grpc
 
 logger = logging.getLogger("board_manager.daemon")
 

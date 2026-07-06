@@ -39,17 +39,17 @@ from arduino_dash.pubsub import (
 from arduino_dash.sketch_management import (
     _find_existing_version,
     _normalize_ino_filename,
+    _render_sketch_path_selector,
     _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
-    _render_sketch_path_selector,
 )
 from arduino_dash.sketch_registry import get_assignment, set_assignment
 from arduino_dash.utils import (
     find_board_info_by_fqbn,
     get_first_board,
-    get_port_info,
     get_known_boards,
+    get_port_info,
     normalize_port,
 )
 
@@ -292,7 +292,8 @@ def init_html_routes(app: Flask, sock):
             f'<span id="global-fqbn-display" hx-swap-oob="true">{fqbn}</span>'
             f'<input type="hidden" id="global-fqbn" value="{fqbn}" hx-swap-oob="true">'
             f'<input type="hidden" id="fqbn" name="fqbn" value="{fqbn}" hx-swap-oob="true">'
-            f'<input type="hidden" id="active-board-hardware-id" name="hardware_id" value="{hardware_id}" hx-swap-oob="true">'
+            f'<input type="hidden" id="active-board-hardware-id" name="hardware_id" '
+            f'value="{hardware_id}" hx-swap-oob="true">'
         )
         return oob
 

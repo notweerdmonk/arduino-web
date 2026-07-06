@@ -25,7 +25,6 @@ import socket
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from board_manager_client.pubsub_client import PubSubClient
 
 

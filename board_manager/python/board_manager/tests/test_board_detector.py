@@ -22,10 +22,8 @@ limitations under the License.
 
 from unittest.mock import MagicMock, patch
 
-
-from board_manager.board_detector import BoardDetector
-
 from arduino_grpc.models import Board, Port
+from board_manager.board_detector import BoardDetector
 
 
 def _make_board(port: str, fqbn: str, name: str) -> Board:

@@ -1067,4 +1067,29 @@ This blacklist matches **any path depth** — not just root. Without the `includ
 | No raw `README.md` in `_site/` | ✅ |
 
 **Verdict**: ✅ **All changes are correct and verified.**
+
+## 2026-07-06 — Phase 114: Fix all ruff lint errors
+
+**Review scope**: 162 ruff lint fixes across 70 source files.
+
+**Findings**:
+1. All E/F/I/W errors resolved ✅
+2. 8/8 nox test sessions pass with 0 failures ✅
+3. Re-export imports preserved via `# noqa: F401` ✅
+4. 37 additional RUF warnings remain (opt-in, not in default select)
+5. 111 files would be reformatted by `ruff format` (formatting, not errors)
+
+**Verdict**: Phase 114 complete and verified.
+
+
+## 2026-07-06 — Phase 115: Remove asyncio_mode pytest warning
+
+**Review scope**: Remove stale `asyncio_mode = "auto"` config option.
+
+**Findings**:
+1. No package needs pytest-asyncio (0 grep hits) ✅
+2. 0 pytest warnings after removal ✅
+3. 8/8 nox sessions pass with 0 failures ✅
+
+**Verdict**: Phase 115 complete and verified.
 {% endraw %}

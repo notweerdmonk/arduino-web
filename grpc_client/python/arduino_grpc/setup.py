@@ -20,13 +20,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from arduino_grpc import __version__
-
+import ast
+from pathlib import Path
 from setuptools import setup
+
+
+def _read_version():
+    init_path = Path(__file__).parent / 'arduino_grpc' / '__init__.py'
+    with open(init_path) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return ast.literal_eval(line.split('=')[1].strip())
+    return '0.0.0'
 
 setup(
     name="arduino-grpc",
-    version=__version__,
+    version=_read_version(),
     description="gRPC client stubs for arduino-cli",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

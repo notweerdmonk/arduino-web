@@ -24,7 +24,7 @@ import argparse
 import logging
 
 from medminder_dash.app import create_app
-from medminder_dash.pubsub import init_pubsub, ensure_sketch_dir
+from medminder_dash.pubsub import ensure_sketch_dir, init_pubsub
 
 logging.basicConfig(level=logging.INFO)
 

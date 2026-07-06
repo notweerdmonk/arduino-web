@@ -20,13 +20,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from arduino_dash import __version__
+import ast
+from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+
+def _read_version():
+    init_path = Path(__file__).parent / 'arduino_dash' / '__init__.py'
+    with open(init_path) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return ast.literal_eval(line.split('=')[1].strip())
+    return '0.0.0'
 
 setup(
     name="arduino-dash",
-    version=__version__,
+    version=_read_version(),
     description="Web GUI for Arduino gRPC Board Manager",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

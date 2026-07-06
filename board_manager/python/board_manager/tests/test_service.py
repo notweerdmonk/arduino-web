@@ -25,11 +25,10 @@ import socket
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from board_manager.config import Config
 from board_manager.daemon_manager import DaemonStartError
-from board_manager.service import BoardManagerService, ClientConn
 from board_manager.protocol import encode_and_frame
+from board_manager.service import BoardManagerService, ClientConn
 
 
 @pytest.fixture

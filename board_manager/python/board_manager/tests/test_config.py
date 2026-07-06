@@ -23,7 +23,6 @@ limitations under the License.
 import os
 import tempfile
 
-
 from board_manager.config import load_config
 
 

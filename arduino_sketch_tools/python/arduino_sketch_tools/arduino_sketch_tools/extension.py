@@ -22,8 +22,8 @@ limitations under the License.
 
 import os
 import re
-import time
 import threading
+import time
 
 PORT_RE = re.compile(r"^/dev/[a-zA-Z0-9_/]+$")
 
@@ -210,7 +210,10 @@ class ArduinoSketchTools:
                 if percent != last:
                     pct_int = int(round(percent))
                     self._compile_last_pct[port_safe] = percent
-                    bar = f'<progress id="compile-progress-{port_safe}" value="{pct_int}" max="100" hx-swap-oob="true"></progress>'
+                    bar = (
+                        f'<progress id="compile-progress-{port_safe}" value="{pct_int}" '
+                        f'max="100" hx-swap-oob="true"></progress>'
+                    )
                     self._broadcast_ws(bar)
             if out or err:
                 text = (
@@ -220,7 +223,11 @@ class ArduinoSketchTools:
                     .replace(">", "&gt;")
                 )
                 pct_prefix = f"[{pct_int}%] " if percent >= 0 else ""
-                html = f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}"><div class="compile-line" data-port="{port}">{pct_prefix}{text}</div></span>'
+                html = (
+                    f'<span hx-swap-oob="beforeend:#compile-output-{port_safe}">'
+                    f'<div class="compile-line" data-port="{port}">'
+                    f'{pct_prefix}{text}</div></span>'
+                )
                 self._broadcast_ws(html)
         else:
             port = rest
@@ -260,7 +267,11 @@ class ArduinoSketchTools:
                     .replace(">", "&gt;")
                 )
                 port_safe = port.replace("/", "_")
-                html = f'<span hx-swap-oob="beforeend:#upload-output-{port_safe}"><div class="upload-line" data-port="{port}">{text}</div></span>'
+                html = (
+                    f'<span hx-swap-oob="beforeend:#upload-output-{port_safe}">'
+                    f'<div class="upload-line" data-port="{port}">'
+                    f'{text}</div></span>'
+                )
                 self._broadcast_ws(html)
         else:
             port = rest

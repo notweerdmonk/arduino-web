@@ -38,16 +38,16 @@
     "default": {
         "arduino-grpc": {
             "hashes": [
-                "sha256:894b4c63483ea7c163f1fe02cb34249888917e4d7778c05c19feb3d07f4515c9",
-                "sha256:aa0f8b7ac17b851d80dcb203a81748230ea8b93b37e0474acec35c2f21db9df7"
+                "sha256:78579b0b346fe74317f862767f28747b8b809ec5d3e6ac76b7b22d2455047d2f",
+                "sha256:e1bcdc5eeb222068ac0091dac16d87f3ef4a28cf5de5b5ef3b35aeb67607f4bb"
             ],
             "index": "arduino-grpc-local",
             "version": "==0.1.0"
         },
         "arduino-sketch-tools": {
             "hashes": [
-                "sha256:c5537ef0949619853e8d1ce7f2854f0dc15e02d47b4f40964e0149ad7f6a7b66",
-                "sha256:f8af8f5d8696fae10148c01880fddb6970908c2d9e054774d1b11532e638c9a3"
+                "sha256:c6a9dfef971e271e74850923e75b0aa2864a57c75db95a9e38ef585374b7cf47",
+                "sha256:e210e9ee139e8179a1f6df17c18560230cc9c4fd08967672f62cfb68a34f51ab"
             ],
             "index": "arduino-sketch-tools-local",
             "version": "==0.1.0"
@@ -62,16 +62,16 @@
         },
         "board-manager": {
             "hashes": [
-                "sha256:1a8cc0f9ff1f7f5e60eeb2362274675dc014d1db818c90cfa6e082bad130cf1c",
-                "sha256:5fb8c5aefc5836fdc082d4968641af25bb2e6fca8343b6e90314e99327233fd7"
+                "sha256:30e1b880f5bfb791da79be033cd0f454ab396dbfb976be7bf236b937e1b801b7",
+                "sha256:50d30fd66d023180e58f551fcc6a4156dc613970a627daedcd79a23baa01a1eb"
             ],
             "index": "board-manager-local",
             "version": "==0.1.0"
         },
         "board-manager-client": {
             "hashes": [
-                "sha256:122181145b4316a8e276fdc9f3fd13dc68139869f74fb235b92602dabf44835e",
-                "sha256:67b520bcd1dc8257fe18e0c9c9b13ad84a9685e87ed74ffe59538034a8659015"
+                "sha256:60afd124e7c2b35bd2b6760c81fddf5ed5ddb677ecbff8a619e62cbe06250880",
+                "sha256:61796ea7b2535c06188a7d7da06384010e9316f331e8c4de9e155d3d2a0c3927"
             ],
             "index": "board-manager-client-local",
             "version": "==0.1.0"

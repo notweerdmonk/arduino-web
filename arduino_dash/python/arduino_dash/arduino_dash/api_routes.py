@@ -39,11 +39,11 @@ from arduino_dash.pubsub import (
 from arduino_dash.sketch_management import (
     _find_existing_version,
     _normalize_ino_filename,
+    _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
 )
 from arduino_dash.sketch_registry import get_assignment, set_assignment
-from arduino_dash.sketch_management import _resolve_latest_upload
 from arduino_dash.utils import (
     get_board_events,
     get_known_boards,

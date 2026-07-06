@@ -30,11 +30,11 @@ except ImportError:
     Sock = None
 
 from arduino_dash import state
+from arduino_dash.api_routes import init_api_routes
+from arduino_dash.html_routes import init_html_routes
 from arduino_dash.pubsub import (
     _broadcast_ws,
 )
-from arduino_dash.html_routes import init_html_routes
-from arduino_dash.api_routes import init_api_routes
 from arduino_sketch_tools import ArduinoSketchTools
 
 
@@ -95,7 +95,7 @@ app = create_app()
 
 
 # Re-export names for test compatibility
-from arduino_dash.pubsub import (  # noqa: E402
+from arduino_dash.pubsub import (  # noqa: E402, F401
     _compute_sketch_checksum,
     _get_sketch_mtime,
     _make_meta,
@@ -106,27 +106,27 @@ from arduino_dash.pubsub import (  # noqa: E402
     _wait_for_response,
     init_pubsub,
 )
-from arduino_dash.sketch_management import (  # noqa: E402
+from arduino_dash.sketch_management import (  # noqa: E402, F401
     _normalize_ino_filename,
     _render_sketch_path_selector,
     _save_registry,
     _update_meta_hw_ids,
     _warm_upload_registry,
 )
-from arduino_dash.state import (  # noqa: E402
+from arduino_dash.state import (  # noqa: E402, F401
     _board_list,
     _board_list_lock,
     _compile_results,
     _compile_results_lock,
-    _last_compiled_sketch,
-    _last_compiled_sketch_lock,
     _last_compile_mtime,
     _last_compile_mtime_lock,
+    _last_compiled_sketch,
+    _last_compiled_sketch_lock,
     _pending_responses,
     _pending_responses_lock,
-    _upload_results,
-    _upload_results_lock,
     _upload_registry,
     _upload_registry_lock,
+    _upload_results,
+    _upload_results_lock,
 )
 

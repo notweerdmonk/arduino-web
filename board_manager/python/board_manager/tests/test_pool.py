@@ -25,7 +25,6 @@ import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from board_manager.pool import BoardPool, PoolLimits
 from board_manager.protocol import encode_and_frame
 

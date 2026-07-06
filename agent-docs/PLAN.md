@@ -1395,6 +1395,54 @@ Three issues found after Phase 20:
 - [x] 22 unit tests passing
 - [x] 6 integration tests passing (Connection, Init, List, ListAll, Watch, Compile)
 
+### Phase 113 — Fix setup.py isolated build failure
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+**Goal**: Fix `ModuleNotFoundError` in all 6 `setup.py` files when building with
+`python -m build` in isolated mode. Replace `from <pkg> import __version__` with
+an `ast.literal_eval` helper that reads the version from `__init__.py` without
+importing the package.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| Q1–Q6 | Fix all 6 setup.py files | ✅ |
+| Q7 | Verify single build (`board_manager`) | ✅ |
+| Q8 | Verify all builds (`nox -s all_builds`) — 7/7 sessions | ✅ |
+| Q9 | Sync all agent-facing docs | ✅ |
+
 ---
+
+### Phase 114 — Fix all ruff lint errors
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+**Goal**: Eliminate all 162 ruff lint errors (E, F, I, W rules). Auto-fix 138, manually fix 24 across 18 source files plus pyproject.toml config.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| Q1 | pyproject.toml config migration (select → lint.select) | ✅ |
+| Q2 | Auto-fix 138 errors via ruff --fix | ✅ |
+| Q3 | Fix 6 E402 imports in setup.py files | ✅ |
+| Q4 | Fix 17 E501 line-too-long in 11 files | ✅ |
+| Q5 | Fix 1 F841 unused-variable | ✅ |
+| Q6 | Restore re-exports with noqa (app.py, state.py) | ✅ |
+| Q7 | Verify: ruff 0 errors, all_tests 8/8 pass | ✅ |
+
+---
+
+### Phase 115 — Remove asyncio_mode pytest warning
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+**Goal**: Eliminate `PytestConfigWarning: Unknown config option: asyncio_mode` in all nox test sessions.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| Q1 | Remove `asyncio_mode = "auto"` from pyproject.toml | ✅ |
+| Q2 | Verify: nox -s all_tests — 0 warnings, 8/8 sessions | ✅ |
 
 {% endraw %}

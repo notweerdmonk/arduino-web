@@ -34,7 +34,11 @@ def parse_spec(file: Path) -> list[tuple[str, list[str]]]:
 
     for i, dm in enumerate(describe_matches):
         section_start = dm.start()
-        section_end = describe_matches[i + 1].start() if i + 1 < len(describe_matches) else len(text)
+        section_end = (
+            describe_matches[i + 1].start()
+            if i + 1 < len(describe_matches)
+            else len(text)
+        )
         section = text[section_start:section_end]
 
         describe_label = dm.group(1)

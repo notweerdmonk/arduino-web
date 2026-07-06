@@ -21,7 +21,6 @@ limitations under the License.
 """
 
 import re
-
 from typing import Optional, Tuple
 
 from arduino_dash import state

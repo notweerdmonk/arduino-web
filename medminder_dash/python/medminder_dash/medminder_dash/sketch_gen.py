@@ -26,7 +26,6 @@ from typing import Any
 
 from medminder_dash.medicines_state import Medicine
 
-
 _ENTRY_RE = re.compile(
     r"\{\s*"
     r"(\d+)\s*,\s*"

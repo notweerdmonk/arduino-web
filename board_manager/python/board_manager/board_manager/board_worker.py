@@ -69,7 +69,7 @@ def _make_event(topic: str, data: Any) -> dict:
 
 
 def main() -> None:
-    """Subprocess entrypoint: connect to arduino-cli daemon and handle messages over a Unix socket."""
+    """Subprocess entrypoint: connect to arduino-cli daemon and process messages over UDS."""
     fd = int(sys.argv[1])
     sock = socket.fromfd(fd, socket.AF_UNIX, socket.SOCK_STREAM)
     reader = FrameReader("newline")

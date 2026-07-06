@@ -83,8 +83,9 @@ def test_resolve_board_info_empty_on_exception():
 
 def test_get_port_info_returns_hardware_id():
     """get_port_info returns hardware_id when stored in _known_ports."""
-    from medminder_dash import state
     from medminder_dash.utils import get_port_info
+
+    from medminder_dash import state
 
     entry = {
         "port": "/dev/ttyACM0",

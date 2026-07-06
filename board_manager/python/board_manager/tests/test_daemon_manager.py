@@ -22,10 +22,9 @@ limitations under the License.
 
 import signal
 import subprocess
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-
 from board_manager.daemon_manager import DaemonManager, DaemonStartError
 
 
@@ -428,7 +427,10 @@ class TestDaemonManagerFindPortPid:
                     result.stdout = ""
                 else:
                     result.returncode = 0
-                    result.stdout = 'LISTEN 0 4096 127.0.0.1:50051 0.0.0.0:* users:(("arduino-cli",pid=12345,fd=6))\n'
+                    result.stdout = (
+                        'LISTEN 0 4096 127.0.0.1:50051 0.0.0.0:* '
+                        'users:(("arduino-cli",pid=12345,fd=6))\n'
+                    )
                 return result
 
             mock_run.side_effect = _side_effect

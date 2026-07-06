@@ -34,7 +34,7 @@ def _write_pidfile(path: str) -> None:
 
 
 def _remove_pidfile(path: str) -> None:
-    """Remove *path* only if it still contains *our* PID (avoid stealing another instance's pidfile)."""
+    """Remove *path* only if it still contains *our* PID (avoid stealing another's pidfile)."""
     try:
         current = str(os.getpid())
         if Path(path).read_text().strip() == current:

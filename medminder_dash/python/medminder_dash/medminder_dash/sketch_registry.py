@@ -21,6 +21,7 @@ limitations under the License.
 """
 
 from arduino_sketch_tools.sketch_registry import SketchRegistry
+
 from medminder_dash import state
 
 _registry = SketchRegistry(state._upload_registry, state._upload_registry_lock)

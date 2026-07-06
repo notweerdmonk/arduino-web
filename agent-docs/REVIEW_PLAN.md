@@ -264,4 +264,24 @@ Verify that the plugin is correctly configured and all 12 README.md files render
 - [x] `bundle exec jekyll build` — 0 errors
 - [x] All 12 README.html files present in `_site/`
 - [x] No raw `.md` copies in `_site/`
+
+---
+
+## Phase 114: Fix all ruff lint errors
+
+| # | Criteria | Approach | Status |
+|---|----------|----------|--------|
+| 1 | All E/F/I/W errors fixed | `ruff check .` must exit 0 | ✅ |
+| 2 | No test regressions | `nox -s all_tests` 8/8 pass | ✅ |
+| 3 | Re-exports preserved | Check app.py + state.py noqa directives | ✅ |
+
+
+---
+
+## Phase 115: Remove asyncio_mode pytest warning
+
+| # | Criteria | Approach | Status |
+|---|----------|----------|--------|
+| 1 | No pytest warnings | `nox -s all_tests` must have 0 warnings | ✅ |
+| 2 | No test regressions | 8/8 sessions pass | ✅ |
 {% endraw %}

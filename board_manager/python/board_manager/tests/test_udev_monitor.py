@@ -22,7 +22,6 @@ limitations under the License.
 
 from unittest.mock import MagicMock, patch
 
-
 from board_manager.udev_monitor import UdevMonitor
 
 

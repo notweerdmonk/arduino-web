@@ -374,4 +374,24 @@ layout: default
 ### Task R4 — Record findings in REVIEW_JOURNAL.md
 
 - [x] Record all review outcomes
+
+---
+
+## Phase 114 — Fix all ruff lint errors
+
+| Task | Scope | Status |
+|------|-------|--------|
+| R1 | Review ruff fixes for correctness | ✅ |
+| R2 | Review test results for regressions | ✅ |
+| R3 | Verify noqa directives correct | ✅ |
+
+
+---
+
+## Phase 115 — Remove asyncio_mode pytest warning
+
+| Task | Scope | Status |
+|------|-------|--------|
+| R1 | Verify 0 pytest warnings | ✅ |
+| R2 | Verify 8/8 sessions pass | ✅ |
 {% endraw %}

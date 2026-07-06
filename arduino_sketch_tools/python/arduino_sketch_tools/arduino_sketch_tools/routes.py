@@ -22,7 +22,7 @@ limitations under the License.
 
 import time
 
-from flask import Blueprint, current_app, render_template, request, jsonify
+from flask import Blueprint, current_app, jsonify, render_template, request
 
 compile_bp = Blueprint(
     "arduino_sketch_tools",

@@ -722,4 +722,28 @@ root VERSION file, and root package.json. Full suite expected to pass.
 - `_site/board_manager/python/board_manager/README.html` — rendered HTML ✅
 - `_site/medminder_dash/python/medminder_dash/README.html` — rendered HTML ✅
 - No raw `.md` output in `_site/` — all 12 README.md files excluded from static copy ✅
+
+## 2026-07-06 — Phase 114: Fix all ruff lint errors
+
+**Event**: Verified all ruff lint fixes across the monorepo.
+
+### Test Results
+
+- `ruff check .` — All checks passed!
+- `nox -s all_tests` — 8/8 sessions, 850+ tests, 0 failures
+- Re-export imports: app.py (3 blocks, 28+ names) and state.py (UPLOAD_BASE_DIR) preserved with `# noqa: F401`
+
+### Gotcha
+
+The initial `ruff --fix` removed 28 re-exports from `app.py` and `UPLOAD_BASE_DIR` from `state.py`. This caused 25 test failures in `test_app.py` that were fixed by restoring the imports with `# noqa: F401` (not just `# noqa: E402`). Always verify tests after auto-fix.
+
+
+## 2026-07-06 — Phase 115: Remove asyncio_mode pytest warning
+
+**Event**: Verified that removing `asyncio_mode = "auto"` from pyproject.toml eliminates pytest warnings.
+
+### Test Results
+
+- `nox -s all_tests` — 8/8 sessions, 0 `PytestConfigWarning`, 850+ tests, 0 failures
+- grep for `async def` / `@pytest.mark.asyncio` across all test files — 0 matches (confirms no package needs async test support)
 {% endraw %}

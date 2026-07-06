@@ -25,10 +25,9 @@ import json
 import logging
 import threading
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Optional
-
 
 logger = logging.getLogger(__name__)
 

@@ -22,4 +22,24 @@ All Phase 112 tests verified:
 - ✅ T1: `bundle exec jekyll build` — 0 errors
 - ✅ T2-T6: All 12 README.html files present in `_site/` with layout
 - ✅ T7: Zero raw `.md` copies in `_site/`
+
+---
+
+## Phase 114 — Fix all ruff lint errors
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | `ruff check .` — 0 errors | ✅ |
+| T2 | `nox -s all_tests` — 8/8 sessions pass | ✅ |
+| T3 | Verify re-export imports preserved | ✅ |
+
+
+---
+
+## Phase 115 — Remove asyncio_mode pytest warning
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | `nox -s all_tests` — 0 pytest warnings | ✅ |
+| T2 | 8/8 sessions pass | ✅ |
 {% endraw %}

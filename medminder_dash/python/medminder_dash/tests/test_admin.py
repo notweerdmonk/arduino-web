@@ -51,6 +51,7 @@ def app(tmp_path, monkeypatch):
         with state._upload_registry_lock:
             state._upload_registry.clear()
         import os as _os
+
         from medminder_dash.sketch_management import REGISTRY_FILE as _REGISTRY_FILE
 
         _os.path.isfile(_REGISTRY_FILE) and _os.remove(_REGISTRY_FILE)
@@ -220,8 +221,8 @@ class TestSetMedicinesSync:
         self, app, client, tmp_path, monkeypatch
     ):
         # Write alarm.hpp with 2 medicines
-        from medminder_dash.medicines_state import Medicine
         from medminder_dash.app import store
+        from medminder_dash.medicines_state import Medicine
 
         # Pre-populate store with 1 medicine
         store._board_meta["TestBoard"] = {
@@ -305,8 +306,8 @@ class TestSetMedicinesGenerate:
     def test_generate_with_valid_token_writes_file(
         self, app, client, tmp_path, monkeypatch
     ):
-        from medminder_dash.medicines_state import Medicine
         from medminder_dash.app import store
+        from medminder_dash.medicines_state import Medicine
 
         m1 = Medicine(name="Asp", hour=8, minute=30, day_of_week=1, day_of_month=0)
         store._board_meta["TestBoard"] = {"medicines": [m1]}
@@ -710,7 +711,7 @@ class TestAdminFrontendStructure:
         assert b'hx-get="/medicine/new"' in resp.data
 
     def test_admin_page_alarm_hpp_card_no_add_button(self, app, client, monkeypatch):
-        """When 2 cards (metadata != alarm.hpp), the alarm.hpp card must NOT have Add Medicine button."""
+        """When 2 cards (metadata != alarm.hpp), alarm.hpp must NOT have Add Medicine button."""
         monkeypatch.setattr(
             "medminder_dash.html_routes.get_known_ports",
             lambda: [
@@ -831,8 +832,9 @@ class TestMedMinderV2DefaultSketch:
         ]
 
     def test_api_sketches_default_first_when_uploads_exist(self, app, client, tmp_path):
-        from medminder_dash import state
         from medminder_dash.settings import _DEFAULT_SKETCH_DIR
+
+        from medminder_dash import state
 
         sketch_dir = tmp_path / "uploads" / "test_entry" / "MySketch"
         sketch_dir.mkdir(parents=True)
@@ -886,8 +888,8 @@ class TestMedMinderV2DefaultSketch:
         """Phase 62.1: _render_sketch_path_selector(include_default=True) injects
         MedMinderV2 as the first entry and auto-selects it. Used by /admin route.
         """
-        from medminder_dash.sketch_management import _render_sketch_path_selector
         from medminder_dash.settings import _DEFAULT_SKETCH_DIR
+        from medminder_dash.sketch_management import _render_sketch_path_selector
 
         with app.test_request_context("/admin"):
             html = _render_sketch_path_selector(include_default=True)
@@ -1281,14 +1283,15 @@ class TestPhase62Q4AdminSketchAssignment:
     ):
         """Admin page shows assigned sketch badge when per-board assignment exists."""
         sketch_path = str(tmp_path / "sketches" / "mysketch")
+        import os
+
+        from medminder_dash.settings import CONFIG_DIR
+        from medminder_dash.sketch_registry import reset_for_tests, set_assignment
         from medminder_dash.state import (
             _known_ports,
             _known_ports_lock,
             _upload_registry,
         )
-        from medminder_dash.sketch_registry import set_assignment, reset_for_tests
-        from medminder_dash.settings import CONFIG_DIR
-        import os
 
         os.makedirs(str(CONFIG_DIR), exist_ok=True)
         reset_for_tests()
@@ -1335,14 +1338,15 @@ class TestPhase62Q4AdminSketchAssignment:
         path is now loaded via htmx from /last-upload).
         """
         sketch_path = str(tmp_path / "sketches" / "mysketch")
+        import os
+
+        from medminder_dash.settings import CONFIG_DIR
+        from medminder_dash.sketch_registry import reset_for_tests, set_assignment
         from medminder_dash.state import (
             _known_ports,
             _known_ports_lock,
             _upload_registry,
         )
-        from medminder_dash.sketch_registry import set_assignment, reset_for_tests
-        from medminder_dash.settings import CONFIG_DIR
-        import os
 
         os.makedirs(str(CONFIG_DIR), exist_ok=True)
         reset_for_tests()

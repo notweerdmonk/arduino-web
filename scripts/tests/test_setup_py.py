@@ -31,7 +31,6 @@ from typing import Optional
 
 import pytest
 
-
 # Per-package expected metadata. Keys use the **dash-form** to match the
 # ``PACKAGES`` fixture in conftest.py.
 #   - ``name`` is the dist name (what `python setup.py --name` returns)

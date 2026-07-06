@@ -27,8 +27,9 @@ import threading
 import time
 from enum import Enum
 
-from arduino_dash import state
 from board_manager_client.pubsub_client import PubSubClient
+
+from arduino_dash import state
 
 
 class PubSubTopic(str, Enum):

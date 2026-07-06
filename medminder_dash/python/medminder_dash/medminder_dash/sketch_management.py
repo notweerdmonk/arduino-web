@@ -24,8 +24,8 @@ import bisect
 import datetime
 import json
 import os
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 from flask import render_template, request
 

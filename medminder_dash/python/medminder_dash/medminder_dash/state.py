@@ -26,9 +26,7 @@ from pathlib import Path
 from typing import Optional
 
 import flask
-
 from board_manager_client.pubsub_client import PubSubClient
-
 
 _app: flask.Flask = None
 logger = logging.getLogger("medminder_dash")

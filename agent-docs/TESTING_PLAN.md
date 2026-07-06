@@ -26,4 +26,37 @@ Verify that the `jekyll-optional-front-matter` plugin correctly processes all 12
 | 5 | `_site/board_manager/python/board_manager/README.html` exists | Rendered HTML with layout | ✅ Present |
 | 6 | `_site/medminder_dash/python/medminder_dash/README.html` exists | Rendered HTML with layout | ✅ Present |
 | 7 | No raw `README.md` in `_site/` | Zero `.md` output files | ✅ 0 raw `.md` copies |
+
+---
+
+## Phase 114: Fix all ruff lint errors
+
+### Scope
+
+Verify that ruff lint fixes don't break tests.
+
+### Test Strategy
+
+1. `ruff check .` must exit 0 with no errors
+2. `nox -s all_tests` must pass 8/8 sessions with 0 failures
+3. Re-export imports in `arduino_dash/app.py` and `arduino_dash/state.py` must be preserved (F401 noqa)
+
+### Test Scenarios
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| 1 | `ruff check .` | 0 errors | ✅ All checks passed! |
+| 2 | `nox -s all_tests` | 8/8 sessions pass | ✅ 8/8, 850+ tests, 0 failures |
+| 3 | `arduino_dash/app.py` re-exports | 3 blocks with noqa persist | ✅ Verified |
+| 4 | `arduino_dash/state.py` UPLOAD_BASE_DIR | Import with noqa persists | ✅ Verified |
+
+
+---
+
+## Phase 115: Remove asyncio_mode pytest warning
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| 1 | `nox -s all_tests` — 0 pytest warnings | 0 `PytestConfigWarning` | ✅ 0 warnings across 8 sessions |
+| 2 | All 8 sessions pass | 8/8 success | ✅ 8/8, 850+ tests, 0 failures |
 {% endraw %}

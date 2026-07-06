@@ -24,7 +24,6 @@ import os
 import subprocess
 from unittest.mock import MagicMock, patch
 
-
 from board_manager.boot import (
     _get_bms_env_config,
     start_bms,

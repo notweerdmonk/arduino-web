@@ -22,7 +22,6 @@ limitations under the License.
 """
 
 import ast
-import os
 import re
 import sys
 from pathlib import Path
@@ -344,7 +343,7 @@ def sh_header(rel: str, desc: str) -> str:
 
 def html_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for an .html file."""
-    lines = [f"<!--", f"    {rel}", "", f"    {desc}", "",
+    lines = ["<!--", f"    {rel}", "", f"    {desc}", "",
              "    Author: notweerdmonk",
              "    SPDX-License-Identifier: Apache-2.0", ""]
     for li in LICENSE_BLOCK.split("\n"):
@@ -358,7 +357,7 @@ def html_header(rel: str, desc: str) -> str:
 
 def css_header(rel: str, desc: str) -> str:
     """Build the Apache 2.0 header block for a .css file."""
-    lines = [f"/*", f" * {rel}", " *", f" * {desc}", " *",
+    lines = ["/*", f" * {rel}", " *", f" * {desc}", " *",
              " * Author: notweerdmonk",
              " * SPDX-License-Identifier: Apache-2.0", " *"]
     for li in LICENSE_BLOCK.split("\n"):
@@ -449,11 +448,7 @@ def patch_file(path: Path) -> bool:
 
 def _strip_existing_docstring(content: str, doc: str) -> str:
     """Remove the first docstring occurrence from Python source."""
-    # Try triple-double-quotes
-    escaped = re.escape(doc)
-    # Match """doc""" or '''doc''' with possible whitespace
-    pattern = r'(^|\s)"""\s*' + escaped.replace(r'\/\/', r'//') + r'\s*"""'
-    # Simpler approach: just find and remove the first triple-quoted string
+    # Just find and remove the first triple-quoted string
     for q in ('"""', "'''"):
         idx = content.find(q)
         if idx != -1:

@@ -28,8 +28,9 @@ import time
 from enum import Enum
 from typing import Any, Optional
 
-from medminder_dash import state
 from board_manager_client.pubsub_client import PubSubClient
+
+from medminder_dash import state
 
 from .settings import load_sketch_dir
 

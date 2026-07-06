@@ -25,9 +25,9 @@ from __future__ import annotations
 import logging
 import os
 
-from arduino_sketch_tools import ArduinoSketchTools
 from flask import Flask, session
 
+from arduino_sketch_tools import ArduinoSketchTools
 from medminder_dash import state
 from medminder_dash.medicines_state import MedicineStore
 from medminder_dash.pubsub import _get_alarm_hpp_path, broadcast_ws
@@ -143,8 +143,8 @@ def create_app() -> Flask:
     except ImportError:
         sock = None
 
-    from medminder_dash.html_routes import init_html_routes
     from medminder_dash.api_routes import init_api_routes
+    from medminder_dash.html_routes import init_html_routes
 
     init_html_routes(
         app,

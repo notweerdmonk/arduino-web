@@ -181,7 +181,7 @@ def test_reset_for_tests_does_not_raise():
 
 def test_save_and_load_registry(tmp_path, monkeypatch):
     """_save_registry and _load_registry persist and restore state."""
-    from medminder_dash.sketch_management import _save_registry, _load_registry
+    from medminder_dash.sketch_management import _load_registry, _save_registry
 
     monkeypatch.setattr("medminder_dash.sketch_management.REGISTRY_DIR", tmp_path)
     monkeypatch.setattr(

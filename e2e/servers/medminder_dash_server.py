@@ -1,8 +1,8 @@
 """Standalone Flask dev server for medminder_dash with optional mock state and BMS.
 
 Usage:
-    python3 e2e/servers/medminder_dash_server.py                    # empty state, port 8766
-    python3 e2e/servers/medminder_dash_server.py --mock              # with mock board + medicine data
+    python3 e2e/servers/medminder_dash_server.py              # empty state, port 8766
+    python3 e2e/servers/medminder_dash_server.py --mock       # with mock board + medicine data
     python3 e2e/servers/medminder_dash_server.py --mock --bms        # with mock data + BMS daemon
     python3 e2e/servers/medminder_dash_server.py --port 9000         # custom port
     python3 e2e/servers/medminder_dash_server.py --stop              # stop a running server
@@ -35,7 +35,7 @@ def _write_pidfile(path: str) -> None:
 
 
 def _remove_pidfile(path: str) -> None:
-    """Remove *path* only if it still contains *our* PID (avoid stealing another instance's pidfile)."""
+    """Remove *path* only if it still contains *our* PID (avoid stealing another's pidfile)."""
     try:
         current = str(os.getpid())
         if Path(path).read_text().strip() == current:

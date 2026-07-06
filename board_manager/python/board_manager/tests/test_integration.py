@@ -27,7 +27,6 @@ import sys
 import time
 
 import pytest
-
 from board_manager.protocol import FrameReader, Handshake, encode_and_frame
 
 UDS_PATH = "/tmp/board_mgr_inttest.sock"

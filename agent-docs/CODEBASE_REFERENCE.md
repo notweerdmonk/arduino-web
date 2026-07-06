@@ -4210,4 +4210,78 @@ __init__.py  (__version__ = "0.1.0")
 | 10 | `grpc_client/python/arduino_grpc/README.md` |
 | 11 | `arduino_dash/python/arduino_dash/README.md` |
 | 12 | `medminder_dash/python/medminder_dash/README.md` |
+
+
+---
+
+## 2026-07-06 — Phase 114: Fix all ruff lint errors
+
+### Ruff Config Pattern
+
+```toml
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+exclude = ["cc/arduino/cli/commands/v1/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+```
+
+Key: `select` (and all other lint config) goes under `[tool.ruff.lint]`, not `[tool.ruff]`.
+
+### Re-export with noqa Pattern
+
+```python
+# Re-export names for test compatibility
+from arduino_dash.pubsub import (  # noqa: E402, F401
+    _on_resp,
+    ...
+)
+```
+
+Use `# noqa: E402, F401` (or both codes as appropriate) to prevent ruff from removing intentional re-exports. Single `# noqa: E402` won't protect against F401 removal.
+
+### Intentionally Unused Unpack Pattern
+
+```python
+result, event = entry
+# result is intentionally unused — it's a convenience unpack pattern
+```
+
+Prefix with `_` or leave as-is if the unpack is for symmetry/clarity. RUF059 flags these but it's not in default select.
+
+### Files Modified (70 total, 473 insertions, 219 deletions)
+
+| File Pattern | Change |
+|---|---|
+| 6 × `setup.py` | E402: moved `from setuptools import setup` above `_read_version()` |
+| `pyproject.toml` | Config migration |
+| `arduino_dash/app.py` | Restored 3 re-export blocks with `# noqa: E402, F401` |
+| `arduino_dash/state.py` | Restored `UPLOAD_BASE_DIR` import with `# noqa: F401` |
+| `scripts/add_license_headers.py` | F841: removed dead `pattern` variable |
+| 11 files with E501 | Long lines wrapped |
+| 56+ files | Auto-fixed I001, W293, F401, F541 |
+
+
+---
+
+## 2026-07-06 — Phase 115: Remove asyncio_mode pytest warning
+
+### Problem
+
+`asyncio_mode = "auto"` in `pyproject.toml` under `[tool.pytest.ini_options]` requires `pytest-asyncio` plugin. Without it, pytest emits `PytestConfigWarning: Unknown config option: asyncio_mode` in every test session.
+
+### Fix
+
+Removed line 20 from `pyproject.toml`:
+
+```diff
+- asyncio_mode = "auto"
+```
+
+### Verification
+
+- `nox -s all_tests` — 0 warnings across all 8 sessions
+- `grep -r "async def\|@pytest.mark.asyncio" */python/*/tests/` — 0 matches (confirms no package needs async tests)
 {% endraw %}

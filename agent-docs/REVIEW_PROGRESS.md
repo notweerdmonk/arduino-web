@@ -116,4 +116,24 @@ layout: default
 | R2 | Verify `_config.yml` changes | ✅ | Plugin listed, `remove_originals: true`, 12 include paths |
 | R3 | Verify build output | ✅ | `bundle exec jekyll build` — 0 errors; 12 README.html files |
 | R4 | Record findings in REVIEW_JOURNAL.md | ✅ | Full entry recorded |
+
+---
+
+## Phase 114: Fix all ruff lint errors
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | All E/F/I/W errors fixed | ✅ | 0 errors |
+| R2 | No test regressions | ✅ | 8/8 nox sessions |
+| R3 | Re-export noqa verified | ✅ | app.py + state.py |
+
+
+---
+
+## Phase 115: Remove asyncio_mode pytest warning
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | 0 pytest warnings | ✅ | No PytestConfigWarning |
+| R2 | 8/8 sessions pass | ✅ | 850+ tests, 0 failures |
 {% endraw %}

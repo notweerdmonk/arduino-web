@@ -4172,4 +4172,47 @@ Flask captures `port = "dev/ttyACM0"` — wrong. Passed directly to gRPC `Upload
 - Create research documents
 - Fix gRPC stubs issues
 - Create clean Python module structure
+
+---
+
+## 2026-07-06 — Phase 114: Fix all ruff lint errors
+
+**Event**: Ran `ruff check .` for the first time in a while — 162 errors across the entire monorepo.
+
+### Findings
+- **Config**: `select` was in `[tool.ruff]` instead of `[tool.ruff.lint]` — deprecation warning
+- **I001 (66)**: Import blocks unsorted across most files — auto-fixed
+- **W293 (37)**: Trailing whitespace on blank lines — auto-fixed  
+- **F401 (30)**: Unused imports — auto-fixed, but needed to restore 2 intentional re-export blocks with `# noqa: F401`
+- **E402 (6)**: All 6 `setup.py` files had `from setuptools import setup` below `_read_version()` — moved above the function
+- **E501 (17)**: 11 files with long lines (up to 160 chars) — manually wrapped all
+- **F541 (5)**: f-strings without placeholders — auto-fixed
+- **F841 (1)**: Unused `pattern` variable in `add_license_headers.py` — removed dead code
+- **Format**: 111 files would be reformatted by `ruff format` (not selected)
+
+### Gotcha
+`ruff check --fix` removed `from arduino_dash.settings import UPLOAD_BASE_DIR` from `state.py` and 28 re-exports from `app.py` (F401). These were intentional re-exports for test compatibility via `patch("arduino_dash.state.UPLOAD_BASE_DIR", ...)`. Restored with `# noqa: F401`.
+
+### Verification
+- `pipenv run ruff check .` — All checks passed!
+- `nox -s all_tests` — 8/8 sessions, 850+ tests, 0 failures
+
+### Remaining (opt-in, not in select)
+- RUF: 37 additional warnings (unused noqa, unused unpacked vars, ambiguous chars, etc.)
+- `ruff format`: 111 files would be reformatted
+
+
+## 2026-07-06 — Phase 115: Remove asyncio_mode pytest warning
+
+**Event**: User noticed `PytestConfigWarning: Unknown config option: asyncio_mode` in all test session output.
+
+### Root Cause
+`asyncio_mode = "auto"` in root `pyproject.toml:20`. No package in the monorepo has `pytest-asyncio` installed (confirmed: 0 grep hits for `pytest-asyncio` in any Pipfile, 0 grep hits for `async def` or `@pytest.mark.asyncio` in any test file). Without the plugin, pytest doesn't recognize the option.
+
+### Fix
+Removed `asyncio_mode = "auto"` from `[tool.pytest.ini_options]` in `pyproject.toml`.
+
+### Verification
+`nox -s all_tests` — 8/8 sessions, 0 warnings, 850+ tests, 0 failures.
+
 {% endraw %}

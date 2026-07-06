@@ -24,9 +24,8 @@ import os
 import tempfile
 
 import pytest
-
-from medminder_dash.sketch_gen import generate_alarm_hpp
 from medminder_dash.medicines_state import Medicine
+from medminder_dash.sketch_gen import generate_alarm_hpp
 
 SKETCH_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), *[".."] * 4, "sketches", "MedMinderV2")

@@ -90,6 +90,10 @@ layout: default
 | 109 | Code Review of Phase 107/108 | ✅ DONE | 160 scripts + 8/8 nox |
 | 110 | Authentication, Authorization, CSRF, Rate Limiting | ✅ DONE | 5 Critical findings addressed |
 | 111 | Semantic Versioning v0.1.0 Baseline | ✅ DONE | 8/8 nox + Jekyll 0 errors |
+| 112 | Jekyll Optional Front Matter Plugin | ✅ DONE | 0 jekyll errors |
+| 113 | Fix setup.py isolated build failure | ✅ DONE | 7/7 nox builds |
+| 114 | Fix all ruff lint errors | ✅ DONE | 8/8 nox tests |
+| 115 | Remove asyncio_mode pytest warning | ✅ DONE | 0 warnings, 8/8 nox |
 
 ## Phase 60 — COMPLETED ✅
 
@@ -921,4 +925,42 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 
 **Verification**: `nox -s all_tests` — 8/8 sessions, 0 failures, 0 errors ✅
 
+---
+
+## Phase 114 — Fix all ruff lint errors ✅ COMPLETED
+
+**Date**: 2026-07-06
+
+**Goal**: Eliminate all 162 ruff lint errors across the monorepo.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | pyproject.toml config migration | ✅ |
+| 2 | Auto-fix 138 errors | ✅ |
+| 3 | Fix 6 E402 in setup.py | ✅ |
+| 4 | Fix 17 E501 in 11 files | ✅ |
+| 5 | Fix F841 unused variable | ✅ |
+| 6 | Restore re-exports with noqa | ✅ |
+| 7 | Verify ruff 0 errors + all_tests 8/8 | ✅ |
+
+**Verification**: `ruff check .` — 0 errors. `nox -s all_tests` — 8/8 sessions, 850+ tests, 0 failures.
+
+**Gotcha**: `ruff --fix` removes re-export imports. Always check tests after auto-fix. Use `# noqa: E402, F401` for intentional re-exports.
+
+**70 files changed, 473 insertions, 219 deletions**.
+
+
+
+## Phase 115 — Remove asyncio_mode pytest warning ✅ COMPLETED
+
+**Date**: 2026-07-06
+
+**Goal**: Eliminate `PytestConfigWarning: Unknown config option: asyncio_mode` in all nox test sessions.
+
+| Q | Scope | Status |
+|---|-------|--------|
+| 1 | Remove `asyncio_mode = "auto"` from pyproject.toml | ✅ |
+| 2 | Verify: 0 pytest warnings, 8/8 sessions | ✅ |
+
+**Verification**: `nox -s all_tests` — 0 warnings, 8/8 sessions, 850+ tests, 0 failures.
 {% endraw %}

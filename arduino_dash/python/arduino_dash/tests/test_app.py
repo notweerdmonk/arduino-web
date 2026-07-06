@@ -28,10 +28,10 @@ import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
+from arduino_dash.sketch_management import REGISTRY_FILE as _REGISTRY_FILE
 
 from arduino_dash import app as _app_module
 from arduino_dash import state
-from arduino_dash.sketch_management import REGISTRY_FILE as _REGISTRY_FILE
 
 
 @pytest.fixture(autouse=True)

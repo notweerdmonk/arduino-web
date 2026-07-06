@@ -22,6 +22,8 @@ limitations under the License.
 
 from pathlib import Path
 
+import pytest
+from medminder_dash.medicines_state import Medicine
 from medminder_dash.sketch_gen import (
     generate_alarm_hpp,
     minute_to_decade,
@@ -29,8 +31,6 @@ from medminder_dash.sketch_gen import (
     unesc_text,
     validate_hour,
 )
-from medminder_dash.medicines_state import Medicine
-import pytest
 
 
 class TestMinuteToDecade:

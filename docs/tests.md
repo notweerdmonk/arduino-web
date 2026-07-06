@@ -178,11 +178,12 @@ Four tools enforce code style across the monorepo. All commands run from the pro
 Ruff lints and formats all Python source. Uses the root `pipenv` venv:
 
 ```bash
-pipenv run ruff check .       # lint (F401, F841, E731, E741, E713, etc.)
-pipenv run ruff format .      # format (108 files, 0 diffs when clean)
+pipenv run ruff check .       # lint (select E, F, I, W)
+pipenv run ruff check --fix . # auto-fix sortable/removable issues
+pipenv run ruff format .      # format (111 files, 0 diffs when clean)
 ```
 
-Config is in each package's `pyproject.toml` under `[tool.ruff]`. Generated protobuf stubs are excluded.
+Config is in `pyproject.toml` under `[tool.ruff]`. Lint rule selection lives under `[tool.ruff.lint]`. Generated protobuf stubs (`cc/arduino/cli/commands/v1/`) are excluded.
 
 ### djlint (Jinja2 templates)
 

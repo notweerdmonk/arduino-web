@@ -10,13 +10,15 @@ Usage examples:
   python arduino_board_status.py --daemon localhost:50051 --detect
 
   # upload sketch to a port (compiles then uploads)
-  python arduino_board_status.py --daemon localhost:50051 --upload /path/to/sketch --port /dev/ttyUSB0 --fqbn arduino:avr:uno
+  python arduino_board_status.py --daemon localhost:50051 --upload /path/to/sketch \\
+    --port /dev/ttyUSB0 --fqbn arduino:avr:uno
 """
 
 import argparse
-import grpc
-import sys
 import os
+import sys
+
+import grpc
 from cc.arduino.cli.commands.v1 import commands_pb2 as rpc_pb2
 from cc.arduino.cli.commands.v1 import commands_pb2_grpc as rpc_pb2_grpc
 

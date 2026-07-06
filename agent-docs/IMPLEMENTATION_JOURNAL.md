@@ -1062,4 +1062,40 @@ to the next.
 **Gotcha**: The plugin's `FILENAME_BLACKLIST` (case-insensitive) at `lib/jekyll-optional-front-matter.rb` excludes `README` at ALL path depths, not just root. Without the `include` list, even `board_manager/python/board_manager/README.md` would be skipped.
 
 **Verification**: `bundle exec jekyll build` — 0 errors. All 12 README.md files appear as `.html` in `_site/`. Use `grep -c '<html' _site/README.html` (or any README.html) to confirm they render with layout.
+
+
+---
+
+## 2026-07-06 — Phase 114: Fix all ruff lint errors
+
+**Objective**: Eliminate all 162 ruff lint errors (E, F, I, W rules) across the monorepo.
+
+**Problem**: `ruff check .` returned 162 errors. The config had a deprecation warning (`select` in wrong section).
+
+**Solution**:
+1. **Config**: Migrated `select` to `[tool.ruff.lint]` section
+2. **Auto-fix**: `ruff check --fix` handled 138 of 162 errors (I001, W293, F401, F541)
+3. **Manual fixes**: 24 remaining errors across 18 files:
+   - E402: All 6 setup.py files — moved `from setuptools import setup` above `_read_version()`
+   - E501: 17 long lines in 11 files — wrapped with string continuation, parenthesized expressions, or docstring rewording
+   - F841: Removed dead `pattern` variable in `add_license_headers.py`
+4. **Fallout**: `ruff --fix` removed re-export imports in `app.py` (28 names) and `state.py` (UPLOAD_BASE_DIR). Tests patching `arduino_dash.state.UPLOAD_BASE_DIR` failed. Restored with `# noqa: F401` directives.
+
+**Changes by file count**: 70 files changed, 473 insertions(+), 219 deletions(-).
+
+**Verification**: `ruff check .` → All checks passed! `nox -s all_tests` → 8/8 sessions, 850+ tests, 0 failures.
+
+**Remaining (opt-in)**: RUF (37 warnings) and `ruff format` (111 files reformattable) not in the default `select`.
+
+
+---
+
+## 2026-07-06 — Phase 115: Remove asyncio_mode pytest warning
+
+**Objective**: Eliminate `PytestConfigWarning: Unknown config option: asyncio_mode` from all 8 nox test sessions.
+
+**Problem**: `asyncio_mode = "auto"` is a `pytest-asyncio` plugin option. When the plugin isn't installed, pytest doesn't recognize it and emits a warning per session. No package in this monorepo uses async tests.
+
+**Verification**: `nox -s all_tests` — 8/8 sessions, 0 pytest warnings, 850+ tests, 0 failures.
+
 {% endraw %}

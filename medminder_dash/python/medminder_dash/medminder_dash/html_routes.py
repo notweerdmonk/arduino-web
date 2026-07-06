@@ -29,18 +29,18 @@ import os
 import shutil
 import uuid
 
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, redirect, render_template, request, session, url_for
 from werkzeug.utils import secure_filename
 
 from medminder_dash import state
 from medminder_dash.medicines_state import Medicine
 from medminder_dash.pubsub import (
+    _get_alarm_hpp_path,
     add_ws_client,
+    broadcast_ws,
+    ensure_sketch_dir,
     is_connected,
     is_daemon_ready,
-    ensure_sketch_dir,
-    _get_alarm_hpp_path,
-    broadcast_ws,
     remove_ws_client,
 )
 from medminder_dash.settings import _DEFAULT_SKETCH_DIR, load_sketch_dir
@@ -49,13 +49,15 @@ from medminder_dash.sketch_management import (
     _compute_sketch_checksum,
     _find_existing_version,
     _normalize_ino_filename,
+    _render_sketch_path_selector,
     _resolve_latest_upload,
     _save_registry,
     _update_meta_hw_ids,
-    _render_sketch_path_selector,
 )
 from medminder_dash.sketch_registry import (
     get_assignment as get_board_sketch_assignment,
+)
+from medminder_dash.sketch_registry import (
     set_assignment,
 )
 from medminder_dash.utils import (
@@ -641,7 +643,8 @@ def init_html_routes(
             _get_alarm_hpp_path(),
         )
         return (
-            f'<div class="log-viewer">Generated alarm.hpp with {len(meds)} enabled medicine(s).</div>',
+            f'<div class="log-viewer">Generated alarm.hpp with '
+            f'{len(meds)} enabled medicine(s).</div>',
             200,
         )
 

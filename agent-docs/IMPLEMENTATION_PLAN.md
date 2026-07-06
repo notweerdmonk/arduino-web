@@ -214,5 +214,151 @@ Front matter was stripped from all 12 README.md files during the document audit 
 - Plugin docs: https://github.com/benbalter/jekyll-optional-front-matter
 - Blacklist source: `lib/jekyll-optional-front-matter.rb` — `FILENAME_BLACKLIST = %w(README LICENSE LICENCE COPYING CODE_OF_CONDUCT CONTRIBUTING ISSUE_TEMPLATE PULL_REQUEST_TEMPLATE)`
 
+
+## Phase 113 — Fix setup.py isolated build failure
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+`python -m build` (used by nox `build()` sessions and `scripts/ci.sh`) creates an
+isolated build environment where the package being built is not on `sys.path`. All 6
+`setup.py` files do `from <pkg> import __version__` which fails with:
+`ModuleNotFoundError: No module named '<pkg>'`.
+
+The fix replaces the direct import with an `ast.literal_eval` helper that reads
+`__version__` from the package's `__init__.py` file without importing the module.
+This preserves the single-source-of-truth pattern (version still lives in `__init__.py`)
+while working in isolated build environments.
+
+### Design
+
+Pattern for each `setup.py`:
+
+```python
+import ast
+from pathlib import Path
+
+def _read_version():
+    init_path = Path(__file__).parent / '<pkg_name>' / '__init__.py'
+    with open(init_path) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return ast.literal_eval(line.split('=')[1].strip())
+    return '0.0.0'
+```
+
+Replace `from <pkg> import __version__` and `version=__version__` with the helper.
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | board_manager setup.py | Replace import with _read_version() | ✅ |
+| Q2 | board_manager_client setup.py | Replace import with _read_version() | ✅ |
+| Q3 | arduino_sketch_tools setup.py | Replace import with _read_version() | ✅ |
+| Q4 | arduino_dash setup.py | Replace import with _read_version() | ✅ |
+| Q5 | arduino_grpc setup.py | Replace import with _read_version() | ✅ |
+| Q6 | medminder_dash setup.py | Replace import with _read_version() | ✅ |
+| Q7 | Verify single build | `nox -s 'build(board_manager)'` — success | ✅ |
+| Q8 | Verify all builds | `nox -s all_builds` — 7/7 sessions in 56s | ✅ |
+| Q9 | Update all agent-facing docs | Sync PLAN, JOURNAL, IMPLEMENTATION_*, TESTING_*, REVIEW_*, CODEBASE_REFERENCE | ✅ |
+
+### Design Decisions
+
+1. **`ast.literal_eval` over `exec` / regex**: `ast.literal_eval` safely evaluates the
+   version string literal without executing arbitrary code. Regex would be fragile
+   (whitespace, quoting variations). `exec` would be unsafe.
+2. **`Path(__file__).parent` over fixed paths**: Relative to `setup.py` itself, so
+   the same pattern works regardless of where the build command is invoked from.
+3. **`startswith('__version__')` over regex**: Simple, fast, and catches
+   `__version__ = "0.1.0"` regardless of spacing around `=`.
+4. **Fallback `'0.0.0'`**: Prevents silent failures. If parsing ever fails, the
+   version degrades to `0.0.0` rather than raising an opaque build error.
+
+### Rollback
+
+Each setup.py change is independent. Revert via `git checkout -- <file>` for
+individual files or `git revert` for the entire phase.
+
+### Existing Version Process (unchanged)
+
+- `__init__.py`: `__version__ = "0.1.0"` — single source of truth
+- `setup.py`: `version=_read_version()` — reads from `__init__.py` without import
+- `pyproject.toml`: `version = "0.1.0"` — PEP 621 compliance (redundant)
+- `VERSION` (root): `0.1.0` — project-wide reference
+- `package.json`: `"version": "0.1.0"` — npm tooling
+
+## Phase 114 — Fix all ruff lint errors
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+162 ruff lint errors across 70+ files after running `ruff check .` for the first time in a while.
+
+### Scope
+
+| Category | Count | Auto-fixable | Description |
+|----------|-------|-------------|-------------|
+| E402 | 6 | ❌ | Import not at top of file (setup.py) |
+| E501 | 17 | ❌ | Line too long (>100) |
+| F841 | 1 | ❌ | Unused variable |
+| F401 | 30 | ✅ | Unused imports |
+| I001 | 66 | ✅ | Unsorted imports |
+| W293 | 37 | ✅ | Blank line whitespace |
+| F541 | 5 | ✅ | f-string no placeholders |
+| Config | 1 | — | select → lint.select deprecation |
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | pyproject.toml config | Migrate `select` to `[tool.ruff.lint]` | ✅ |
+| Q2 | Auto-fix 138 errors | `ruff check --fix` (I001, W293, F401, F541) | ✅ |
+| Q3 | E402 in setup.py (6 files) | Move `from setuptools import setup` above `_read_version()` | ✅ |
+| Q4 | E501 in 11 files (17 lines) | Wrap long f-strings, docstrings, expressions | ✅ |
+| Q5 | F841 | Remove dead `pattern` variable in `add_license_headers.py` | ✅ |
+| Q6 | Restore re-exports | Add `# noqa: F401` to app.py (3 blocks) and state.py re-exports | ✅ |
+| Q7 | Verify | `ruff check .` → 0 errors, `nox -s all_tests` → 8/8 sessions | ✅ |
+
+### Files Modified
+
+70 files changed, 473 insertions(+), 219 deletions(-). Key files:
+
+- `pyproject.toml` — config migration
+- 6 × `setup.py` — E402 fix (import order)
+- `arduino_dash/app.py` — restored re-export blocks with `# noqa: F401`
+- `arduino_dash/state.py` — restored `UPLOAD_BASE_DIR` import with `# noqa: F401`
+- `scripts/add_license_headers.py` — removed dead `pattern` variable
+- `arduino_dash/html_routes.py`, `extension.py`, `board_worker.py`, `test_daemon_manager.py`, `arduino_dash_server.py`, `medminder_dash_server.py`, `arduino_upload.py`, `medminder_dash/html_routes.py`, `test_admin.py`, `noxfile.py`, `docstring_audit.py`, `gen_e2e_spec_docs.py` — E501 wraps
+- `scripts/tests/*`, `board_manager/tests/*`, `board_manager_client/tests/*`, `arduino_dash/tests/*`, `medminder_dash/tests/*` — auto-fixed imports/whitespace
+
+### Gotchas
+
+1. `ruff --fix` removes re-export imports (F401) even when tests depend on them via `patch()`. Always check test files after auto-fix.
+2. `# noqa: E402` alone doesn't protect against F401 removal. Use `# noqa: E402, F401` for intentional re-exports.
 ---
+
+## Phase 115 — Remove asyncio_mode pytest warning
+
+**Date**: 2026-07-06
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+`PytestConfigWarning: Unknown config option: asyncio_mode` appeared in all 8 nox test sessions. The `asyncio_mode = "auto"` option requires `pytest-asyncio` to be installed — no package in the monorepo uses async tests.
+
+### Scope
+
+| File | Change | Impact |
+|------|--------|--------|
+| `pyproject.toml` | Remove `asyncio_mode = "auto"` from `[tool.pytest.ini_options]` | Eliminates 8 pytest warnings |
+
+### Verification
+
+`nox -s all_tests` — 8/8 sessions, 0 pytest warnings, 850+ tests, 0 failures.
+
 {% endraw %}

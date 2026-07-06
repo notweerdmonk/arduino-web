@@ -23,7 +23,6 @@ limitations under the License.
 import socket
 
 import pytest
-
 from board_manager.protocol import FrameReader
 
 
@@ -141,6 +140,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             from unittest.mock import MagicMock
+
             import board_manager.board_worker as bw
 
             client = FakeClient()
@@ -174,6 +174,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             from unittest.mock import MagicMock
+
             import board_manager.board_worker as bw
 
             client = FakeClient()
@@ -227,6 +228,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             from unittest.mock import MagicMock
+
             import board_manager.board_worker as bw
 
             client = FakeClient()
@@ -280,8 +282,8 @@ class TestHandleMessage:
     def test_upload_failure_sends_error_dict_with_status(self):
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
-            from arduino_grpc.exceptions import UploadError
             import board_manager.board_worker as bw
+            from arduino_grpc.exceptions import UploadError
 
             client = FakeClient()
             client.upload_error = UploadError(
@@ -342,6 +344,7 @@ class TestHandleMessage:
         parent, child = socket.socketpair(socket.AF_UNIX, socket.SOCK_STREAM)
         try:
             from unittest.mock import MagicMock
+
             import board_manager.board_worker as bw
 
             client = FakeClient()

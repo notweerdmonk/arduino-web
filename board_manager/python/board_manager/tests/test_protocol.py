@@ -22,14 +22,14 @@ limitations under the License.
 
 import json
 import struct
-import pytest
 
+import pytest
 from board_manager.protocol import (
     FrameReader,
     Handshake,
-    encode_and_frame,
     decode_frame,
     detect_mode_from_handshake,
+    encode_and_frame,
 )
 
 

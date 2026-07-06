@@ -187,10 +187,13 @@ Config is in `pyproject.toml` under `[tool.ruff]`. Lint rule selection lives und
 
 ### djlint (Jinja2 templates)
 
-Djlint checks HTML/Jinja2 template syntax across all 190+ template files. Uses the root `pipenv` venv:
+Djlint checks HTML/Jinja2 template formatting across all 50 source
+templates (25 medminder_dash, 15 arduino_dash, 10 arduino_sketch_tools).
+Generated HTML output (`_site/`, `docs/reference/`, etc.) is excluded
+via `extend_exclude` in `pyproject.toml`. Uses the root `pipenv` venv:
 
 ```bash
-pipenv run djlint . --check      # lint only (no file modifications)
+pipenv run djlint . --check      # check formatting (exit 0 = clean)
 pipenv run djlint . --reformat   # auto-fix formatting
 ```
 

@@ -1092,4 +1092,34 @@ This blacklist matches **any path depth** — not just root. Without the `includ
 3. 8/8 nox sessions pass with 0 failures ✅
 
 **Verdict**: Phase 115 complete and verified.
+
+---
+
+## Phase 116 — djlint template reformatting
+
+**Date**: 2026-07-06 19:42
+
+### Review Criteria
+
+| # | Criteria | Result | Notes |
+|---|----------|--------|-------|
+| 1 | `djlint . --check` exit 0 | ✅ | 50 files checked, 0 flagged |
+| 2 | `ruff check .` exit 0 | ✅ | 0 errors |
+| 3 | Generated dirs excluded | ✅ | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` |
+
+### Findings
+
+- All changes are cosmetic (indentation, whitespace, casing)
+- No structural HTML or Jinja template syntax modified
+- djlint needed 2 passes to converge (known idempotency issue)
+- Codebase reference updated with djlint config and command reference
+
+### Cross-References
+
+- **Detailed gotcha analysis**: See `JOURNAL.md` Phase 116 entry — contains
+  full root-cause breakdown of the djlint `--reformat`/`--check` disagreement
+  loop, the 8 affected files, detection steps, workaround options, and
+  upstream fix recommendations.
+
+**Verdict**: Phase 116 complete and verified.
 {% endraw %}

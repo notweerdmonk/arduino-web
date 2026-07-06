@@ -4284,4 +4284,48 @@ Removed line 20 from `pyproject.toml`:
 
 - `nox -s all_tests` — 0 warnings across all 8 sessions
 - `grep -r "async def\|@pytest.mark.asyncio" */python/*/tests/` — 0 matches (confirms no package needs async tests)
+
+---
+
+## Phase 116 — djlint template reformatting
+
+### Config
+
+| File | Section | Key | Value |
+|------|---------|-----|-------|
+| `pyproject.toml` | `[tool.djlint]` | `profile` | `"jinja"` |
+| `pyproject.toml` | `[tool.djlint]` | `extend_exclude` | `"node_modules\|_site\|dist-standalone\|docs/reference\|scratch"` |
+
+### Commands
+
+| Command | Purpose |
+|---------|---------|
+| `pipenv run djlint . --check` | Check templates for formatting compliance |
+| `pipenv run djlint . --reformat` | Auto-format templates to match djlint style |
+
+### Template file categories
+
+| Category | Path pattern | Count | Action |
+|----------|-------------|-------|--------|
+| medminder_dash | `medminder_dash/.../templates/` | 25 | Reformatted |
+| arduino_dash | `arduino_dash/.../templates/` | 15 | Reformatted |
+| arduino_sketch_tools | `arduino_sketch_tools/.../templates/` | 10 | Reformatted |
+| Generated (excluded) | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` | 334 | Excluded via `extend_exclude` |
+
+### Reformatting categories
+
+- 2-space → 4-space indentation hierarchy
+- `<!doctype html>` → `<!DOCTYPE html>` (uppercase)
+- Self-closing tag spacing (` />`)
+- Short content consolidation (`<p>text</p>`)
+- Jinja `{% block %}` / `{% endblock %}` tag line breaks
+- Long attribute wrapping (multi-line `href`, `src`, `hx-*` attributes)
+
+### Gotcha
+
+`djlint --reformat` does not always converge in a single pass. The first pass
+reformatted 50 files, but a second pass was needed for 8 files where
+`{% endblock %}` tag placement was adjusted differently by `--check` vs
+`--reformat`. Always run `--check` after `--reformat` to confirm.
+
 {% endraw %}

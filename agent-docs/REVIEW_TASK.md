@@ -394,4 +394,13 @@ layout: default
 |------|-------|--------|
 | R1 | Verify 0 pytest warnings | ✅ |
 | R2 | Verify 8/8 sessions pass | ✅ |
+
+## Phase 116 — djlint template reformatting
+
+| Task | Scope | Status |
+|------|-------|--------|
+| R1 | Verify `djlint . --check` exit 0 | ✅ |
+| R2 | Verify `ruff check .` exit 0 | ✅ |
+| R3 | Verify generated dirs excluded from djlint | ✅ |
+
 {% endraw %}

@@ -1098,4 +1098,47 @@ to the next.
 
 **Verification**: `nox -s all_tests` — 8/8 sessions, 0 pytest warnings, 850+ tests, 0 failures.
 
+---
+
+## Phase 116 — djlint template reformatting
+
+**Date**: 2026-07-06 19:42
+**Status**: ✅ COMPLETED
+
+### Problem
+
+`djlint . --check` exited 1 with 384 files flagged. Analysis revealed that
+334 of those (87%) were generated build output — `_site/` (251 Jekyll),
+`docs/reference/` (61 pydoc-markdown), `dist-standalone/` (8 PyOxidizer),
+`scratch/` (14 experiments). Only 50 files (13%) were actual source Jinja
+templates.
+
+### Solution
+
+1. **pyproject.toml**: Added `_site|dist-standalone|docs/reference|scratch`
+   to `[tool.djlint]` `extend_exclude`.
+2. **djlint --reformat**: Ran on all 50 templates (25 medminder_dash,
+   15 arduino_dash, 10 arduino_sketch_tools).
+
+### Gotcha: Non-convergence of djlint --reformat
+
+`djlint --reformat` does not always converge in a single pass. First pass
+reformatted 50 files, but `--check` still flagged 8 files. The issue was
+`{% endblock %}` tag placement — the reformatter and checker disagree on
+whether `{% endblock %}` should be on the same line as the last content or
+on its own line. A second `--reformat` pass resolved all 8.
+
+### Verification
+
+- `djlint . --check` — exit 0 (50/50 files checked)
+- `ruff check .` — 0 errors (no Python files were modified)
+
+### Changes by template directory
+
+| Package | Templates reformatted | Key changes |
+|---------|----------------------|-------------|
+| medminder_dash | 25 | 2→4 spaces, Jinja block breaks, attribute wrapping |
+| arduino_dash | 15 | 2→4 spaces, doctype casing, self-closing tags |
+| arduino_sketch_tools | 10 | Attribute alignment, consistent indentation |
+
 {% endraw %}

@@ -136,4 +136,13 @@ layout: default
 |------|-------------|--------|-------|
 | R1 | 0 pytest warnings | ✅ | No PytestConfigWarning |
 | R2 | 8/8 sessions pass | ✅ | 850+ tests, 0 failures |
+
+## Phase 116 — djlint template reformatting
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | `djlint . --check` exit 0 | ✅ | 50/50 files, 0 flagged |
+| R2 | `ruff check .` exit 0 | ✅ | No Python files affected |
+| R3 | Generated dirs excluded | ✅ | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` |
+
 {% endraw %}

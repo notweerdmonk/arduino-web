@@ -284,4 +284,13 @@ Verify that the plugin is correctly configured and all 12 README.md files render
 |---|----------|----------|--------|
 | 1 | No pytest warnings | `nox -s all_tests` must have 0 warnings | ✅ |
 | 2 | No test regressions | 8/8 sessions pass | ✅ |
+
+## Phase 116 — djlint template reformatting
+
+| # | Criteria | Approach | Status |
+|---|----------|----------|--------|
+| 1 | `djlint . --check` passes | Run `djlint . --check` — must exit 0 | ✅ |
+| 2 | `ruff check .` passes | No Python files affected | ✅ |
+| 3 | Generated dirs excluded | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` not checked | ✅ |
+
 {% endraw %}

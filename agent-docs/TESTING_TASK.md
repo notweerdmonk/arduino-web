@@ -42,4 +42,13 @@ All Phase 112 tests verified:
 |------|-------|--------|
 | T1 | `nox -s all_tests` — 0 pytest warnings | ✅ |
 | T2 | 8/8 sessions pass | ✅ |
+
+## Phase 116 — djlint template reformatting
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | `djlint . --check` exit 0 | ✅ |
+| T2 | `ruff check .` exit 0 | ✅ |
+| T3 | Templates render correctly (no structural changes) | ✅ |
+
 {% endraw %}

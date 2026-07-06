@@ -20,31 +20,32 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <div id="compile-section">
-  <div class="card">
-    <h3 class="card-section-title">Compile Output</h3>
-    {% if meta and meta.get("port") %}
-    <div class="output-meta">
-      Port: {{ meta.port }} {% if meta.get("board") %}· {{ meta.board }}{% endif
-      %} {% if meta.get("fqbn") %}· {{ meta.fqbn }}{% endif %} {% if
-      meta.get("sketch_name") %}· Sketch: {{ meta.sketch_name }}{% endif %}
+    <div class="card">
+        <h3 class="card-section-title">Compile Output</h3>
+        {% if meta and meta.get("port") %}
+            <div class="output-meta">
+                Port: {{ meta.port }}
+                {% if meta.get("board") %}
+                    · {{ meta.board }}
+                {% endif
+                %}
+                {% if meta.get("fqbn") %}· {{ meta.fqbn }}{% endif %}
+                {% if
+                    meta.get("sketch_name") %}
+                    · Sketch: {{ meta.sketch_name }}
+                {% endif %}
+            </div>
+        {% endif %}
+        <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">
+            <span class="text-timeout">Compile timed out after 150 seconds.</span>
+            <div class="mt-075">
+                <button class="btn btn-primary"
+                        hx-post="/board/{{ port }}/compile"
+                        hx-target="#compile-section"
+                        hx-swap="outerHTML"
+                        hx-include="#fqbn, #sketch_path">Retry Compile</button>
+            </div>
+        </div>
     </div>
-    {% endif %}
-    <div class="log-viewer" id="compile-output-{{ port | replace('/', '_') }}">
-      <span class="text-timeout">Compile timed out after 150 seconds.</span>
-      <div class="mt-075">
-        <button
-          class="btn btn-primary"
-          hx-post="/board/{{ port }}/compile"
-          hx-target="#compile-section"
-          hx-swap="outerHTML"
-          hx-include="#fqbn, #sketch_path"
-        >
-          Retry Compile
-        </button>
-      </div>
-    </div>
-  </div>
 </div>
-

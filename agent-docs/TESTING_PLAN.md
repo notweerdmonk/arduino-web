@@ -59,4 +59,28 @@ Verify that ruff lint fixes don't break tests.
 |---|----------|----------|--------|
 | 1 | `nox -s all_tests` — 0 pytest warnings | 0 `PytestConfigWarning` | ✅ 0 warnings across 8 sessions |
 | 2 | All 8 sessions pass | 8/8 success | ✅ 8/8, 850+ tests, 0 failures |
+
+---
+
+## Phase 116 — djlint template reformatting
+
+### Scope
+
+Verify that djlint reformatting produces clean output without affecting
+Python tests or functionality.
+
+### Test Strategy
+
+1. `djlint . --check` must exit 0
+2. `ruff check .` must exit 0 (template reformat should not affect Python)
+3. Templates must render correctly (structural HTML unchanged)
+
+### Test Scenarios
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| 1 | `djlint . --check` exit 0 | 0 files flagged | ✅ |
+| 2 | `ruff check .` exit 0 | 0 errors | ✅ |
+| 3 | Templates render correctly | structural HTML unchanged | ✅ (cosmetic only) |
+
 {% endraw %}

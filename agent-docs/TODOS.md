@@ -963,4 +963,18 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 | 2 | Verify: 0 pytest warnings, 8/8 sessions | ✅ |
 
 **Verification**: `nox -s all_tests` — 0 warnings, 8/8 sessions, 850+ tests, 0 failures.
+
+---
+
+## Phase 116 — djlint template reformatting
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Update `extend_exclude` in pyproject.toml | ✅ |
+| 2 | `djlint . --reformat` on 50 templates (8 in second pass) | ✅ |
+| 3 | Verify: `djlint . --check` exit 0 | ✅ |
+| 4 | Update all agent-facing docs | ✅ |
+| 5 | Update user-facing docs | ✅ |
+
+**Verification**: `djlint . --check` — exit 0 (50/50 files). `ruff check .` — 0 errors.
 {% endraw %}

@@ -1,5 +1,5 @@
 {% if ok %}
-<!--
+    <!--
     medminder_dash/python/medminder_dash/medminder_dash/templates/partials/generate_result.html
 
     Generate Result template.
@@ -21,14 +21,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
-<div class="result-banner result-banner--success">
-  Generated <code>{{ path }}</code> with {{ count }} medicine{{ 's' if count !=
-  1 else '' }}.
-</div>
+    <div class="result-banner result-banner--success">
+        Generated <code>{{ path }}</code> with {{ count }} medicine{{ 's' if count !=
+        1 else '' }}.
+    </div>
 {% else %}
-<div class="result-banner result-banner--error">
-  Error generating alarm.hpp: {{ error }}
-</div>
+    <div class="result-banner result-banner--error">Error generating alarm.hpp: {{ error }}</div>
 {% endif %}
-

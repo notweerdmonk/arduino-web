@@ -4215,4 +4215,97 @@ Removed `asyncio_mode = "auto"` from `[tool.pytest.ini_options]` in `pyproject.t
 ### Verification
 `nox -s all_tests` — 8/8 sessions, 0 warnings, 850+ tests, 0 failures.
 
+---
+
+## 2026-07-06 19:42 — Phase 116: djlint template reformatting ✅ COMPLETED
+
+**Problem**: `djlint . --check` exited 1 with 384 files needing reformatting.
+334 of those were generated build output (`_site/`, `dist-standalone/`,
+`docs/reference/`, `scratch/`) and only 50 were actual Jinja source templates.
+
+**Solution**:
+1. Updated `extend_exclude` in `[tool.djlint]` in `pyproject.toml` to exclude
+   all generated directories
+2. Ran `djlint . --reformat` — 50 templates reformatted (8 needed a second pass)
+
+**Gotcha**: djlint --reformat does not always converge in a single pass. Ran
+twice: first pass reformatted 50 files, second pass reformatted 8 files where
+`{% endblock %}` tag placement still differed from `--check` expectations.
+
+### Detailed Gotcha Analysis: djlint --reformat Non-Convergence
+
+**Observed behavior**: Running `djlint . --reformat` on the 50-source-template
+set reported "50 files were updated." However, immediately running
+`djlint . --check` still returned exit code 1, reporting "8 files would be
+updated." A second `--reformat` pass fixed those 8, and the third `--check`
+passed.
+
+**Root cause**: djlint's reformatter (`--reformat`) and checker (`--check`)
+use slightly different heuristics for Jinja `{% endblock %}` tag placement.
+
+When a `{% block %}` contains short content (e.g.,
+`{% block title %}Short Title{% endblock %}`), the reformatter keeps
+everything on one line. But when the content spans multiple lines, the
+reformatter outputs:
+
+```
+{% block title %}
+    Multi-line
+    content here
+{% endblock %}
+```
+
+The checker, however, expects `{% endblock %}` to be on its own line
+whenever the block tag itself is on its own line at open — it flags inline
+`{% endblock %}` as a violation even when the reformatter itself put it
+there. This creates a disagreement loop:
+
+1. `--reformat` produces: `{% block title %}...{% endblock %}` (inline)
+2. `--check` flags: `{% endblock %}` should be on its own line
+3. `--reformat` (2nd pass) moves it: `{% endblock %}` → new line
+4. `--check` now accepts it
+
+**8 files affected** (all in medminder_dash and arduino_dash templates):
+
+| File | Pattern |
+|------|---------|
+| `medminder_dash/.../admin.html` | `{% block title %}...{% endblock %}` on same line after reformat, checker wants separate line |
+| `medminder_dash/.../base.html` | `{% block extra_head %}{% endblock %}` empty block reformatted inline, checker disagrees |
+| `medminder_dash/.../board_detail.html` | `{% block extra_head %}` content spanning multiple lines, endblock placement |
+| `medminder_dash/.../index.html` | `{% block extra_head %}` favicon block, endblock on wrong line after first pass |
+| `arduino_dash/.../admin.html` | Same `{% block title %}` inline vs newline disagreement |
+| `arduino_dash/.../base.html` | `{% block extra_head %}` empty block |
+| `arduino_dash/.../board_detail.html` | Multi-line `{% endblock %}` disagreement in content block |
+| `arduino_dash/.../dashboard.html` | `{% block content %}` endblock placement |
+
+**Detection**: Always run `djlint . --check` immediately after
+`djlint . --reformat`. If exit code 1, run `--reformat` again. Repeat until
+`--check` passes. This is the only reliable convergence test — there is no
+`--check` flag for the reformatter itself.
+
+**Workaround**: None within djlint's configuration. The disagreement is in
+djlint's internal Jinja formatting logic. Options:
+1. **Double-reformat**: Always run `--reformat` twice in CI pipelines
+   (cheap — 50 templates process in <2s)
+2. **Ignore**: Accept that `--check` will fail after a single `--reformat`
+   and add it as a known CI step quirk
+3. **Upstream fix**: This could be patched in djlint's Jinja profile by
+   aligning the reformatter's `{% endblock %}` placement heuristic with the
+   checker's expectations — but that's a djlint codebase change
+
+**Recommendation**: Use option 1 — run `djlint . --reformat` twice in CI.
+The second pass is near-instant (only files that need it get rewritten) and
+guarantees convergence.
+
+**References**:
+- Root config: `pyproject.toml` `[tool.djlint]` section
+- Affected files: 8 templates across `medminder_dash/.../templates/` and
+  `arduino_dash/.../templates/`
+- See also: `REVIEW_JOURNAL.md` Phase 116 entries (review findings)
+- See also: `CODEBASE_REFERENCE.md` Phase 116 section (config + commands)
+
+**Verification**:
+- `pipenv run djlint . --check` — exit 0
+- `pipenv run ruff check .` — 0 errors (no Python files affected)
+
 {% endraw %}

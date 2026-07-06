@@ -361,4 +361,40 @@ individual files or `git revert` for the entire phase.
 
 `nox -s all_tests` — 8/8 sessions, 0 pytest warnings, 850+ tests, 0 failures.
 
+---
+
+## Phase 116 — djlint template reformatting
+
+**Date**: 2026-07-06 19:42
+**Status**: 🔄 IN PROGRESS
+
+### Motivation
+
+`djlint . --check` exits 1 with 384 files needing reformatting. However,
+334 of those files are generated build output (`_site/`, `dist-standalone/`,
+`docs/reference/`, `scratch/`) and only 50 are actual Jinja source templates.
+The fix involves excluding generated directories and reformatting only the
+real templates.
+
+### Scope
+
+| Quantum | Scope | Key Changes | Status |
+|---------|-------|-------------|--------|
+| Q1 | pyproject.toml | Add `_site|dist-standalone|docs/reference|scratch` to `extend_exclude` | 🔄 |
+| Q2 | 50 templates | `djlint . --reformat` auto-formats source templates | Pending |
+| Q3 | Verification | `djlint . --check` must exit 0 | Pending |
+
+### Changes by category
+
+| Category | Files | Action |
+|----------|-------|--------|
+| `pyproject.toml` | 1 | Update `[tool.djlint]` `extend_exclude` |
+| `medminder_dash/.../templates/` | 25 | Auto-reformat |
+| `arduino_dash/.../templates/` | 15 | Auto-reformat |
+| `arduino_sketch_tools/.../templates/` | 10 | Auto-reformat |
+
+### Verification
+
+`pipenv run djlint . --check` — must exit 0.
+
 {% endraw %}

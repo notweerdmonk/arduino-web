@@ -1445,4 +1445,15 @@ importing the package.
 | Q1 | Remove `asyncio_mode = "auto"` from pyproject.toml | ✅ |
 | Q2 | Verify: nox -s all_tests — 0 warnings, 8/8 sessions | ✅ |
 
+### Phase 116 — djlint template reformatting ✅ COMPLETED
+
+**Goal**: Fix `djlint . --check` exit 1 on 384 files by excluding generated
+build output and reformatting only the 50 actual Jinja source templates.
+
+| Q | Task | Status |
+|---|------|--------|
+| 1 | Add `_site|dist-standalone|docs/reference|scratch` to `extend_exclude` | ✅ |
+| 2 | `djlint . --reformat` — 50 templates (8 in second pass) | ✅ |
+| 3 | Verify: `djlint . --check` exit 0 | ✅ |
+
 {% endraw %}

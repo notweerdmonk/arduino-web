@@ -746,4 +746,30 @@ The initial `ruff --fix` removed 28 re-exports from `app.py` and `UPLOAD_BASE_DI
 
 - `nox -s all_tests` — 8/8 sessions, 0 `PytestConfigWarning`, 850+ tests, 0 failures
 - grep for `async def` / `@pytest.mark.asyncio` across all test files — 0 matches (confirms no package needs async test support)
+
+---
+
+## Phase 116 — djlint template reformatting
+
+**Date**: 2026-07-06 19:42
+
+### Test Results
+
+| Check | Result | Notes |
+|-------|--------|-------|
+| `djlint . --check` | ✅ exit 0 | 50 files checked, 0 flagged |
+| `ruff check .` | ✅ exit 0 | 0 errors, 0 warnings |
+
+### Gotcha
+
+djlint --reformat needed two passes. First pass reformatted 50 files; second
+pass reformatted 8 files where `{% endblock %}` tag placement was adjusted
+differently by `--reformat` vs what `--check` expects. This is a known djlint
+idempotency issue with Jinja block tags.
+
+### Conclusion
+
+Phase 116 complete — no regressions, no Python code changes, pure cosmetic
+template reformatting.
+
 {% endraw %}

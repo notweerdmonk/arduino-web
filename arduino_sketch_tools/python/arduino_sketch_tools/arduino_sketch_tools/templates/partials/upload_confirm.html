@@ -20,49 +20,44 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-
 <div id="upload-section">
-  <div class="card">
-    <h3 class="card-section-title">Upload Output</h3>
-    <div class="warning-box">
-      <strong class="text-warning">Warnings detected:</strong>
-      {% for w in warnings %}
-      <div class="warning-box-text">
-        {% if w.type == "sketch_path_changed" %} ⚠ Sketch path changed: {{ w.old
-        }} → {{ w.new }} {% elif w.type == "sketch_modified" %} ⚠ Sketch
-        modified on disk since last successful compile {% else %} ⚠ {{ w.type }}
-        {% endif %}
-      </div>
-      {% endfor %}
+    <div class="card">
+        <h3 class="card-section-title">Upload Output</h3>
+        <div class="warning-box">
+            <strong class="text-warning">Warnings detected:</strong>
+            {% for w in warnings %}
+                <div class="warning-box-text">
+                    {% if w.type == "sketch_path_changed" %}
+                        ⚠ Sketch path changed: {{ w.old
+                        }} → {{ w.new }}
+                    {% elif w.type == "sketch_modified" %}
+                        ⚠ Sketch
+                        modified on disk since last successful compile
+                    {% else %}
+                        ⚠ {{ w.type }}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <form id="upload-confirm-form">
+            <input type="hidden" name="sketch_path" value="{{ sketch_path }}" />
+            <input type="hidden" name="fqbn" value="{{ fqbn }}" />
+            <input type="hidden" name="verbose" value="{{ verbose }}" />
+            <div class="flex-row">
+                <button type="button"
+                        class="btn btn-warning"
+                        hx-post="/board/{{ port }}/upload/confirm"
+                        hx-trigger="click"
+                        hx-target="#upload-section"
+                        hx-swap="outerHTML"
+                        hx-include="#upload-confirm-form">Upload Anyway</button>
+                <button type="button"
+                        class="btn btn-secondary"
+                        hx-get="/board/{{ port }}/upload/section"
+                        hx-trigger="click"
+                        hx-target="#upload-section"
+                        hx-swap="outerHTML">Cancel</button>
+            </div>
+        </form>
     </div>
-    <form id="upload-confirm-form">
-      <input type="hidden" name="sketch_path" value="{{ sketch_path }}" />
-      <input type="hidden" name="fqbn" value="{{ fqbn }}" />
-      <input type="hidden" name="verbose" value="{{ verbose }}" />
-      <div class="flex-row">
-        <button
-          type="button"
-          class="btn btn-warning"
-          hx-post="/board/{{ port }}/upload/confirm"
-          hx-trigger="click"
-          hx-target="#upload-section"
-          hx-swap="outerHTML"
-          hx-include="#upload-confirm-form"
-        >
-          Upload Anyway
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          hx-get="/board/{{ port }}/upload/section"
-          hx-trigger="click"
-          hx-target="#upload-section"
-          hx-swap="outerHTML"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
 </div>
-

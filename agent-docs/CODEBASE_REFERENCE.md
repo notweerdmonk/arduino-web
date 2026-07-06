@@ -4,7 +4,7 @@ layout: default
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-07-05 (Phases 89-112)
+**Last updated**: 2026-07-06 20:22 (Phases 89-117)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -181,6 +181,37 @@ All stubs under `cc/arduino/cli/commands/v1/` (11 services, generated from ardui
 | Code | `--code-bg`, `--code-text` | 2 |
 | Misc | `--shadow`, `--link`, `--danger`, `--warning` | 4 |
 
+### Phase 117 — Fix CI Pipeline: Install nox + swap build/test order ✅ COMPLETED
+
+**Date**: 2026-07-06 20:22
+
+**Type**: DevOps
+
+**Goal**: Enable GitHub CI workflow to run `./scripts/ci.sh` successfully.
+
+**Changes**:
+1. `.github/workflows/ci.yml` — added `pip install nox` step before `./scripts/ci.sh`
+2. `scripts/ci.sh` — swapped Phase 1/Phase 2 so builds run before tests,
+   updated `--help` text and output messages
+3. `scripts/tests/test_ci.sh` — updated 3 phase-label assertions to match new order
+
+**Root cause**: Builds must precede tests because per-package test sessions
+call `pipenv lock --dev` which resolves `file://${PROJECT_ROOT}/../dist`
+sources — those `dist/` directories don't exist in a fresh CI checkout
+(gitignored). Building wheels first creates the required wheels at the
+resolved paths.
+
+**Pipeline**:
+```
+Install pipenv → Install root deps → ruff check → djlint check → Install nox → ./scripts/ci.sh
+  └── ci.sh: Phase 1 = all_builds → Phase 2 = all_tests
+```
+
+**Files changed**: `scripts/ci.sh`, `scripts/tests/test_ci.sh`, `.github/workflows/ci.yml`
+
+**Verification**: `bash -n scripts/ci.sh` ✅, `bash scripts/tests/test_ci.sh` 30/30 ✅,
+YAML valid ✅, `nox -s scripts_tests` 202/202 ✅.
+
 ### Running
 
 ```bash
@@ -206,7 +237,7 @@ dist-standalone/medminder-dash/bin/medminder-dash
 nox -s 'tests(board_manager)' 'build(board_manager)'   # single package
 nox -s all_tests                                        # all tests
 nox -s all_builds                                       # all wheels
-./scripts/ci.sh                                         # full CI pipeline
+./scripts/ci.sh                                         # full CI pipeline (builds → tests)
 ```
 
 ### Jekyll Documentation Site (Phase 93)

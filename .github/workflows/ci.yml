@@ -26,5 +26,7 @@ jobs:
         run: pipenv run ruff check .
       - name: Lint templates with djlint
         run: pipenv run djlint . --check
+      - name: Install nox
+        run: pip install nox
       - name: Full CI pipeline
         run: ./scripts/ci.sh

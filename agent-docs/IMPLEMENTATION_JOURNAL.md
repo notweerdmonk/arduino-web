@@ -1141,4 +1141,114 @@ on its own line. A second `--reformat` pass resolved all 8.
 | arduino_dash | 15 | 2→4 spaces, doctype casing, self-closing tags |
 | arduino_sketch_tools | 10 | Attribute alignment, consistent indentation |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline: Install nox + swap build/test order
+
+**Date**: 2026-07-06 20:22
+**Status**: ✅ Complete
+
+### Goal
+
+Enable GitHub CI workflow (`.github/workflows/ci.yml`) to successfully run
+`./scripts/ci.sh` by fixing two issues:
+1. `nox` not installed in the CI runner
+2. Test-before-build ordering causes `pipenv lock --dev` to fail in fresh
+   checkout where `dist/` directories (gitignored) don't exist
+
+### Root Cause Analysis
+
+**Issue 1 — Missing nox**: The CI workflow installed `pipenv` and root dev
+dependencies but never installed `nox`. The `ci.sh` script's first action is
+`command -v nox` which exits with error 1 when not found.
+
+**Issue 2 — Build/test ordering**: `ci.sh` ran `nox -s all_tests` before
+`nox -s all_builds`. The per-package test sessions (lines 75-82 of noxfile.py)
+run `pipenv lock --dev` followed by `pipenv sync --dev`. The per-package
+`Pipfile` files reference sibling monorepo packages via:
+
+```ini
+[[source]]
+url = "file://${PROJECT_ROOT}/../dist"
+```
+
+In a fresh CI checkout, no `dist/` directories exist (they are gitignored).
+When `pipenv lock --dev` tries to resolve dependencies, it cannot find the
+required wheels at the `file://` URLs and fails with a resolution error.
+
+### Dependency Chain
+
+```mermaid
+graph TD
+    A[build arduino-grpc] --> B[build board-manager]
+    B --> C[build board-mgr-client]
+    C --> D[build arduino-sketch-tools]
+    D --> E[build arduino-dash]
+    E --> F[build medminder-dash]
+    A --> C
+    A --> D
+    A --> E
+    A --> F
+    B --> C
+    B --> D
+    B --> E
+    B --> F
+    C --> D
+    C --> E
+    C --> F
+    D --> E
+    D --> F
+    style A fill:#c6e6c6
+    style B fill:#c6e6c6
+    style C fill:#c6e6c6
+    style D fill:#c6e6c6
+    style E fill:#c6e6c6
+    style F fill:#c6e6c6
+```
+
+Builds must precede tests so that wheel files exist in `dist/` directories
+when pipenv resolves `file://` dependency sources.
+
+### Changes Made
+
+**File 1: `scripts/ci.sh`**
+- Swapped Phase 1 and Phase 2 execution order: builds now run first,
+  tests run second
+- Updated `@file` docblock (description, --option order)
+- Updated `usage()` help text to reflect new order
+- Updated Phase 1/Phase 2 echo messages
+- Both exit codes unchanged: build failure = exit 3, test failure = exit 2
+
+**File 2: `scripts/tests/test_ci.sh`**
+- Updated 3 assertions in Q18.6 and Q18.7 to match the new phase labels:
+  - Q18.6 (`--skip-builds`): `Phase 2: skipped` → `Phase 2: running all test suites`
+  - Q18.7 (`--skip-tests`): `Phase 1: skipped` → `Phase 1: building all packages`;
+    `Phase 2: building all packages` → `Phase 2: skipped`
+
+**File 3: `.github/workflows/ci.yml`**
+- Added `- name: Install nox` step with `run: pip install nox` between the
+  djlint step and the Full CI pipeline step
+
+### Verification
+
+| Check | Method | Result |
+|-------|--------|--------|
+| ci.sh syntax | `bash -n scripts/ci.sh` | ✅ exit 0 |
+| ci.sh unit test | `bash scripts/tests/test_ci.sh` | ✅ 30/30 assertions |
+| ci.yml YAML | `python3 -c "import yaml; yaml.safe_load(...)"` | ✅ valid |
+| Full scripts suite | `nox -s scripts_tests` | ✅ 202/202 (160 pytest + 12 bash + 30 bash) |
+
+### Gotchas
+
+1. **test_ci.sh assertion update required**: The test script has 3 assertions
+   that hardcode Phase 1/Phase 2 labels. When swapping the order, these
+   assertions must be updated to match the new phase semantics or they fail
+   with misleading needle-not-found errors.
+
+2. **Exit codes intentionally unchanged**: Build failure = exit 3, test
+   failure = exit 2. These codes are tested by test_ci.sh Q18.9/Q18.10
+   using `FAKE_NOX_RC` and must not change.
+
 {% endraw %}

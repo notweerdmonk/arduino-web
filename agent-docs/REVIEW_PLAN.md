@@ -293,4 +293,22 @@ Verify that the plugin is correctly configured and all 12 README.md files render
 | 2 | `ruff check .` passes | No Python files affected | ✅ |
 | 3 | Generated dirs excluded | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` not checked | ✅ |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline — Review Plan
+
+### Review Criteria
+
+| # | Item | Type | Method |
+|---|------|------|--------|
+| R1 | ci.sh build/test order | Correctness | Verify Phase 1 = builds, Phase 2 = tests |
+| R2 | ci.sh help text | Consistency | Verify --skip-builds/--skip-tests labels match new order |
+| R3 | ci.sh exit codes | Correctness | Build failure = exit 3, test failure = exit 2 (unchanged) |
+| R4 | ci.yml nox install step | Placement | Step inserted before ci.sh call, after djlint |
+| R5 | test_ci.sh assertions | Correctness | All 30 assertions match new phase labels |
+| R6 | test_ci.sh exit codes | Correctness | Q18.9 (exit 2) and Q18.10 (exit 3) unchanged |
+| R7 | Docs sync | Completeness | All 16 agent-facing docs + user-facing docs updated |
+
 {% endraw %}

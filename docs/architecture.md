@@ -347,7 +347,7 @@ Prior to the frontend optimization, interactive UI behaviors used **Hyperscript*
 | WSGI server | Gunicorn |
 | Board detection | pyudev (optional) |
 | Build | setuptools, nox |
-| CI pipeline | `scripts/ci.sh` — `nox -s all_tests all_builds` |
+| CI pipeline | `scripts/ci.sh` — `nox -s all_builds all_tests` (builds first, then tests) |
 | Testing | pytest, unittest.mock, bash (scripts/tests) |
 | Standalone binary | PyOxidizer |
 | Arduino libs | RTClib, TM1637TinyDisplay |

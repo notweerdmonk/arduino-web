@@ -403,4 +403,20 @@ layout: default
 | R2 | Verify `ruff check .` exit 0 | ✅ |
 | R3 | Verify generated dirs excluded from djlint | ✅ |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline — Review Task
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| R1 | ci.sh build/test order swapped correctly | ✅ | Phase 1 = all_builds, Phase 2 = all_tests |
+| R2 | ci.sh help text consistent with new order | ✅ | --skip options, description, usage all updated |
+| R3 | ci.sh exit codes unchanged | ✅ | Build=3, Test=2 (verified by test_ci.sh) |
+| R4 | ci.yml nox step placement correct | ✅ | After djlint, before ci.sh |
+| R5 | test_ci.sh assertions match new order | ✅ | 30/30 pass |
+| R6 | All agent-facing docs synced | ✅ | 16 docs updated |
+| R7 | User-facing docs synced | ✅ | Documentation skill applied |
+
 {% endraw %}

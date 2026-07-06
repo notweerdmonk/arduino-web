@@ -772,4 +772,30 @@ idempotency issue with Jinja block tags.
 Phase 116 complete — no regressions, no Python code changes, pure cosmetic
 template reformatting.
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline — Test Results
+
+**Date**: 2026-07-06 20:22
+
+**Status**: ✅ All tests pass
+
+### Test Results
+
+| Test | Result | Details |
+|------|--------|---------|
+| `bash -n scripts/ci.sh` | ✅ Exit 0 | No syntax errors |
+| `bash scripts/tests/test_ci.sh` | ✅ 30/30 | All 10 scenarios pass including updated phase labels |
+| YAML validity | ✅ | `yaml.safe_load` accepted the file |
+| `nox -s scripts_tests` | ✅ 202/202 | 160 pytest + 12 bash (install_arduino_deps) + 30 bash (test_ci.sh) |
+
+### Gotcha
+
+The 3 phase-label assertions in `test_ci.sh` (Q18.6 line 203, Q18.7 lines 234-235)
+were hardcoded to the old test-first order. After swapping build/test order,
+these assertions failed with "needle not found" errors. The fix was to update
+the expected phase labels to match the new semantics.
+
 {% endraw %}

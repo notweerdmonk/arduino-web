@@ -145,4 +145,20 @@ layout: default
 | R2 | `ruff check .` exit 0 | ✅ | No Python files affected |
 | R3 | Generated dirs excluded | ✅ | `_site/`, `dist-standalone/`, `docs/reference/`, `scratch/` |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline
+
+| Task | Description | Status | Notes |
+|------|-------------|--------|-------|
+| R1 | ci.sh build/test order swapped | ✅ | Phase 1 = builds (all_builds), Phase 2 = tests (all_tests) |
+| R2 | ci.sh help text consistent | ✅ | docblock, usage(), echo messages all updated |
+| R3 | ci.sh exit codes unchanged | ✅ | Build failure = exit 3 (Q18.10), Test failure = exit 2 (Q18.9) |
+| R4 | ci.yml nox install step | ✅ | Inserted correctly, YAML valid |
+| R5 | test_ci.sh assertions updated | ✅ | 3 phase-label assertions updated, 30/30 pass |
+| R6 | Docs sync — agent-facing | ✅ | All 16 docs updated with Phase 117 entries |
+| R7 | Docs sync — user-facing | ✅ | Documentation skill applied |
+
 {% endraw %}

@@ -84,16 +84,17 @@ nox -s 'tests(board_manager)'  # single package
 ### CI pipeline
 
 ```bash
-./scripts/ci.sh           # full pipeline (tests + builds)
+./scripts/ci.sh           # full pipeline (builds → tests)
 ```
 
-The CI pipeline supports `--skip-tests` and `--skip-builds` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96).
+The CI pipeline supports `--skip-builds` and `--skip-tests` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96).
 
 ### Expected Results
 
 | Session | Tests | Notes |
 |---------|-------|-------|
-| `scripts_tests` | **170 passed** (128 pytest + 12 bash + **30 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
+| `scripts_tests` | **202 passed** (160 pytest + 12 bash + **30 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
+| `all_tests` | **8/8 sessions** | all packages + scripts |
 | `tests(board_manager)` | 212 passed | includes integration tests |
 | `tests(board_manager_client)` | 24 passed | |
 | `tests(arduino_sketch_tools)` | 51 passed | |

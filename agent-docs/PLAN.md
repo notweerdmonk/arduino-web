@@ -11,6 +11,26 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
+### Phase 117 — Fix CI Pipeline: Install nox + swap build/test order
+
+**Date**: 2026-07-06 20:22
+**Status**: ✅ COMPLETED
+
+**Goal**: Enable GitHub CI workflow to run `./scripts/ci.sh` successfully by
+installing `nox` and swapping the build/test phase order so that wheel files
+in `dist/` directories exist when per-package test sessions resolve
+monorepo `file://` dependencies via `pipenv lock --dev`.
+
+| File | Change | Status |
+|------|--------|--------|
+| `.github/workflows/ci.yml` | Add `pip install nox` step | ✅ |
+| `scripts/ci.sh` | Swap Phase 1 (builds) before Phase 2 (tests) | ✅ |
+
+**Verification**: `bash -n scripts/ci.sh` ✅, `bash scripts/tests/test_ci.sh`
+30/30 ✅, YAML validity ✅, `nox -s scripts_tests` 202/202 ✅.
+
+---
+
 ### Phase 111 — Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
 
 **Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
@@ -65,6 +85,22 @@ __init__.py  (__version__ = "0.1.0")
 - Rate-limited endpoints return 429 after threshold
 - Session cookies have security flags set
 - `nox -s all_tests` — 8/8 sessions, 0 failures
+
+---
+
+### Phase 116 — djlint template reformatting ✅ COMPLETED
+
+**Date**: 2026-07-06 19:42
+
+**Goal**: Fix `djlint . --check` exit 1 (384 flagged files) by excluding
+generated build output and reformatting 50 source templates.
+
+**Changes**:
+- `pyproject.toml`: Added `_site|dist-standalone|docs/reference|scratch` to `[tool.djlint]` `extend_exclude`
+- 50 source templates auto-reformatted via `djlint . --reformat`
+- 8 files needed second pass for `{% endblock %}` convergence
+
+**Verification**: `djlint . --check` exit 0 ✅, `ruff check .` exit 0 ✅
 
 ---
 

@@ -65,7 +65,7 @@ import + CLI smoke tests. See `../dist-test-install/README.md` for details.
 ## CI Pipeline
 
 ```bash
-./scripts/ci.sh                         # tests + builds
+./scripts/ci.sh                         # builds → tests
 ./scripts/ci.sh --skip-tests            # builds only
 ./scripts/ci.sh --skip-builds           # tests only
 ```

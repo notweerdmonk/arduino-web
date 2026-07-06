@@ -1,10 +1,12 @@
 # ci.sh
 
-Full CI pipeline — tests + builds in one command.
+Full CI pipeline — builds + tests in one command.
 
 ## Overview
 
-Run all test suites via nox -s all_tests, then build all
-packages via nox -s all_builds.
+Build all packages via nox -s all_builds (creates dist/ wheels),
+then run all test suites via nox -s all_tests. Builds first so that
+dist/ directories exist when per-package tests resolve file://
+dependency sources.
 
 

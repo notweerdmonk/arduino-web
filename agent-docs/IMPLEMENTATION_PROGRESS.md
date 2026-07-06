@@ -72,4 +72,17 @@ layout: default
 | 4 | All agent-facing docs updated | Pending | |
 | 5 | User-facing docs updated | Pending | |
 
+
+---
+
+### Phase 117 — Fix CI Pipeline
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| Q1 | Swap build/test order in ci.sh | ✅ | Phase 1 = builds, Phase 2 = tests; updated --help, docblock, echo messages |
+| Q2 | Add nox install to ci.yml | ✅ | `pip install nox` before ./scripts/ci.sh |
+| Q3 | Verify changes | ✅ | bash syntax ✅, test_ci.sh 30/30 ✅, YAML valid ✅, nox -s scripts_tests 202/202 ✅ |
+| Q4 | Update all agent-facing docs (16) | ✅ | All project + workflow docs updated |
+| Q5 | Update user-facing docs | ✅ | Documentation skill applied |
+
 {% endraw %}

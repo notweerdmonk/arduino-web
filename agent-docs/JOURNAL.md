@@ -4308,4 +4308,51 @@ guarantees convergence.
 - `pipenv run djlint . --check` — exit 0
 - `pipenv run ruff check .` — 0 errors (no Python files affected)
 
+
+
+---
+
+## 2026-07-06 20:22 — Phase 117: Fix CI Pipeline (Install nox + swap build/test order) ✅ COMPLETED
+
+**Goal**: Enable `.github/workflows/ci.yml` to run `./scripts/ci.sh` successfully
+in a fresh GitHub CI environment.
+
+**Root causes**:
+1. `nox` was not installed in the CI runner — `ci.sh` exits with "nox not
+   found" before doing anything
+2. `ci.sh` ran tests before builds. Per-package test sessions call
+   `pipenv lock --dev` which resolves `file://${PROJECT_ROOT}/../dist`
+   sources referencing sibling monorepo packages. In a fresh checkout,
+   `dist/` directories don't exist (gitignored), causing resolution failure.
+
+**Fixes**:
+
+| File | Change |
+|------|--------|
+| `.github/workflows/ci.yml` | Added `pip install nox` step before `./scripts/ci.sh` |
+| `scripts/ci.sh` | Swapped Phase 1 (builds) before Phase 2 (tests); updated `--help` and output messages |
+| `scripts/tests/test_ci.sh` | Updated 3 phase-label assertions to match new order |
+
+**Pipeline before**:
+```
+Install pipenv → ruff check → djlint check → ./scripts/ci.sh (fails: nox not found)
+```
+
+**Pipeline after**:
+```
+Install pipenv → ruff check → djlint check → Install nox → ./scripts/ci.sh (builds → tests)
+```
+
+**Verification**:
+- `bash -n scripts/ci.sh` — syntax OK ✅
+- `bash scripts/tests/test_ci.sh` — 30/30 assertions ✅
+- `python3 -c "import yaml; yaml.safe_load(...)"` — YAML valid ✅
+- `nox -s scripts_tests` — 202/202 tests ✅
+
+**Build order rationale**: Builds must precede tests because `pipenv lock --dev`
+needs wheels in `dist/` directories for `file://` source resolution. The
+6-package dependency chain is: arduino-grpc → board-manager →
+board-manager-client → arduino-sketch-tools → arduino-dash → medminder-dash.
+All_builds handles this ordering automatically via nox parametrized sessions.
+
 {% endraw %}

@@ -81,7 +81,7 @@ Open [http://localhost:8081](http://localhost:8081)
 
 ```bash
 nox -s all_tests          # 8 sessions: all 6 packages + scripts
-./scripts/ci.sh           # full CI pipeline (tests + builds)
+./scripts/ci.sh           # full CI pipeline (builds → tests)
 ```
 
 The nox sessions auto-regenerate Pipfile.lock on each run (Phase 94), so there is

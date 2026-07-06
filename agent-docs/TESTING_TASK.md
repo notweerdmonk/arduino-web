@@ -51,4 +51,17 @@ All Phase 112 tests verified:
 | T2 | `ruff check .` exit 0 | ✅ |
 | T3 | Templates render correctly (no structural changes) | ✅ |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline
+
+| # | Test Task | Status | Notes |
+|---|-----------|--------|-------|
+| T1 | `bash -n scripts/ci.sh` | ✅ | Exit 0, syntax OK |
+| T2 | `bash scripts/tests/test_ci.sh` | ✅ | 30/30 assertions pass |
+| T3 | YAML validity check | ✅ | `yaml.safe_load` no error |
+| T4 | `nox -s scripts_tests` | ✅ | 202/202 tests pass |
+
 {% endraw %}

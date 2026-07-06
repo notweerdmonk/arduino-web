@@ -3,18 +3,21 @@ layout: default
 ---
 # CI Pipeline — `ci.sh`
 
-One-command runner for the full test + build pipeline. Used in CI; also handy locally.
+One-command runner for the full build + test pipeline. Used in CI; also handy locally.
 
 ```bash
-./scripts/ci.sh              # tests + builds (full pipeline)
-./scripts/ci.sh --skip-tests # build only
-./scripts/ci.sh --skip-builds # test only
+./scripts/ci.sh               # builds + tests (full pipeline)
+./scripts/ci.sh --skip-builds # test only (skips the build phase)
+./scripts/ci.sh --skip-tests  # build only (skips the test phase)
 ```
 
 ## Pipeline Stages
 
-1. **Test** — `nox -s all_tests` runs `scripts_tests` + 6 per-package pytest suites
-2. **Build** — `nox -s all_builds` builds all 6 package wheels
+Builds precede tests so that wheel files exist in `dist/` directories when
+per-package test sessions resolve monorepo `file://` dependency sources.
+
+1. **Build** — `nox -s all_builds` builds all 6 package wheels (creates `dist/`)
+2. **Test** — `nox -s all_tests` runs `scripts_tests` + 6 per-package pytest suites
 
 ## Exit Codes
 

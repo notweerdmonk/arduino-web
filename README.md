@@ -194,7 +194,7 @@ pipenv run python -m pytest medminder_dash/tests/ tests/ -v
 Full documentation: [`scripts/docs/index.md`](scripts/docs/index.md)
 
 ```bash
-./scripts/ci.sh                        # Full CI pipeline (tests + builds)
+./scripts/ci.sh                        # Full CI pipeline (builds → tests)
 ./scripts/build_standalone.sh          # Standalone binaries via PyOxidizer
 ./scripts/test_installs.sh             # Wheel install validation + smoke tests
 ./scripts/install_arduino_deps.sh      # Install Arduino libraries (RTClib, TM1637)

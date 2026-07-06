@@ -40,4 +40,15 @@ layout: default
 | T2 — `ruff check .` exit 0 | ✅ | 0 errors (no Python files affected) |
 | T3 — Templates render correctly | ✅ | Structural HTML unchanged, cosmetic only |
 
+
+
+## Phase 117 — Fix CI Pipeline
+
+| Test | Status | Notes |
+|------|--------|-------|
+| T1 — `bash -n scripts/ci.sh` | ✅ | Syntax OK |
+| T2 — `bash scripts/tests/test_ci.sh` | ✅ | 30/30 assertions |
+| T3 — YAML validity | ✅ | `yaml.safe_load` OK |
+| T4 — `nox -s scripts_tests` | ✅ | 202/202 tests pass |
+
 {% endraw %}

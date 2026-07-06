@@ -1122,4 +1122,42 @@ This blacklist matches **any path depth** — not just root. Without the `includ
   upstream fix recommendations.
 
 **Verdict**: Phase 116 complete and verified.
+
+
+---
+
+## Phase 117 — Fix CI Pipeline — Review
+
+**Date**: 2026-07-06 20:22
+
+**Status**: ✅ Review complete
+
+### Review Summary
+
+| # | Item | Finding | Verdict |
+|---|------|---------|---------|
+| R1 | ci.sh swap build/test order | Phase 1 runs `all_builds`, Phase 2 runs `all_tests` | ✅ |
+| R2 | ci.sh help text | `@file` docblock, `usage()`, exit code doc all updated | ✅ |
+| R3 | ci.sh exit codes | Build failure = exit 3, test failure = exit 2 — unchanged | ✅ |
+| R4 | ci.yml nox step | `pip install nox` inserted after djlint, before ci.sh | ✅ |
+| R5 | test_ci.sh assertions | 3 phase-label assertions in Q18.6/Q18.7 updated | ✅ |
+| R6 | test coverage | All 10 scenarios pass 30/30, no new scenarios needed | ✅ |
+| R7 | Docs sync | All 16 agent-facing + user-facing docs updated | ✅ |
+
+### Verification
+
+```
+bash -n scripts/ci.sh                                    → exit 0  ✅
+bash scripts/tests/test_ci.sh                            → 30/30   ✅
+python3 -c "import yaml; yaml.safe_load(open(...))"      → valid   ✅
+nox -s scripts_tests                                     → 202/202 ✅
+```
+
+### Findings
+
+- The 3 updated assertions in test_ci.sh now correctly match the new
+  build-first phase ordering
+- No regression in any test scenario
+- All docs internally consistent
+
 {% endraw %}

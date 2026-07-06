@@ -397,4 +397,61 @@ real templates.
 
 `pipenv run djlint . --check` — must exit 0.
 
+## Phase 117 — Fix CI Pipeline: Install nox + swap build/test order
+
+**Date**: 2026-07-06 20:22
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+The GitHub CI workflow (`.github/workflows/ci.yml`) calls `./scripts/ci.sh` but
+two issues prevent it from succeeding in a fresh CI environment:
+
+1. **`nox` not installed**: The workflow installs `pipenv` and root dev deps but
+   never installs `nox`. The `ci.sh` script's first action is guarding for `nox`
+   and it exits with error if not found.
+2. **Test-before-build dependency ordering**: `ci.sh` runs `nox -s all_tests`
+   before `nox -s all_builds`. The per-package test sessions call
+   `pipenv lock --dev` which resolves `file://${PROJECT_ROOT}/../dist` sources
+   referencing sibling monorepo packages. In a fresh CI checkout, these `dist/`
+   directories don't exist (gitignored), so `pipenv lock --dev` fails with a
+   resolution error.
+
+**Fix order**: Build must precede test so that wheel files in `dist/` directories
+exist when pipenv resolves dependencies during the test sessions.
+
+### Scope
+
+| File | Change | Impact |
+|------|--------|--------|
+| `.github/workflows/ci.yml` | Add `pip install nox` step before `./scripts/ci.sh` | Installs nox in CI runner |
+| `scripts/ci.sh` | Swap Phase 1 (builds) and Phase 2 (tests) order | Builds create dist/ wheels before tests resolve from them |
+
+### Dependency Chain Context
+
+```
+build(arduino-grpc)       → creates grpc_client/.../dist/   (no local deps)
+build(board-manager)      → needs arduino-grpc dist/        ← depends on #1
+build(board-mgr-client)   → needs arduino-grpc + bm dist/   ← depends on #1, #2
+build(arduino-sketch-tools)→ needs above 3 dist/            ← depends on #1-3
+build(arduino-dash)       → needs above 4 dist/             ← depends on #1-4
+build(medminder-dash)     → needs above 5 dist/             ← depends on #1-5
+
+all_builds: 7 sessions (6 packages + test_installs session)
+all_tests:  7 sessions (scripts_tests + 6 per-package tests)
+```
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | `scripts/ci.sh` — swap build/test order | Phase 1 = builds, Phase 2 = tests; update `--help`, docblock, echo messages | ✅ |
+| Q2 | `.github/workflows/ci.yml` — add nox install | Insert `pip install nox` step before `./scripts/ci.sh` | ✅ |
+| Q3 | Verification | `bash -n scripts/ci.sh` ✅, `test_ci.sh` 30/30 ✅, YAML valid ✅, `nox -s scripts_tests` 202/202 ✅ | ✅ |
+| Q4 | Docs sync | All 16 agent-facing docs + user-facing docs | ✅ |
+
+### Rollback
+
+Each change is scoped to one file. Revert via `git checkout -- <file>`.
+
 {% endraw %}

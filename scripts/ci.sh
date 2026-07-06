@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # @file ci.sh
-# @brief Full CI pipeline — tests + builds in one command.
-# @description Run all test suites via nox -s all_tests, then build all
-# packages via nox -s all_builds.
-# @option --skip-tests  Skip the test phase, build only.
+# @brief Full CI pipeline — builds + tests in one command.
+# @description Build all packages via nox -s all_builds (creates dist/ wheels),
+# then run all test suites via nox -s all_tests. Builds first so that dist/
+# directories exist when per-package tests resolve file:// dependency sources.
 # @option --skip-builds Skip the build phase, test only.
+# @option --skip-tests  Skip the test phase, build only.
 # @option --help        Show usage and exit.
 # @exitcode 0 Pipeline succeeded.
 # @exitcode 1 nox not found on PATH.
@@ -14,7 +15,7 @@
 
 # scripts/ci.sh
 #
-# Full CI pipeline — tests + builds in one command.
+# Full CI pipeline — builds + tests in one command.
 #
 # Author: notweerdmonk
 # SPDX-License-Identifier: Apache-2.0
@@ -51,11 +52,11 @@ usage() {
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  --skip-tests     Skip the test phase (still run all_builds)
   --skip-builds    Skip the build phase (still run all_tests)
+  --skip-tests     Skip the test phase (still run all_builds)
   --help           Show this help and exit
 
-Default: run all_tests then all_builds. Exits non-zero on the first failure.
+Default: run all_builds then all_tests. Exits non-zero on the first failure.
 EOF
 }
 
@@ -84,24 +85,24 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ $run_tests -eq 1 ]]; then
-    echo "==> Phase 1: running all test suites"
-    if ! nox -s all_tests; then
-        echo "error: at least one test session failed" >&2
-        exit 2
-    fi
-else
-    echo "==> Phase 1: skipped (--skip-tests)"
-fi
-
 if [[ $run_builds -eq 1 ]]; then
-    echo "==> Phase 2: building all packages"
+    echo "==> Phase 1: building all packages"
     if ! nox -s all_builds; then
         echo "error: at least one build session failed" >&2
         exit 3
     fi
 else
-    echo "==> Phase 2: skipped (--skip-builds)"
+    echo "==> Phase 1: skipped (--skip-builds)"
+fi
+
+if [[ $run_tests -eq 1 ]]; then
+    echo "==> Phase 2: running all test suites"
+    if ! nox -s all_tests; then
+        echo "error: at least one test session failed" >&2
+        exit 2
+    fi
+else
+    echo "==> Phase 2: skipped (--skip-tests)"
 fi
 
 echo "==> CI pipeline complete"

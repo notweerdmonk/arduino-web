@@ -977,4 +977,19 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 | 5 | Update user-facing docs | ✅ |
 
 **Verification**: `djlint . --check` — exit 0 (50/50 files). `ruff check .` — 0 errors.
+
+
+---
+
+## 2026-07-06 20:22 — Phase 117: Fix CI Pipeline ✅ COMPLETED
+
+| Task | Status |
+|------|--------|
+| Swap build/test order in ci.sh | ✅ |
+| Add pip install nox to ci.yml | ✅ |
+| Update test_ci.sh phase-label assertions | ✅ |
+| Verify: bash syntax, test_ci.sh 30/30, YAML valid, scripts_tests 202/202 | ✅ |
+| Update all 16 agent-facing docs | ✅ |
+| Update user-facing docs | ✅ |
+
 {% endraw %}

@@ -83,4 +83,27 @@ Python tests or functionality.
 | 2 | `ruff check .` exit 0 | 0 errors | ✅ |
 | 3 | Templates render correctly | structural HTML unchanged | ✅ (cosmetic only) |
 
+
+
+---
+
+## Phase 117 — Fix CI Pipeline
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | ci.sh bash syntax | `bash -n scripts/ci.sh` | Exit 0 |
+| T2 | ci.sh flag parsing | `bash scripts/tests/test_ci.sh` | 30/30 assertions pass |
+| T3 | ci.yml YAML validity | `python3 -c "import yaml; yaml.safe_load(...)"` | No error |
+| T4 | Regression: scripts tests | `nox -s scripts_tests` | 202/202 tests pass (160 pytest + 42 bash) |
+
+### Coverage Notes
+
+- The `test_ci.sh` unit test covers: `--help`, unknown flags, nox-missing guard,
+  `--skip-builds`, `--skip-tests`, both flags, test failure exit 2, build
+  failure exit 3 — all using a fake nox shim
+- Phase label assertions in test_ci.sh were updated from old order (tests first)
+  to new order (builds first)
+
 {% endraw %}

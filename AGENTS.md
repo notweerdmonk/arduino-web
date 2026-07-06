@@ -61,8 +61,8 @@ Mock at import level: `@patch("module.path.ClassName")`.
 ### Build
 
 ```
-./scripts/ci.sh                           # tests + builds (flags: --skip-tests, --skip-builds)
-nox -s all_tests all_builds               # test then build all 6 packages
+./scripts/ci.sh                           # builds → tests (flags: --skip-builds, --skip-tests)
+nox -s all_builds all_tests               # build then test all 6 packages
 nox -s 'build(board_manager)'             # single package
 nox -s test_installs                      # wheel install smoke tests
 ```

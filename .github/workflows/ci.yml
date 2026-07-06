@@ -24,8 +24,6 @@ jobs:
         run: pipenv install --dev
       - name: Lint with ruff
         run: pipenv run ruff check .
-      - name: Check formatting with ruff
-        run: pipenv run ruff format --check .
       - name: Lint templates with djlint
         run: pipenv run djlint . --check
       - name: Full CI pipeline

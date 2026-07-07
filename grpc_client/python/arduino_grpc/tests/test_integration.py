@@ -30,6 +30,7 @@ from arduino_grpc.client import ArduinoGrpcClient
 from .daemon_helper import DaemonCtx
 
 
+@pytest.mark.integration
 def test_connection(daemon_url):
     print("\n=== Test 1: Connection ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -43,6 +44,7 @@ def test_connection(daemon_url):
         client.disconnect()
 
 
+@pytest.mark.integration
 def test_init(daemon_url):
     print("\n=== Test 2: Instance Initialization ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -56,6 +58,7 @@ def test_init(daemon_url):
         raise
 
 
+@pytest.mark.integration
 def test_list_boards(daemon_url):
     print("\n=== Test 3: List Boards ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -71,6 +74,7 @@ def test_list_boards(daemon_url):
         raise
 
 
+@pytest.mark.integration
 def test_list_all_boards(daemon_url):
     print("\n=== Test 4: List All Boards ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -88,6 +92,7 @@ def test_list_all_boards(daemon_url):
         raise
 
 
+@pytest.mark.integration
 def test_watch_boards(daemon_url):
     print("\n=== Test 5: Watch Boards (4 second timeout) ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -102,6 +107,7 @@ def test_watch_boards(daemon_url):
         print(f"SUCCESS: Watch ended after {elapsed:.1f}s, detected {count} event(s)")
 
 
+@pytest.mark.integration
 def test_watch_boards_event(daemon_url):
     print("\n=== Test 8: Watch Boards — Board Events ===")
     client = ArduinoGrpcClient(daemon=daemon_url)
@@ -122,6 +128,7 @@ def test_watch_boards_event(daemon_url):
         print(f"SUCCESS: Watch ended, detected {count} event(s) for {board.name}")
 
 
+@pytest.mark.integration
 def test_compile(daemon_url):
     print("\n=== Test 6: Compile Sketch ===")
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -144,6 +151,7 @@ def test_compile(daemon_url):
         assert result.success, f"Compilation failed: {result.error}"
 
 
+@pytest.mark.integration
 def test_upload(daemon_url):
     print("\n=== Test 7: Upload Sketch ===")
     script_dir = os.path.dirname(os.path.abspath(__file__))

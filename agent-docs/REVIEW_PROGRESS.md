@@ -68,4 +68,19 @@ layout: default
 
 ---
 
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| 1 | conftest.py gating matches board_manager pattern | ✅ | --integration marker gating verified |
+| 2 | All integration tests have `@pytest.mark.integration` | ✅ | 8 functions marked |
+| 3 | noxfile.py includes arduino_grpc | ✅ | Condition extended and verified |
+| 4 | ci.yml arduino-cli install step | ✅ | curl → GITHUB_PATH → export PATH → core update + core install arduino:avr |
+| 5 | ruff check — 0 errors | ✅ | Lint verified |
+| 6 | Integration tests skip without --integration | ✅ | 27+8 mode verified |
+| 7 | User-facing docs updated | ✅ | 5 files updated |
+| 8 | Agent-facing docs synced | ✅ | 16 files updated |
+
+---
+
 {% endraw %}

@@ -253,4 +253,24 @@ Test the new behavior using `make_fake_git()` shim with controlled pre/post dirt
 | T3 | `bash -n scripts/ci.sh` | Exit 0 | ✅ |
 | T4 | `bash -n scripts/tests/test_ci.sh` | Exit 0 | ✅ |
 
+
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 18:17
+**Status**: ✅ COMPLETED
+
+**Scope**: Verify that integration tests in `tests(arduino_grpc)` are correctly gated by `--integration` marker, and that CI installs `arduino-cli` so they run in CI.
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | `ruff check .` | `pipenv run ruff check .` | Exit 0, 0 errors |
+| T2 | Integration tests skip without `--integration` | `pipenv run pytest tests/` from `grpc_client/python/arduino_grpc/` | All 8 integration tests skip, unit tests pass |
+| T3 | Integration tests run with `--integration` | `pipenv run pytest tests/ --integration` from package dir + `arduino-cli` on PATH | Integration tests execute (may skip with "No board detected") |
+| T4 | noxfile passes `--integration` for arduino_grpc | `nox -s 'tests(arduino_grpc)'` with `arduino-cli` on PATH | Integration tests execute |
+| T5 | ci.yml has arduino-cli install step | Inspect `.github/workflows/ci.yml` | curl → GITHUB_PATH → export PATH → core update + core install arduino:avr step present |
+| T6 | `nox -s all_tests` without `arduino-cli` | `nox -s all_tests` on a system without arduino-cli | All sessions pass (arduino_grpc integration tests skip) |
+
 {% endraw %}

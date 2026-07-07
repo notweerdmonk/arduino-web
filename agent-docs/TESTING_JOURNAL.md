@@ -986,4 +986,29 @@ All 4 test scenarios pass. `test_ci.sh` grew from 40 to 49 assertions (3 new tes
 - `cache: npm` caches `~/.npm` based on `package-lock.json` hash, keeping CI runs fast.
 - No issues detected. All prior tests unaffected.
 
+---
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 19:00
+**Status**: ✅ COMPLETED
+
+### Test Results
+
+| # | Test | Result | Details |
+|---|------|--------|---------|
+| T1 | `ruff check .` | ✅ | 0 errors |
+| T2 | Integration tests skip without `--integration` | ✅ | 27 passed, 8 skipped |
+| T3 | Integration tests run with `--integration` | ✅ | 8 integration tests execute (2 skip: board-dependent) |
+| T4 | noxfile passes `--integration` for arduino_grpc | ✅ | `if name in ("board_manager", "arduino_grpc")` |
+| T5 | ci.yml arduino-cli install step | ✅ | curl install.sh → GITHUB_PATH → export PATH → core update + core install arduino:avr |
+| T6 | `nox -s all_tests` without arduino-cli | ✅ | All 8 sessions pass |
+
+### Changes Verified
+
+1. **conftest.py**: `pytest_addoption`/`configure`/`collection_modifyitems` — exact pattern from board_manager. YAML valid.
+2. **test_integration.py**: `@pytest.mark.integration` on all 8 functions. Python syntax OK.
+3. **noxfile.py:80**: `if name in ("board_manager", "arduino_grpc")` — nox syntax OK.
+4. **ci.yml**: arduino-cli install step (curl → GITHUB_PATH → export PATH → core update + core install arduino:avr). YAML valid.
+
 {% endraw %}

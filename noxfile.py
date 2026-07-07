@@ -77,7 +77,7 @@ def tests(session, name, pip_name, src, outdir):
         session.run("pipenv", "lock", "--dev", external=True, env=env)
         session.run("pipenv", "sync", "--dev", external=True, env=env)
         pytest_args = ["tests/"]
-        if name == "board_manager":
+        if name in ("board_manager", "arduino_grpc"):
             pytest_args.append("--integration")
         session.run("pipenv", "run", "pytest", *pytest_args, external=True, env=env)
 

@@ -535,4 +535,33 @@ git config --unset core.hooksPath
 
 ---
 
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 19:00
+**Status**: ✅ COMPLETED
+
+### Review Criteria
+
+| # | Criterion | Method |
+|---|-----------|--------|
+| R1 | conftest.py gating matches board_manager pattern | Compare `conftest.py` against `board_manager/tests/conftest.py:26-47` |
+| R2 | All integration tests have `@pytest.mark.integration` | Grep for marker on all functions in `test_integration.py` |
+| R3 | noxfile.py includes arduino_grpc | Verify `if name in ("board_manager", "arduino_grpc")` at `noxfile.py:80` |
+| R4 | ci.yml arduino-cli install step | Verify curl → GITHUB_PATH → export PATH → core update + core install arduino:avr between builds and tests |
+| R5 | `ruff check .` — 0 errors | Run ruff check |
+| R6 | `pipenv run pytest tests/` without `--integration` skips cleanly | 27 passed, 8 skipped |
+| R7 | All user-facing docs updated | Verify README.md, docs/tests.md, architecture.md, index.md, ci.md |
+| R8 | All agent-facing docs synced | 16 docs with status/task markers up to date |
+
+### Files to Review
+
+| File | Review Focus |
+|------|-------------|
+| `grpc_client/python/arduino_grpc/tests/conftest.py` | --integration gating pattern |
+| `grpc_client/python/arduino_grpc/tests/test_integration.py` | @pytest.mark.integration on 8 functions |
+| `noxfile.py:80` | Condition includes arduino_grpc |
+| `.github/workflows/ci.yml` | arduino-cli install step placement |
+
+---
+
 {% endraw %}

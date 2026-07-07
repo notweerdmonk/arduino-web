@@ -1050,4 +1050,16 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 
 ---
 
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Q1: conftest.py — add `--integration` marker gating | ✅ DONE |
+| 2 | Q2: test_integration.py — add `@pytest.mark.integration` to 8 functions | ✅ DONE |
+| 3 | Q3: noxfile.py — extend `--integration` condition to include arduino_grpc | ✅ DONE |
+| 4 | Q4: ci.yml — add arduino-cli install step (core update + core install arduino:avr) before nox -s all_tests | ✅ DONE |
+| 5 | Verify: ruff check ✅ 0 errors, pytest without --integration ✅ 27 passed 8 skipped, syntax checks ✅ | ✅ DONE |
+
+---
+
 {% endraw %}

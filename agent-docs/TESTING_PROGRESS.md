@@ -136,4 +136,17 @@ layout: default
 | T3 | `bash -n scripts/ci.sh` | ✅ | Syntax OK |
 | T4 | `bash -n scripts/tests/test_ci.sh` | ✅ | Syntax OK |
 
+
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| # | Test | Status | Notes |
+|---|------|--------|-------|
+| T1 | `ruff check .` | ✅ | 0 errors |
+| T2 | Integration tests skip without `--integration` | ✅ | 27 passed, 8 skipped |
+| T3 | Integration tests run with `--integration` | ✅ | 8 integration tests execute (2 skip: board-dependent) |
+| T4 | noxfile passes `--integration` for arduino_grpc | ✅ | `if name in ("board_manager", "arduino_grpc")` |
+| T5 | ci.yml arduino-cli install step | ✅ | curl install.sh → GITHUB_PATH → export PATH → core update + core install arduino:avr |
+| T6 | `nox -s all_tests` without arduino-cli | ✅ | All 8 sessions pass |
+
 {% endraw %}

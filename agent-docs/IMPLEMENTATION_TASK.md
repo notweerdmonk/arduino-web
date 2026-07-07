@@ -91,4 +91,23 @@ layout: default
 | E | Sync all agent-facing docs | ✅ |
 | F | Sync user-facing docs | ✅ |
 
+
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | conftest.py — Add `pytest_addoption`/`configure`/`collection_modifyitems` gating with `--integration` flag | ✅ |
+| B | test_integration.py — Add `@pytest.mark.integration` to all 8 test functions | ✅ |
+| C | noxfile.py — Extend `--integration` condition to include `arduino_grpc` alongside `board_manager` | ✅ |
+| D | ci.yml — Add `arduino-cli` install step (curl → GITHUB_PATH → export PATH → core update + core install arduino:avr) before `nox -s all_tests` | ✅ |
+| E | Verify: ruff check 0 errors, `nox -s 'tests(arduino_grpc)'` passes/skips correctly | ✅ |
+
+## Completed
+
+All 4 quantums implemented and verified:
+- `ruff check .` — 0 errors ✅
+- `pipenv run pytest tests/` (without `--integration`) — 27 passed, 8 skipped ✅
+- All 4 files pass syntax checks ✅
+
 {% endraw %}

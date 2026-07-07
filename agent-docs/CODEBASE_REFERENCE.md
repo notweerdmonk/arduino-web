@@ -4,7 +4,7 @@ layout: default
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-07-07 07:43 (Phases 89-122c)
+**Last updated**: 2026-07-07 18:17 (Phases 89-122e)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -4647,5 +4647,54 @@ nox check → pre-check (git diff lock files) → Phase 1 build → Phase 2 test
 | `bash scripts/tests/test_ci.sh` | ✅ 49/49 |
 | `bash -n scripts/ci.sh` | ✅ syntax OK |
 | `bash -n scripts/tests/test_ci.sh` | ✅ syntax OK |
+
+---
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 18:17
+**Status**: ✅ COMPLETED
+**Type**: DevOps/Testing
+
+**Goal**: Fix `tests(arduino_grpc)` CI failure where 8 integration tests error at fixture setup (`daemon_helper.py:152`) with `FileNotFoundError: [Errno 2] No such file or directory: 'arduino-cli'`.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `grpc_client/python/arduino_grpc/tests/conftest.py` | Added `pytest_addoption`/`pytest_configure`/`pytest_collection_modifyitems` — exact pattern from `board_manager/tests/conftest.py:26-47` |
+| `grpc_client/python/arduino_grpc/tests/test_integration.py` | Added `@pytest.mark.integration` to all 8 test functions |
+| `noxfile.py:80` | `if name == "board_manager"` → `if name in ("board_manager", "arduino_grpc")` |
+| `.github/workflows/ci.yml` | Added arduino-cli install step: `curl install.sh \| sh` → `echo "$(pwd)/bin" >> GITHUB_PATH` → `export PATH` → `arduino-cli core update` + `arduino-cli core install arduino:avr` |
+
+### CI.yml Structure (after Phase 122e)
+
+```
+.github/workflows/ci.yml:
+  setup-python → pip install pipenv → pipenv install --dev
+  → setup-node@v4 (node-version: "20", cache: "npm")
+  → npm ci
+  → ruff check → ruff format --check → djlint --check → prettier --check → eslint
+  → pip install nox → nox -s all_builds
+  → curl install.sh → echo "$(pwd)/bin" >> GITHUB_PATH → export PATH adds $PWD/bin → arduino-cli core update → core install arduino:avr
+  → nox -s all_tests
+```
+
+### Test Suite Reference Update
+
+| Package | Tests | Notes |
+|---------|-------|-------|
+| `arduino_grpc` | 27 unit + 8 integration | Integration tests gated by `--integration` flag |
+
+### Verification
+
+| Test | Result |
+|------|--------|
+| `ruff check .` | ✅ 0 errors |
+| `pipenv run pytest tests/` (without `--integration`) | ✅ 27 passed, 8 skipped |
+| Python syntax: noxfile.py | ✅ AST valid |
+| YAML syntax: ci.yml | ✅ `yaml.safe_load` OK |
+| Python syntax: conftest.py | ✅ AST valid |
+| Python syntax: test_integration.py | ✅ AST valid |
 
 {% endraw %}

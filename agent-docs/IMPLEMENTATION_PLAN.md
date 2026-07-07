@@ -693,4 +693,49 @@ an unknown tag. Wrap in `{% raw %}...{% endraw %}`.
 | Q3 | Verify | Jekyll build, test_ci.sh | ✅ |
 | Q4 | Docs sync | All agent-facing + user-facing docs | ✅ |
 
+---
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 18:17
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+`nox -s all_tests` fails in the `tests(arduino_grpc)` session because the 8 integration tests in `test_integration.py` require `arduino-cli` on PATH. The `daemon_url` fixture in `conftest.py` creates a `DaemonCtx` which runs `subprocess.Popen(['arduino-cli', 'daemon', ...])`, raising `FileNotFoundError` when the binary is absent. This happens in CI runners where `arduino-cli` is not pre-installed.
+
+### Approach
+
+Two-part fix:
+1. **Gate with `--integration` marker** — Mirror the exact pattern from `board_manager/tests/conftest.py`: `pytest_addoption` registers `--integration`, `pytest_configure` adds the marker, `pytest_collection_modifyitems` skips integration-marked tests unless `--integration` is passed.
+2. **Install `arduino-cli` in CI** — Add a step in `.github/workflows/ci.yml` that downloads and installs the Arduino CLI binary, adds it to PATH, runs `arduino-cli core update` and `arduino-cli core install arduino:avr` (required for compiles).
+
+This keeps direct `pipenv run pytest tests/` safe locally (skips integration tests) while CI always runs the full suite with `--integration`.
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | `conftest.py` | Add `pytest_addoption`/`configure`/`collection_modifyitems` with `--integration` flag | ✅ |
+| Q2 | `test_integration.py` | Add `@pytest.mark.integration` to all 8 test functions | ✅ |
+| Q3 | `noxfile.py` | Extend `--integration` condition to include `arduino_grpc` alongside `board_manager` | ✅ |
+| Q4 | `.github/workflows/ci.yml` | Add `arduino-cli` install step (curl → GITHUB_PATH → export PATH → core update + core install arduino:avr) before `nox -s all_tests` | ✅ |
+
+### Verification
+
+- `ruff check .` — 0 errors, 0 warnings
+- `nox -s 'tests(arduino_grpc)'` — passes with `--integration` when `arduino-cli` is present, skips without it
+- `nox -s all_tests` — all sessions pass
+- Direct `pipenv run pytest tests/` from package dir — skips integration tests cleanly
+
+### Design Decisions
+
+1. **Exact board_manager pattern**: The `pytest_addoption`/`configure`/`collection_modifyitems` triple is copied verbatim from `board_manager/tests/conftest.py:26-47`. Consistent behavior across packages.
+2. **`arduino-cli install` in ci.yml**: Placed right before `nox -s all_tests` (after all builds). Installing in a pre-test step ensures the binary is on PATH when nox spawns pipenv → pytest. Also installs the `arduino:avr` core platform for sketch compilation.
+3. **No `--integration` passed in ci.yml**: The `ci.yml` nox step already runs `nox -s all_tests` which triggers `tests()` sessions. Since ci.yml adds `arduino-cli` to PATH, the noxfile must pass `--integration` for `arduino_grpc` (same as `board_manager`). This is done by extending the noxfile condition.
+
+### Rollback
+
+Each quantum is scoped to one file. Revert individual changes with `git checkout -- <file>`.
+
 {% endraw %}

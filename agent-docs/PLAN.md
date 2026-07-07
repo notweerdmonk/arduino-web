@@ -1633,4 +1633,25 @@ before commits and pushes.
 - `README.md` — Same fix for a bare `{% endblock %}` (done by user).
 
 **Verification**: `bundle exec jekyll build` — done in 93s, 0 errors ✅. `bash scripts/tests/test_ci.sh` — 49/49 ✅. `bash -n` on both scripts ✅.
+
+---
+
+### Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+**Date**: 2026-07-07 18:17
+**Status**: ✅ COMPLETED
+
+**Goal**: Fix CI failure in `tests(arduino_grpc)` where 8 integration tests error at fixture setup because `arduino-cli` binary is not on PATH in GitHub runners. (`grpc_client/python/arduino_grpc/tests/conftest.py:32` → `daemon_helper.py:152`, `FileNotFoundError: [Errno 2] No such file or directory: 'arduino-cli'`)
+
+**Approach** (user-approved): Apply the `--integration` marker gating pattern already used by `board_manager`, AND install `arduino-cli` in ci.yml. Direct `pipenv run pytest tests/` stays safe locally; CI always runs integration tests.
+
+**Changes**:
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | `conftest.py` | Add `pytest_addoption`/`configure`/`collection_modifyitems` with `--integration` flag | ✅ |
+| Q2 | `test_integration.py` | Add `@pytest.mark.integration` to all 8 test functions | ✅ |
+| Q3 | `noxfile.py` | Extend `--integration` condition in `tests()` session to include `arduino_grpc` alongside `board_manager` | ✅ |
+| Q4 | `.github/workflows/ci.yml` | Add `arduino-cli` install step (curl → GITHUB_PATH → export PATH → core update + core install arduino:avr) before `nox -s all_tests` | ✅ |
+
+**Verification**: `ruff check .` — 0 errors ✅. `nox -s all_tests` — all sessions pass. `pipenv run pytest tests/` (without `--integration`) — skips integration tests cleanly.
 {% endraw %}

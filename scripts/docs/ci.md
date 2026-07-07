@@ -50,7 +50,7 @@ completes, a post-check lists any newly-dirtied lock files and offers to
 - Equivalent granular nox invocations:
 
 ```bash
-nox -s all_tests                # all 7 test sessions
+nox -s all_tests                # all 8 test sessions
 nox -s all_builds               # all 6 wheel builds
 nox -s scripts_tests            # scripts tests only
 nox -s 'tests(arduino_dash)'    # one package's tests

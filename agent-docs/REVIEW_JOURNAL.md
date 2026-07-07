@@ -1557,4 +1557,49 @@ ESLint was flagging 2201 problems. Analysis showed the vast majority came from g
 
 All 5 criteria pass. The ignore list is complete, the `/* exported */` annotations are correctly placed and scoped, and all formatters remain green. Phase 121 approved.
 
+## 2026-07-07 19:00 — Phase 122e: Fix `tests(arduino_grpc)` CI Failure
+
+**Status**: ✅ REVIEW COMPLETED
+
+**Scope**: Review 4 implementation quantums: conftest.py gating, test_integration.py markers, noxfile.py extension, ci.yml arduino-cli install.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `grpc_client/python/arduino_grpc/tests/conftest.py` | Added pytest_addoption/configure/collection_modifyitems |
+| `grpc_client/python/arduino_grpc/tests/test_integration.py` | Added @pytest.mark.integration to 8 functions |
+| `noxfile.py:80` | `== "board_manager"` → `in ("board_manager", "arduino_grpc")` |
+| `.github/workflows/ci.yml` | Added arduino-cli install step between builds and tests (core update + core install arduino:avr) |
+
+### Verification
+
+| Check | Result |
+|-------|--------|
+| `ruff check .` | ✅ 0 errors |
+| `pipenv run pytest tests/` (no --integration) | ✅ 27 passed, 8 skipped |
+| Syntax: noxfile.py | ✅ AST valid |
+| Syntax: ci.yml | ✅ YAML valid |
+| Syntax: conftest.py | ✅ AST valid |
+| Syntax: test_integration.py | ✅ AST valid |
+
+### Documentation Audit
+
+All 16 agent-facing docs updated with ✅ status markers. 5 user-facing docs updated (README.md, tests.md, architecture.md, index.md, ci.md).
+
+### Findings Summary
+
+| Criterion | Result | Notes |
+|-----------|--------|-------|
+| conftest.py gating | ✅ | Matches board_manager pattern exactly |
+| test_integration.py markers | ✅ | All 8 functions have `@pytest.mark.integration` |
+| noxfile.py | ✅ | `if name in ("board_manager", "arduino_grpc")` at line 80 |
+| ci.yml install step | ✅ | curl → GITHUB_PATH → export PATH → core update + core install arduino:avr |
+| ruff check | ✅ | 0 errors |
+| Integration skip without --integration | ✅ | 27 passed, 8 skipped |
+| User-facing docs | ✅ | All 5 files updated and consistent |
+| Agent-facing docs | ✅ | All 16 files synced |
+
+**Overall Verdict**: ✅ All implementation quantums complete and verified. No blocking issues. Two ci.yml fixes during review: (1) switched from `$HOME/bin` to `$(pwd)/bin` to match the installer's default BINDIR, (2) added `export PATH="$(pwd)/bin:$PATH"` after `GITHUB_PATH` so `arduino-cli` is on PATH in the same step.
+
 {% endraw %}

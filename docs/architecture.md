@@ -348,7 +348,7 @@ Prior to the frontend optimization, interactive UI behaviors used **Hyperscript*
 | Board detection | pyudev (optional) |
 | Build | setuptools, nox |
 | CI pipeline (local) | `scripts/ci.sh` — lint (Phase 0) + `nox -s all_builds` (Phase 1) + `nox -s all_tests` (Phase 2) |
-| CI pipeline (GitHub Actions) | `.github/workflows/ci.yml` — standalone workflow (ruff, djlint, prettier, eslint, nox builds + tests) |
+| CI pipeline (GitHub Actions) | `.github/workflows/ci.yml` — standalone workflow (ruff, djlint, prettier, eslint, nox builds, arduino-cli install, nox tests) |
 | Testing | pytest, unittest.mock, bash (scripts/tests) |
 | Standalone binary | PyOxidizer |
 | Arduino libs | RTClib, TM1637TinyDisplay |

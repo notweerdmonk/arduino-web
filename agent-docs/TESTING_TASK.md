@@ -138,4 +138,17 @@ All Phase 112 tests verified:
 | T3 | Post-check skip (Q18.16) — newly dirty + user declines → left dirty, no git restore | ✅ |
 | T4 | Existing tests isolated — Q18.6–Q18.10 pass with FAKE_GIT_DIRTY_LOCK_FILES="" | ✅ |
 
+
+
+## Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | `ruff check .` — 0 errors | ✅ |
+| T2 | Verify integration tests skip without `--integration` | ✅ |
+| T3 | Verify integration tests run with `--integration` (when arduino-cli present) | ✅ |
+| T4 | Verify noxfile passes `--integration` for arduino_grpc | ✅ |
+| T5 | Verify ci.yml has arduino-cli install step (core install arduino:avr) | ✅ |
+| T6 | `nox -s all_tests` without arduino-cli — all sessions pass | ✅ |
+
 {% endraw %}

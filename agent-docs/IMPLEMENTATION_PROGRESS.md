@@ -167,4 +167,16 @@ layout: default
 | 3 | Verify — Jekyll build, test_ci.sh | ✅ | Jekyll 0 errors, test_ci.sh 49/49 |
 | 4 | Docs sync — all docs updated | ✅ | |
 
+
+
+### Phase 122e — Fix `tests(arduino_grpc)` CI Failure
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | conftest.py — integration marker gating | ✅ | Add pytest_addoption/configure/collection_modifyitems |
+| 2 | test_integration.py — @pytest.mark.integration on 8 functions | ✅ | Mark all integration test functions |
+| 3 | noxfile.py --integration flag for arduino_grpc | ✅ | Extend condition to include arduino_grpc |
+| 4 | ci.yml — arduino-cli install step | ✅ | curl → GITHUB_PATH → export PATH → core update + core install arduino:avr |
+| 5 | Verify: ruff check, nox tests pass | ✅ | ruff 0 errors, pytest 27+8 |
+
 {% endraw %}

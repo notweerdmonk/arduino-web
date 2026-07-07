@@ -31,19 +31,21 @@ def test_encode_and_frame_newline():
 
 ### Integration Tests
 
-Integration tests require a running `arduino-cli daemon` and are gated by a `--integration` pytest flag. They test end-to-end message flow through BoardManagerService as a subprocess.
+Integration tests require a running `arduino-cli daemon` and are gated by a `--integration` pytest flag. In `board_manager`, they test end-to-end message flow through BoardManagerService as a subprocess. In `arduino_grpc`, they test the client directly against the arduino-cli daemon.
 
 **Location:**
 - `board_manager/tests/test_integration.py` — 8 tests (TCP/UDS connect, subscribe, health, publish, unsubscribe, multiple clients, board_cmd_status)
-- `arduino_grpc/tests/test_integration.py` — 7 tests (connection, init, list_boards, watch_boards, compile) — 2 skip when no physical board is plugged in
+- `arduino_grpc/tests/test_integration.py` — 8 tests (connection, init, list_boards, watch_boards, compile, upload) — 2 skip when no physical board is plugged in
 
 **Invocation:**
 ```bash
 cd board_manager/python/board_manager
 pipenv run pytest tests/ --integration
+cd grpc_client/python/arduino_grpc
+pipenv run pytest tests/ --integration
 ```
 
-Integration tests spawn the full BoardManagerService as a subprocess, connect over TCP or UDS, and verify end-to-end message flow. They are included automatically in `nox -s all_tests` for the `board_manager` package.
+Integration tests are included automatically in `nox -s all_tests` for the `board_manager` and `arduino_grpc` packages.
 
 ### Board-Dependent Tests
 
@@ -66,7 +68,7 @@ cd board_manager_client/python/board_manager_client && pipenv run pytest tests/ 
 cd arduino_sketch_tools/python/arduino_sketch_tools && pipenv run pytest tests/  # 51 tests
 cd arduino_dash/python/arduino_dash             && pipenv run pytest tests/    # 119 tests
 cd medminder_dash/python/medminder_dash         && pipenv run pytest tests/    # 186 passed, 1 skipped
-cd grpc_client/python/arduino_grpc              && pipenv run pytest tests/    # 35 tests
+cd grpc_client/python/arduino_grpc              && pipenv run pytest tests/    # 27 unit + 8 integration (integration skip without --integration)
 ```
 
 ### All packages (nox)
@@ -112,7 +114,7 @@ Two Git hooks integrate the CI pipeline into your local workflow (enable with `g
 | `tests(board_manager_client)` | 24 passed | |
 | `tests(arduino_sketch_tools)` | 51 passed | |
 | `tests(arduino_dash)` | 119 passed | |
-| `tests(arduino_grpc)` | 33 passed, 2 skipped | board-dependent (watch, upload) |
+| `tests(arduino_grpc)` | 33 passed, 2 skipped | 27 unit + 8 integration (2 board-dependent skips: watch_events, upload) |
 | `tests(medminder_dash)` | 186 passed, 1 skipped | route change (admin URL query) |
 
 ## Test Coverage Areas

@@ -42,5 +42,12 @@ jobs:
         run: pip install nox
       - name: Build all packages
         run: nox -s all_builds
+      - name: Install arduino-cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$(pwd)/bin" >> "$GITHUB_PATH"
+          export PATH="$(pwd)/bin:$PATH"
+          arduino-cli core update
+          arduino-cli core install arduino:avr
       - name: Run all tests
         run: nox -s all_tests

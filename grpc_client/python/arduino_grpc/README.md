@@ -119,13 +119,13 @@ with ArduinoGrpcClient() as client:
 
 ```bash
 # Unit tests (mocked, no daemon needed)
-pipenv run python -m pytest arduino_grpc/tests/test_client.py -v
+pipenv run pytest tests/test_client.py -v
 
-# Integration tests (requires running daemon)
-pipenv run python -m arduino_grpc.tests.integration_test
+# Integration tests (requires running daemon, gated by --integration flag)
+pipenv run pytest tests/ --integration
 ```
 
-Integration tests: Connection, Init, List Boards, List All Boards, Watch Boards (with timeout), Compile, Upload (full compile + upload to detected board).
+Integration tests: Connection, Init, List Boards, List All Boards, Watch Boards (with timeout), Watch Board Events, Compile, Upload (full compile + upload to detected board).
 
 ## Project Structure
 
@@ -139,7 +139,7 @@ grpc_client/python/
 │   └── tests/
 │       ├── __init__.py
 │       ├── test_client.py        # 27 unit tests
-│       └── integration_test.py   # 8 integration tests
+│       └── test_integration.py   # 8 integration tests (--integration flag)
 ├── cc/                    # Generated gRPC stubs
 ├── Pipfile
 └── pyproject.toml

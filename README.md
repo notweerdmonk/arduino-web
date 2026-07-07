@@ -111,7 +111,7 @@ nox -s 'tests(medminder_dash)'
 ./scripts/ci.sh --skip-tests     # builds only
 ```
 
-**Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 186 (+1 skip), arduino_grpc 33 (+2 skip), scripts 170.
+**Package counts:** board_manager ~212, board_manager_client 24, arduino_sketch_tools 51, arduino_dash 119, medminder_dash 186 (+1 skip), arduino_grpc 27 unit (+8 integration with --integration; 33 pass + 2 skip with daemon), scripts 170.
 
 **Note:** Nox sessions auto-regenerate `Pipfile.lock` on each run — no manual lock management after wheel rebuilds.
 

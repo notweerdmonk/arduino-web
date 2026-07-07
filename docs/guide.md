@@ -81,7 +81,9 @@ Open [http://localhost:8081](http://localhost:8081)
 
 ```bash
 nox -s all_tests          # 8 sessions: all 6 packages + scripts
-./scripts/ci.sh           # full CI pipeline (builds → tests)
+./scripts/ci.sh               # full CI pipeline (lint → builds → tests)
+./scripts/ci.sh --skip-lint     # builds → tests (skip lint)
+./scripts/ci.sh --no-install    # skip nox phases if nox missing (no prompt)
 ```
 
 The nox sessions auto-regenerate Pipfile.lock on each run (Phase 94), so there is
@@ -359,7 +361,7 @@ Medicine data is stored in `board_meta.json`. Check:
 The repository ships with two Git hooks in `.githooks/` (enable with `git config core.hooksPath .githooks`):
 
 - **Pre-commit** (optional): Prompts before running ruff check, ruff format --check, prettier --check, eslint, and djlint --check. Skip with `n` or `git commit --no-verify`.
-- **Pre-push** (mandatory): Runs `scripts/ci.sh` — full CI pipeline (builds + tests, ~15-25 min). Skip with `git push --no-verify`.
+- **Pre-push** (mandatory): Runs `scripts/ci.sh` — full CI pipeline (lint + builds + tests, ~15-25 min). Skip with `git push --no-verify`.
 
 The pre-commit hook's djlint check runs `--check` only (read-only). If it fails, run `pipenv run djlint . --reformat` manually — you may need a second pass for `{% endblock %}` convergence. Add and commit again after fixing.
 

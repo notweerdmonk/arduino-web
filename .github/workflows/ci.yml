@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +24,17 @@ jobs:
         run: pipenv install --dev
       - name: Lint with ruff
         run: pipenv run ruff check .
+      - name: Format check with ruff
+        run: pipenv run ruff format --check .
       - name: Lint templates with djlint
         run: pipenv run djlint . --check
+      - name: Format check with prettier
+        run: npx prettier --check "**/*.html"
+      - name: Lint with eslint
+        run: npx eslint .
       - name: Install nox
         run: pip install nox
-      - name: Full CI pipeline
-        run: ./scripts/ci.sh
+      - name: Build all packages
+        run: nox -s all_builds
+      - name: Run all tests
+        run: nox -s all_tests

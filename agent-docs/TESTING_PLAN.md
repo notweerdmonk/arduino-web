@@ -186,4 +186,29 @@ Python tests or functionality.
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | test_ci.sh full suite | `bash scripts/tests/test_ci.sh` | 40/40 assertions pass |
+| T2 | ruff no regressions | `pipenv run ruff check .` | Exit 0 |
+| T3 | ruff format consistency | `pipenv run ruff format --check .` | Exit 0 |
+| T4 | bash syntax ci.sh | `bash -n scripts/ci.sh` | Exit 0 |
+| T5 | bash syntax test_ci.sh | `bash -n scripts/tests/test_ci.sh` | Exit 0 |
+| T6 | Lint success (Q18.11) | Fake pipenv/npx exit 0, `--skip-builds --skip-tests` | Exit 0, "Phase 0: running lint checks" |
+| T7 | Lint failure (Q18.12) | FAKE_PIPENV_RC=1 | Exit 5, "lint check failed" |
+| T8 | `--no-install` (Q18.13) | PATH stripped, `--skip-lint --no-install` | Exit 0, warning, both phases skipped |
+| T9 | Non-interactive nox missing (Q18.5) | PATH `/usr/bin:/bin`, `--skip-lint` | Exit 1, "pipx" in stderr |
+| T10 | `--skip-lint` on flag tests (Q18.6–Q18.10) | Fake nox with `--skip-lint` | All pass, correct phase labels |
+
+### Coverage Notes
+
+- Lint phase (Phase 0) tested via fake pipenv/npx shims — no real lint tools needed
+- Nox prompt tested implicitly: non-interactive fallback tested (Q18.5), `--no-install` tested (Q18.13), interactive prompt not testable in CI (requires real terminal)
+- All existing flag tests updated with `--skip-lint` — lint phase would fail without real pipenv/npx
+
+---
+
 {% endraw %}

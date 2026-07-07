@@ -111,4 +111,19 @@ All Phase 112 tests verified:
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | `bash scripts/tests/test_ci.sh` 40/40 | ✅ |
+| T2 | `ruff check .` exit 0 | ✅ |
+| T3 | `ruff format --check .` all formatted | ✅ |
+| T4 | `bash -n scripts/ci.sh` syntax OK | ✅ |
+| T5 | `bash -n scripts/tests/test_ci.sh` syntax OK | ✅ |
+| T6 | Lint success (Q18.11) — exit 0, Phase 0 labels | ✅ |
+| T7 | Lint failure (Q18.12) — exit 5, stderr message | ✅ |
+| T8 | `--no-install` (Q18.13) — exit 0, warning, phases skipped | ✅ |
+
+---
+
 {% endraw %}

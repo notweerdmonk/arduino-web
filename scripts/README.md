@@ -65,9 +65,11 @@ import + CLI smoke tests. See `../dist-test-install/README.md` for details.
 ## CI Pipeline
 
 ```bash
-./scripts/ci.sh                         # builds → tests
+./scripts/ci.sh                         # lint → builds → tests
+./scripts/ci.sh --skip-lint             # builds → tests (skip lint)
 ./scripts/ci.sh --skip-tests            # builds only
 ./scripts/ci.sh --skip-builds           # tests only
+./scripts/ci.sh --no-install            # skip nox phases if nox missing (no prompt)
 ```
 
 Or via nox:

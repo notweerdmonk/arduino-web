@@ -4513,4 +4513,26 @@ These gaps violate the explicit requirement in `IMPLEMENTATION_TASK.md` Task E a
 
 ---
 
+### Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+**Date**: 2026-07-07
+
+Key decisions:
+- **Architecture decision**: `ci.yml` and `ci.sh` are independent. `ci.yml` is GitHub-specific (explicit steps, each failure visible separately in UI). `ci.sh` is the local CI script for pre-push hook and local development (phases, interactive prompt). They share no code paths.
+- **Interactivity detection**: Use `(</dev/tty) 2>/dev/null` in a subshell (not `-t 0`). If `/dev/tty` redirect fails → non-interactive context → error out. If it succeeds → show interactive nox install prompt with 5 options.
+- **Nox install prompt**: Options 1-3 install (pip/pipx/custom), option 4 skips nox phases, option 0 aborts. After install attempt, re-check `command -v nox` before proceeding.
+- **`--no-install` flag**: Bypasses all nox detection/prompting. If nox is missing, phases are silently skipped with a stderr warning. Exit 0.
+- **Lint Phase 0**: 5 checks — ruff check, ruff format --check, prettier --check, eslint, djlint --check. If `pipenv` or `npx` missing, marks as failure. Does NOT check for individual tools (ruff, djlint, prettier, eslint) beyond what pipenv/npx provide.
+- **test_ci.sh**: `make_fake_lint_tools()` helper creates fake `pipenv` and `npx` shims controlled by `FAKE_PIPENV_RC`/`FAKE_NPX_RC` env vars. Q18.11 tests lint success, Q18.12 tests lint failure (pipenv exits 1), Q18.13 tests `--no-install`.
+
+**Tty bugfix (Phase 122b)**: Q18.5 (nox-missing → exit 1) — `PATH=/usr/bin:/bin`, `nox` not found, `(</dev/tty)` succeeds from terminal → interactive prompt → `read -r choice </dev/tty` blocks forever. Fixed with `tty_var` param on `run_script`: pipes through `script(1)` to create pty. Sub-fixes:
+- **`script -e`**: Without `-e`, `script -q` always returns exit 0 regardless of child exit code. Added `-e` flag.
+- **`%q` quoting broken**: `printf '%q '` produced backslash-escaped tokens (`\'echo out\'`) that `script`'s inner `/bin/sh -c` couldn't parse. Switched to direct string concatenation: `cmd_str="bash ${SCRIPT_UNDER_TEST}${args[@]/#/ }"` + `" 2>${err}"`. Safe because all args are simple flags.
+- **Q18.5 assertions**: Prompt output goes to stdout (via pty), not stderr. Changed from `assert_contains stderr` to `assert_contains stdout`.
+- **ci.sh unchanged**: No changes needed. Reads `/dev/tty` correctly via the pty under `script`.
+
+**Verification**: `bash scripts/tests/test_ci.sh` 40/40 ✅ after tty bugfix. `ruff format --check` OK ✅, `ruff check .` OK ✅.
+
+---
+
 {% endraw %}

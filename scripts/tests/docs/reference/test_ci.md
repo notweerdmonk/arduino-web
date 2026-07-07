@@ -1,12 +1,12 @@
 # test_ci.sh
 
-Tests for the `ci.sh` script — validates flag parsing, error handling, and nox shim integration.
+Tests for the `ci.sh` script — validates flag parsing, error handling, nox shim integration, and lint phase.
 
 ## Overview
 
-30 bash assertions covering: `--help`, unknown flags, nox-missing handling, `--skip-builds` (runs all_tests), `--skip-tests` (runs all_builds), both flags (skips all nox calls), test failure propagation (exit 2), build failure propagation (exit 3).
+40 bash assertions covering: `--help`, unknown flags, nox-missing handling, `--skip-lint`, `--skip-builds` (runs all_tests), `--skip-tests` (runs all_builds), both flags (skips all nox calls), test failure propagation (exit 2), build failure propagation (exit 3), lint success (exit 0), lint failure (exit 5), and `--no-install` (silently falls through).
 
-Uses a fake `nox` shim in a temp dir — zero external dependencies beyond bash.
+Uses fake `nox`, `pipenv`, and `npx` shims in temp dirs — zero external dependencies beyond bash.
 
 ## Usage
 

@@ -601,4 +601,29 @@ ESLint flagged 2201 problems (737 errors, 1464 warnings) across the monorepo. 99
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+**Date**: 2026-07-07
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+Add lint Phase 0 to `ci.sh`, interactive nox install prompt, make `ci.yml` a standalone GitHub workflow independent from `ci.sh`.
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | `scripts/ci.sh` lint Phase 0 | 5 lint checks (ruff check, ruff format --check, prettier, eslint, djlint), `--skip-lint` flag, exit 5 | ✅ |
+| Q2 | `scripts/ci.sh` nox prompt | Interactive 5-option nox install prompt, `--no-install` flag, non-interactive nox-missing → exit 1 | ✅ |
+| Q3 | `.github/workflows/ci.yml` | Standalone with explicit steps — no `ci.sh` call | ✅ |
+| Q4 | `scripts/tests/test_ci.sh` | 3 new tests, 6 updated with `--skip-lint`, 40 assertions total | ✅ |
+| Q5 | User-facing docs | Updated: ci.md, reference/ci.md, test_ci.md, scripts/README.md, docs/tests.md, docs/guide.md, docs/architecture.md | ✅ |
+
+### Verification
+
+`bash scripts/tests/test_ci.sh` 40/40 ✅, `ruff check .` 0 errors ✅, `ruff format --check .` all formatted ✅.
+
+---
+
 {% endraw %}

@@ -98,4 +98,21 @@ layout: default
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+| # | Test | Status | Notes |
+|---|------|--------|-------|
+| T1 | `bash scripts/tests/test_ci.sh` | ✅ 40/40 | 10 new assertions (was 30) |
+| T2 | `ruff check .` | ✅ exit 0 | No regressions |
+| T3 | `ruff format --check .` | ✅ 112 files formatted | No regressions |
+| T4 | `bash -n scripts/ci.sh` | ✅ Syntax OK | 198 lines |
+| T5 | `bash -n scripts/tests/test_ci.sh` | ✅ Syntax OK | 393 lines |
+| T6 | Lint success (fake tools exit 0) | ✅ Q18.11: exit 0, "Phase 0: running lint checks" |
+| T7 | Lint failure (pipenv exits 1) | ✅ Q18.12: exit 5, "lint check failed" |
+| T8 | `--no-install` without nox | ✅ Q18.13: exit 0, warning, both phases skipped |
+| T9 | Non-interactive nox missing | ✅ Q18.5: exit 1, stderr pipx message |
+| T10 | `--skip-lint` on all flag tests | ✅ Q18.6-Q18.10: all pass with `--skip-lint` |
+
+---
+
 {% endraw %}

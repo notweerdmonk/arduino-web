@@ -46,4 +46,19 @@ layout: default
 | C | Fix `no-unused-vars` in medminder_dash base.html (htmx callbacks) | ✅ |
 | D | Verify `npx eslint .` — 0 errors, 0 warnings | ✅ |
 
+---
+
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | ci.sh — lint Phase 0 (5 checks, exit 5) | ✅ |
+| B | ci.sh — `--skip-lint`, `--no-install` flags | ✅ |
+| C | ci.sh — interactive nox install prompt (5 options) | ✅ |
+| D | ci.yml — standalone (no ci.sh call) | ✅ |
+| E | test_ci.sh — 3 new tests, 6 updated (40 total) | ✅ |
+| F | User-facing docs updated | ✅ |
+| G | Agent-facing docs updated | ✅ |
+| H | Verify: `test_ci.sh` 40/40 ✅, `ruff check .` OK ✅ | ✅ |
+
 {% endraw %}

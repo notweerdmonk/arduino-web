@@ -131,4 +131,20 @@ layout: default
 | 3 | Fix medminder_dash base.html unused vars | ✅ | Same annotation |
 | 4 | Verify npx eslint . — 0 errors, 0 warnings | ✅ | Down from 2201 problems |
 
+---
+
+### Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | ci.sh — lint Phase 0 (5 checks, exit 5) | ✅ | ruff check, ruff format --check, prettier, eslint, djlint |
+| 2 | ci.sh — `--skip-lint`, `--no-install` flags | ✅ | Parsed in arg-handling loop |
+| 3 | ci.sh — interactive nox install prompt | ✅ | 5 options, `/dev/tty` subshell detection |
+| 4 | ci.yml — standalone (no ci.sh call) | ✅ | Explicit lint/build/test steps |
+| 5 | test_ci.sh — update 6 tests with `--skip-lint` | ✅ | Q18.5–Q18.10 all use `--skip-lint` |
+| 6 | test_ci.sh — 3 new tests (lint fail, lint pass, --no-install) | ✅ | Q18.11, Q18.12, Q18.13; `make_fake_lint_tools()` helper |
+| 7 | Update user-facing docs | ✅ | ci.md, reference/ci.md, test_ci.md, scripts/README.md, docs/tests.md, docs/guide.md, docs/architecture.md |
+| 8 | Update agent-facing docs | ✅ | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, IMPLEMENTATION_PROGRESS.md |
+| 9 | Verify — test_ci.sh + ruff | ✅ | 40/40 tests pass, ruff check 0 errors, ruff format OK |
+
 {% endraw %}

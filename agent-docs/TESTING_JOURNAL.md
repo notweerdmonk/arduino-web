@@ -898,4 +898,34 @@ All 3 test scenarios pass. ESLint went from 2201 problems (737 errors, 1464 warn
 - Ruff and prettier were checked to ensure the ignore list changes didn't accidentally affect other file types
 - No nox test sessions were required since only ESLint config and HTML comments changed (no Python code changes)
 
+---
+
+## 2026-07-07 — Phase 122: CI Restructure — Test Results
+
+### Summary
+
+All 10 test scenarios pass. `test_ci.sh` grew from 30 to 40 assertions. Phase 122 testing had the widest scope in project history: 40 bash assertions + ruff format + ruff check.
+
+### Test Execution
+
+| # | Test Command | Result | Output |
+|---|-------------|--------|--------|
+| T1 | `bash scripts/tests/test_ci.sh` | ✅ 40/40 | 10 scenarios, all pass |
+| T2 | `ruff check .` | ✅ exit 0 | All checks passed |
+| T3 | `ruff format --check .` | ✅ exit 0 | 112 files formatted |
+| T4 | `bash -n scripts/ci.sh` | ✅ exit 0 | 198 lines, syntax OK |
+| T5 | `bash -n scripts/tests/test_ci.sh` | ✅ exit 0 | 393 lines, syntax OK |
+| T6 | Lint success (Q18.11) | ✅ | Fake pipenv/npx exit 0 → "Phase 0: running lint checks" |
+| T7 | Lint failure (Q18.12) | ✅ | FAKE_PIPENV_RC=1 → exit 5, "lint check failed" |
+| T8 | `--no-install` (Q18.13) | ✅ | No nox → exit 0, warning, both phases skipped |
+| T9 | Non-interactive nox missing (Q18.5) | ✅ | PATH stripped → exit 1, "pipx" in stderr |
+| T10 | `--skip-lint` on flag tests (Q18.6–Q18.10) | ✅ | All pass with `--skip-lint` on stripped PATH |
+
+### Verification Notes
+
+- The `(</dev/tty) 2>/dev/null` subshell pattern was validated — behaves correctly in both interactive (prompt shows) and non-interactive (exit 1) contexts
+- `make_fake_lint_tools()` creates controllable `pipenv`/`npx` shims — reliable zero-dep testing for Phase 0
+- Updated `--no-install` test (Q18.13) verifies exit 0 + stderr warning + "Phase 1: skipped" + "Phase 2: skipped"
+- Q18.6–Q18.10 all needed `--skip-lint` because plain `/usr/bin:/bin` PATH lacks pipenv/npx
+
 {% endraw %}

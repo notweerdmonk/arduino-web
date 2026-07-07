@@ -1447,4 +1447,79 @@ The `/* exported name1, name2 */` comment is the correct way to suppress `no-unu
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+**Date**: 2026-07-07
+**Status**: ✅ Complete
+
+### Motivation
+
+The CI pipeline had two shortcomings: (1) no lint phase in `ci.sh` — lint checks were only in the pre-commit hook and `ci.yml`, not in the local CI script; (2) `ci.yml` delegated to `ci.sh`, making them coupled and GitHub UI steps invisible.
+
+### Quantum 1 — ci.sh Lint Phase
+
+**Changed**: `scripts/ci.sh`
+
+Added Phase 0 with 5 lint checks before any build/test work:
+- `pipenv run ruff check .`
+- `pipenv run ruff format --check .`
+- `pipenv run djlint . --check`
+- `npx prettier --check "**/*.html"`
+- `npx eslint .`
+
+Any lint failure → `lint_failed=1` → exit 5 (new exit code). If `pipenv` or `npx` missing, marks as lint failure.
+
+### Quantum 2 — ci.sh Flags and Nox Prompt
+
+**Changed**: `scripts/ci.sh`
+
+- Added `--skip-lint` flag — skips Phase 0 entirely
+- Added `--no-install` flag — if nox is missing, silently skip nox phases (warning to stderr), resume with exit 0
+- Added interactive nox install prompt (when nox missing and terminal accessible):
+  - Option 1: `pip install nox` (respects active venv)
+  - Option 2: `pipx install nox` (isolated venv)
+  - Option 3: custom command
+  - Option 4: skip nox phases
+  - Option 0: abort (exit 1)
+- Non-interactive nox-missing → exit 1 with install instructions
+- Interactivity detection: `(</dev/tty) 2>/dev/null` in subshell (not `-t 0`)
+
+### Quantum 3 — Standalone ci.yml
+
+**Changed**: `.github/workflows/ci.yml`
+
+Replaced `./scripts/ci.sh` call with explicit steps:
+```
+ruff check → ruff format --check → djlint --check → prettier --check → eslint → pip install nox → nox -s all_builds → nox -s all_tests
+```
+
+`ci.yml` is now standalone and independent from `ci.sh`. GitHub failures appear per-step in the UI.
+
+### Quantum 4 — test_ci.sh Updates
+
+**Changed**: `scripts/tests/test_ci.sh` (322→393 lines)
+
+- Added `--skip-lint` to 6 existing tests (Q18.5–Q18.10) so they reach their target phases
+- Added `make_fake_lint_tools()` helper — creates fake `pipenv` and `npx` shims controlled by `FAKE_PIPENV_RC`/`FAKE_NPX_RC`
+- Added Q18.11: lint success (exit 0) — fake tools pass, `--skip-builds --skip-tests`
+- Added Q18.12: lint failure (exit 5) — `FAKE_PIPENV_RC=1`
+- Added Q18.13: `--no-install` (exit 0) — nox missing, `--skip-lint --no-install`
+- 40 assertions total (was 30)
+
+### Gotchas
+
+1. **`-r /dev/tty` returns true when I/O fails**: In test environments, `[[ -r /dev/tty ]]` returns true (device file exists and is readable) but actual `read` fails. Fixed by using `(</dev/tty) 2>/dev/null` in a subshell — the redirect itself is the test.
+2. **All fake-nox tests need `--skip-lint`**: Without it, the lint phase tries to run `pipenv` and `npx` which aren't available, causing exit 5.
+3. **`--no-install` goes to stderr but exit 0**: The warning message goes to stderr but the pipeline completes successfully — exit 0. Test Q18.13 checks for both.
+
+### Verification
+
+```
+bash scripts/tests/test_ci.sh → 40/40 ✅
+ruff check .                  → 0 errors ✅
+ruff format --check .         → 112 files formatted ✅
+```
+
+---
+
 {% endraw %}

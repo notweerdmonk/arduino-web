@@ -1530,7 +1530,7 @@ and catch CI failures before push. Shellcheck-clean scripts.
 | File | Action | Status |
 |------|--------|--------|
 | `.githooks/pre-commit` | **Create** — optional lint checks (ruff, prettier, eslint, djlint) with `[Y/n]` prompt | ✅ |
-| `.githooks/pre-push` | **Create** — runs `scripts/ci.sh` (full build + test, ~15-25 min) | ✅ |
+| `.githooks/pre-push` | **Create** — runs `scripts/ci.sh` (full lint + build + test, ~15-25 min) | ✅ |
 | `AGENTS.md` | Add hooksPath setup documentation | ✅ |
 | `scripts/ci.sh` | Fix SC2155 — split declare+assign for REPO_ROOT | ✅ |
 | `scripts/tests/test_ci.sh` | Fix SC2034/SC2154 — remove unused REPO_ROOT, pre-declare out_* vars | ✅ |
@@ -1575,4 +1575,28 @@ before commits and pushes.
 - `medminder_dash/templates/base.html` — Same `/* exported */` annotation
 
 **Result**: ESLint went from 2201 problems (737 errors, 1464 warnings) to 0 errors, 0 warnings.
+
+---
+
+### Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+**Date**: 2026-07-07
+**Status**: ✅ COMPLETED
+
+**Goal**: Add lint Phase 0 to ci.sh, interactive nox install prompt, make ci.yml a standalone GitHub-specific workflow independent from ci.sh.
+
+**Changes**:
+- `scripts/ci.sh` — Added Phase 0 (lint): ruff check, ruff format --check, prettier --check, eslint, djlint --check. Added `--skip-lint`, `--no-install` flags. Added interactive nox install prompt (4 options + abort). Non-interactive nox-missing → exit 1. Updated exit codes (5 = lint failure).
+- `.github/workflows/ci.yml` — Standalone GitHub workflow with explicit lint/build/test steps. No longer calls `ci.sh`.
+- `scripts/tests/test_ci.sh` — Added `--skip-lint` to 6 existing tests. Added 3 new tests: lint success (exit 0), lint failure (exit 5), `--no-install` (exit 0). 40 bash assertions total (was 30).
+- Updated user-facing docs: `scripts/docs/ci.md`, `scripts/docs/reference/ci.md`, `scripts/tests/docs/reference/test_ci.md`, `scripts/README.md`, `docs/tests.md`, `docs/guide.md`, `docs/architecture.md`.
+
+**Architecture**: `ci.yml` and `ci.sh` are independent. `ci.yml` is GitHub-specific (explicit steps, separate job per failure). `ci.sh` is the local CI script for pre-push hook and local dev (phases, interactive prompt).
+
+**Tty bugfix (Phase 122b)**: Q18.5 (nox-missing → exit 1) failed from a local terminal because `(</dev/tty)` succeeds → A. read blocks forever. Fixed with `tty_var` param on `run_script`: when non-empty, pipes through `script(1)` to create a pty. Two additional sub-fixes:
+- **`script -e`**: Without `-e`, `script -q` always returns exit 0 regardless of child exit code.
+- **`%q` quoting**: `printf '%q '` produced backslash-escaped tokens that `script`'s inner shell couldn't parse. Switched to direct string concatenation.
+- **Q18.5 assertions**: Prompt output goes to stdout (through pty), not stderr. Changed from `assert_contains stderr` to `assert_contains stdout`.
+
+**Verification**: `bash scripts/tests/test_ci.sh` 40/40 ✅ after tty bugfix. `ruff format --check` OK ✅, `ruff check .` OK ✅.
 {% endraw %}

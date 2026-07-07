@@ -9,13 +9,13 @@ Utility scripts for building, testing, and deploying the Arduino Web monorepo. L
 
 | Script | Purpose |
 |--------|---------|
-| [`ci.sh`](ci.md) | Full CI pipeline — builds + tests in one command |
+| [`ci.sh`](ci.md) | Full CI pipeline — lint + builds + tests in one command |
 | [`build_standalone.sh`](build-standalone.md) | Build standalone binaries via PyOxidizer |
 | [`test_installs.sh`](test-installs.md) | Install wheels into clean venv + smoke test |
 | [`install_arduino_deps.sh`](install-arduino-deps.md) | Install Arduino libraries for MedMinderV2 sketches |
 | [`gen_grpc_bindings.py`](gen-grpc-bindings.md) | Regenerate Python gRPC stubs from proto files |
 | [`check_venv.bash`](check-venv.md) | Recursively verify pipenv venvs in the project tree |
-| [Tests](tests.md) | Scripts test suite (170 tests) |
+| [Tests](tests.md) | Scripts test suite (180 tests) |
 | [README](../README.md) | Scripts overview, CI pipeline, dependencies |
 
 Most scripts support `--help` for detailed usage.

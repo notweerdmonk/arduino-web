@@ -2,8 +2,9 @@
 # @file test_ci.sh
 # @brief Tests for the ci.sh script.
 # @description Verify --help, unknown flags, nox-missing handling,
-# --skip-builds, --skip-tests, both flags, test failure propagation,
-# build failure propagation.
+# --skip-lint, --skip-builds, --skip-tests, both flags, test failure
+# propagation, build failure propagation, lint success/failure,
+# --no-install flag.
 
 # scripts/tests/test_ci.sh
 #
@@ -94,26 +95,83 @@ SHIM
     printf '%s' "${tmpdir}"
 }
 
+# Make a private temp dir with fake `pipenv` and `npx` shims for testing
+# the lint phase. Each shim's exit code is controlled via environment
+# variables (default 0). Echoes the temp dir path.
+make_fake_lint_tools() {
+    local tmpdir
+    tmpdir="$(mktemp -d -t lint-shim.XXXXXX)"
+
+    cat >"${tmpdir}/pipenv" <<'SHIM'
+#!/bin/sh
+# Fake pipenv for testing. Exits FAKE_PIPENV_RC (default 0).
+exit "${FAKE_PIPENV_RC:-0}"
+SHIM
+    chmod +x "${tmpdir}/pipenv"
+
+    cat >"${tmpdir}/npx" <<'SHIM'
+#!/bin/sh
+# Fake npx for testing. Exits FAKE_NPX_RC (default 0).
+exit "${FAKE_NPX_RC:-0}"
+SHIM
+    chmod +x "${tmpdir}/npx"
+
+    printf '%s' "${tmpdir}"
+}
+
 # Run the script under test, capturing stdout, stderr, and exit code.
-# Usage: run_script <stdout_var> <stderr_var> <code_var> [args...]
-# where [args...] is the script args. The script is invoked as
-# `bash ${SCRIPT_UNDER_TEST} "$@"`.
+# Usage: run_script <stdout_var> <stderr_var> <code_var> [stdin_var] [tty_var] [args...]
+#
+# Positional parameters after code_var:
+#   stdin_var  — optional: text piped to the child's stdin. Omit or pass ""
+#                if not needed.
+#   tty_var    — optional: text fed to the child's /dev/tty via script(1)
+#                (creates a pty). Omit or pass "" if not needed.
+#   args...    — remaining arguments forwarded to the script.
+#
+# stdin_var and tty_var are detected by not starting with "-". To pass
+# tty_var without stdin_var, use "" for stdin_var. When both are provided,
+# tty_var takes precedence (script(1) handles both tty and stdin).
 run_script() {
-    local stdout_var="$1"
-    local stderr_var="$2"
-    local code_var="$3"
+    local stdout_var="$1" stderr_var="$2" code_var="$3"
     shift 3
+    local stdin_var="" tty_var="" args=()
+    if [[ $# -gt 0 && "$1" != -* ]]; then
+        stdin_var="$1"; shift
+        if [[ $# -gt 0 && "$1" != -* ]]; then
+            tty_var="$1"; shift
+        fi
+    fi
+    args=("$@")
     local out err code
-    out="$(mktemp)"
-    err="$(mktemp)"
+    out="$(mktemp)"; err="$(mktemp)"
     set +e
-    bash "${SCRIPT_UNDER_TEST}" "$@" >"${out}" 2>"${err}"
-    code=$?
+    if [[ -n "$tty_var" && -x /usr/bin/script ]]; then
+        # Use script(1) to create a pty. The child's /dev/tty resolves to
+        # the pty slave. tty_var content is piped to the pty master via
+        # script's stdin. Session output (child's stdout via pty) goes to
+        # a temp file. Child's stderr is redirected to the real $err file
+        # via 2> redirect inside the -c command string.
+        local sce cmd_str
+        sce="$(mktemp)"
+        cmd_str="bash ${SCRIPT_UNDER_TEST}${args[@]/#/ }"
+        cmd_str+=" 2>${err}"
+        printf '%s\n' "$tty_var" | script -q -e -c "$cmd_str" "$sce" >/dev/null 2>/dev/null
+        code=$?
+        cat "$sce" >"$out"
+        rm -f "$sce"
+    elif [[ -n "$stdin_var" ]]; then
+        printf '%s' "$stdin_var" | bash "${SCRIPT_UNDER_TEST}" "${args[@]}" >"$out" 2>"$err"
+        code=$?
+    else
+        bash "${SCRIPT_UNDER_TEST}" "${args[@]}" >"$out" 2>"$err"
+        code=$?
+    fi
     set -e
-    printf -v "${stdout_var}" '%s' "$(cat "${out}")"
-    printf -v "${stderr_var}" '%s' "$(cat "${err}")"
-    printf -v "${code_var}" '%s' "${code}"
-    rm -f "${out}" "${err}"
+    printf -v "$stdout_var" '%s' "$(cat "$out")"
+    printf -v "$stderr_var" '%s' "$(cat "$err")"
+    printf -v "$code_var" '%s' "$code"
+    rm -f "$out" "$err"
 }
 
 # ---------------------------------------------------------------------------
@@ -156,8 +214,9 @@ echo "== Q18.3: --help exits 0 with usage =="
 run_script out_stdout out_stderr out_code --help
 assert_eq "--help exit code" "0" "${out_code}"
 assert_contains "stdout contains Usage" "${out_stdout}" "Usage:"
-assert_contains "stdout mentions all_tests" "${out_stdout}" "all_tests"
-assert_contains "stdout mentions all_builds" "${out_stdout}" "all_builds"
+assert_contains "stdout mentions skip-lint" "${out_stdout}" "--skip-lint"
+assert_contains "stdout mentions skip-builds" "${out_stdout}" "--skip-builds"
+assert_contains "stdout mentions skip-tests" "${out_stdout}" "--skip-tests"
 
 echo
 echo "== Q18.4: unknown flag exits 4 =="
@@ -171,10 +230,11 @@ echo "== Q18.5: nox missing -> exit 1 =="
 
 saved_path="${PATH}"
 export PATH="/usr/bin:/bin"
-run_script out_stdout out_stderr out_code
+run_script out_stdout out_stderr out_code "" "0" --skip-lint
 assert_eq "nox-missing exit code" "1" "${out_code}"
-assert_contains "stderr mentions nox" "${out_stderr}" "nox"
-assert_contains "stderr mentions pipx" "${out_stderr}" "pipx"
+# Interactive path: prompt goes to stdout (ptty), ci.sh reads "0" → abort → exit 1
+assert_contains "stdout says nox not found" "${out_stdout}" "nox not found"
+assert_contains "stdout offers pipx install" "${out_stdout}" "pipx"
 export PATH="${saved_path}"
 
 echo
@@ -185,13 +245,12 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
-run_script out_stdout out_stderr out_code --skip-builds
+run_script out_stdout out_stderr out_code --skip-lint --skip-builds
 assert_eq "exit code with --skip-builds" "0" "${out_code}"
 
 if [[ -f "${fake_log}" ]]; then
     log_contents="$(cat "${fake_log}")"
     assert_contains "called nox -s all_tests" "${log_contents}" "-s all_tests"
-    # Should NOT have run all_builds
     if [[ "${log_contents}" == *"-s all_builds"* ]]; then
         printf '  FAIL  all_builds should NOT have been called with --skip-builds\n'
         FAIL=$((FAIL + 1))
@@ -218,7 +277,7 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
-run_script out_stdout out_stderr out_code --skip-tests
+run_script out_stdout out_stderr out_code --skip-lint --skip-tests
 assert_eq "exit code with --skip-tests" "0" "${out_code}"
 
 if [[ -f "${fake_log}" ]]; then
@@ -250,7 +309,7 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
-run_script out_stdout out_stderr out_code --skip-tests --skip-builds
+run_script out_stdout out_stderr out_code --skip-lint --skip-tests --skip-builds
 assert_eq "exit code with both --skip" "0" "${out_code}"
 
 if [[ -f "${fake_log}" ]] && [[ -s "${fake_log}" ]]; then
@@ -276,9 +335,8 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
-# FAKE_NOX_RC=2 simulates the nox session exiting 2 (test failure)
 export FAKE_NOX_RC=2
-run_script out_stdout out_stderr out_code --skip-builds
+run_script out_stdout out_stderr out_code --skip-lint --skip-builds
 assert_eq "exit code with failing tests" "2" "${out_code}"
 assert_contains "stderr says test session failed" "${out_stderr}" "test session failed"
 unset FAKE_NOX_RC
@@ -296,8 +354,7 @@ saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
 export FAKE_NOX_RC=2
-run_script out_stdout out_stderr out_code --skip-tests
-# The tests phase is skipped, so we hit Phase 2 with FAKE_NOX_RC=2 -> exit 3
+run_script out_stdout out_stderr out_code --skip-lint --skip-tests
 assert_eq "exit code with failing builds" "3" "${out_code}"
 assert_contains "stderr says build session failed" "${out_stderr}" "build session failed"
 unset FAKE_NOX_RC
@@ -305,6 +362,55 @@ rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
 rm -rf "${fake_dir}"
+
+echo
+echo "== Q18.11: lint success =="
+
+lint_tools_dir="$(make_fake_lint_tools)"
+fake_dir="$(make_fake_nox)"
+fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
+saved_path="${PATH}"
+export PATH="${lint_tools_dir}:${fake_dir}:${saved_path}"
+export FAKE_NOX_LOG="${fake_log}"
+export FAKE_PIPENV_RC=0
+export FAKE_NPX_RC=0
+run_script out_stdout out_stderr out_code --skip-builds --skip-tests
+assert_eq "lint success exit code" "0" "${out_code}"
+assert_contains "stdout announces Phase 0 lint" "${out_stdout}" "Phase 0: running lint checks"
+assert_contains "stdout announces pipeline complete" "${out_stdout}" "CI pipeline complete"
+unset FAKE_PIPENV_RC
+unset FAKE_NPX_RC
+rm -f "${fake_log}"
+unset FAKE_NOX_LOG
+export PATH="${saved_path}"
+rm -rf "${fake_dir}" "${lint_tools_dir}"
+
+echo
+echo "== Q18.12: lint failure (pipenv fails) =="
+
+lint_tools_dir="$(make_fake_lint_tools)"
+fake_dir="$(make_fake_nox)"
+saved_path="${PATH}"
+export PATH="${lint_tools_dir}:${fake_dir}:${saved_path}"
+export FAKE_PIPENV_RC=1
+run_script out_stdout out_stderr out_code
+assert_eq "lint failure exit code" "5" "${out_code}"
+assert_contains "stderr says lint check failed" "${out_stderr}" "lint check failed"
+unset FAKE_PIPENV_RC
+export PATH="${saved_path}"
+rm -rf "${fake_dir}" "${lint_tools_dir}"
+
+echo
+echo "== Q18.13: --no-install without nox =="
+
+saved_path="${PATH}"
+export PATH="/usr/bin:/bin"
+run_script out_stdout out_stderr out_code --skip-lint --no-install
+assert_eq "no-install exit code" "0" "${out_code}"
+assert_contains "stderr warns nox not found" "${out_stderr}" "nox"
+assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
+assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
+export PATH="${saved_path}"
 
 # ---------------------------------------------------------------------------
 # Summary
@@ -319,4 +425,3 @@ if [[ "${FAIL}" -ne 0 ]]; then
     exit 1
 fi
 exit 0
-

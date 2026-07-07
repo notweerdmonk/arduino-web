@@ -117,8 +117,8 @@ medminder/
 | `arduino_sketch_tools` | 51 | `arduino_sketch_tools/python/` |
 | `arduino_dash` | 119 | `arduino_dash/python/` |
 | `medminder_dash` | 186 + 1 skip | `medminder_dash/python/` |
-| `scripts/` | 170 (128 pytest + 42 bash) | `scripts/tests/` |
-| **Grand total** | **~789 + 9 skip** | |
+| `scripts/` | 180 (128 pytest + 52 bash) | `scripts/tests/` |
+| **Grand total** | **~799 + 9 skip** | |
 
 ### gRPC API
 
@@ -201,7 +201,7 @@ sources — those `dist/` directories don't exist in a fresh CI checkout
 (gitignored). Building wheels first creates the required wheels at the
 resolved paths.
 
-**Pipeline**:
+**Pipeline (original)**:
 ```
 Install pipenv → Install root deps → ruff check → djlint check → Install nox → ./scripts/ci.sh
   └── ci.sh: Phase 1 = all_builds → Phase 2 = all_tests
@@ -211,6 +211,8 @@ Install pipenv → Install root deps → ruff check → djlint check → Install
 
 **Verification**: `bash -n scripts/ci.sh` ✅, `bash scripts/tests/test_ci.sh` 30/30 ✅,
 YAML valid ✅, `nox -s scripts_tests` 202/202 ✅.
+
+**Note**: Restructured again in Phase 122 — `ci.yml` is now a standalone workflow (no longer calls `ci.sh`). `ci.sh` gained lint Phase 0, `--skip-lint`, `--no-install`, and interactive nox install prompt.
 
 ### Running
 
@@ -237,7 +239,9 @@ dist-standalone/medminder-dash/bin/medminder-dash
 nox -s 'tests(board_manager)' 'build(board_manager)'   # single package
 nox -s all_tests                                        # all tests
 nox -s all_builds                                       # all wheels
-./scripts/ci.sh                                         # full CI pipeline (builds → tests)
+./scripts/ci.sh                                         # full CI pipeline (lint → builds → tests)
+./scripts/ci.sh --skip-lint                              # builds → tests (skip lint)
+./scripts/ci.sh --no-install                             # skip nox phases if nox missing (no prompt)
 ```
 
 ### Jekyll Documentation Site (Phase 93)
@@ -3208,11 +3212,11 @@ defaults:
 Runs 3 suites in order:
 1. `pipenv run pytest tests/` — 128 tests (test_gen_grpc_bindings.py, test_setup_py.py)
 2. `bash tests/test_install_arduino_deps.sh` — 12 tests
-3. `bash tests/test_ci.sh` — 30 tests (10 scenarios)
+3. `bash tests/test_ci.sh` — 40 tests (13 scenarios)
 
-Total: 170 tests.
+Total: 180 tests.
 
-**Last updated**: 2026-06-21 09:36 (Phase 97 audit fixes)
+**Last updated**: 2026-07-07 (Phase 122 — added lint + nox-install tests)
 
 ---
 
@@ -4463,7 +4467,7 @@ npx prettier --check "**/*.html"  # only non-Jinja files checked
 | Path | Description |
 |------|-------------|
 | `.githooks/pre-commit` | Optional lint checks: ruff check, ruff format --check, prettier --check, eslint, djlint --check. `[Y/n]` prompt with 10s timeout, default Y. Missing tools skipped. |
-| `.githooks/pre-push` | Runs `bash scripts/ci.sh` (full build + test cycle). Blocks push on failure. |
+| `.githooks/pre-push` | Runs `bash scripts/ci.sh` (full lint + build + test cycle). Blocks push on failure. |
 
 ### Setup
 
@@ -4555,5 +4559,36 @@ function uploadSketch() {
 ```
 
 This is more precise than `/* eslint-disable no-unused-vars */` — it only suppresses warnings for the named functions, not the entire block.
+
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+**Date**: 2026-07-07
+
+**Type**: DevOps
+
+**Goal**: Add lint Phase 0 to ci.sh, interactive nox install prompt, make ci.yml a standalone GitHub-specific workflow independent from ci.sh.
+
+**Changes**:
+
+1. **`scripts/ci.sh`** — Added Phase 0 (lint): ruff check, ruff format --check, prettier --check, eslint, djlint --check. Any failure → exit 5. Added `--skip-lint`, `--no-install` flags. Added interactive nox install prompt (4 options + abort). Non-interactive nox-missing → exit 1. `--no-install` → silently skip nox phases.
+2. **`.github/workflows/ci.yml`** — Standalone workflow with explicit steps (ruff check, ruff format --check, djlint, prettier, eslint, pip install nox, nox -s all_builds, nox -s all_tests). No longer calls `ci.sh`.
+3. **`scripts/tests/test_ci.sh`** — Added `--skip-lint` to 6 existing tests. Added 3 new tests: lint success (exit 0), lint failure (exit 5), `--no-install` (exit 0 with warning). 40 bash assertions total (was 30).
+
+**Pipeline**:
+```
+ci.yml: ruff check → ruff format --check → djlint --check → prettier --check → eslint → pip install nox → nox -s all_builds → nox -s all_tests
+ci.sh:   Phase 0 (lint) → nox check [interactive prompt if missing] → Phase 1 (build) → Phase 2 (test)
+```
+
+**Architecture**: `ci.yml` and `ci.sh` are independent. `ci.yml` is GitHub-specific (explicit steps, separate job per failure). `ci.sh` is the local CI script for pre-push hook and local development (phases, interactive prompt).
+
+**Tty bugfix (Phase 122b)**:
+- Q18.5 (nox-missing → exit 1) — `PATH=/usr/bin:/bin`, `nox` not found, `(</dev/tty)` succeeds from terminal → `read -r choice </dev/tty` blocks forever.
+- Fix: `tty_var` param on `run_script`. When non-empty, pipes through `script(1)` to create a pty.
+- `script -e` required: Without `-e`, `script -q` always returns exit 0. Added `-e` flag.
+- `%q` quoting broken: `printf '%q '` produced backslash-escaped tokens. Switched to direct string concatenation.
+- Q18.5 assertions: stderr → stdout (prompt output goes through pty to stdout).
+
+**Verification**: `bash scripts/tests/test_ci.sh` 40/40 ✅ after tty bugfix. `ruff format --check` OK ✅, `ruff check .` OK ✅.
 
 {% endraw %}

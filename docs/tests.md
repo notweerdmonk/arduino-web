@@ -84,12 +84,14 @@ nox -s 'tests(board_manager)'  # single package
 ### CI pipeline
 
 ```bash
-./scripts/ci.sh           # full pipeline (builds → tests)
-./scripts/ci.sh --skip-builds  # tests only
-./scripts/ci.sh --skip-tests   # builds only
+./scripts/ci.sh               # full pipeline (lint → builds → tests)
+./scripts/ci.sh --skip-lint     # builds → tests (skip lint)
+./scripts/ci.sh --skip-builds   # tests only
+./scripts/ci.sh --skip-tests    # builds only
+./scripts/ci.sh --no-install    # skip nox phases if nox missing (no prompt)
 ```
 
-The CI pipeline supports `--skip-builds` and `--skip-tests` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96). Run it standalone: `bash scripts/tests/test_ci.sh`.
+The CI pipeline supports `--skip-lint`, `--skip-builds`, `--skip-tests`, and `--no-install` flags. The `test_ci.sh` script (40 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure, exit 5 for lint failure), the nox-not-found guard, and lint phase success/failure — all using fake nox/pipenv/npx shims with zero external dependencies (Phase 96). Run it standalone: `bash scripts/tests/test_ci.sh`.
 
 ### Git Hooks Gate
 
@@ -98,13 +100,13 @@ Two Git hooks integrate the CI pipeline into your local workflow (enable with `g
 | Hook | Gate | Skip | Notes |
 |------|------|------|-------|
 | Pre-commit | Optional lint checks (ruff, prettier, eslint, djlint) | `git commit --no-verify` or press `n` at prompt | djlint runs `--check` only; auto-fix with `pipenv run djlint . --reformat` |
-| Pre-push | `scripts/ci.sh` — full build + test | `git push --no-verify` | ~15-25 min; catches failures before upstream CI |
+| Pre-push | `scripts/ci.sh` — full lint + build + test | `git push --no-verify` | ~15-25 min; catches failures before upstream CI |
 
 ### Expected Results
 
 | Session | Tests | Notes |
 |---------|-------|-------|
-| `scripts_tests` | **202 passed** (160 pytest + 12 bash + **30 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
+| `scripts_tests` | **212 passed** (160 pytest + 12 bash + **40 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
 | `all_tests` | **8/8 sessions** | all packages + scripts |
 | `tests(board_manager)` | 212 passed | includes integration tests |
 | `tests(board_manager_client)` | 24 passed | |

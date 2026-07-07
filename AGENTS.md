@@ -79,6 +79,17 @@ bundle exec jekyll build                  # builds _site/ (~255 pages)
 pipenv run python scripts/gen_grpc_bindings.py
 ```
 
+### Git hooks
+
+Pre-commit and pre-push hooks live in `.githooks/` (version-controlled). Enable with:
+
+```
+git config core.hooksPath .githooks
+```
+
+- **`pre-commit`**: Optional lint/format checks with `[Y/n]` prompt (10s timeout, default Y). Runs ruff check, ruff format --check, prettier --check, eslint, djlint --check. Skip with `n` or `git commit --no-verify`.
+- **`pre-push`**: Mandatory — runs `scripts/ci.sh` (full `nox -s all_builds` + `all_tests`, ~15-25 min). Skip with `git push --no-verify`.
+
 ### Version query
 
 ```python

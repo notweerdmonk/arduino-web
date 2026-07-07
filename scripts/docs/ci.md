@@ -32,6 +32,7 @@ per-package test sessions resolve monorepo `file://` dependency sources.
 ## Notes
 
 - The script does **not** call `install_arduino_deps.sh` — that is a separate step for flashing boards.
+- This script is invoked by the **pre-push Git hook** (`.githooks/pre-push`) as a mandatory gate. Skip the hook with `git push --no-verify`.
 - Equivalent granular nox invocations:
 
 ```bash

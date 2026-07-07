@@ -354,6 +354,15 @@ Medicine data is stored in `board_meta.json`. Check:
 - The sketch directory is configured correctly.
 - Board is selected (operations are scoped to active board).
 
+## Git Hooks
+
+The repository ships with two Git hooks in `.githooks/` (enable with `git config core.hooksPath .githooks`):
+
+- **Pre-commit** (optional): Prompts before running ruff check, ruff format --check, prettier --check, eslint, and djlint --check. Skip with `n` or `git commit --no-verify`.
+- **Pre-push** (mandatory): Runs `scripts/ci.sh` — full CI pipeline (builds + tests, ~15-25 min). Skip with `git push --no-verify`.
+
+The pre-commit hook's djlint check runs `--check` only (read-only). If it fails, run `pipenv run djlint . --reformat` manually — you may need a second pass for `{% endblock %}` convergence. Add and commit again after fixing.
+
 ## Code Quality
 
 All commands run from the project root. See [`docs/tests.md`](tests.md#code-quality) for full documentation.

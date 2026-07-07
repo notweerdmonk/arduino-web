@@ -53,14 +53,15 @@ layout: default
 
 ---
 
-## Phase 120 — Git Hooks
+## Phase 118 — Ruff Format Audit
 
 | Test | Status | Notes |
 |------|--------|-------|
-| T1 — pre-commit bash syntax | ✅ | `bash -n .githooks/pre-commit` |
-| T2 — pre-push bash syntax | ✅ | `bash -n .githooks/pre-push` |
-| T3 — pre-commit dry run | ✅ | ruff check, ruff format --check, djlint --check all pass |
-| T4 — pre-push dry run | ✅ | scripts_tests passes |
+| T1 — `ruff format --check .` | ✅ | 111 files would be reformatted, all .py |
+| T2 — `ruff check .` | ✅ | 0 errors |
+| T3 — E501 fix in add_license_headers.py | ✅ | 35 lines wrapped, 0 errors |
+
+---
 
 ## Phase 119 — Prettier/Djlint Convergence
 
@@ -69,5 +70,20 @@ layout: default
 | T1 — `djlint . --check` | ✅ | 50 files, 0 flagged, exit 0 |
 | T2 — `ruff check .` | ✅ | 0 errors |
 | T3 — `prettier --check "**/*.html"` | ✅ | Templates excluded by .prettierignore |
+
+---
+
+## Phase 120 — Git Hooks
+
+| Test | Status | Notes |
+|------|--------|-------|
+| T1 — `bash -n .githooks/pre-commit` | ✅ | 46 lines, syntax OK |
+| T2 — `bash -n .githooks/pre-push` | ✅ | 15 lines, syntax OK |
+| T3 — `shellcheck scripts/ci.sh` | ✅ | SC2155, SC2034, SC2154 fixed |
+| T4 — `shellcheck scripts/tests/test_ci.sh` | ✅ | Same fixes applied |
+| T5 — `ruff check .` | ✅ | 0 errors |
+| T6 — Pre-commit prompt/skip behavior | ✅ | Y → all checks; n → yellow warning, exit 0 |
+| T7 — Pre-commit sequential checks | ✅ | 5 tools run in order |
+| T8 — Pre-push ci.sh invocation | ✅ | Script inspected, calls `./scripts/ci.sh` |
 
 {% endraw %}

@@ -24,6 +24,7 @@ Welcome to the Arduino Web documentation. This index maps all documentation reso
 | [e2e/](e2e/index.md) | E2E browser testing: mock servers, scenarios, Playwright MCP |
 | [dist-test-install/](dist-test-install/index.md) | Wheel install validation |
 | [dist-standalone-install/](dist-standalone-install/index.md) | Standalone binary builds |
+| [.githooks/](README.md#git-hooks) | Git hooks: pre-commit lint checks + pre-push CI gate |
 
 ---
 

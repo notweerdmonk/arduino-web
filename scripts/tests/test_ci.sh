@@ -30,10 +30,14 @@ set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_UNDER_TEST="${SCRIPT_DIR}/../ci.sh"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 PASS=0
 FAIL=0
+
+# Pre-declare for shellcheck; assigned by run_script via printf -v nameref
+out_stdout=""
+out_stderr=""
+out_code=""
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -199,8 +203,8 @@ else
     printf '  FAIL  fake nox log missing\n'
     FAIL=$((FAIL + 1))
 fi
-assert_contains "stdout announces Phase 1" "${out_stdout}" "Phase 1"
-assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
+assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
+assert_contains "stdout announces Phase 2 runs tests" "${out_stdout}" "Phase 2: running all test suites"
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -231,8 +235,8 @@ else
     printf '  FAIL  fake nox log missing\n'
     FAIL=$((FAIL + 1))
 fi
-assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
-assert_contains "stdout announces Phase 2" "${out_stdout}" "Phase 2: building all packages"
+assert_contains "stdout announces Phase 1 runs builds" "${out_stdout}" "Phase 1: building all packages"
+assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"

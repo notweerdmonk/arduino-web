@@ -85,9 +85,20 @@ nox -s 'tests(board_manager)'  # single package
 
 ```bash
 ./scripts/ci.sh           # full pipeline (builds → tests)
+./scripts/ci.sh --skip-builds  # tests only
+./scripts/ci.sh --skip-tests   # builds only
 ```
 
-The CI pipeline supports `--skip-builds` and `--skip-tests` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96).
+The CI pipeline supports `--skip-builds` and `--skip-tests` flags. The `test_ci.sh` script (30 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure), and the nox-not-found guard — all using a fake nox shim with zero external dependencies (Phase 96). Run it standalone: `bash scripts/tests/test_ci.sh`.
+
+### Git Hooks Gate
+
+Two Git hooks integrate the CI pipeline into your local workflow (enable with `git config core.hooksPath .githooks`):
+
+| Hook | Gate | Skip | Notes |
+|------|------|------|-------|
+| Pre-commit | Optional lint checks (ruff, prettier, eslint, djlint) | `git commit --no-verify` or press `n` at prompt | djlint runs `--check` only; auto-fix with `pipenv run djlint . --reformat` |
+| Pre-push | `scripts/ci.sh` — full build + test | `git push --no-verify` | ~15-25 min; catches failures before upstream CI |
 
 ### Expected Results
 
@@ -181,7 +192,7 @@ Ruff lints and formats all Python source. Uses the root `pipenv` venv:
 ```bash
 pipenv run ruff check .       # lint (select E, F, I, W)
 pipenv run ruff check --fix . # auto-fix sortable/removable issues
-pipenv run ruff format .      # format (111 files, 0 diffs when clean)
+pipenv run ruff format .      # format (112 files, 0 diffs when clean)
 ```
 
 Config is in `pyproject.toml` under `[tool.ruff]`. Lint rule selection lives under `[tool.ruff.lint]`. Generated protobuf stubs (`cc/arduino/cli/commands/v1/`) are excluded.

@@ -4,7 +4,7 @@ layout: default
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-07-06 20:22 (Phases 89-117)
+**Last updated**: 2026-07-07 00:45 (Phases 89-119)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -4456,25 +4456,54 @@ pipenv run ruff check .        # exit 0
 npx prettier --check "**/*.html"  # only non-Jinja files checked
 ```
 
-### Phase 120 — Git Hooks
+## Phase 120 — Git Hooks
 
-#### New files
+### Files
 
-| File | Purpose |
-|------|---------|
-| `.githooks/pre-commit` | Run ruff check, ruff format --check, djlint --check |
-| `.githooks/pre-push` | Run nox -s scripts_tests (smoke test) |
+| Path | Description |
+|------|-------------|
+| `.githooks/pre-commit` | Optional lint checks: ruff check, ruff format --check, prettier --check, eslint, djlint --check. `[Y/n]` prompt with 10s timeout, default Y. Missing tools skipped. |
+| `.githooks/pre-push` | Runs `bash scripts/ci.sh` (full build + test cycle). Blocks push on failure. |
 
-#### Setup
+### Setup
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
+### Skip flags
+
+- `git commit --no-verify` — skip pre-commit hook
+- `git push --no-verify` — skip pre-push hook
+
+### Hook architecture
+
+```
+git commit
+  └─ .githooks/pre-commit [Y/n] prompt (10s timeout, default Y)
+       ├─ ruff check .               → command -v pipenv → pipenv run
+       ├─ ruff format --check .      → command -v pipenv → pipenv run
+       ├─ npx prettier --check       → command -v npx
+       ├─ npx eslint .               → command -v npx
+       └─ djlint . --check           → command -v pipenv → pipenv run
+
+git push
+  └─ .githooks/pre-push (mandatory)
+       └─ bash scripts/ci.sh         → nox -s all_builds + all_tests
+```
+
+### Shellcheck fixes
+
+| File | Issue | Fix |
+|------|-------|-----|
+| `scripts/ci.sh:39` | SC2155 — declare+assign `readonly REPO_ROOT=$(realpath ...)` | Split into `declare REPO_ROOT=$(realpath ...); readonly REPO_ROOT` |
+| `scripts/tests/test_ci.sh` | SC2034 — `REPO_ROOT` assigned but unused | Removed variable |
+| `scripts/tests/test_ci.sh` | SC2154 — `out_stdout`, `out_stderr`, `out_code` referenced but not assigned | Pre-declared as empty strings |
+
 #### AGENTS.md instructions
 
 Added section under `## Commands` documenting the hooks, setup command,
 and the formatter responsibility split (ruff → Python, prettier → non-Jinja,
-djlint → Jinja2, ESLint → JS).
+djlint → Jinja2, ESLint → JS, shellcheck).
 
 {% endraw %}

@@ -456,21 +456,21 @@ Each change is scoped to one file. Revert via `git checkout -- <file>`.
 
 ---
 
-## Phase 120 — Git Hooks
+## Phase 118 — Ruff Format Audit
 
-**Date**: 2026-07-07 02:02
+**Date**: 2026-07-07
 **Status**: ✅ COMPLETED
 
-**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates.
+**Scope**: Run `pipenv run ruff format .` across the entire monorepo.
 
-**Scope**:
-- `.githooks/pre-commit` — ruff check, ruff format --check, djlint --check
-- `.githooks/pre-push` — nox -s scripts_tests (smoke test)
-- AGENTS.md — add hook setup instructions
-- README.md — add quick start section
-- scripts/ci.sh — add core.hooksPath reference
+**Result**: 111 files reformatted, 1 left unchanged. All changes cosmetic
+(line wrapping, quote normalization, trailing blank lines, adjacent string
+merging). Idempotency confirmed: second `--check` run reports all formatted.
 
-**Verification**: `git config core.hooksPath .githooks` ✅, `bash .githooks/pre-commit` — 0 errors ✅
+**Follow-up — E501 fix**: Post-formatting `ruff check .` revealed 35 E501
+errors in `scripts/add_license_headers.py` DESCRIPTIONS dict. Restructured
+35 values with parenthetical line continuation. Dict type and consumer code
+unchanged. Verified: `ruff check .` → 0 errors.
 
 ---
 
@@ -489,5 +489,83 @@ Each change is scoped to one file. Revert via `git checkout -- <file>`.
 - 50 templates reformatted with djlint indent=2
 
 **Verification**: `djlint . --check` exit 0 ✅, `ruff check .` exit 0 ✅
+
+---
+
+## Phase 120 — Git Hooks
+
+**Date**: 2026-07-06 23:04
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates.
+
+**Scope**:
+- `.githooks/pre-commit` — ruff check, ruff format --check, djlint --check
+- `.githooks/pre-push` — nox -s scripts_tests (smoke test)
+- AGENTS.md — add hook setup instructions
+- README.md — add quick start section
+- scripts/ci.sh — add core.hooksPath reference
+
+**Verification**: `git config core.hooksPath .githooks` ✅, `bash .githooks/pre-commit` — 0 errors ✅
+
+### Motivation
+
+Standardise git workflow with pre-commit lint checks and pre-push CI guard. Previously,
+lint/format checks (ruff, prettier, eslint, djlint) were only run manually or in CI,
+and CI failures (full `nox all_builds + all_tests`) weren't caught before pushing.
+
+### File Structure
+
+```
+.githooks/
+├── pre-commit     # Optional lint checks with [Y/n] prompt
+└── pre-push       # Full CI pipeline (bash scripts/ci.sh)
+```
+
+### Pre-Commit Hook Design
+
+- **Prompt**: `[Y/n]` with 10-second timeout, default `Y` (run checks)
+- **5 checks in order**: `ruff check .` → `ruff format --check .` → `npx prettier --check "**/*.html"` → `eslint .` → `pipenv run djlint . --check`
+- **Missing-tool handling**: Each check uses `command -v <tool>` to detect availability.
+  If not found, prints `⚠ <tool> not found, skipping` and continues.
+- **Djlint specific**: Runs `--check` only (not `--reformat`). This is a lint gate,
+  not a formatter.
+- **Skip with**: `n` at prompt, or `git commit --no-verify`.
+
+### Pre-Push Hook Design
+
+- Runs `bash scripts/ci.sh` (full `nox -s all_builds` + `all_tests`)
+- **No prompt** — mandatory check
+- **Blocks push** on non-zero exit (build failure or test failure)
+- **Skip with**: `git push --no-verify`
+
+### AGENTS.md Update
+
+Added `git config core.hooksPath .githooks` setup instruction to AGENTS.md hooks section.
+
+### Shellcheck Fixes
+
+- `scripts/ci.sh` — fixed SC2155 (declare and assign separately)
+- `scripts/tests/test_ci.sh` — fixed SC2034 (unused variable) and SC2154 (referenced but not assigned)
+- Both scripts now shellcheck-clean with zero warnings
+- No source logic changes — ci.sh and test_ci.sh behavior is identical
+
+### Cleanup
+
+`GIT_HOOKS_PLAN.md` deleted — superseded by `REVIEW_PLAN.md`.
+
+### Verification
+
+- `ruff check .` — 0 errors ✅
+- Shellcheck on ci.sh — 0 warnings ✅
+- Shellcheck on test_ci.sh — 0 warnings ✅
+- hooksPath configured — `git config core.hooksPath` returns `.githooks` ✅
+
+### Rollback
+
+```bash
+git config --unset core.hooksPath
+rm .githooks/pre-commit .githooks/pre-push
+```
 
 {% endraw %}

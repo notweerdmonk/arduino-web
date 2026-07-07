@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Pre-push hook — full CI pipeline gate
+#
+# Runs scripts/ci.sh (nox -s all_builds + nox -s all_tests).
+# Builds all 6 packages, runs all 8 test sessions (~830 tests).
+# Estimated duration: 15-25 minutes.
+#
+# Skip with: git push --no-verify
+# Interrupt (Ctrl+C) exits non-zero — push blocked.
+# Recovery: git push again.
+#
+# Exit codes: 0 = CI passed, 1 = CI failed (push blocked)
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+printf "==> Pre-push: running full CI pipeline (builds + tests)\n"
+printf "    This may take 15-25 minutes.\n"
+printf "    Skip with: git push --no-verify\n\n"
+
+if ! bash "$REPO_ROOT/scripts/ci.sh"; then
+    printf "\nFAILED: CI pipeline did not pass. Push blocked.\n"
+    exit 1
+fi
+
+printf "\n==> CI pipeline passed. Push proceeding.\n"

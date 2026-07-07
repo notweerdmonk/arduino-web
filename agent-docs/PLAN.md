@@ -11,97 +11,6 @@ Build a gRPC client for arduino-cli in Python3 to detect boards, enumerate board
 
 ---
 
-### Phase 117 — Fix CI Pipeline: Install nox + swap build/test order
-
-**Date**: 2026-07-06 20:22
-**Status**: ✅ COMPLETED
-
-**Goal**: Enable GitHub CI workflow to run `./scripts/ci.sh` successfully by
-installing `nox` and swapping the build/test phase order so that wheel files
-in `dist/` directories exist when per-package test sessions resolve
-monorepo `file://` dependencies via `pipenv lock --dev`.
-
-| File | Change | Status |
-|------|--------|--------|
-| `.github/workflows/ci.yml` | Add `pip install nox` step | ✅ |
-| `scripts/ci.sh` | Swap Phase 1 (builds) before Phase 2 (tests) | ✅ |
-
-**Verification**: `bash -n scripts/ci.sh` ✅, `bash scripts/tests/test_ci.sh`
-30/30 ✅, YAML validity ✅, `nox -s scripts_tests` 202/202 ✅.
-
----
-
-### Phase 118 — Ruff Format Audit ✅ REVIEW COMPLETE
-
-**Date**: 2026-07-07 00:45
-**Status**: ✅ REVIEW COMPLETE
-
-**Goal**: Audit `pipenv run ruff format .` output to confirm all 111
-reformatted files contain only cosmetic changes with zero logic/semantic
-modifications.
-
-| # | Item | Result |
-|---|------|--------|
-| R1 | Exclusion config (`pyproject.toml`) | ✅ Protobuf stubs excluded |
-| R2 | Scope (files to reformat) | 111 `.py` files, 0 non-Python |
-| R3 | Per-package breakdown | 9 package categories |
-| R4 | Diff sampling (8 files) | All cosmetic — line wrapping, quotes, EOF blanks, string merging |
-| R5 | Verdict | ✅ Safe to proceed |
-
----
-
-### Phase 119 — Prettier/Djlint Convergence ✅ COMPLETED
-
-**Date**: 2026-07-07 02:02
-**Status**: ✅ COMPLETED
-
-**Root cause**: `.prettierrc` sets `tabWidth: 2` but djlint defaults to `indent = 4`.
-Prettier does not understand Jinja2 template syntax (`{% %}`, `{{ }}`), so it
-mangles template logic when run on `.html` files containing Jinja2.
-
-**Resolution**: Split formatter responsibilities:
-
-| Formatter | Scope | Config |
-|-----------|-------|--------|
-| Ruff | All Python (`.py`) | `line-length = 100` |
-| Prettier | Non-Jinja HTML, JS, JSON, YAML | `.prettierrc` (tabWidth=2) |
-| djlint | Jinja2 HTML templates | `pyproject.toml` (`indent = 2`) |
-| ESLint | JavaScript (in templates + standalone) | `eslint.config.mjs` |
-
-**Changes**:
-
-| File | Change | Status |
-|------|--------|--------|
-| `pyproject.toml` | `[tool.djlint]` `indent = 2` — match prettier tabWidth | ✅ |
-| `.prettierignore` | Add `**/templates/` — exclude Jinja2 from prettier | ✅ |
-| 50 templates | Reformatted by djlint with indent=2 (25 medminder_dash, 15 arduino_dash, 10 arduino_sketch_tools) | ✅ |
-
-**Verification**: `pipenv run djlint . --check` — exit 0 ✅, `pipenv run ruff check .` — exit 0 ✅, `npx prettier --check "**/*.html"` — no Jinja files checked ✅
-
----
-
-### Phase 120 — Git Hooks ✅ COMPLETED
-
-**Date**: 2026-07-07 02:02
-**Status**: ✅ COMPLETED
-
-**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates
-before commits and pushes.
-
-**Changes**:
-
-| File | Change | Status |
-|------|--------|--------|
-| `.githooks/pre-commit` | **New** — run ruff check, ruff format --check, djlint --check | ✅ |
-| `.githooks/pre-push` | **New** — run nox -s scripts_tests (smoke test) | ✅ |
-| `AGENTS.md` | Add git hooks setup instructions | ✅ |
-| `README.md` | Add git hooks quick start section | ✅ |
-| `scripts/ci.sh` | Add core.hooksPath reference in docblock | ✅ |
-
-**Verification**: `git config core.hooksPath .githooks` — hooks active ✅, `bash .githooks/pre-commit` — 0 errors ✅
-
----
-
 ### Phase 111 — Semantic Versioning v0.1.0 Baseline ✅ COMPLETED
 
 **Goal**: Establish consistent semantic versioning across the monorepo. Declare the current state of
@@ -1563,6 +1472,28 @@ build output and reformatting only the 50 actual Jinja source templates.
 | 2 | `djlint . --reformat` — 50 templates (8 in second pass) | ✅ |
 | 3 | Verify: `djlint . --check` exit 0 | ✅ |
 
+---
+
+### Phase 117 — Fix CI Pipeline: Install nox + swap build/test order
+
+**Date**: 2026-07-06 20:22
+**Status**: ✅ COMPLETED
+
+**Goal**: Enable GitHub CI workflow to run `./scripts/ci.sh` successfully by
+installing `nox` and swapping the build/test phase order so that wheel files
+in `dist/` directories exist when per-package test sessions resolve
+monorepo `file://` dependencies via `pipenv lock --dev`.
+
+| File | Change | Status |
+|------|--------|--------|
+| `.github/workflows/ci.yml` | Add `pip install nox` step | ✅ |
+| `scripts/ci.sh` | Swap Phase 1 (builds) before Phase 2 (tests) | ✅ |
+
+**Verification**: `bash -n scripts/ci.sh` ✅, `bash scripts/tests/test_ci.sh`
+30/30 ✅, YAML validity ✅, `nox -s scripts_tests` 202/202 ✅.
+
+---
+
 ### Phase 118 — Ruff Format Audit ✅ REVIEW COMPLETE
 
 **Date**: 2026-07-07 00:45
@@ -1586,4 +1517,46 @@ errors in `scripts/add_license_headers.py` `DESCRIPTIONS` dict (long paths +
 long descriptions). Fixed by wrapping 35 values with parenthetical line
 continuation. Verified: `ruff check .` → 0 errors ✅.
 
+---
+
+### Phase 119 — Git Hooks (pre-commit + pre-push) ✅ COMPLETED
+
+**Date**: 2026-07-06 23:04
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push Git hooks to enforce code quality
+and catch CI failures before push. Shellcheck-clean scripts.
+
+| File | Action | Status |
+|------|--------|--------|
+| `.githooks/pre-commit` | **Create** — optional lint checks (ruff, prettier, eslint, djlint) with `[Y/n]` prompt | ✅ |
+| `.githooks/pre-push` | **Create** — runs `scripts/ci.sh` (full build + test, ~15-25 min) | ✅ |
+| `AGENTS.md` | Add hooksPath setup documentation | ✅ |
+| `scripts/ci.sh` | Fix SC2155 — split declare+assign for REPO_ROOT | ✅ |
+| `scripts/tests/test_ci.sh` | Fix SC2034/SC2154 — remove unused REPO_ROOT, pre-declare out_* vars | ✅ |
+
+**Verification**: `bash -n` both hooks ✅, `shellcheck ci.sh test_ci.sh` clean ✅,
+`ruff check .` 0 errors ✅, pre-commit prompt/skip/checks tested ✅.
+
+---
+
+### Phase 120 — Git Hooks ✅ COMPLETED
+
+**Date**: 2026-07-07 02:02
+**Status**: ✅ COMPLETED
+
+**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates
+before commits and pushes.
+
+**Changes**:
+
+| File | Change | Status |
+|------|--------|--------|
+| `.githooks/pre-commit` | **New** — run ruff check, ruff format --check, djlint --check | ✅ |
+| `.githooks/pre-push` | **New** — run nox -s scripts_tests (smoke test) | ✅ |
+| `AGENTS.md` | Add git hooks setup instructions | ✅ |
+| `README.md` | Add git hooks quick start section | ✅ |
+| `scripts/ci.sh` | Add core.hooksPath reference in docblock | ✅ |
+
+**Verification**: `git config core.hooksPath .githooks` — hooks active ✅, `bash .githooks/pre-commit` — 0 errors ✅
 {% endraw %}

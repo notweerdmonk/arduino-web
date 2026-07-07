@@ -98,7 +98,7 @@ layout: default
 | 117 | Fix CI Pipeline (nox + build order) | ✅ DONE | 202/202 scripts_tests |
 | 118 | Ruff Format Audit | ✅ DONE | 111 files cosmetic only |
 | 119 | Prettier/Djlint Convergence | ✅ DONE | indent=2, 50 templates reformatted, both formatters pass |
-| 120 | Git Hooks (pre-commit/pre-push) | ⏳ PENDING | Not yet implemented |
+| 120 | Git Hooks (pre-commit/pre-push) | ✅ DONE | pre-commit checks, pre-push ci.sh, shellcheck clean |
 
 ## Phase 60 — COMPLETED ✅
 

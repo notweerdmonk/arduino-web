@@ -352,4 +352,21 @@ medminder/
 
 ## Acknowledgements
 
+## Git Hooks
+
+The repository ships with two Git hooks in `.githooks/` to enforce code quality:
+
+- **Pre-commit** (optional): Prompts `[Y/n]` with 10s timeout (default Y). Runs ruff check, ruff format --check, prettier --check, eslint, and djlint --check. If djlint --check fails, run `pipenv run djlint . --reformat` manually then re-stage. Skip with `n` or `git commit --no-verify`.
+- **Pre-push** (mandatory): Runs the full CI pipeline (`scripts/ci.sh`) — builds all 6 packages then runs all 8 test sessions (~15-25 min). Skip with `git push --no-verify`.
+
+The pre-push hook runs **unconditionally** (no interactive prompt) — its purpose is to catch failures before they reach upstream CI. Bypass with `--no-verify` for quick pushes. The pre-commit hook's djlint check runs in `--check` mode only (read-only); auto-fix requires a manual `djlint . --reformat` pass which may need a second run due to `{% endblock %}` convergence quirks.
+
+The `test_ci.sh` script (30 bash assertions) validates `ci.sh` flag parsing, error propagation, and nox-not-found handling using a fake nox shim — all with zero external dependencies beyond bash. It runs as part of `nox -s scripts_tests` (202 tests total).
+
+Enable hooks:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 Assisted by OpenCode:minimax-m2.5-free and OpenCode:deepseek-v4-flash-free

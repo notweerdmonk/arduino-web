@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Pre-commit hook — optional lint/format checks
+#
+# Prompts [Y/n] with 10s timeout (default Y). Runs sequentially:
+#   1. ruff check         — Python lint
+#   2. ruff format --check — Python format
+#   3. prettier --check    — HTML/JS format
+#   4. eslint             — JS lint
+#   5. djlint --check      — Jinja2 template lint
+#
+# Skip with `n` at the prompt or `git commit --no-verify`.
+# If djlint --check fails, auto-fix with:
+#   pipenv run djlint . --reformat
+# then re-stage files and commit again. May need a second pass
+# due to {% endblock %} convergence quirks.
+#
+# Exit codes: 0 = passed or skipped, 1 = check failed
+
+set -euo pipefail
+
+YELLOW=$'\033[1;33m'
+RED=$'\033[1;31m'
+NC=$'\033[0m'
+
+warn() { printf "${YELLOW}%s${NC}\n" "$*"; }
+fail() { printf "${RED}%s${NC}\n" "$*"; }
+
+run_checks=1
+if [ "${SKIP_PRE_COMMIT:-0}" == "0" ]; then
+
+    printf "== Pre-commit linter checks ==\n\n"
+    printf "Run linter/formatter checks? [Y/n] "
+    read -r -t 10 answer </dev/tty 2>/dev/null || true
+    case "${answer:-Y}" in
+        n|N) run_checks=0;;
+    esac
+else
+    run_checks=0
+fi
+
+if [ "$run_checks" -eq 0 ]; then
+    echo
+    warn "WARNING: Skipping pre-commit linter checks."
+    warn "  Your commit may fail CI if code does not meet project standards."
+    echo
+    exit 0
+fi
+
+check() {
+    local tool="$1" desc="$2"
+    shift 2
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        warn "Skipping ${desc} — '${tool}' not found"
+        return 0
+    fi
+    printf "==> %s\n" "$desc"
+    if ! "$@" 2>&1; then
+        fail "FAILED: ${desc}"
+        exit 1
+    fi
+}
+
+check pipenv "ruff check" pipenv run ruff check .
+check pipenv "ruff format --check" pipenv run ruff format --check .
+check npx "prettier --check" npx prettier --check "**/*.html"
+check npx "eslint" npx eslint .
+check pipenv "djlint --check" pipenv run djlint . --check
+
+printf "==> All pre-commit checks passed\n"

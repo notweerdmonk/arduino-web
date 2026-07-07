@@ -357,20 +357,6 @@ as values — combined string exceeds 100-char limit.
 
 ---
 
-## Phase 120 — Git Hooks — Review Plan
-
-### Review Criteria
-
-| # | Item | Type | Method |
-|---|------|------|--------|
-| R1 | pre-commit hook contents | Correctness | Verify ruff check, ruff format --check, djlint --check all present |
-| R2 | pre-push hook contents | Correctness | Verify nox -s scripts_tests present |
-| R3 | AGENTS.md updates | Completeness | Verify hook setup instructions and formatter split are documented |
-| R4 | README.md updates | Completeness | Verify quick start section is present |
-| R5 | scripts/ci.sh updates | Correctness | Verify docblock reference is accurate |
-
----
-
 ## Phase 119 — Prettier/Djlint Convergence — Review Plan
 
 ### Review Criteria
@@ -382,5 +368,147 @@ as values — combined string exceeds 100-char limit.
 | R3 | djlint --check exit 0 | Verification | Run and confirm clean output |
 | R4 | ruff check exit 0 | Verification | Run and confirm no regressions |
 | R5 | Formatter split documented | Completeness | AGENTS.md has the responsibility table |
+
+## Phase 120 — Git Hooks — Review Plan
+
+### Review Criteria
+
+| # | Item | Type | Method |
+|---|------|------|--------|
+| R1 | pre-commit hook contents | Correctness | Verify ruff check, ruff format --check, djlint --check all present |
+| R2 | pre-push hook contents | Correctness | Verify nox -s scripts_tests present |
+| R3 | AGENTS.md updates | Completeness | Verify hook setup instructions and formatter split are documented |
+| R4 | README.md updates | Completeness | Verify quick start section is present |
+| R5 | scripts/ci.sh updates | Correctness | Verify docblock reference is accurate |
+| H1 | pre-commit prompt works | Correctness | Verify `[Y/n]` prompt appears, timeout defaults to Y, `n` prints yellow warning and exits 0 |
+| H2 | pre-commit Y runs all 5 checks | Correctness | Verify ruff check, ruff format --check, prettier --check, eslint, djlint --check run sequentially |
+| H3 | pre-commit Y failure exits 1 | Correctness | Introduce deliberate lint error, verify exit code |
+| H4 | pre-commit n exits 0 | Correctness | Verify exit 0 with warning message |
+| H5 | pre-push runs `scripts/ci.sh` | Correctness | Verify `bash scripts/ci.sh` is invoked |
+| H6 | pre-push blocks on failure | Correctness | Force ci.sh failure, verify push blocked (exit non-zero) |
+| H7 | pre-push passes on success | Correctness | Verify clean push proceeds |
+| H8 | No source code modified | Integrity | `ci.sh` and `test_ci.sh` unchanged |
+| H9 | `.githooks/` tracked in git | Integrity | `git status` shows new files in working tree |
+| H10 | `GIT_HOOKS_PLAN.md` deleted after implementation | Cleanup | Superseded by this REVIEW_PLAN.md entry |
+| H11 | hooksPath documented in AGENTS.md | Documentation | Mention `git config core.hooksPath .githooks` for new contributors |
+| H12 | Missing tool graceful handling | Correctness | Verify pre-commit gracefully handles missing `pipenv`, `npx`, `eslint`, `prettier` — warn and skip, not hard fail |
+| H13 | `--no-verify` escape hatch documented | Documentation | Plan explicitly states `git commit --no-verify` / `git push --no-verify` bypass hooks |
+| H14 | Ctrl+C interrupt recovery documented | Documentation | Plan states Ctrl+C during pre-push exits non-zero, push blocked; recovery is `git push` again |
+| H15 | Phase 117 dependency noted | Documentation | Plan references that ci.sh with real nox (Phase 117) must be in place |
+
+---
+
+## Git Hooks — Pre-Commit & Pre-Push
+
+**Date**: 2026-07-06 22:16
+
+**Status**: Ready for implementation
+
+---
+
+### File structure
+
+```
+.githooks/
+  pre-commit       # Optional lint/format checks (user-prompted, exit 0 on skip)
+  pre-push         # Runs scripts/ci.sh with real nox (mandatory)
+```
+
+Hooks are enabled via `git config core.hooksPath .githooks` — `.githooks/` is tracked in version control so all contributors get the same hooks.
+
+---
+
+### Pre-commit hook: optional lint/format checks
+
+#### Behavior
+
+```
+== Pre-commit linter checks ==
+Run linter/formatter checks? [Y/n] (10s timeout, default: Y)
+```
+
+| User input | Action | Exit code |
+|------------|--------|-----------|
+| **Y** / Enter / timeout | Run all checks sequentially | 1 on failure |
+| **n** / **N** | Print yellow warning, skip | 0 |
+
+Warning message on skip:
+
+```
+⚠  WARNING: Skipping pre-commit linter checks.
+   Your commit may fail CI if code does not meet project standards.
+```
+
+#### Checks (run in order, fail on first failure)
+
+```bash
+pipenv run ruff check .
+pipenv run ruff format --check .
+npx prettier --check "**/*.html"
+npx eslint .
+pipenv run djlint . --check
+```
+
+#### Djlint gotcha
+
+`djlint --reformat` may need two passes due to `{% endblock %}` placement disagreement
+(see CODEBASE_REFERENCE.md:4357-4360). The hook runs `--check` only. If it fails, print:
+
+```
+⚠  djlint --check found issues. To auto-fix:
+   pipenv run djlint . --reformat
+   Then re-stage the files and commit again.
+```
+
+---
+
+### Pre-push hook: mandatory `scripts/ci.sh`
+
+#### Behavior
+
+```bash
+bash scripts/ci.sh
+```
+
+Runs `nox -s all_builds` (6 packages, ~5-10 min) then `nox -s all_tests` (8 sessions, 830 tests, ~10-15 min).
+Total estimated: **15-25 min**. Exit code propagates — any failure blocks the push.
+
+#### No changes to test_ci.sh or ci.sh
+
+- `ci.sh` already uses real nox — no modifications needed
+- `test_ci.sh` stays untouched (shim-based testing of ci.sh only)
+- No `--real-nox` flag needed
+
+---
+
+### Files to create
+
+| File | Action |
+|------|--------|
+| `.githooks/pre-commit` | **Create** — optional lint checks with user prompt |
+| `.githooks/pre-push` | **Create** — runs `scripts/ci.sh` |
+
+No existing source files modified.
+
+---
+
+### Escape hatches
+
+| Bypass | Command | Effect |
+|--------|---------|--------|
+| Skip pre-commit | `git commit --no-verify` (or `-n`) | Skips both hooks |
+| Skip pre-push | `git push --no-verify` | Skips pre-push only |
+
+Interrupt (Ctrl+C) during `scripts/ci.sh` produces a non-zero exit — push is blocked. Recovery is simply `git push` again.
+
+### Phase 117 dependency
+
+This plan requires `scripts/ci.sh` (Phase 117) which uses real `nox` for builds and tests. `ci.sh` and `test_ci.sh` are already in place with the correct behavior.
+
+### Rollback
+
+```bash
+git config --unset core.hooksPath
+```
 
 {% endraw %}

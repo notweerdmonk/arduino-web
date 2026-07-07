@@ -87,15 +87,15 @@ layout: default
 
 ---
 
-### Phase 120 — Git Hooks
+### Phase 118 — Ruff Format Audit
 
 | Q | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Create pre-commit hook | ✅ | ruff check + format --check + djlint --check |
-| 2 | Create pre-push hook | ✅ | nox -s scripts_tests |
-| 3 | Update AGENTS.md | ✅ | Hook setup + formatter responsibility split |
-| 4 | Update README.md | ✅ | Quick start section |
-| 5 | Update scripts/ci.sh | ✅ | core.hooksPath docblock |
+| 1 | Run `ruff format .` | ✅ | 111 files reformatted, cosmetic only |
+| 2 | Verify idempotency | ✅ | Second `--check` confirms all formatted |
+| 3 | Fix E501 in add_license_headers.py | ✅ | 35 lines wrapped, 0 ruff errors |
+
+---
 
 ### Phase 119 — Prettier/Djlint Convergence
 
@@ -106,5 +106,18 @@ layout: default
 | 3 | Reformatted 50 templates with djlint | ✅ | 25 medminder_dash + 15 arduino_dash + 10 arduino_sketch_tools |
 | 4 | Verify djlint --check exit 0 | ✅ | |
 | 5 | Verify ruff check . exit 0 | ✅ | |
+
+---
+
+### Phase 120 — Git Hooks
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| A | Create .githooks/pre-commit | ✅ | 5 lint checks, [Y/n] prompt, missing-tool graceful handling |
+| B | Create .githooks/pre-push | ✅ | Runs `bash scripts/ci.sh`, blocks push on failure |
+| C | Update AGENTS.md | ✅ | hooksPath setup added |
+| D | Fix shellcheck issues | ✅ | ci.sh (SC2155) + test_ci.sh (SC2034, SC2154) — both clean |
+| E | Update all agent-facing docs | ✅ | All project + workflow docs updated |
+| F | Verify — ruff 0, shellcheck clean | ✅ | `ruff check .` 0 errors, both scripts shellcheck-clean |
 
 {% endraw %}

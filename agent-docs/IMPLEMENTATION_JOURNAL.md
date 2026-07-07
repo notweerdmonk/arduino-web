@@ -1253,43 +1253,30 @@ when pipenv resolves `file://` dependency sources.
 
 ---
 
-## 2026-07-07 02:02 — Phase 120: Git Hooks
+## Phase 118 — Ruff Format Audit
 
+**Date**: 2026-07-07
 **Status**: ✅ COMPLETED
 
-**Goal**: Add pre-commit and pre-push git hooks to enforce code quality gates
-before commits and pushes.
+**Scope**: Run `pipenv run ruff format .` across the entire monorepo.
+
+**Result**: 111 files reformatted, 1 file left unchanged. All changes cosmetic
+(line wrapping, quote normalization, trailing blank lines, adjacent string
+merging). Idempotency confirmed: second `--check` run reports all formatted.
+
+**Follow-up — E501 fix**: Post-formatting `ruff check .` revealed 35 E501
+errors in `scripts/add_license_headers.py` DESCRIPTIONS dict. Restructured
+35 values with parenthetical line continuation. Dict type and consumer
+code unchanged. Verified: `ruff check .` → 0 errors.
 
 ### Changes
 
-**File 1: `.githooks/pre-commit`** (new, 62 lines)
-- Runs in sequence: `ruff check .`, `ruff format --check .`, `djlint . --check`
-- Exits with error on first failure (set -e)
-- Uses `pipenv run` to ensure correct virtualenv
+| File | Change | Status |
+|------|--------|--------|
+| 111 Python files | `ruff format .` — cosmetic only | ✅ |
+| `scripts/add_license_headers.py` | 35 E501 lines wrapped | ✅ |
 
-**File 2: `.githooks/pre-push`** (new, 26 lines)
-- Runs `nox -s scripts_tests` as a quick smoke test before push
-- Lightweight — completes in ~30s
-
-**File 3: `AGENTS.md`**
-- Added `## Commands` section documenting the hooks, setup command
-  (`git config core.hooksPath .githooks`), and the formatter responsibility
-  split: ruff (Python), prettier (non-Jinja HTML/JS/JSON/YAML),
-  djlint (Jinja2 templates), ESLint (JS)
-
-**File 4: `README.md`**
-- Added "Prettier/Djlint Convergence" quick start section under Development Setup
-
-**File 5: `scripts/ci.sh`**
-- Added `core.hooksPath .githooks` reference in docblock
-
-### Verification
-
-| Check | Method | Result |
-|-------|--------|--------|
-| Hook setup | `git config core.hooksPath .githooks` | ✅ |
-| pre-commit dry run | `bash .githooks/pre-commit` | ✅ exit 0 |
-| pre-push dry run | `bash .githooks/pre-push` | ✅ exit 0 |
+---
 
 ## 2026-07-07 02:02 — Phase 119: Prettier/Djlint Convergence
 
@@ -1336,5 +1323,66 @@ shared templates in `arduino_sketch_tools`.
 | djlint --check | `pipenv run djlint . --check` | ✅ exit 0 |
 | ruff check | `pipenv run ruff check .` | ✅ exit 0 |
 | prettier check | `npx prettier --check "**/*.html"` | ✅ no Jinja files checked |
+
+---
+
+## Phase 120 — Git Hooks
+
+**Date**: 2026-07-06 23:04
+**Status**: ✅ COMPLETED
+
+### Pre-Commit Hook Design
+
+The `.githooks/pre-commit` hook presents a `[Y/n]` prompt with 10-second timeout
+(default `Y`) asking whether to run lint checks. If accepted, it runs 5 checks
+in sequence:
+
+1. `command -v ruff && ruff check .` — lint check
+2. `command -v ruff && ruff format --check .` — format check
+3. `command -v npx && npx prettier --check "**/*.html"` — JS/HTML formatting
+4. `command -v eslint && eslint .` — JS lint
+5. `command -v pipenv && pipenv run djlint . --check` — Jinja template lint
+
+Each check is gated by `command -v` so missing tools print a warning and continue
+rather than aborting the commit. The `djlint` check runs `--check` only (not
+`--reformat`) — it acts as a lint gate, not a formatter.
+
+The `[Y/n]` prompt allows quick commits (typing `n`) while keeping the default
+path safe (run checks).
+
+### Pre-Push Hook Design
+
+The `.githooks/pre-push` hook runs `bash scripts/ci.sh` which executes the full
+`nox -s all_builds` followed by `nox -s all_tests`. This catches build failures
+and test regressions before they reach the remote. There is no prompt — the
+check is mandatory. Push is blocked on any non-zero exit from ci.sh.
+
+### Shellcheck Fixes
+
+- **`scripts/ci.sh` (SC2155)**: `local var=$(cmd)` split into `local var` then
+  `var=$(cmd)` to avoid masking the exit code of `cmd`.
+- **`scripts/tests/test_ci.sh` (SC2034, SC2154)**: Unused variable `project_root`
+  removed. Variable `FAKE_NOX_RC` referenced but not assigned — properly initialized
+  before use.
+
+Both files are now shellcheck-clean with zero warnings. No source logic was changed;
+behavior of ci.sh and test_ci.sh is identical.
+
+### Review Findings — 2026-07-06 23:45
+
+The Phase 120 code review identified **3 critical gaps** and **2 minor suggestions**:
+
+**Critical — Missing agent-facing doc entries**:
+1. `agent-docs/PLAN.md` — no Phase 120 entry (and Phase 117 section content also absent)
+2. `agent-docs/JOURNAL.md` — no Phase 120 entry
+3. `agent-docs/CODEBASE_REFERENCE.md` — no Phase 120 entry
+
+These were explicitly required by Task E but were not implemented. The hooks code itself is correct and properly tested.
+
+**Minor suggestions**:
+1. `.githooks/pre-commit:30` — suppress `/dev/tty` read errors with `2>/dev/null`
+2. `.githooks/pre-commit:20-22` — use `$'...'` ANSI-C quoting for color variables
+
+See `REVIEW_JOURNAL.md` for detailed findings.
 
 {% endraw %}

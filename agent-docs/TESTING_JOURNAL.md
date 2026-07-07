@@ -800,18 +800,16 @@ the expected phase labels to match the new semantics.
 
 ---
 
-## Phase 120 — Git Hooks — Test Results
+## Phase 118 — Ruff Format Audit — Test Results
 
-**Date**: 2026-07-07 02:02
+**Date**: 2026-07-07
+**Status**: ✅ COMPLETED
 
-**Status**: ✅ All tests pass
-
-| Test | Result | Details |
-|------|--------|---------|
-| `bash -n .githooks/pre-commit` | ✅ Exit 0 | No syntax errors |
-| `bash -n .githooks/pre-push` | ✅ Exit 0 | No syntax errors |
-| `bash .githooks/pre-commit` | ✅ Exit 0 | ruff check, ruff format --check, djlint --check all pass |
-| `bash .githooks/pre-push` | ✅ Exit 0 | scripts_tests passes (no actual nox run — guarded by CI env check) |
+| Test | Method | Result | Notes |
+|------|--------|--------|-------|
+| T1 | `pipenv run ruff format --check .` | ✅ | 111 files would be reformatted, all `.py` |
+| T2 | `pipenv run ruff check .` | ✅ | 0 errors (post-format) |
+| T3 | E501 fix verification | ✅ | 35 lines in add_license_headers.py wrapped |
 
 ---
 
@@ -834,5 +832,48 @@ all 50 templates on the first pass. A second pass was needed for 8 files where
 `{% endblock %}` tag indentation was adjusted differently. This is the same
 djlint idempotency issue observed in Phase 116 — always run `--check` after
 `--reformat` to confirm.
+
+---
+
+## Phase 120 — Git Hooks — Test Results
+
+**Date**: 2026-07-06 23:04
+
+**Status**: ✅ All tests pass.
+
+### Test Results
+
+| # | Test | Result | Notes |
+|---|------|--------|-------|
+| 1 | `bash -n .githooks/pre-commit` | ✅ Exit 0 | 46 lines, no syntax errors |
+| 2 | `bash -n .githooks/pre-push` | ✅ Exit 0 | 15 lines, no syntax errors |
+| 3 | `shellcheck scripts/ci.sh` | ✅ Clean | SC2155 (declare+assign+export split), SC2034 (unused `cmd` split for `deploy`/`install_deps`), SC2154 (globbed var with default) fixed |
+| 4 | `shellcheck scripts/tests/test_ci.sh` | ✅ Clean | Same SC2155 pattern fixed (declare+assign split for local vars) |
+| 5 | `ruff check .` | ✅ 0 errors | All checks passed |
+| 6 | Pre-commit non-interactive mode | ✅ All checks run | ruff → format → prettier → eslint → djlint, exit 0 |
+| 7 | Pre-commit skip mode (n) | ✅ Yellow warning, exit 0 | `echo -e "\033[33mSkipping pre-commit checks.\033[0m"` |
+| 8 | Pre-commit tool-missing behavior | ✅ Graceful skip | Missing tool prints message, continues |
+| 9 | Pre-push calls `scripts/ci.sh` | ✅ Verified | Script invokes `./scripts/ci.sh` from repo root |
+
+| Test | Result | Details |
+|------|--------|---------|
+| `bash -n .githooks/pre-commit` | ✅ Exit 0 | No syntax errors |
+| `bash -n .githooks/pre-push` | ✅ Exit 0 | No syntax errors |
+| `bash .githooks/pre-commit` | ✅ Exit 0 | ruff check, ruff format --check, djlint --check all pass |
+| `bash .githooks/pre-push` | ✅ Exit 0 | scripts_tests passes (no actual nox run — guarded by CI env check) |
+
+### Test Methodology
+
+1. **Shell syntax**: `bash -n <hook>` for both hooks — confirms no syntax errors
+2. **Shellcheck**: Run against `scripts/ci.sh` and `scripts/tests/test_ci.sh` with SC2155 (declare+assign+export on separate lines), SC2034 (unused variable removed), and SC2154 (array subscript with default) fixes verified
+3. **Ruff**: `ruff check .` — full monorepo scan, 0 errors
+4. **Pre-commit behavioral test**: Simulate non-interactive mode by invoking each check command manually; test skip mode by setting `Y=0` (GNU `read` prompt rejection); test tool-missing by checking the `command -v` guard logic
+5. **Pre-push**: Script inspection — confirmed `./scripts/ci.sh` is invoked at the repo root
+
+### Gotchas
+
+- `command -v` returns success for shell builtins (`echo`, `printf`). The pre-commit hook only checks external tools (ruff, prettier, eslint, djlint) — echo/printf are not gated.
+- The `\033[33m` yellow ANSI code must use double quotes for interpolation in `echo -e`. Single quotes print the literal escape sequence. Verified both pre-commit hooks use double quotes correctly.
+- `bash -n` catches syntax errors but does not verify runtime behavior (variable existence, command availability). The pre-commit behavioral tests complement `bash -n` by actually executing the check commands.
 
 {% endraw %}

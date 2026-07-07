@@ -108,16 +108,13 @@ Python tests or functionality.
 
 ---
 
-## Phase 120 — Git Hooks
-
-### Test Strategy
+## Phase 118 — Ruff Format Audit
 
 | # | Test | Method | Expected |
 |---|------|--------|----------|
-| T1 | pre-commit hook syntax | `bash -n .githooks/pre-commit` | Exit 0 |
-| T2 | pre-push hook syntax | `bash -n .githooks/pre-push` | Exit 0 |
-| T3 | pre-commit dry run | `bash .githooks/pre-commit` | Exit 0 (all checks pass) |
-| T4 | pre-push dry run | `bash .githooks/pre-push` | Exit 0 (scripts_tests passes) |
+| T1 | Format idempotency | `pipenv run ruff format --check .` | Exit 0, all formatted |
+| T2 | No lint regressions | `pipenv run ruff check .` | Exit 0 |
+| T3 | E501 fix | `ruff check scripts/add_license_headers.py` | 0 line-too-long errors |
 
 ---
 
@@ -130,5 +127,43 @@ Python tests or functionality.
 | T1 | djlint --check | `pipenv run djlint . --check` | Exit 0, 0 files flagged |
 | T2 | ruff check | `pipenv run ruff check .` | Exit 0 |
 | T3 | prettier check | `npx prettier --check "**/*.html"` | Only non-Jinja files checked |
+
+---
+
+## Phase 120 — Git Hooks
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | pre-commit hook syntax | `bash -n .githooks/pre-commit` | Exit 0 |
+| T2 | pre-push hook syntax | `bash -n .githooks/pre-push` | Exit 0 |
+| T3 | pre-commit dry run | `bash .githooks/pre-commit` | Exit 0 (all checks pass) |
+| T4 | pre-push dry run | `bash .githooks/pre-push` | Exit 0 (scripts_tests passes) |
+
+### Test Strategy
+
+1. **Syntax validation**: `bash -n` on both `.githooks/pre-commit` and `.githooks/pre-push` — must exit 0
+2. **Static analysis**: `shellcheck` on `scripts/ci.sh` and `scripts/tests/test_ci.sh` — must pass cleanly with SC2155/SC2034/SC2154 fixed
+3. **Ruff check**: `ruff check .` — 0 errors
+4. **Pre-commit behavioral tests**:
+   - Non-interactive mode (all tools present): runs ruff check, ruff format --check, prettier --check, eslint, djlint --check sequentially
+   - Skip mode (respond `n` at prompt): prints yellow warning, exits 0
+   - Tool-missing behavior (missing executable): skips that check gracefully
+5. **Pre-push behavioral test**: invokes `scripts/ci.sh` (full nox all_builds + all_tests)
+
+### Test Scenarios
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| 1 | `bash -n .githooks/pre-commit` | Exit 0 | ✅ |
+| 2 | `bash -n .githooks/pre-push` | Exit 0 | ✅ |
+| 3 | `shellcheck scripts/ci.sh` | Clean pass | ✅ (SC2155, SC2034, SC2154 fixed) |
+| 4 | `shellcheck scripts/tests/test_ci.sh` | Clean pass | ✅ (same 3 categories fixed) |
+| 5 | `ruff check .` | 0 errors | ✅ |
+| 6 | Pre-commit non-interactive mode | All checks run, exit 0 | ✅ |
+| 7 | Pre-commit skip mode (n) | Yellow warning, exit 0 | ✅ |
+| 8 | Pre-commit tool missing | Graceful skip, exit 0 | ✅ |
+| 9 | Pre-push calls `scripts/ci.sh` | Script invoked at `$REPO_ROOT` | ✅ (verified via script inspection) |
 
 {% endraw %}

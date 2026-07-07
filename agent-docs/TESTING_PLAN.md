@@ -211,4 +211,26 @@ Python tests or functionality.
 
 ---
 
+
+---
+
+## Phase 122c — Lock File Handling in ci.sh
+
+### Scope
+
+Verify the pre-check (warn/abort on dirty lock files before nox) and post-check (offer git restore of newly-dirtied lock files after nox) in ci.sh.
+
+### Test Strategy
+
+Test the new behavior using `make_fake_git()` shim with controlled pre/post dirty file state and user input via `tty_var`. Existing tests isolated from real git via `FAKE_GIT_DIRTY_LOCK_FILES=""`.
+
+### Test Scenarios
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| T1 | Pre-check abort: dirty lock files + user says "n" (Q18.14) | Exit 1, warns "uncommitted changes", stderr "aborting" | ✅ |
+| T2 | Post-check restore: newly dirty locks + user says "y" (Q18.15) | Exit 0, "restored:" in stdout, git restore logged | ✅ |
+| T3 | Post-check skip: newly dirty locks + user says "n" (Q18.16) | Exit 0, "left in working tree" in stdout | ✅ |
+| T4 | Existing tests Q18.6–Q18.10 isolated from git | All pass with FAKE_GIT_DIRTY_LOCK_FILES="" | ✅ |
+
 {% endraw %}

@@ -147,4 +147,14 @@ layout: default
 | 8 | Update agent-facing docs | ✅ | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, IMPLEMENTATION_PROGRESS.md |
 | 9 | Verify — test_ci.sh + ruff | ✅ | 40/40 tests pass, ruff check 0 errors, ruff format OK |
 
+
+### Phase 122c — Lock File Handling in ci.sh
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | ci.sh — pre-check + post-check + FAKE_GIT env-var | ✅ | tty-gated interactive prompts, exit 1 on abort |
+| 2 | test_ci.sh — 3 new tests + existing test updates | ✅ | Q18.14–Q18.16, make_fake_git helper, FAKE_GIT_DIRTY_LOCK_FILES isolation |
+| 3 | Docs sync — all agent-facing docs updated | ✅ | PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
+| 4 | Lint + final verify | ✅ | bash -n, test_ci.sh 49/49 |
+
 {% endraw %}

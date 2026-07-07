@@ -115,4 +115,14 @@ layout: default
 
 ---
 
+
+## Phase 122c — Lock File Handling in ci.sh
+
+| # | Test | Status | Notes |
+|---|------|--------|-------|
+| T1 | Pre-check abort (Q18.14) | ✅ | FAKE_GIT_PRE_DIRTY set → user says "n" → exit 1, "aborting" |
+| T2 | Post-check restore (Q18.15) | ✅ | FAKE_GIT_PRE="" → FAKE_GIT_POST="board_manager/..." → user says "y" → restored |
+| T3 | Post-check skip (Q18.16) | ✅ | Same setup → user says "n" → "left in working tree" |
+| T4 | Existing test isolation (Q18.6–Q18.10) | ✅ | All pass with FAKE_GIT_DIRTY_LOCK_FILES="" |
+
 {% endraw %}

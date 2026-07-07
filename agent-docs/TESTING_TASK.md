@@ -126,4 +126,16 @@ All Phase 112 tests verified:
 
 ---
 
+
+---
+
+## Phase 122c — Lock File Handling in ci.sh
+
+| Task | Scope | Status |
+|------|-------|--------|
+| T1 | Pre-check abort (Q18.14) — dirty locks + user declines → exit 1, warning + abort message | ✅ |
+| T2 | Post-check restore (Q18.15) — newly dirty + user accepts → restored, git restore called | ✅ |
+| T3 | Post-check skip (Q18.16) — newly dirty + user declines → left dirty, no git restore | ✅ |
+| T4 | Existing tests isolated — Q18.6–Q18.10 pass with FAKE_GIT_DIRTY_LOCK_FILES="" | ✅ |
+
 {% endraw %}

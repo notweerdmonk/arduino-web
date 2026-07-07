@@ -4535,4 +4535,25 @@ Key decisions:
 
 ---
 
+
+---
+
+## 2026-07-07 07:43 — Phase 122c: Lock File Handling in ci.sh ✅ COMPLETED
+
+**Goal**: Add interactive pre-check (warn/abort on dirty Pipfile.lock files before nox) and post-check (offer git restore of newly-dirtied lock files after nox) to ci.sh, so users are aware of and can manage lock file churn caused by `pipenv lock --dev` during CI.
+
+**Root cause**: The nox `tests` session calls `pipenv lock --dev` (noxfile.py:77) per package, which regenerates `Pipfile.lock`. Wheel hashes for local dependencies change after every rebuild in the `build` session. 5 packages have local deps and are affected; `arduino_grpc` has no local deps so stays clean.
+
+**Approach**:
+- **Pre-check**: Before Phase 1, if `_get_dirty_lock_files()` returns non-empty, warn and prompt "Continue and overwrite? [y/N]". Abort (exit 1) if user declines.
+- **Post-check**: After Phase 2, compute `new_dirty` = post-state minus pre-state (preserving user modifications). If non-empty, list files and prompt "Restore them with git restore? [y/N]". On "y", `git restore` each file.
+- **tty-gated**: Both prompts only show when `/dev/tty` is available. Non-interactive contexts skip prompts but print warnings.
+- **Test isolation**: `FAKE_GIT_DIRTY_LOCK_FILES` env var bypasses git entirely. New `make_fake_git()` shim uses counter-based state machine for pre/post diff control.
+
+**Changes**:
+- `scripts/ci.sh` — `_get_dirty_lock_files()` helper, pre-check section, post-check section
+- `scripts/tests/test_ci.sh` — `make_fake_git()` helper, 3 new tests (Q18.14–Q18.16, 9 new assertions), `FAKE_GIT_DIRTY_LOCK_FILES=""` on Q18.6–Q18.10
+
+**Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (was 40). `bash -n` on both scripts ✅.
+
 {% endraw %}

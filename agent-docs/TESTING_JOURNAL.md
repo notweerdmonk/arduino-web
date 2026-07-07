@@ -928,4 +928,32 @@ All 10 test scenarios pass. `test_ci.sh` grew from 30 to 40 assertions. Phase 12
 - Updated `--no-install` test (Q18.13) verifies exit 0 + stderr warning + "Phase 1: skipped" + "Phase 2: skipped"
 - Q18.6–Q18.10 all needed `--skip-lint` because plain `/usr/bin:/bin` PATH lacks pipenv/npx
 
+
+
+---
+
+## 2026-07-07 — Phase 122c: Lock File Handling — Test Results
+
+### Summary
+
+All 4 test scenarios pass. `test_ci.sh` grew from 40 to 49 assertions (3 new tests, 9 new assertions). `make_fake_git()` shim works reliably with counter-based pre/post state machine.
+
+### Test Execution
+
+| # | Test Command | Result | Output |
+|---|-------------|--------|--------|
+| T1 | `bash scripts/tests/test_ci.sh` | ✅ 49/49 | 16 scenarios, all pass |
+| T2 | `bash -n scripts/ci.sh` | ✅ exit 0 | 250 lines, syntax OK |
+| T3 | `bash -n scripts/tests/test_ci.sh` | ✅ exit 0 | 560 lines, syntax OK |
+
+### Verification Notes
+
+- `make_fake_git()` shim uses counter file (`FAKE_GIT_COUNT_FILE`) to return different values for pre-check (call 0 → FAKE_GIT_PRE_DIRTY) and post-check (call 1 → FAKE_GIT_POST_DIRTY)
+- `git restore` calls are logged to `FAKE_GIT_RESTORE_LOG` for verification
+- All other git commands forward to real `/usr/bin/git` via `exec`
+- `FAKE_GIT_DIRTY_LOCK_FILES=""` in Q18.6–Q18.10 prevents real git from being called in those tests
+- Q18.14 tests pre-check abort path: dirty file detection → prompt → user declines → exit 1
+- Q18.15 tests post-check happy path: no pre-existing → newly dirty after CI → user accepts restore
+- Q18.16 tests post-check skip: same scenario → user declines → files left in working tree
+
 {% endraw %}

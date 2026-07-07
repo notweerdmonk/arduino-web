@@ -61,4 +61,21 @@ layout: default
 | G | Agent-facing docs updated | ✅ |
 | H | Verify: `test_ci.sh` 40/40 ✅, `ruff check .` OK ✅ | ✅ |
 
+
+## Phase 122c — Lock File Handling in ci.sh
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | ci.sh — pre-check: warn/abort on dirty lock files before Phase 1 | ✅ |
+| B | ci.sh — post-check: list newly-dirtied lock files after Phase 2, offer git restore | ✅ |
+| C | ci.sh — `FAKE_GIT_DIRTY_LOCK_FILES` env-var bypass for test isolation | ✅ |
+| D | test_ci.sh — `make_fake_git()` helper for lock-file test scenarios | ✅ |
+| E | test_ci.sh — Q18.14: pre-check abort (dirty files + user says "n" → exit 1) | ✅ |
+| F | test_ci.sh — Q18.15: post-check restore (newly dirty + user says "y" → restored) | ✅ |
+| G | test_ci.sh — Q18.16: post-check skip (newly dirty + user says "n" → leave dirty) | ✅ |
+| H | test_ci.sh — Add `FAKE_GIT_DIRTY_LOCK_FILES=""` to Q18.6–Q18.10 for isolation | ✅ |
+| I | Run all tests 49/49 | ✅ |
+| J | Sync all agent-facing docs | ✅ |
+| K | Lint + final verify | ✅ |
+
 {% endraw %}

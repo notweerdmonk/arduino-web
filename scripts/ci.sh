@@ -11,11 +11,27 @@
 # @option --no-install  Don't prompt to install nox — silently skip nox phases if missing.
 # @option --help        Show usage and exit.
 # @exitcode 0 Pipeline succeeded.
-# @exitcode 1 nox not found on PATH and non-interactive or abort.
+# @exitcode 1 nox not found on PATH and non-interactive or abort; or pre-check abort.
 # @exitcode 2 At least one test session failed.
 # @exitcode 3 At least one build session failed.
 # @exitcode 4 Invalid CLI argument.
 # @exitcode 5 At least one lint check failed.
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+# Get list of dirty Pipfile.lock files. When FAKE_GIT_DIRTY_LOCK_FILES is
+# set (even to empty), its value is used instead of running git — this
+# enables controlled testing of the pre-check / post-check prompts without
+# requiring actual dirty lock files in the working tree.
+_get_dirty_lock_files() {
+    if [[ -n "${FAKE_GIT_DIRTY_LOCK_FILES+x}" ]]; then
+        printf '%s\n' "$FAKE_GIT_DIRTY_LOCK_FILES"
+    else
+        git diff --name-only -- '**/Pipfile.lock' 2>/dev/null || true
+    fi
+}
 
 # scripts/ci.sh
 #
@@ -170,6 +186,28 @@ if [[ $run_builds -eq 1 || $run_tests -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Lock file pre-check — warn if Pipfile.lock files are dirty before nox
+# ---------------------------------------------------------------------------
+if [[ $run_builds -eq 1 || $run_tests -eq 1 ]]; then
+    lock_dirty_pre=$(_get_dirty_lock_files)
+    if [[ -n "$lock_dirty_pre" ]]; then
+        echo "warning: uncommitted changes in Pipfile.lock files:"
+        echo "$lock_dirty_pre"
+        echo "The nox build/test phases will call pipenv lock and overwrite these."
+        if (</dev/tty) 2>/dev/null; then
+            printf "Continue and overwrite? [y/N]: "
+            read -r response </dev/tty
+            if [[ $response != [yY] ]]; then
+                echo "aborting" >&2
+                exit 1
+            fi
+        else
+            echo "warning: non-interactive — proceeding will overwrite dirty lock files" >&2
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
 # Phase 1 — Build
 # ---------------------------------------------------------------------------
 if [[ $run_builds -eq 1 ]]; then
@@ -193,6 +231,45 @@ if [[ $run_tests -eq 1 ]]; then
     fi
 else
     echo "==> Phase 2: skipped"
+fi
+
+# ---------------------------------------------------------------------------
+# Lock file post-check — offer to restore newly-dirtied lock files
+# ---------------------------------------------------------------------------
+if [[ $run_builds -eq 1 || $run_tests -eq 1 ]]; then
+    lock_dirty_post=$(_get_dirty_lock_files)
+    # Compute files that are dirty now but were not dirty before
+    new_dirty=""
+    while IFS= read -r f; do
+        if [[ -z "$f" ]]; then continue; fi
+        case "$lock_dirty_pre" in
+            *"$f"*) ;;
+            *) new_dirty="${new_dirty}${f}"$'\n' ;;
+        esac
+    done <<< "$lock_dirty_post"
+    new_dirty="${new_dirty%$'\n'}"
+    if [[ -n "$new_dirty" ]]; then
+        echo ""
+        echo "The following Pipfile.lock files were modified by the CI pipeline:"
+        echo "$new_dirty"
+        if (</dev/tty) 2>/dev/null; then
+            printf "Restore them with git restore? [y/N]: "
+            read -r response </dev/tty
+            if [[ $response == [yY] ]]; then
+                while IFS= read -r f; do
+                    if [[ -z "$f" ]]; then continue; fi
+                    if [[ ! -v FAKE_GIT_DIRTY_LOCK_FILES ]]; then
+                        git restore "$f"
+                    fi
+                    echo "  restored: $f"
+                done <<< "$new_dirty"
+            else
+                echo "note: Pipfile.lock changes left in working tree"
+            fi
+        else
+            echo "warning: Pipfile.lock files were modified (non-interactive, leaving them dirty)" >&2
+        fi
+    fi
 fi
 
 echo "==> CI pipeline complete"

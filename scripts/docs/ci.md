@@ -25,6 +25,12 @@ per-package test sessions resolve monorepo `file://` dependency sources.
 If `nox` is missing and no `--no-install` flag is given, an interactive prompt
 offers to install nox or skip the build/test phases.
 
+If uncommitted `Pipfile.lock` changes are detected before the build phase,
+a pre-check warns and asks whether to overwrite them (the nox test session
+calls `pipenv lock --dev` which regenerates lock files). After the pipeline
+completes, a post-check lists any newly-dirtied lock files and offers to
+`git restore` them.
+
 ## Exit Codes
 
 | Code | Meaning |

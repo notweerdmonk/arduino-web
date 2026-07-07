@@ -91,7 +91,7 @@ nox -s 'tests(board_manager)'  # single package
 ./scripts/ci.sh --no-install    # skip nox phases if nox missing (no prompt)
 ```
 
-The CI pipeline supports `--skip-lint`, `--skip-builds`, `--skip-tests`, and `--no-install` flags. The `test_ci.sh` script (40 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure, exit 5 for lint failure), the nox-not-found guard, and lint phase success/failure — all using fake nox/pipenv/npx shims with zero external dependencies (Phase 96). Run it standalone: `bash scripts/tests/test_ci.sh`.
+The CI pipeline supports `--skip-lint`, `--skip-builds`, `--skip-tests`, and `--no-install` flags. The `test_ci.sh` script (49 bash assertions) validates flag parsing, error propagation (exit 2 for test failure, exit 3 for build failure, exit 5 for lint failure), the nox-not-found guard, lint phase success/failure, and lock file pre-check/post-check — all using fake nox/pipenv/npx/git shims with zero external dependencies (Phase 96). Run it standalone: `bash scripts/tests/test_ci.sh`.
 
 ### Git Hooks Gate
 
@@ -106,7 +106,7 @@ Two Git hooks integrate the CI pipeline into your local workflow (enable with `g
 
 | Session | Tests | Notes |
 |---------|-------|-------|
-| `scripts_tests` | **212 passed** (160 pytest + 12 bash + **40 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
+| `scripts_tests` | **221 passed** (160 pytest + 12 bash + **49 bash**) | pytest + `test_install_arduino_deps.sh` + `test_ci.sh` |
 | `all_tests` | **8/8 sessions** | all packages + scripts |
 | `tests(board_manager)` | 212 passed | includes integration tests |
 | `tests(board_manager_client)` | 24 passed | |

@@ -74,6 +74,50 @@ assert_contains() {
     fi
 }
 
+# Make a private temp dir with a fake `git` shim for testing lock file
+# handling in ci.sh. Controlled by env vars:
+#
+#   FAKE_GIT_COUNT_FILE  - counter file (call 0 = pre, call 1 = post)
+#   FAKE_GIT_PRE_DIRTY   - output for first `git diff` call
+#   FAKE_GIT_POST_DIRTY  - output for second `git diff` call
+#   FAKE_GIT_RESTORE_LOG - log file for `git restore` calls
+#
+# All other git commands are forwarded to the real git binary.
+# Echoes the temp dir path.
+make_fake_git() {
+    local tmpdir real_git
+    tmpdir="$(mktemp -d -t git-shim.XXXXXX)"
+    real_git="$(command -v git)"
+    cat >"${tmpdir}/git" <<SHIM
+#!/bin/sh
+real_git='${real_git}'
+case " \$* " in
+    *" diff --name-only "*)
+        count_file="\${FAKE_GIT_COUNT_FILE:-/dev/null}"
+        count=0
+        [ -f "\$count_file" ] && read -r count < "\$count_file"
+        case \$count in
+            0) echo "\${FAKE_GIT_PRE_DIRTY:-}" ;;
+            1) echo "\${FAKE_GIT_POST_DIRTY:-}" ;;
+        esac
+        echo \$((count + 1)) > "\$count_file"
+        exit 0
+        ;;
+    *" restore "*)
+        for arg in "\$@"; do
+            echo "restore:\$arg" >> "\${FAKE_GIT_RESTORE_LOG:-/dev/null}"
+        done
+        exit 0
+        ;;
+    *)
+        exec "\$real_git" "\$@"
+        ;;
+esac
+SHIM
+    chmod +x "${tmpdir}/git"
+    printf '%s' "${tmpdir}"
+}
+
 # Make a private temp dir with a fake `nox` shim. The shim records every
 # invocation (one line per call) into a log file, exits 0, and prints a
 # marker. Echoes the temp dir path.
@@ -245,6 +289,7 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
+export FAKE_GIT_DIRTY_LOCK_FILES=""
 run_script out_stdout out_stderr out_code --skip-lint --skip-builds
 assert_eq "exit code with --skip-builds" "0" "${out_code}"
 
@@ -264,6 +309,7 @@ else
 fi
 assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
 assert_contains "stdout announces Phase 2 runs tests" "${out_stdout}" "Phase 2: running all test suites"
+unset FAKE_GIT_DIRTY_LOCK_FILES
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -277,6 +323,7 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
+export FAKE_GIT_DIRTY_LOCK_FILES=""
 run_script out_stdout out_stderr out_code --skip-lint --skip-tests
 assert_eq "exit code with --skip-tests" "0" "${out_code}"
 
@@ -296,6 +343,7 @@ else
 fi
 assert_contains "stdout announces Phase 1 runs builds" "${out_stdout}" "Phase 1: building all packages"
 assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
+unset FAKE_GIT_DIRTY_LOCK_FILES
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -309,6 +357,7 @@ fake_log="$(mktemp -t nox-shim-log.XXXXXX)"
 saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
+export FAKE_GIT_DIRTY_LOCK_FILES=""
 run_script out_stdout out_stderr out_code --skip-lint --skip-tests --skip-builds
 assert_eq "exit code with both --skip" "0" "${out_code}"
 
@@ -322,6 +371,7 @@ else
 fi
 assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
 assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
+unset FAKE_GIT_DIRTY_LOCK_FILES
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -336,10 +386,12 @@ saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
 export FAKE_NOX_RC=2
+export FAKE_GIT_DIRTY_LOCK_FILES=""
 run_script out_stdout out_stderr out_code --skip-lint --skip-builds
 assert_eq "exit code with failing tests" "2" "${out_code}"
 assert_contains "stderr says test session failed" "${out_stderr}" "test session failed"
 unset FAKE_NOX_RC
+unset FAKE_GIT_DIRTY_LOCK_FILES
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -354,10 +406,12 @@ saved_path="${PATH}"
 export PATH="${fake_dir}:${saved_path}"
 export FAKE_NOX_LOG="${fake_log}"
 export FAKE_NOX_RC=2
+export FAKE_GIT_DIRTY_LOCK_FILES=""
 run_script out_stdout out_stderr out_code --skip-lint --skip-tests
 assert_eq "exit code with failing builds" "3" "${out_code}"
 assert_contains "stderr says build session failed" "${out_stderr}" "build session failed"
 unset FAKE_NOX_RC
+unset FAKE_GIT_DIRTY_LOCK_FILES
 rm -f "${fake_log}"
 unset FAKE_NOX_LOG
 export PATH="${saved_path}"
@@ -411,6 +465,88 @@ assert_contains "stderr warns nox not found" "${out_stderr}" "nox"
 assert_contains "stdout announces Phase 1 skipped" "${out_stdout}" "Phase 1: skipped"
 assert_contains "stdout announces Phase 2 skipped" "${out_stdout}" "Phase 2: skipped"
 export PATH="${saved_path}"
+
+echo
+echo "== Q18.14: pre-check abort on dirty lock files =="
+
+fake_git_dir="$(make_fake_git)"
+fake_nox_dir="$(make_fake_nox)"
+fake_git_count="$(mktemp -t git-count.XXXXXX)"
+echo "0" > "$fake_git_count"
+saved_path="${PATH}"
+export PATH="${fake_git_dir}:${fake_nox_dir}:${saved_path}"
+export FAKE_GIT_PRE_DIRTY="some/Pipfile.lock"
+export FAKE_GIT_COUNT_FILE="$fake_git_count"
+run_script out_stdout out_stderr out_code "" "n" --skip-lint
+assert_eq "pre-check abort exit code" "1" "${out_code}"
+assert_contains "stdout warns uncommitted changes" "${out_stdout}" "uncommitted changes in Pipfile.lock"
+assert_contains "stdout mentions the dirty file" "${out_stdout}" "some/Pipfile.lock"
+assert_contains "stderr says aborting" "${out_stderr}" "aborting"
+unset FAKE_GIT_PRE_DIRTY
+unset FAKE_GIT_COUNT_FILE
+export PATH="${saved_path}"
+rm -f "$fake_git_count"
+rm -rf "$fake_git_dir" "$fake_nox_dir"
+
+echo
+echo "== Q18.15: post-check restore newly-dirty lock files =="
+
+fake_git_dir="$(make_fake_git)"
+fake_nox_dir="$(make_fake_nox)"
+fake_nox_log="$(mktemp -t nox-shim-log.XXXXXX)"
+fake_git_count="$(mktemp -t git-count.XXXXXX)"
+fake_restore_log="$(mktemp -t git-restore.XXXXXX)"
+echo "0" > "$fake_git_count"
+saved_path="${PATH}"
+export PATH="${fake_git_dir}:${fake_nox_dir}:${saved_path}"
+export FAKE_GIT_PRE_DIRTY=""
+export FAKE_GIT_POST_DIRTY="board_manager/python/board_manager/Pipfile.lock"
+export FAKE_GIT_COUNT_FILE="$fake_git_count"
+export FAKE_GIT_RESTORE_LOG="$fake_restore_log"
+export FAKE_NOX_LOG="$fake_nox_log"
+run_script out_stdout out_stderr out_code "" "y" --skip-lint
+assert_eq "post-check restore exit code" "0" "${out_code}"
+assert_contains "stdout says restored" "${out_stdout}" "restored:"
+if [[ -f "$fake_restore_log" ]]; then
+    restore_contents="$(cat "$fake_restore_log")"
+    assert_contains "git restore was called" "${restore_contents}" "restore:board_manager"
+else
+    printf '  FAIL  fake git restore log missing\n'
+    FAIL=$((FAIL + 1))
+fi
+unset FAKE_GIT_PRE_DIRTY
+unset FAKE_GIT_POST_DIRTY
+unset FAKE_GIT_COUNT_FILE
+unset FAKE_GIT_RESTORE_LOG
+unset FAKE_NOX_LOG
+export PATH="${saved_path}"
+rm -f "$fake_git_count" "$fake_restore_log" "$fake_nox_log"
+rm -rf "$fake_git_dir" "$fake_nox_dir"
+
+echo
+echo "== Q18.16: post-check skip restore =="
+
+fake_git_dir="$(make_fake_git)"
+fake_nox_dir="$(make_fake_nox)"
+fake_nox_log="$(mktemp -t nox-shim-log.XXXXXX)"
+fake_git_count="$(mktemp -t git-count.XXXXXX)"
+echo "0" > "$fake_git_count"
+saved_path="${PATH}"
+export PATH="${fake_git_dir}:${fake_nox_dir}:${saved_path}"
+export FAKE_GIT_PRE_DIRTY=""
+export FAKE_GIT_POST_DIRTY="board_manager/python/board_manager/Pipfile.lock"
+export FAKE_GIT_COUNT_FILE="$fake_git_count"
+export FAKE_NOX_LOG="$fake_nox_log"
+run_script out_stdout out_stderr out_code "" "n" --skip-lint
+assert_eq "post-check skip exit code" "0" "${out_code}"
+assert_contains "stdout says left in working tree" "${out_stdout}" "left in working tree"
+unset FAKE_GIT_PRE_DIRTY
+unset FAKE_GIT_POST_DIRTY
+unset FAKE_GIT_COUNT_FILE
+unset FAKE_NOX_LOG
+export PATH="${saved_path}"
+rm -f "$fake_git_count" "$fake_nox_log"
+rm -rf "$fake_git_dir" "$fake_nox_dir"
 
 # ---------------------------------------------------------------------------
 # Summary

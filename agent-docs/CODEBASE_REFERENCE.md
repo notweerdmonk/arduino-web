@@ -4,7 +4,7 @@ layout: default
 {% raw %}
 # Codebase Reference
 
-**Last updated**: 2026-07-07 00:45 (Phases 89-119)
+**Last updated**: 2026-07-07 07:43 (Phases 89-122c)
 
 > A concise, navigation-grade index of the MedMinder monorepo. Section
 > headers in `## Phase N` form track the build history; the top of the
@@ -3212,11 +3212,11 @@ defaults:
 Runs 3 suites in order:
 1. `pipenv run pytest tests/` — 128 tests (test_gen_grpc_bindings.py, test_setup_py.py)
 2. `bash tests/test_install_arduino_deps.sh` — 12 tests
-3. `bash tests/test_ci.sh` — 40 tests (13 scenarios)
+3. `bash tests/test_ci.sh` — 49 tests (16 scenarios)
 
-Total: 180 tests.
+Total: 189 tests.
 
-**Last updated**: 2026-07-07 (Phase 122 — added lint + nox-install tests)
+**Last updated**: 2026-07-07 (Phase 122c — added lock file handling pre/post-check)
 
 ---
 
@@ -4590,5 +4590,25 @@ ci.sh:   Phase 0 (lint) → nox check [interactive prompt if missing] → Phase 
 - Q18.5 assertions: stderr → stdout (prompt output goes through pty to stdout).
 
 **Verification**: `bash scripts/tests/test_ci.sh` 40/40 ✅ after tty bugfix. `ruff format --check` OK ✅, `ruff check .` OK ✅.
+
+## Phase 122c — Lock File Handling in ci.sh
+
+**Date**: 2026-07-07 07:43
+**Type**: DevOps
+
+**Goal**: Warn users about dirty Pipfile.lock files before nox, and offer to git restore them afterwards.
+
+**Changes**:
+1. **`scripts/ci.sh`** — Added `_get_dirty_lock_files()` helper (respects `FAKE_GIT_DIRTY_LOCK_FILES` env var for test isolation). Pre-check before Phase 1: if dirty lock files exist, warn and prompt "Continue and overwrite? [y/N]". Post-check after Phase 2: compute newly-dirtied files (post minus pre), list them, prompt "Restore them? [y/N]". Both tty-gated.
+2. **`scripts/tests/test_ci.sh`** — Added `make_fake_git()` shim with counter-based state machine (`FAKE_GIT_PRE_DIRTY` / `FAKE_GIT_POST_DIRTY`). 3 new tests (Q18.14–Q18.16, 9 assertions): pre-check abort, post-check restore, post-check skip. Added `FAKE_GIT_DIRTY_LOCK_FILES=""` to Q18.6–Q18.10 for isolation from real git.
+
+**Flow**:
+```
+nox check → pre-check (git diff lock files) → Phase 1 build → Phase 2 test → post-check (git diff + restore prompt)
+```
+
+**Key design**: Newly-dirtied files computed by diffing pre-state against post-state, preserving pre-existing user modifications. Non-interactive contexts skip prompts.
+
+**Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (was 40). `bash -n` on both scripts ✅.
 
 {% endraw %}

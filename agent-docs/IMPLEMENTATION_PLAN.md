@@ -626,4 +626,42 @@ Add lint Phase 0 to `ci.sh`, interactive nox install prompt, make `ci.yml` a sta
 
 ---
 
+---
+
+## Phase 122c — Lock File Handling in ci.sh
+
+**Date**: 2026-07-07 07:43
+**Status**: 🔄 IN PROGRESS
+
+**Motivation**: The nox `tests` session runs `pipenv lock --dev` for each package,
+which modifies `Pipfile.lock` files (wheel hashes for local dependencies change
+after rebuild). This leaves dirty lock files in the working tree after every CI
+run. The 5 dependent packages (arduino_dash, arduino_sketch_tools, board_manager,
+board_manager_client, medminder_dash) are affected. `arduino_grpc` has no local
+deps so stays clean.
+
+**Approach**: Add two interactive checks to ci.sh:
+1. **Pre-check** (before Phase 1): If dirty lock files exist, warn and prompt
+   to proceed (overwrite them) or abort.
+2. **Post-check** (after Phase 2 completes): If lock files were newly dirtied by
+   nox, list them and offer to `git restore` them selectively.
+
+**Key decision**: Both prompts are tty-gated (`(</dev/tty)`) — skipped silently
+in non-interactive contexts. Newly-dirtied files are computed by diffing the
+pre-nox state against the post-nox state, so pre-existing user modifications
+are preserved.
+
+**Testing strategy**: Add `FAKE_GIT_DIRTY_LOCK_FILES` env-var bypass to ci.sh
+so tests can simulate dirty lock files without touching real git. Three new
+test scenarios: pre-check abort, post-check restore, post-check skip.
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | ci.sh | Pre-check (warn/abort before Phase 1), post-check (restore after Phase 2), `FAKE_GIT_DIRTY_LOCK_FILES` bypass | ✅ |
+| Q2 | test_ci.sh | 3 new tests (Q18.14–Q18.16), FAKE_GIT env-var in existing tests, all pass | ✅ |
+| Q3 | Docs sync | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, IMPLEMENTATION_*, TESTING_* | ✅ |
+| Q4 | Lint + final verify | `bash -n`, ruff, `test_ci.sh` 43/43 | ✅ |
+
 {% endraw %}

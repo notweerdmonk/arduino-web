@@ -1522,4 +1522,64 @@ ruff format --check .         → 112 files formatted ✅
 
 ---
 
+---
+
+## Entry — Phase 122c: Lock File Handling in ci.sh
+
+**Date**: 2026-07-07 07:43
+
+**Status**: ✅ Complete
+
+**Goal**: Add interactive pre-check (warn/abort on dirty lock files before nox) and post-check (offer git restore of newly-dirtied lock files after nox) to ci.sh.
+
+### Design
+
+The nox `tests` session runs `pipenv lock --dev` (noxfile.py:77) for each package, which modifies `Pipfile.lock` files. Wheel hashes for local dependencies (arduino-grpc, arduino-sketch-tools, board-manager, board-manager-client) change after every rebuild. The 5 dependent packages are affected; `arduino_grpc` has no local deps so stays clean.
+
+Two interactive sections added to ci.sh:
+
+1. **Pre-check** (before Phase 1, when builds or tests will run):
+   - Calls `_get_dirty_lock_files()` which wraps `git diff --name-only -- '**/Pipfile.lock'`
+   - If dirty files exist, warns user and prompts "Continue and overwrite? [y/N]"
+   - tty-gated via `(</dev/tty) 2>/dev/null` — non-interactive just warns
+   - "n" or anything else → exit 1
+
+2. **Post-check** (after Phase 2 completion):
+   - Calls `_get_dirty_lock_files()` again
+   - Computes `new_dirty` = current dirty minus pre-existing dirty (preserving user modifications)
+   - If newly-dirtied files found, lists them and prompts "Restore them with git restore? [y/N]"
+   - "y" → `git restore` on each file, prints "restored: $f"
+   - "n" → "note: Pipfile.lock changes left in working tree"
+   - Non-interactive → just warns
+
+### Test isolation
+
+Added `FAKE_GIT_DIRTY_LOCK_FILES` env-var bypass: when set (even to empty), `_get_dirty_lock_files()` returns its value instead of running git. Existing tests Q18.6–Q18.10 set it to `""` to avoid real git calls in the pre-check.
+
+Added `make_fake_git()` helper for the new tests: a fake `git` shim with a counter-based approach (first call returns `FAKE_GIT_PRE_DIRTY`, second returns `FAKE_GIT_POST_DIRTY`). Also logs `git restore` calls to `FAKE_GIT_RESTORE_LOG`. Non-lock-file git operations are forwarded to the real `/usr/bin/git`.
+
+### Changes Made
+
+**`scripts/ci.sh`**:
+- Added `_get_dirty_lock_files()` helper at top of file
+- Added pre-check section: `lock_dirty_pre=$(_get_dirty_lock_files)` → warn + prompt
+- Added post-check section: compute `new_dirty` → offer restore
+- Updated `@exitcode` docblock (1 also covers pre-check abort)
+- Updated `set -euo pipefail` compatibility: all git calls use `|| true`
+
+**`scripts/tests/test_ci.sh`**:
+- Added `make_fake_git()` helper with counter-based state machine
+- Q18.14: pre-check abort — FAKE_GIT_PRE_DIRTY="some/Pipfile.lock", tty_var="n" → exit 1, "aborting"
+- Q18.15: post-check restore — FAKE_GIT_PRE="" → FAKE_GIT_POST="board_manager/...", tty_var="y" → restored, git restore logged
+- Q18.16: post-check skip — same, tty_var="n" → "left in working tree"
+- Q18.6–Q18.10: added `FAKE_GIT_DIRTY_LOCK_FILES=""` before each run_script call for isolation
+
+### Verification
+
+```
+bash scripts/tests/test_ci.sh → 49/49 ✅
+bash -n scripts/ci.sh         → syntax OK
+bash -n scripts/tests/test_ci.sh → syntax OK
+```
+
 {% endraw %}

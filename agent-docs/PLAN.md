@@ -1599,4 +1599,22 @@ before commits and pushes.
 - **Q18.5 assertions**: Prompt output goes to stdout (through pty), not stderr. Changed from `assert_contains stderr` to `assert_contains stdout`.
 
 **Verification**: `bash scripts/tests/test_ci.sh` 40/40 ✅ after tty bugfix. `ruff format --check` OK ✅, `ruff check .` OK ✅.
+
+---
+
+### Phase 122c — Lock File Handling in ci.sh
+
+**Date**: 2026-07-07 07:43
+**Status**: ✅ COMPLETED
+
+**Goal**: Add interactive pre-check (warn/abort on dirty `Pipfile.lock` files before nox) and post-check (offer `git restore` of newly-dirtied lock files after nox) to ci.sh.
+
+**Changes**:
+- `scripts/ci.sh` — Added `_get_dirty_lock_files()` helper, pre-check (warn + prompt before Phase 1), post-check (compute newly-dirtied + offer restore after Phase 2). `FAKE_GIT_DIRTY_LOCK_FILES` env-var bypass for tests.
+- `scripts/tests/test_ci.sh` — Added `make_fake_git()` shim with counter-based output control. 3 new tests (Q18.14–Q18.16) covering pre-check abort, post-check restore, and post-check skip. Added `FAKE_GIT_DIRTY_LOCK_FILES=""` to Q18.6–Q18.10 for isolation.
+- Updated exitcode 1 docblock to include pre-check abort.
+
+**Architecture**: Pre-check and post-check are both tty-gated (`(</dev/tty)` subshell). Non-interactive contexts skip prompts silently. Newly-dirtied files are computed by diffing pre-nox state against post-nox state, preserving pre-existing user modifications.
+
+**Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (`test_ci.sh` grew from 40 to 49 assertions). `bash -n scripts/ci.sh` ✅, `bash -n scripts/tests/test_ci.sh` ✅.
 {% endraw %}

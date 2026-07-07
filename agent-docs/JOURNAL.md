@@ -4556,4 +4556,19 @@ Key decisions:
 
 **Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (was 40). `bash -n` on both scripts ✅.
 
+
+
+---
+
+## 2026-07-07 — Phase 122d: CI YAML Node.js Setup + Jekyll Build Fix ✅ COMPLETED
+
+**Goal**: Fix two issues discovered after the push dry-run: (1) `npx prettier` and `npx eslint` failing in GitHub Actions because ubuntu-latest lacks Node.js, and (2) Jekyll build failing on bare `{% endblock %}` tags in documentation files.
+
+**Changes**:
+- `.github/workflows/ci.yml` — Added `actions/setup-node@v4` (Node 20, `cache: npm`) and `npm ci` steps before the lint checks. The npm workspace now installs prettier@^3.9.0 and eslint@^10.5.0 from root `package-lock.json`, making `npx prettier` and `npx eslint` work reliably.
+- `docs/guide.md` — Wrapped `{% endblock %}` in `{% raw %}...{% endraw %}` to prevent Liquid syntax error.
+- `README.md` — Same fix for a bare `{% endblock %}`.
+
+**Verification**: `bundle exec jekyll build` — 0 errors, 93s ✅. `test_ci.sh` — 49/49 ✅.
+
 {% endraw %}

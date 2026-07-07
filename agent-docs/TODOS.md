@@ -1007,4 +1007,47 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 
 ---
 
+## Phase 122 — CI Restructure: Lint Phase + Nox Prompt + Standalone CI YAML
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Add Phase 0 (lint) to ci.sh: ruff, prettier, eslint, djlint | ✅ DONE |
+| 2 | Add `--skip-lint`, `--no-install` flags | ✅ DONE |
+| 3 | Add interactive nox install prompt (4 options + abort) | ✅ DONE |
+| 4 | Create standalone `.github/workflows/ci.yml` independent from ci.sh | ✅ DONE |
+| 5 | Add 3 new tests: lint success, lint failure, --no-install | ✅ DONE |
+| 6 | test_ci.sh: 40 bash assertions total (was 30) | ✅ DONE |
+| 7 | Update all docs | ✅ DONE |
+
+## Phase 122a — CI Restructure Tty Bugfix
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Fix Q18.5 blocking forever on `read -r </dev/tty` | ✅ DONE |
+| 2 | Use `script -q -e` to create pty for prompt capture | ✅ DONE |
+| 3 | Replace `%q` printf with direct string concat | ✅ DONE |
+| 4 | Route stderr→stdout for pty-based test output | ✅ DONE |
+| 5 | All 40 tests pass | ✅ DONE |
+
+## Phase 122c — Lock File Handling in ci.sh
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Add `_get_dirty_lock_files()` helper | ✅ DONE |
+| 2 | Pre-check before Phase 1: warn + prompt on dirty lock files | ✅ DONE |
+| 3 | Post-check after Phase 2: compute newly-dirtied + offer restore | ✅ DONE |
+| 4 | Add `make_fake_git()` shim with counter-based state machine | ✅ DONE |
+| 5 | 3 new tests: pre-check abort, post-check restore, post-check skip | ✅ DONE |
+| 6 | test_ci.sh: 49/49 (was 40) | ✅ DONE |
+
+## Phase 122d — CI YAML Node.js Setup + Jekyll Build Fix
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Add `actions/setup-node@v4` (Node 20, cache npm) + `npm ci` to ci.yml | ✅ DONE |
+| 2 | Fix docs/guide.md + README.md bare `{% endblock %}` Liquid errors | 🏠 done by user |
+| 3 | Verify: jekyll build 0 errors, test_ci.sh 49/49, bash -n OK | ✅ DONE |
+
+---
+
 {% endraw %}

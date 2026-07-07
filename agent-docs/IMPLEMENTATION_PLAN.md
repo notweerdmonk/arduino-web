@@ -664,4 +664,33 @@ test scenarios: pre-check abort, post-check restore, post-check skip.
 | Q3 | Docs sync | PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md, IMPLEMENTATION_*, TESTING_* | ✅ |
 | Q4 | Lint + final verify | `bash -n`, ruff, `test_ci.sh` 43/43 | ✅ |
 
+---
+
+## Phase 122d — CI YAML: Node.js Setup for Prettier/ESLint
+
+**Date**: 2026-07-07
+**Status**: 🔄 IN PROGRESS
+
+**Motivation**: The GitHub Actions workflow (`.github/workflows/ci.yml`) runs
+`npx prettier --check` and `npx eslint .` in its lint steps, but the runner
+image (ubuntu-latest) does not have Node.js pre-installed with `npx`
+available. The lint steps silently fail or error out, making CI unreliable.
+
+**Approach**: Add `actions/setup-node@v4` to install Node.js and its npm
+ecosystem, followed by `npm ci` to install prettier/eslint from the root
+`package-lock.json`. Place these steps right after the pipenv install step.
+
+Also fix Jekyll build failure caused by bare `{% endblock %}` in
+`docs/guide.md:366` (and `README.md:362`), which Liquid parser treats as
+an unknown tag. Wrap in `{% raw %}...{% endraw %}`.
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | ci.yml | Add setup-node + npm ci steps | ✅ |
+| Q2 | Jekyll fix | Wrap `{% endblock %}` in raw/endraw in docs/guide.md + README.md | 🏠 done by user |
+| Q3 | Verify | Jekyll build, test_ci.sh | ✅ |
+| Q4 | Docs sync | All agent-facing + user-facing docs | ✅ |
+
 {% endraw %}

@@ -956,4 +956,34 @@ All 4 test scenarios pass. `test_ci.sh` grew from 40 to 49 assertions (3 new tes
 - Q18.15 tests post-check happy path: no pre-existing → newly dirty after CI → user accepts restore
 - Q18.16 tests post-check skip: same scenario → user declines → files left in working tree
 
+
+
+---
+
+## Entry — Phase 122d: CI YAML Node.js Setup + Jekyll Build Fix
+
+**Date**: 2026-07-07
+**Status**: ✅ Complete
+
+### Test Results
+
+| Test | Result | Detail |
+|------|--------|--------|
+| `bundle exec jekyll build` | ✅ | Generated 255 pages, 93.331s, 0 errors |
+| `bash scripts/tests/test_ci.sh` | ✅ | 49/49 passed |
+| `bash -n scripts/ci.sh` | ✅ | Syntax OK |
+| `bash -n scripts/tests/test_ci.sh` | ✅ | Syntax OK |
+
+### Changes Verified
+
+1. **ci.yml**: `actions/setup-node@v4` (Node 20, cache npm) + `npm ci` inserted between pipenv install and ruff lint step. YAML valid, no syntax errors.
+2. **`docs/guide.md`**: `{% raw %}...{% endraw %}` wrapping around bare `{% endblock %}`. Jekyll build passes clean.
+3. **`README.md`**: Same wrapping applied. Jekyll build passes clean.
+
+### Notes
+
+- Node.js 20 was chosen as the LTS version widely available via setup-node@v4.
+- `cache: npm` caches `~/.npm` based on `package-lock.json` hash, keeping CI runs fast.
+- No issues detected. All prior tests unaffected.
+
 {% endraw %}

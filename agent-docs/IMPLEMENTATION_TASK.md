@@ -78,4 +78,17 @@ layout: default
 | J | Sync all agent-facing docs | ✅ |
 | K | Lint + final verify | ✅ |
 
+
+
+## Phase 122d — CI YAML: Node.js Setup for Prettier/ESLint
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | ci.yml — add `actions/setup-node@v4` step | ✅ |
+| B | ci.yml — add `npm ci` step after setup-node | ✅ |
+| C | Jekyll fix — wrap `{% endblock %}` in raw/endraw in docs/guide.md | 🏠 done by user |
+| D | Verify: Jekyll build + test_ci.sh + ruff | ✅ |
+| E | Sync all agent-facing docs | ✅ |
+| F | Sync user-facing docs | ✅ |
+
 {% endraw %}

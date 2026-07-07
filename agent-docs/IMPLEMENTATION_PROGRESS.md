@@ -157,4 +157,14 @@ layout: default
 | 3 | Docs sync — all agent-facing docs updated | ✅ | PLAN, JOURNAL, CODEBASE_REFERENCE, IMPLEMENTATION_*, TESTING_* |
 | 4 | Lint + final verify | ✅ | bash -n, test_ci.sh 49/49 |
 
+
+### Phase 122d — CI YAML: Node.js Setup for Prettier/ESLint
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | ci.yml — setup-node + npm ci | ✅ | Node 20 LTS, cache npm |
+| 2 | Jekyll fix — raw/endraw in docs/guide.md + README.md | 🏠 | Done by user |
+| 3 | Verify — Jekyll build, test_ci.sh | ✅ | Jekyll 0 errors, test_ci.sh 49/49 |
+| 4 | Docs sync — all docs updated | ✅ | |
+
 {% endraw %}

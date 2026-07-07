@@ -125,4 +125,15 @@ layout: default
 | T3 | Post-check skip (Q18.16) | ✅ | Same setup → user says "n" → "left in working tree" |
 | T4 | Existing test isolation (Q18.6–Q18.10) | ✅ | All pass with FAKE_GIT_DIRTY_LOCK_FILES="" |
 
+
+
+## Phase 122d — CI YAML: Node.js Setup + Jekyll Build Fix
+
+| # | Test | Status | Notes |
+|---|------|--------|-------|
+| T1 | `bundle exec jekyll build` | ✅ | 93s, 0 Liquid errors |
+| T2 | `bash scripts/tests/test_ci.sh` | ✅ | 49/49 |
+| T3 | `bash -n scripts/ci.sh` | ✅ | Syntax OK |
+| T4 | `bash -n scripts/tests/test_ci.sh` | ✅ | Syntax OK |
+
 {% endraw %}

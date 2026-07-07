@@ -4611,4 +4611,41 @@ nox check → pre-check (git diff lock files) → Phase 1 build → Phase 2 test
 
 **Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (was 40). `bash -n` on both scripts ✅.
 
+---
+
+## Phase 122d — CI YAML: Node.js Setup for Prettier/ESLint
+
+**Date**: 2026-07-07
+**Type**: DevOps
+
+**Goal**: Fix `npx prettier` and `npx eslint` failing in GitHub Actions CI runner due to missing Node.js runtime. Fix Jekyll build failure from bare `{% endblock %}` Jinja2 tags in docs.
+
+**Changes**:
+
+1. **`.github/workflows/ci.yml`** — Added `actions/setup-node@v4` with `node-version: "20"` and `cache: "npm"`, then `npm ci` to install prettier/eslint from root `package-lock.json`. Placed between pipenv install and ruff lint step.
+
+2. **`docs/guide.md`** — Wrapped bare `{% endblock %}` in `{% raw %}...{% endraw %}` to fix Liquid syntax error.
+
+3. **`README.md`** — Same fix.
+
+### CI.yml Structure (after Phase 122d)
+
+```
+.github/workflows/ci.yml:
+  setup-python → pip install pipenv → pipenv install --dev
+  → setup-node@v4 (node-version: "20", cache: "npm")
+  → npm ci
+  → ruff check → ruff format --check → djlint --check → prettier --check → eslint
+  → pip install nox → nox -s all_builds → nox -s all_tests
+```
+
+### Verification
+
+| Test | Result |
+|------|--------|
+| `bundle exec jekyll build` | ✅ 93s, 0 errors |
+| `bash scripts/tests/test_ci.sh` | ✅ 49/49 |
+| `bash -n scripts/ci.sh` | ✅ syntax OK |
+| `bash -n scripts/tests/test_ci.sh` | ✅ syntax OK |
+
 {% endraw %}

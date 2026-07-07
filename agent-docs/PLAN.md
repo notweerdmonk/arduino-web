@@ -1617,4 +1617,20 @@ before commits and pushes.
 **Architecture**: Pre-check and post-check are both tty-gated (`(</dev/tty)` subshell). Non-interactive contexts skip prompts silently. Newly-dirtied files are computed by diffing pre-nox state against post-nox state, preserving pre-existing user modifications.
 
 **Verification**: `bash scripts/tests/test_ci.sh` 49/49 ✅ (`test_ci.sh` grew from 40 to 49 assertions). `bash -n scripts/ci.sh` ✅, `bash -n scripts/tests/test_ci.sh` ✅.
+
+---
+
+### Phase 122d — CI YAML: Node.js Setup for Prettier/ESLint
+
+**Date**: 2026-07-07
+**Status**: ✅ COMPLETED
+
+**Goal**: Add Node.js setup to `.github/workflows/ci.yml` so `npx prettier` and `npx eslint` steps have the required runtime and npm packages.
+
+**Changes**:
+- `.github/workflows/ci.yml` — Added `actions/setup-node@v4` step (Node 20, with npm cache) and `npm ci` step before the lint checks. `npx prettier` and `npx eslint` now resolve from the locally installed node_modules.
+- `docs/guide.md` — Wrapped `{% endblock %}` in `{% raw %}...{% endraw %}` to fix Liquid syntax error (done by user).
+- `README.md` — Same fix for a bare `{% endblock %}` (done by user).
+
+**Verification**: `bundle exec jekyll build` — done in 93s, 0 errors ✅. `bash scripts/tests/test_ci.sh` — 49/49 ✅. `bash -n` on both scripts ✅.
 {% endraw %}

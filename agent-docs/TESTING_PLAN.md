@@ -233,4 +233,24 @@ Test the new behavior using `make_fake_git()` shim with controlled pre/post dirt
 | T3 | Post-check skip: newly dirty locks + user says "n" (Q18.16) | Exit 0, "left in working tree" in stdout | ✅ |
 | T4 | Existing tests Q18.6–Q18.10 isolated from git | All pass with FAKE_GIT_DIRTY_LOCK_FILES="" | ✅ |
 
+
+
+---
+
+## Phase 122d — CI YAML: Node.js Setup + Jekyll Build Fix
+
+**Date**: 2026-07-07
+**Status**: ✅ Complete
+
+**Scope**: Verify `.github/workflows/ci.yml` edits (setup-node + npm ci steps) and Jekyll build fix (raw/endraw wrapping).
+
+### Test Scenarios
+
+| # | Scenario | Expected | Actual |
+|---|----------|----------|--------|
+| T1 | `bundle exec jekyll build` | Exit 0, no Liquid errors | ✅ "done in 93.331 seconds" |
+| T2 | `bash scripts/tests/test_ci.sh` | 49/49 | ✅ |
+| T3 | `bash -n scripts/ci.sh` | Exit 0 | ✅ |
+| T4 | `bash -n scripts/tests/test_ci.sh` | Exit 0 | ✅ |
+
 {% endraw %}

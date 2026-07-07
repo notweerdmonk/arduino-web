@@ -54,4 +54,18 @@ layout: default
 | R4 | ruff check . exit 0 | ✅ | 0 errors |
 | R5 | Formatter split documented | ✅ | AGENTS.md updated |
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| 1 | Ignore list completeness | ✅ | 5 patterns: docs/reference, scratch, typedoc, search.js, eslint.config.mjs |
+| 2 | Root passthrough ignored | ✅ | 3-line ESM file, no value in linting |
+| 3 | Source template fix accurate | ✅ | `/* exported handleFolderInput, uploadSketch */` in both base.html |
+| 4 | No false negatives | ✅ | ESLint still checks all source .js/.mjs/.html files |
+| 5 | All formatters pass | ✅ | ruff ✅, prettier ✅, djlint ✅, eslint ✅ |
+
+---
+
 {% endraw %}

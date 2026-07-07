@@ -99,4 +99,16 @@ All Phase 112 tests verified:
 | T7 | Pre-commit sequential checks | ✅ | ruff check → ruff format --check → prettier --check → eslint → djlint --check |
 | T8 | Pre-push ci.sh invocation | ✅ | Script inspection confirms `./scripts/ci.sh` call |
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | Verify ESLint 0 errors 0 warnings | ✅ |
+| B | Verify ruff check exits 0 | ✅ |
+| C | Verify prettier check exits 0 | ✅ |
+
+---
+
 {% endraw %}

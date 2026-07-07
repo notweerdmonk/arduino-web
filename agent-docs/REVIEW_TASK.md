@@ -54,4 +54,18 @@ layout: default
 
 All 15 criteria (H1-H15) verified plus R1-R3 documentation checks. See REVIEW_PLAN.md for detailed plan.
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| # | Review Item | Status | Notes |
+|---|-------------|--------|-------|
+| R1 | Ignore list covers all generated doc paths | ✅ | 5 patterns added |
+| R2 | Root eslint.config.mjs ignored | ✅ | Passthrough file added to ignores |
+| R3 | `/* exported */` correctly suppresses only intended functions | ✅ | Precisely targets handleFolderInput + uploadSketch |
+| R4 | ESLint still catches real issues in source files | ✅ | Verified by running on known source files |
+| R5 | ruff, prettier, djlint all pass | ✅ | All 4 formatters clean |
+
+---
+
 {% endraw %}

@@ -86,4 +86,16 @@ layout: default
 | T7 — Pre-commit sequential checks | ✅ | 5 tools run in order |
 | T8 — Pre-push ci.sh invocation | ✅ | Script inspected, calls `./scripts/ci.sh` |
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| # | Test | Status | Notes |
+|---|------|--------|-------|
+| T1 | `npx eslint . --max-warnings 0` | ✅ exit 0, 0 errors, 0 warnings | Down from 2201 problems |
+| T2 | `pipenv run ruff check .` | ✅ exit 0 | No regressions |
+| T3 | `npx prettier --check "**/*.html"` | ✅ exit 0 | All files formatted |
+
+---
+
 {% endraw %}

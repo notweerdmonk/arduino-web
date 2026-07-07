@@ -120,4 +120,15 @@ layout: default
 | E | Update all agent-facing docs | ✅ | All project + workflow docs updated |
 | F | Verify — ruff 0, shellcheck clean | ✅ | `ruff check .` 0 errors, both scripts shellcheck-clean |
 
+---
+
+### Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| Q | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | Add generated-path ignores to ESLint config | ✅ | 5 patterns: docs/reference, scratch, typedoc, search.js, eslint.config.mjs |
+| 2 | Fix arduino_dash base.html unused vars | ✅ | `/* exported handleFolderInput, uploadSketch */` |
+| 3 | Fix medminder_dash base.html unused vars | ✅ | Same annotation |
+| 4 | Verify npx eslint . — 0 errors, 0 warnings | ✅ | Down from 2201 problems |
+
 {% endraw %}

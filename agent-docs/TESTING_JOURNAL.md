@@ -876,4 +876,26 @@ djlint idempotency issue observed in Phase 116 — always run `--check` after
 - The `\033[33m` yellow ANSI code must use double quotes for interpolation in `echo -e`. Single quotes print the literal escape sequence. Verified both pre-commit hooks use double quotes correctly.
 - `bash -n` catches syntax errors but does not verify runtime behavior (variable existence, command availability). The pre-commit behavioral tests complement `bash -n` by actually executing the check commands.
 
+---
+
+## 2026-07-07 05:56 — Phase 121: ESLint Ignore + Source Fix — Test Results
+
+### Summary
+
+All 3 test scenarios pass. ESLint went from 2201 problems (737 errors, 1464 warnings) to clean zero.
+
+### Test Execution
+
+| # | Test Command | Result | Output |
+|---|-------------|--------|--------|
+| T1 | `npx eslint . --max-warnings 0` | ✅ exit 0 | Clean terminal |
+| T2 | `pipenv run ruff check . --quiet` | ✅ exit 0 | Clean terminal |
+| T3 | `npx prettier --check "**/*.html"` | ✅ exit 0 | "All matched files use Prettier code style!" |
+
+### Verification Notes
+
+- The `--max-warnings 0` flag ensures ESLint treats any warning as an error — this is stricter than the default behavior and matches the CI gate
+- Ruff and prettier were checked to ensure the ignore list changes didn't accidentally affect other file types
+- No nox test sessions were required since only ESLint config and HTML comments changed (no Python code changes)
+
 {% endraw %}

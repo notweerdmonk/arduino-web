@@ -1537,4 +1537,24 @@ The Git Hooks plan is well-structured with clear behavior specification, compreh
 
 The three missing agent-facing doc entries (PLAN.md, JOURNAL.md, CODEBASE_REFERENCE.md) are documentation gaps that should be filled before final sign-off to maintain project documentation completeness.
 
+---
+
+## 2026-07-07 05:56 — Phase 121: ESLint Ignore + Source Fix — Review Journal
+
+### Pre-Review Context
+
+ESLint was flagging 2201 problems. Analysis showed the vast majority came from generated documentation paths that were unintentionally scanned. The actual source code had only 6 minor issues.
+
+### Key Decisions During Review
+
+1. **Ignore vs fix generated docs**: Could have added `/* eslint-disable */` headers to generated files, but that would pollute auto-generated output. Ignoring the directories is cleaner and safer.
+
+2. **`/* exported */` vs `eslint-disable`**: The `/* exported handleFolderInput, uploadSketch */` comment is more precise than `/* eslint-disable no-unused-vars */`. It tells ESLint "these specific names are intentionally global" rather than suppressing all warnings in the script block.
+
+3. **Config passthrough ignored**: The root `eslint.config.mjs` is a 3-line file that just imports and re-exports. It uses ESM `import/export` syntax but matches the `**/*.mjs` glob with `sourceType: "script"`. Adding it to ignores is the simplest fix — there's nothing meaningful to lint in a passthrough file.
+
+### Review Outcome
+
+All 5 criteria pass. The ignore list is complete, the `/* exported */` annotations are correctly placed and scoped, and all formatters remain green. Phase 121 approved.
+
 {% endraw %}

@@ -35,4 +35,15 @@ layout: default
 | D | Add README.md quick start section | ✅ |
 | E | Update scripts/ci.sh docblock | ✅ |
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| Task | Scope | Status |
+|------|-------|--------|
+| A | Add generated-path ignores to `config/eslint.config.mjs` (5 patterns) | ✅ |
+| B | Fix `no-unused-vars` in arduino_dash base.html (htmx callbacks) | ✅ |
+| C | Fix `no-unused-vars` in medminder_dash base.html (htmx callbacks) | ✅ |
+| D | Verify `npx eslint .` — 0 errors, 0 warnings | ✅ |
+
 {% endraw %}

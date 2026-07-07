@@ -1385,4 +1385,66 @@ These were explicitly required by Task E but were not implemented. The hooks cod
 
 See `REVIEW_JOURNAL.md` for detailed findings.
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+**Date**: 2026-07-07 05:53
+**Status**: ✅ Complete
+
+### Motivation
+
+Running `npx eslint .` after the Phase 120 commit revealed 2201 problems. Investigation showed 99%+ came from generated documentation directories that were not in the ESLint ignore list.
+
+### File Breakdown
+
+| Source | Files | Problems | Explanation |
+|--------|-------|----------|-------------|
+| `**/docs/reference/**` | ~50 HTML + search.js files | ~1800 | Generated pdoc/Jekyll docs with lunr search index |
+| `**/scratch/**` | ~15 HTML + search.js files | ~300 | Experimental pdoc output |
+| `**/typedoc/**` | ~10 HTML + main.js | ~80 | TypeDoc generated scripts |
+| `**/search.js` | ~10 files | ~15 | Standalone search indices outside docs/reference/ |
+| `eslint.config.mjs` (root) | 1 file | 2 | ESM passthrough matched with sourceType: "script" |
+| Source templates | 2 base.html | 4 | htmx callback functions not seen by ESLint |
+
+### Quantum 1 — ESLint Config Ignores
+
+**Changed**: `config/eslint.config.mjs` ignores list
+
+Added 5 patterns:
+```js
+"eslint.config.mjs",       // root passthrough (3-line ESM, no value in linting)
+"**/docs/reference/**",    // generated pdoc/Jekyll/typedoc docs
+"**/scratch/**",           // experimental scratch files
+"**/typedoc/**",           // TypeDoc output
+"**/search.js",            // generated lunr search indices
+```
+
+### Quantum 2 — arduino_dash base.html
+
+**Changed**: `arduino_dash/python/arduino_dash/arduino_dash/templates/base.html:63`
+
+Added `/* exported handleFolderInput, uploadSketch */` comment before the function declarations. This tells ESLint's `no-unused-vars` rule that these functions are intentionally exported for use by other code (htmx attributes in the HTML).
+
+### Quantum 3 — medminder_dash base.html
+
+**Changed**: `medminder_dash/python/medminder_dash/medminder_dash/templates/base.html:67`
+
+Same annotation added.
+
+### Verification
+
+```
+npx eslint . --max-warnings 0
+→ exit 0, 0 errors, 0 warnings
+```
+
+Also verified: `ruff check .` — 0 errors, `npx prettier --check "**/*.html"` — all clean. No regressions.
+
+### Key Takeaway
+
+The `/* exported name1, name2 */` comment is the correct way to suppress `no-unused-vars` for functions that are called from outside the analyzed scope (htmx attributes, global event handlers, inline `onclick=` attributes). It is more precise than `/* eslint-disable no-unused-vars */` which would suppress all such warnings in the block.
+
+---
+
 {% endraw %}

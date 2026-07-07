@@ -166,4 +166,24 @@ Python tests or functionality.
 | 8 | Pre-commit tool missing | Graceful skip, exit 0 | ✅ |
 | 9 | Pre-push calls `scripts/ci.sh` | Script invoked at `$REPO_ROOT` | ✅ (verified via script inspection) |
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+### Test Strategy
+
+| # | Test | Method | Expected |
+|---|------|--------|----------|
+| T1 | ESLint 0 errors, 0 warnings | `npx eslint . --max-warnings 0` | Exit 0 |
+| T2 | Ruff no regressions | `pipenv run ruff check .` | Exit 0 |
+| T3 | Prettier no regressions | `npx prettier --check "**/*.html"` | Exit 0 |
+
+### Coverage Notes
+
+- ESLint now ignores generated docs/reference, scratch, typedoc, search.js, and the root eslint.config.mjs passthrough
+- Source template fixes use `/* exported */` comment which is more precise than blanket `eslint-disable`
+- Pre-commit hook's eslint step will no longer fail on generated docs
+
+---
+
 {% endraw %}

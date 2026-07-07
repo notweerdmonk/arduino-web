@@ -3610,8 +3610,8 @@ exclude = ["cc/arduino/cli/commands/v1/"]
 | Config | `eslint.config.mjs` (root proxy → `config/eslint.config.mjs`) |
 | Plugins | `eslint-plugin-html` v8.1.4 (CJS monkey-patch, no `processor` export) + `eslint-plugin-prettier/recommended` |
 | Prettier | v3.9.0, config at `.prettierrc` (singleQuote false, semi true, tabWidth 2, trailingComma "es5") |
-| Errors | **0** (pre-existing: 2 parsing errors in `eslint.config.mjs` proxy — import/export with sourceType:script) |
-| Warnings | 4 (false positives — `handleFolderInput`/`uploadSketch` called via HTML `onchange`/`onclick` in `base.html`) |
+| Errors | **0** (root `eslint.config.mjs` ignored — ESM passthrough with sourceType:script conflict avoided) |
+| Warnings | **0** (`handleFolderInput`/`uploadSketch` suppressed via `/* exported */` comments) |
 
 **Key files**:
 
@@ -4505,5 +4505,55 @@ git push
 Added section under `## Commands` documenting the hooks, setup command,
 and the formatter responsibility split (ruff → Python, prettier → non-Jinja,
 djlint → Jinja2, ESLint → JS, shellcheck).
+
+## Phase 121 — ESLint Generated-Docs Ignore
+
+### ESLint Config Ignore List (`config/eslint.config.mjs:58-73`)
+
+```js
+ignores: [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/dist-standalone/**",
+  "**/build/**",
+  "**/.nox/**",
+  "**/_site/**",
+  "**/__pycache__/**",
+  "**/.opencode/**",
+  "**/*.ts",
+  "**/*.tsx",
+  "config/eslint.config.mjs",
+  "eslint.config.mjs",
+  "**/docs/reference/**",
+  "**/scratch/**",
+  "**/typedoc/**",
+  "**/search.js",
+],
+```
+
+### Generated Documentation Paths Ignored by ESLint
+
+| Pattern | Reason | Contents |
+|---------|--------|----------|
+| `**/docs/reference/**` | pdoc/Jekyll/typedoc generated HTML | lunr search index JS, full API reference pages |
+| `**/scratch/**` | Experimental files | Scratch pdoc output, temporary experiments |
+| `**/typedoc/**` | TypeDoc generated output | TypeScript API reference HTML + main.js bundle |
+| `**/search.js` | Generated lunr search indices | Minified/concatenated vendor search JS |
+
+### HTMX Callback Suppression Pattern (`base.html` inline scripts)
+
+Functions called from htmx attributes (e.g., `hx-on:click="uploadSketch()"`) are invisible to ESLint's `no-unused-vars` rule. The correct fix is the `/* exported */` JSDoc-style comment:
+
+```javascript
+/* exported handleFolderInput, uploadSketch */
+function handleFolderInput(input) {
+    // ...
+}
+function uploadSketch() {
+    // ...
+}
+```
+
+This is more precise than `/* eslint-disable no-unused-vars */` — it only suppresses warnings for the named functions, not the entire block.
 
 {% endraw %}

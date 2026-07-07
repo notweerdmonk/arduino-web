@@ -568,4 +568,37 @@ git config --unset core.hooksPath
 rm .githooks/pre-commit .githooks/pre-push
 ```
 
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+**Date**: 2026-07-07 05:53
+**Status**: ✅ COMPLETED
+
+### Motivation
+
+ESLint flagged 2201 problems (737 errors, 1464 warnings) across the monorepo. 99%+ of these were from generated documentation files (`**/docs/reference/**`, `**/scratch/**`, `**/typedoc/**`, `**/search.js`) containing large vendored JS bundles (lunr search indices, TypeDoc scripts). The remaining 6 problems were:
+- 2 parsing errors: root `eslint.config.mjs` (ESM passthrough) matched the `**/*.mjs` glob with `sourceType: "script"` instead of `"module"`
+- 4 `no-unused-vars` warnings: `handleFolderInput` and `uploadSketch` functions in both `base.html` templates — these are global functions called from htmx attributes that ESLint's html plugin cannot see
+
+### Quantums
+
+| Q | Scope | Key Changes | Status |
+|---|-------|-------------|--------|
+| Q1 | config/eslint.config.mjs ignores | Add `**/docs/reference/**`, `**/scratch/**`, `**/typedoc/**`, `**/search.js`, `eslint.config.mjs` | ✅ |
+| Q2 | arduino_dash base.html | Add `/* exported handleFolderInput, uploadSketch */` for htmx callback suppression | ✅ |
+| Q3 | medminder_dash base.html | Same `/* exported */` annotation | ✅ |
+
+### Verification
+
+`npx eslint .` — 0 errors, 0 warnings. (`--max-warnings 0` gate passes.)
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `config/eslint.config.mjs` | 5 ignores added |
+| `arduino_dash/templates/base.html` | 1 comment added |
+| `medminder_dash/templates/base.html` | 1 comment added |
+
+---
+
 {% endraw %}

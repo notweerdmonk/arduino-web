@@ -997,4 +997,14 @@ then `__main__.main()`'s `finally` block calls `stop()` again.
 | Update all 16 agent-facing docs | ✅ |
 | Update user-facing docs | ✅ |
 
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+| # | Task | Status |
+|---|------|--------|
+| 1 | Add generated-path ignores to config/eslint.config.mjs | ✅ DONE |
+| 2 | Fix no-unused-vars in both base.html templates | ✅ DONE |
+| 3 | Verify eslint 0 errors 0 warnings | ✅ DONE |
+
+---
+
 {% endraw %}

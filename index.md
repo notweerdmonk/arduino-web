@@ -6,7 +6,7 @@ layout: default
 
 Welcome to the Arduino Web documentation. This index maps all documentation resources across the monorepo.
 
-> **Last updated**: 2026-07-07 — Phases 109-119 complete (Code Review, Security Audit, Semantic Versioning v0.1.0, Config/CI/Docs, Ruff Format Audit, Prettier/Djlint Convergence). See [agent-docs/PLAN.md](agent-docs/PLAN.md) for full phase history.
+> **Last updated**: 2026-07-07 — Phases 109-121 complete (Code Review, Security Audit, Semantic Versioning v0.1.0, Config/CI/Docs, Ruff Format Audit, Prettier/Djlint Convergence, Git Hooks, ESLint Fix). See [agent-docs/PLAN.md](agent-docs/PLAN.md) for full phase history.
 
 ---
 

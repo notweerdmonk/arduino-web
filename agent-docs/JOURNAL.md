@@ -4496,4 +4496,21 @@ These gaps violate the explicit requirement in `IMPLEMENTATION_TASK.md` Task E a
 
 **Detailed findings**: See `agent-docs/REVIEW_JOURNAL.md` 2026-07-06 23:45 entry.
 
+---
+
+## 2026-07-07 05:53 — Phase 121: ESLint Generated-Docs Ignore + Source Fix ✅ COMPLETED
+
+**Goal**: Eliminate ESLint errors across the monorepo by ignoring generated documentation files and fixing unused-var warnings in source templates.
+
+**Root cause**: ESLint's `config/eslint.config.mjs` had no ignores for generated documentation outputs (`**/docs/reference/**`, `**/scratch/**`, `**/typedoc/**`, `**/search.js`). These directories contain vendored JS bundles (lunr search indices, TypeDoc scripts, pdoc reference pages) that produce `no-undef` errors for `lunr`, `elasticlunr`, `define`, `module`, massive `no-var` warnings, and `no-redeclare` errors. Total: 2201 problems (737 errors, 1464 warnings). Only 6 problems were in actual source files.
+
+**Changes**:
+- `config/eslint.config.mjs` — Added 5 ignores patterns (docs/reference, scratch, typedoc, search.js, root eslint.config.mjs)
+- `arduino_dash/templates/base.html` — Added `/* exported handleFolderInput, uploadSketch */` comment to suppress `no-unused-vars` warnings for htmx callback functions (ESLint's html plugin cannot see references in htmx attributes)
+- `medminder_dash/templates/base.html` — Same annotation
+
+**Verification**: `npx eslint . --max-warnings 0` — exit 0, 0 errors, 0 warnings. All other linters unaffected.
+
+---
+
 {% endraw %}

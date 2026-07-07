@@ -511,4 +511,28 @@ This plan requires `scripts/ci.sh` (Phase 117) which uses real `nox` for builds 
 git config --unset core.hooksPath
 ```
 
+---
+
+## Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+### Review Criteria
+
+| # | Criterion | Method |
+|---|----------|--------|
+| 1 | Ignore list completeness | Verify all generated doc paths are covered (docs/reference, scratch, typedoc, search.js) |
+| 2 | Config passthrough ignored | Root eslint.config.mjs (3-line ESM) should be ignored — no lint value |
+| 3 | Source template fix accuracy | `/* exported */` comment should suppress only the intended functions, not blanket-disable the rule |
+| 4 | No false negatives | ESLint should still catch real issues in source `.js` files and inline scripts in source templates |
+| 5 | All formatters pass | ruff, prettier, djlint, eslint all exit 0 |
+
+### Files to Review
+
+| File | Review Focus |
+|------|-------------|
+| `config/eslint.config.mjs` | Ignore list completeness, correctness |
+| `arduino_dash/templates/base.html` | `/* exported */` placement, accuracy |
+| `medminder_dash/templates/base.html` | Same |
+
+---
+
 {% endraw %}

@@ -1559,4 +1559,20 @@ before commits and pushes.
 | `scripts/ci.sh` | Add core.hooksPath reference in docblock | ✅ |
 
 **Verification**: `git config core.hooksPath .githooks` — hooks active ✅, `bash .githooks/pre-commit` — 0 errors ✅
+
+---
+
+### Phase 121 — ESLint Generated-Docs Ignore + Source Fix
+
+**Date**: 2026-07-07 05:53
+**Status**: ✅ COMPLETED
+
+**Goal**: Eliminate ESLint errors by ignoring generated documentation paths in the ESLint config, and fix 4 `no-unused-vars` warnings in source templates for htmx callback functions.
+
+**Changes**:
+- `config/eslint.config.mjs` — Added `**/docs/reference/**`, `**/scratch/**`, `**/typedoc/**`, `**/search.js` to ignores list; added `eslint.config.mjs` (root passthrough) to ignores
+- `arduino_dash/templates/base.html` — Added `/* exported handleFolderInput, uploadSketch */` for htmx callback functions
+- `medminder_dash/templates/base.html` — Same `/* exported */` annotation
+
+**Result**: ESLint went from 2201 problems (737 errors, 1464 warnings) to 0 errors, 0 warnings.
 {% endraw %}

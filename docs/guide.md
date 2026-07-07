@@ -363,7 +363,7 @@ The repository ships with two Git hooks in `.githooks/` (enable with `git config
 - **Pre-commit** (optional): Prompts before running ruff check, ruff format --check, prettier --check, eslint, and djlint --check. Skip with `n` or `git commit --no-verify`.
 - **Pre-push** (mandatory): Runs `scripts/ci.sh` — full CI pipeline (lint + builds + tests, ~15-25 min). Skip with `git push --no-verify`.
 
-The pre-commit hook's djlint check runs `--check` only (read-only). If it fails, run `pipenv run djlint . --reformat` manually — you may need a second pass for `{% endblock %}` convergence. Add and commit again after fixing.
+The pre-commit hook's djlint check runs `--check` only (read-only). If it fails, run `pipenv run djlint . --reformat` manually — you may need a second pass for {% raw %}`{% endblock %}`{% endraw %} convergence. Add and commit again after fixing.
 
 ## Code Quality
 
